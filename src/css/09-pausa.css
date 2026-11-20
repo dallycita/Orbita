@@ -1,0 +1,46 @@
+/* pausa: salir a los niveles */
+#quit{position:absolute;top:max(3vh,18px);left:max(18px, env(safe-area-inset-left));z-index:8;width:44px;height:44px;padding:0;border:0;background:none;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s;}
+#quit svg{width:100%;height:100%;display:block;}
+body.playing #quit{opacity:.8;pointer-events:auto;}
+#quit:hover{opacity:1;}
+
+/* ---------- pausa: la misma pantalla de "Escapaste", con la partida congelada detrás ---------- */
+body.paused #quit{opacity:0 !important;pointer-events:none !important;}
+body.paused #hud, body.paused #wallet{opacity:0 !important;transition:opacity .25s;}
+#panel.pzp{z-index:7;pointer-events:none;}
+#panel.pzp::before{-webkit-backdrop-filter:blur(6px) saturate(.8);backdrop-filter:blur(6px) saturate(.8);background:radial-gradient(120% 80% at 50% 40%, rgba(5,7,13,.58), rgba(5,7,13,.42));animation:wblur .45s ease-out both;}
+#panel.pzp .wtit{text-shadow:0 0 30px rgba(143,208,255,.32);}
+#panel.pzp .wact{margin-top:30px;}
+#panel.pzp button, #panel.pzp .pz-vol{pointer-events:auto;}
+.pz-trip{position:relative;display:flex;align-items:center;gap:8px;width:250px;margin:22px auto 0;animation:wfade .5s .35s both;}
+.pz-trip .bh{flex:0 0 auto;width:12px;height:12px;border-radius:50%;background:#000;box-shadow:0 0 0 1.5px #ff5a1f,0 0 10px rgba(255,90,31,.7);}
+.pz-trip .exit{flex:0 0 auto;width:12px;height:12px;border-radius:50%;border:1.5px dashed rgba(236,230,216,.45);box-sizing:border-box;}
+.pz-trip .line{position:relative;flex:1;height:2px;background:repeating-linear-gradient(90deg,rgba(236,230,216,.28) 0 4px,transparent 4px 8px);}
+.pz-trip .line i{position:absolute;left:0;top:0;bottom:0;width:var(--p);background:linear-gradient(90deg,rgba(236,230,216,.08),rgba(236,230,216,.75));}
+.pz-trip .me{position:absolute;top:50%;left:var(--p);width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#8fc4ff,#2f6fd8 60%,#123a7a);box-shadow:0 0 8px rgba(143,208,255,.9);}
+.pz-trip .rec{position:absolute;top:-6px;left:var(--r);width:2px;height:14px;margin-left:-1px;border-radius:1px;background:#ffd36b;box-shadow:0 0 7px rgba(255,211,107,.85);}
+.pz-trip .rec::after{content:'RÉCORD';position:absolute;top:-15px;left:50%;transform:translateX(-50%);font:400 8px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;color:#ffd36b;}
+.pz-sl{display:flex;flex-direction:column;gap:18px;width:270px;margin-top:44px;animation:wfade .5s 1s both;}
+.pz-vol{display:flex;align-items:center;gap:12px;width:100%;touch-action:none;}
+.pz-vol .ico{flex:0 0 auto;width:32px;height:32px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#eaf3ff;cursor:pointer;
+  background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.18),rgba(143,208,255,.06) 40%,rgba(8,12,24,.7) 72%);border:1px solid rgba(160,205,255,.55);box-shadow:0 0 14px rgba(120,180,255,.22),inset 0 0 10px rgba(143,208,255,.16);transition:opacity .2s;}
+.pz-vol .ico svg{width:15px;height:15px;filter:drop-shadow(0 0 3px rgba(143,208,255,.6));}
+.pz-vol.fx .ico{color:#ffe2c8;border-color:rgba(255,170,110,.55);box-shadow:0 0 14px rgba(255,140,60,.22),inset 0 0 10px rgba(255,161,85,.16);}
+.pz-vol .lb{flex:0 0 auto;width:60px;text-align:left;font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.22em;text-transform:uppercase;color:#ece6d8;}
+.pz-vol .line{position:relative;flex:1;height:4px;border-radius:3px;background:rgba(236,230,216,.16);cursor:pointer;}
+.pz-vol .line::before{content:'';position:absolute;left:-10px;right:-10px;top:-16px;bottom:-16px;}
+.pz-vol .line i{position:absolute;left:0;top:0;bottom:0;width:var(--v);border-radius:3px;background:linear-gradient(90deg,#4f8fe0,#cfe8ff);box-shadow:0 0 12px rgba(143,208,255,1);}
+.pz-vol .line b{position:absolute;top:50%;left:var(--v);width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#8fc4ff,#2f6fd8 60%,#123a7a);box-shadow:0 0 0 4px rgba(143,208,255,.22),0 0 16px rgba(143,208,255,1);transition:transform .15s;}
+.pz-vol.fx .line i{background:linear-gradient(90deg,#e0662a,#ffd0a0);box-shadow:0 0 12px rgba(255,140,60,1);}
+.pz-vol.fx .line b{background:radial-gradient(circle at 35% 35%,#ffd2a0,#ff7a2a 60%,#8a2e0c);box-shadow:0 0 0 4px rgba(255,161,85,.22),0 0 16px rgba(255,140,60,1);}
+.pz-vol.drag .line b{transform:scale(1.2);}
+.pz-vol.zero .line i{opacity:0;} .pz-vol.zero .ico{opacity:.55;}
+.pz-vol .val{flex:0 0 auto;width:28px;text-align:right;font:400 11px 'Space Mono',ui-monospace,monospace;color:#fff;}
+/* al seguir: cuenta 3 · 2 · 1 sobre la partida, al ritmo */
+#pzcount{position:absolute;left:0;right:0;top:calc(max(3vh,18px) + 92px);height:150px;z-index:7;pointer-events:none;display:flex;align-items:center;justify-content:center;}
+#pzcount b{position:absolute;font:600 clamp(64px,22vw,110px)/1 'Unbounded',system-ui,sans-serif;color:#ece6d8;text-shadow:0 0 34px rgba(255,161,85,.55),0 0 2px rgba(255,255,255,.6);animation:pzNum .62s cubic-bezier(.2,.8,.3,1) both;}
+#pzcount i{position:absolute;width:130px;height:130px;border-radius:50%;border:2px solid rgba(255,161,85,.8);box-shadow:0 0 22px rgba(255,140,60,.6),inset 0 0 18px rgba(255,140,60,.35);animation:pzRing .62s ease-out both;}
+#pzcount u{position:absolute;top:calc(100% + 6px);font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.32em;text-transform:uppercase;color:rgba(236,230,216,.75);text-decoration:none;text-shadow:0 0 10px rgba(3,4,10,.95);}
+@keyframes pzNum{0%{opacity:0;transform:scale(1.5);filter:blur(6px)}22%{opacity:1;transform:scale(1);filter:blur(0)}75%{opacity:1}100%{opacity:0;transform:scale(.86)}}
+@keyframes pzRing{0%{opacity:0;transform:scale(.55)}20%{opacity:1}100%{opacity:0;transform:scale(1.9)}}
+@media (prefers-reduced-motion:reduce){#pzcount b,#pzcount i{animation-duration:.01s}}

@@ -1,0 +1,10 @@
+#home .playrow{display:flex;align-items:center;gap:26px;}
+#home .spacer{width:68px;height:68px;}
+#home .plan{position:relative;width:68px;height:68px;border-radius:50%;border:0;background:radial-gradient(circle at 50% 40%,#1d2440,#0f1426);
+  box-shadow:0 0 0 2px rgba(143,208,255,.35),0 0 22px rgba(143,208,255,.25);display:flex;align-items:center;justify-content:center;}
+#home .plan svg{width:52px;height:52px;}
+#home .plan .orb{position:absolute;inset:-7px;border-radius:50%;border:1.5px dashed rgba(143,208,255,.5);animation:orbspin 9s linear infinite;}
+@keyframes orbspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#home .plan .orb{animation:none}}
+#home .plabel{position:absolute;top:100%;margin-top:9px;left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:.08em;color:#8fd0ff;white-space:nowrap;}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){#home .plan:hover{animation:hopbig .4s ease-out forwards;box-shadow:0 0 0 3px rgba(143,208,255,.6),0 0 34px rgba(143,208,255,.5);}}

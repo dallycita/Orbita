@@ -1,0 +1,24 @@
+#home{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  padding-bottom:max(7vh,44px);transition:opacity .9s ease;pointer-events:none;
+  background:linear-gradient(to bottom, rgba(11,15,28,.15) 0%, rgba(11,15,28,0) 35%, rgba(11,15,28,.55) 70%, rgba(11,15,28,.85) 100%);}
+#home.off{opacity:0;}
+#home > *{transition:transform .9s cubic-bezier(.2,.7,.2,1);}
+#home.off > *{transform:translateY(14px);}
+@media (prefers-reduced-motion:reduce){#home.off > *{transform:none;}}
+#home.off *{pointer-events:none !important;}
+#home button{pointer-events:auto;font-family:'Unbounded',system-ui,sans-serif;cursor:pointer;}
+#home .bigplay{width:104px;height:104px;border-radius:50%;border:0;background:var(--sun);color:#fff;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 8px rgba(255,90,31,.14),0 0 40px rgba(255,90,31,.35);transition:transform .15s;}
+#home .bigplay:active{transform:scale(.94);}
+#home .bigplay svg{width:40px;height:40px;margin-left:6px;}
+#home .playlbl{margin-top:14px;font-size:14px;font-weight:500;letter-spacing:.12em;color:var(--fg);}
+#home .row{display:flex;gap:12px;margin-top:30px;}
+#home .sm{min-width:92px;padding:11px 14px;border-radius:999px;border:1px solid rgba(236,230,216,.22);background:rgba(13,18,32,.6);color:var(--fg);font-size:12px;font-weight:500;}
+#home .sheet{position:absolute;left:50%;bottom:max(7vh,44px);transform:translateX(-50%);width:min(320px,86vw);background:#151a2b;border:1px solid rgba(236,230,216,.14);
+  border-radius:22px;padding:20px;box-sizing:border-box;display:none;flex-direction:column;gap:12px;pointer-events:auto;}
+#home .sheet.on{display:flex;}
+#home .sheet h3{margin:0 0 4px;font-size:15px;font-weight:500;color:var(--fg);text-align:center;}
+#home .sheet .opt{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:14px;border:1px solid rgba(236,230,216,.14);background:transparent;color:var(--fg);font-size:13px;font-weight:400;}
+#home .sheet .opt b{font-weight:500;color:var(--muted);}
+#home .sheet .danger{color:var(--fg);}
+#home button:focus-visible{outline:2px solid var(--fg);outline-offset:3px;}

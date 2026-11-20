@@ -1,0 +1,45 @@
+#planets{position:absolute;inset:0;z-index:6;background:transparent;transition:opacity .3s;pointer-events:none;text-align:center;}
+#planets.off{opacity:0;}
+#planets.off *{pointer-events:none !important;}
+#planets button{pointer-events:auto;cursor:pointer;font-family:'Unbounded',system-ui,sans-serif;}
+#planets .back{position:absolute;top:max(3vh,18px);left:14px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(236,230,216,.22);background:rgba(13,18,32,.6);color:var(--fg);font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;}
+#planets .ptop{position:absolute;left:0;right:0;top:max(3vh,18px);font-size:13px;letter-spacing:.12em;color:var(--muted);line-height:40px;}
+#planets .pcount{position:absolute;left:0;right:0;top:calc(max(3vh,18px) + 36px);font-size:11px;color:var(--muted);letter-spacing:.08em;}
+#planets .arrow{position:absolute;top:38%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;border:1px solid rgba(236,230,216,.25);background:rgba(13,18,32,.5);color:var(--fg);font-size:26px;line-height:1;display:flex;align-items:center;justify-content:center;}
+#planets .arrow.l{left:12px;} #planets .arrow.r{right:12px;}
+#planets .pinfo{position:absolute;left:0;right:0;bottom:max(6vh,36px);padding:0 28px;display:flex;flex-direction:column;align-items:center;}
+#planets .pname{font-size:clamp(28px,8vw,40px);font-weight:500;color:#fff;line-height:1.1;}
+#planets .pchip{margin-top:10px;padding:4px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.35);font-size:11px;letter-spacing:.06em;color:#fff;}
+#planets .pdesc{margin:14px 0 0;max-width:32ch;font-size:14px;line-height:1.6;color:#fff;opacity:.9;font-weight:400;}
+#planets .plock{margin-top:12px;max-width:32ch;font-size:12px;line-height:1.5;color:var(--muted);}
+#planets .pbtn{margin-top:20px;min-width:200px;padding:13px 22px;border-radius:999px;border:0;background:var(--sun);color:#fff;font-size:14px;font-weight:500;}
+#planets .pbtn[disabled]{background:transparent;border:1px solid rgba(255,255,255,.4);cursor:default;}
+#planets .scanbtn{margin-top:14px;padding:9px 18px;border-radius:999px;border:1px solid rgba(143,208,255,.55);background:rgba(13,18,32,.5);color:#8fd0ff;font-size:12px;letter-spacing:.12em;}
+#planets .pinfo{transition:opacity .3s;}
+#planets.scanning .pinfo{opacity:0;}
+#planets.scanning .pinfo *{pointer-events:none !important;}
+#planets .pstats{position:absolute;left:0;right:0;top:31%;padding:0 24px;display:flex;flex-direction:column;align-items:center;opacity:0;transition:opacity .4s;}
+#planets.scanning .pstats{opacity:1;}
+#planets:not(.scanning) .pstats *{pointer-events:none !important;}
+#planets .sname{font-size:22px;font-weight:500;color:#fff;}
+#planets .srow{width:100%;max-width:340px;margin-top:12px;text-align:left;}
+#planets .shead{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:#fff;}
+#planets .shead small{font-size:10px;color:var(--muted);margin-left:6px;font-weight:400;}
+#planets .sval{font-weight:500;}
+#planets .sdat{font-size:10.5px;color:var(--muted);margin-top:3px;}
+#planets .sbar{position:relative;height:6px;border-radius:3px;background:#22283a;margin-top:6px;overflow:hidden;}
+#planets .sbar i{position:absolute;top:0;bottom:0;left:50%;width:0;border-radius:3px;transition:width .55s ease-out,left .55s ease-out;}
+#planets .sbar b{position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.55);}
+#planets .spips{display:flex;gap:6px;margin-top:6px;}
+#planets .spips i{width:10px;height:10px;border-radius:50%;border:1.5px solid #8fd0ff;opacity:0;transition:opacity .3s;}
+#planets .spips i.on{background:#8fd0ff;}
+#planets .spower{width:100%;max-width:340px;margin-top:16px;padding:12px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.18);background:rgba(13,18,32,.55);text-align:left;box-sizing:border-box;opacity:0;transform:translateY(8px);transition:opacity .4s,transform .4s;}
+#planets .spower.on{opacity:1;transform:none;}
+#planets .spk{font-size:10px;letter-spacing:.12em;color:var(--muted);}
+#planets .spn{margin-top:4px;font-size:15px;font-weight:500;color:#fff;}
+#planets .spd{margin-top:4px;font-size:12px;line-height:1.5;color:#fff;opacity:.9;font-weight:400;}
+#planets .spf{margin-top:6px;font-size:11px;line-height:1.5;color:#8fd0ff;font-weight:400;}
+#planets .spsoon{margin-top:6px;font-size:10.5px;line-height:1.4;color:var(--muted);}
+#planets .sclose{margin-top:14px;padding:9px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:12px;letter-spacing:.08em;}
+#planets button:focus-visible{outline:2px solid var(--fg);outline-offset:3px;}
+

@@ -1,0 +1,13 @@
+# Revisa en cada cambio que index.html esté armado con lo último de src/
+name: Revisar
+on: [push, pull_request]
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: node build.mjs --check
+      - name: Cada archivo del juego es JavaScript válido
+        run: for f in src/js/*.js src/js/fuera/*.js; do node --check "$f" || exit 1; done

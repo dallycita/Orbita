@@ -1,0 +1,12 @@
+{
+  "name": "orbita",
+  "private": true,
+  "description": "Órbita: escapa del agujero negro saltando entre anillos, al ritmo de la música.",
+  "type": "module",
+  "scripts": {
+    "dev": "node dev.mjs",
+    "build": "node build.mjs",
+    "check": "node build.mjs --check"
+  },
+  "engines": { "node": ">=18" }
+}
