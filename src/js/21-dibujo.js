@@ -1,7 +1,7 @@
 // ┌─ 21-dibujo.js
-// │ da:     drawAst, drawCharge, drawEarth, drawPowerAura, powerReadySound, render
+// │ da:     astPrebake, drawAst, drawCharge, drawEarth, drawPowerAura, powerReadySound, render
 // │ lo usan: 16-partida, 22-viaje-sistema-solar, 23-intro, 29-planetas-hd, 36-bucle-principal
-// │ usa 01-pantalla-y-utilidades: BONE, clamp, ctx, CX, CY, frac, H, PR, S, W
+// │ usa 01-pantalla-y-utilidades: BONE, clamp, ctx, CX, CY, DPR, frac, H, PR, S, W
 // │ usa 02-audio: AC, ROOT
 // │ usa 06-record-y-estado: charge
 // │ usa 07-planetas: chargeMax, sizeK
@@ -131,6 +131,21 @@ function astSprite(shape, frame, rp){
   // contorno: claro abajo (luz), casi invisible arriba
   shapePath(); const ol = g.createLinearGradient(0, cy - rp, 0, cy + rp); ol.addColorStop(0, 'rgba(255,240,220,.12)'); ol.addColorStop(1, 'rgba(255,200,150,.7)'); g.strokeStyle = ol; g.lineWidth = Math.max(.8, rp*.05); g.stroke();
   return (AST_SPR[key] = c);
+}
+// rocas por adelantado: las que la partida va a usar se fabrican en los menús y en "Toca para escapar", poco a poco
+// (unas pocas por cuadro), para no fabricarlas en pleno juego, donde cada una era un tirón. Son exactamente las mismas.
+let astPre = null, astPreK = '';
+function astPrebake(){
+  const k = S + '_' + DPR; if (k !== astPreK){ astPreK = k; astPre = null; }
+  if (!astPre){
+    // tamaño en pantalla: asteroides de 9 a 10.5, que aparecen desde el 40 % y al derretirse crecen hasta 115 %
+    const bk = r => AST_B.find(v => v >= r) || AST_B[AST_B.length - 1], full0 = bk(9*S*DPR), full1 = bk(10.5*S*DPR), top = bk(10.5*S*DPR*1.15);
+    const sizes = AST_B.filter(v => v >= full0 && v <= full1).concat(AST_B.filter(v => (v < full0 || v > full1) && v <= top).reverse());
+    astPre = []; for (const rp of sizes) for (let f = 0; f < 12; f++) for (let s = 0; s < 8; s++) astPre.push([s, f, rp]);
+  }
+  if (!astPre.length || !ASTGL.ok()) return;
+  const t0 = performance.now();
+  for (let n = 0; n < 4 && astPre.length && performance.now() - t0 < 3; n++){ const [s, f, rp] = astPre.shift(); if (!AST_SPR[s + '_' + f + '_' + rp]) astSprite(s, f, rp); else n--; }
 }
 function drawAst(x, y, r, seed, rot, col, alpha){
   let sc = 1; try{ const m = ctx.getTransform && ctx.getTransform(); sc = m ? Math.hypot(m.a, m.b) : (window.devicePixelRatio || 1); }catch(e){}

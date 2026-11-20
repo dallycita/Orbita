@@ -3,11 +3,11 @@
 // │ lo usan: 18-pausa
 // │ usa 01-pantalla-y-utilidades: ctx
 // │ usa 06-record-y-estado: state
-// │ usa 08-partida-estado: t
+// │ usa 08-partida-estado: deadT, t
 // │ usa 10-ritmo-y-objetos: elWallet
 // │ usa 18-pausa: paused
 // │ usa 20-logica: update
-// │ usa 21-dibujo: render
+// │ usa 21-dibujo: astPrebake, render
 // │ usa 23-intro: renderIntro, updateIntro
 // │ usa 24-presentacion: renderSplash, updateSplash
 // │ usa 26-pantalla-inicio: elHome
@@ -39,6 +39,8 @@ function frame(now){
     else if (paused){ /* congelado: el lienzo conserva el último cuadro */ }
     else { update(dt); if (MEDIR) medMid = performance.now(); render(); }
     if (misOpen) misPlanetDraw();
+    // en pantallas tranquilas, adelantar las rocas de la partida (ver astPrebake)
+    if (state === 'menu' || state === 'levels' || state === 'win' || paused || (state === 'dead' && deadT > .6) || (state === 'home' && homeT >= HOME_IN + 2.5)) astPrebake();
   }catch(e){ try{ ctx.restore(); }catch(_){} console.error(e); }
   if (MEDIR) medFrame(now, m0);
 }

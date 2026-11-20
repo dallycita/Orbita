@@ -3831,6 +3831,21 @@ function astSprite(shape, frame, rp){
   shapePath(); const ol = g.createLinearGradient(0, cy - rp, 0, cy + rp); ol.addColorStop(0, 'rgba(255,240,220,.12)'); ol.addColorStop(1, 'rgba(255,200,150,.7)'); g.strokeStyle = ol; g.lineWidth = Math.max(.8, rp*.05); g.stroke();
   return (AST_SPR[key] = c);
 }
+// rocas por adelantado: las que la partida va a usar se fabrican en los menús y en "Toca para escapar", poco a poco
+// (unas pocas por cuadro), para no fabricarlas en pleno juego, donde cada una era un tirón. Son exactamente las mismas.
+let astPre = null, astPreK = '';
+function astPrebake(){
+  const k = S + '_' + DPR; if (k !== astPreK){ astPreK = k; astPre = null; }
+  if (!astPre){
+    // tamaño en pantalla: asteroides de 9 a 10.5, que aparecen desde el 40 % y al derretirse crecen hasta 115 %
+    const bk = r => AST_B.find(v => v >= r) || AST_B[AST_B.length - 1], full0 = bk(9*S*DPR), full1 = bk(10.5*S*DPR), top = bk(10.5*S*DPR*1.15);
+    const sizes = AST_B.filter(v => v >= full0 && v <= full1).concat(AST_B.filter(v => (v < full0 || v > full1) && v <= top).reverse());
+    astPre = []; for (const rp of sizes) for (let f = 0; f < 12; f++) for (let s = 0; s < 8; s++) astPre.push([s, f, rp]);
+  }
+  if (!astPre.length || !ASTGL.ok()) return;
+  const t0 = performance.now();
+  for (let n = 0; n < 4 && astPre.length && performance.now() - t0 < 3; n++){ const [s, f, rp] = astPre.shift(); if (!AST_SPR[s + '_' + f + '_' + rp]) astSprite(s, f, rp); else n--; }
+}
 function drawAst(x, y, r, seed, rot, col, alpha){
   let sc = 1; try{ const m = ctx.getTransform && ctx.getTransform(); sc = m ? Math.hypot(m.a, m.b) : (window.devicePixelRatio || 1); }catch(e){}
   const rp = AST_B.find(v => v >= r*sc) || AST_B[AST_B.length - 1], shape = Math.floor(frac(Math.abs(seed)*.137)*8), fr = Math.floor(((rot % (Math.PI*2)) + Math.PI*2) % (Math.PI*2)/(Math.PI*2)*12) % 12;
@@ -8331,6 +8346,8 @@ function frame(now){
     else if (paused){ /* congelado: el lienzo conserva el último cuadro */ }
     else { update(dt); if (MEDIR) medMid = performance.now(); render(); }
     if (misOpen) misPlanetDraw();
+    // en pantallas tranquilas, adelantar las rocas de la partida (ver astPrebake)
+    if (state === 'menu' || state === 'levels' || state === 'win' || paused || (state === 'dead' && deadT > .6) || (state === 'home' && homeT >= HOME_IN + 2.5)) astPrebake();
   }catch(e){ try{ ctx.restore(); }catch(_){} console.error(e); }
   if (MEDIR) medFrame(now, m0);
 }
