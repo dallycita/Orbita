@@ -67,6 +67,7 @@ for (const [name, setup, extra] of SCENES){
   await pg.evaluate(s => window.__ev(s), BOT); await pg.evaluate(s => window.__ev(s), MEASURE);
   await pg.evaluate(s => window.__ev(s), setup);
   const cdp = await pg.context().newCDPSession(pg);
+  if (+process.env.LENTO > 1) await cdp.send('Emulation.setCPUThrottlingRate', {rate: +process.env.LENTO});   // simular un procesador de celular
   await cdp.send('Profiler.enable'); await cdp.send('Profiler.setSamplingInterval', {interval: 200});
   await b.startTracing(pg, {categories: ['disabled-by-default-v8.gc', 'v8']});
   await cdp.send('HeapProfiler.enable'); await cdp.send('HeapProfiler.startSampling', {samplingInterval: 2048});
