@@ -36,6 +36,10 @@ versiones-anteriores/    prototipos viejos
 orbita_ideas_pendientes.md
 ```
 
+### El estilo (`src/css/`)
+
+Un archivo por pantalla: `01-base` (colores y página), `02-navegacion` (flechas y botón de volver), `03-inicio`, `04-niveles`, `05-planetas`, `06-misiones`, `07-partida` (marcador, botón de pausa, "Intento N"), `08-panel` (antes de jugar, victoria y derrota) y `09-pausa`.
+
 ### El código (`src/js/`)
 
 | Archivo | Qué tiene |
@@ -49,9 +53,10 @@ orbita_ideas_pendientes.md
 | `07-ritmo-y-objetos` | sincronía con la música, estrellas (moneda), nebulosas, púlsares y recorridos |
 | `08-peligros-datos` | dónde aparecen cometas, rayos, llamaradas, supernovas y novas |
 | `09-poderes` | los poderes de cada planeta y sus efectos visuales |
-| `10-agujero-de-gusano` | el modo Órbita dentro del gusano y el espacio doblado |
+| `10-agujero-de-gusano` | el modo Órbita dentro del gusano y la lente que dobla el espacio |
 | `11-peligros` | cómo se mueven y dibujan los peligros (ondas, novas, cometas…) |
 | `12-partida` | anillos, inicio, saltos, aterrizar, ganar y morir |
+| `12-tutorial` | el tutorial |
 | `13-pausa` | el menú de pausa, sus sonidos y la cuenta 3·2·1 |
 | `14-controles` | toques, deslizamientos y teclado |
 | `15-logica` | lo que pasa en cada cuadro (`update`) |
@@ -65,10 +70,24 @@ orbita_ideas_pendientes.md
 | `23-sonidos-interfaz` | los sonidos de cristal de los botones |
 | `24-planetas-hd` | la pantalla de planetas y los planetas en 3D (WebGL) |
 | `25-escanear` | el escaneo de datos de cada planeta |
-| `26-fondos-galaxias` | los fondos 2D de Andrómeda, Magallanes y los niveles 4 a 8 |
-| `27-fondos-webgl` | los fondos en WebGL: shaders de cada galaxia y la lente gravitacional |
+| `26-fondos-galaxias` | los fondos 2D (respaldo si no hay WebGL) |
+| `27-fondos-1-comun` … `27-fondos-6-foto` | los shaders de cada fondo, uno por galaxia: Andrómeda, Vía Láctea, Magallanes, y las lejanas (Centaurus A, Remolino, Sombrero, M87, Sagitario A\*) |
+| `27-fondos-9-motor` | el motor que dibuja esos shaders y la lente gravitacional |
 | `28-tarjetas-niveles` | las galaxias en movimiento del selector |
 | `29-misiones` | misiones diarias, logros y polvo estelar |
 | `30-bucle-principal` | el bucle que mueve todo (`frame`) |
 
 Todos los archivos de `js/` comparten el mismo espacio de nombres: una función de un archivo puede usar las variables de otro. El número al principio fija el orden en que se unen, y ese orden importa: un archivo puede usar al cargar lo que se definió en un archivo anterior, no en uno posterior. Si agregas un archivo nuevo, ponle el número del lugar donde va.
+
+## Comprobar que nada cambió
+
+`pruebas/huella.mjs` juega el juego solo, de forma exacta y repetible (mismo azar, reloj falso), y guarda una "huella": una captura de cada pantalla y de las 8 galaxias, el estilo calculado de cada elemento y el estado de cada partida cuadro a cuadro. Sirve para cambios internos (ordenar, limpiar) que no deben cambiar nada.
+
+```bash
+npm install --no-save playwright && npx playwright install chromium   # una vez
+node pruebas/huella.mjs antes                  # antes del cambio
+node pruebas/huella.mjs despues                # después
+node pruebas/huella.mjs --comparar antes despues
+```
+
+Las capturas pueden diferir en unos pocos píxeles por cómo dibuja la tarjeta gráfica (pasa incluso entre dos corridas iguales); el comparador lo indica aparte.

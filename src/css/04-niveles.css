@@ -1,24 +1,62 @@
+/* selector de niveles (galaxias) */
+@media (hover:hover) and (prefers-reduced-motion:no-preference){ #levels .arrow:hover,#levels .back:hover,#levels .play:not([disabled]):hover{animation:hop .35s ease-out forwards;} }
+#levels .back{position:absolute;z-index:3;width:40px;height:40px;border-radius:50%;border:1px solid rgba(236,230,216,.22);
+  background:rgba(13,18,32,.6);color:var(--fg);font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+#levels{position:absolute;inset:0;z-index:5;background:#05060c;transition:opacity .3s;touch-action:pan-x pan-y;overflow:hidden;}
+#levels.off{opacity:0;pointer-events:none;}
+#levels .lvbg{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+#levels .lvshade{position:absolute;inset:0;z-index:0;pointer-events:none;}
+#levels.live{background:transparent;}
+#levels.live .art svg{opacity:0;}
+#levels .lvbg{display:none;}
+#levels.live .page::before{opacity:.05;}
+#levels .track{position:absolute;inset:0;z-index:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;scroll-behavior:smooth;}
+#levels .track::-webkit-scrollbar{display:none;}
+#levels .page{flex:0 0 100%;height:100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:safe center;overflow-y:auto;scrollbar-width:none;
+  box-sizing:border-box;text-align:center;position:relative;}
+#levels .page::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 42% at 50% 38%, var(--lc) 0%, transparent 70%);opacity:.14;pointer-events:none;}
+#levels .num{position:relative;font-size:11px;color:var(--muted);letter-spacing:.14em;}
+#levels .art{position:relative;}
+#levels .art svg{display:block;}
+#levels .name{position:relative;font-weight:500;color:var(--fg);line-height:1.1;}
+#levels .badge{position:relative;display:inline-block;margin-top:12px;padding:5px 14px;border-radius:999px;border:1.5px solid currentColor;font-size:12px;font-weight:500;letter-spacing:.04em;}
+#levels .fact{position:relative;max-width:30ch;line-height:1.6;color:var(--fg);font-weight:400;}
+#levels .stats{position:relative;margin-top:20px;width:100%;max-width:300px;}
+#levels .row{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);}
+#levels .row b{color:var(--fg);font-weight:500;}
+#levels .bar{height:6px;border-radius:3px;background:#22283a;margin-top:7px;overflow:hidden;}
+#levels .bar i{display:block;height:100%;background:var(--lc);}
+#levels .nuevo{position:relative;}
+#levels .play{cursor:pointer;}
+#levels .play[disabled]{background:#22283a;cursor:default;}
+#levels .top{position:absolute;left:0;right:0;text-align:center;font-size:13px;color:var(--muted);letter-spacing:.06em;pointer-events:none;z-index:2;}
+#levels .arrow{position:absolute;z-index:2;border-radius:50%;border:1px solid rgba(236,230,216,.22);
+  background:rgba(13,18,32,.6);color:var(--fg);font-size:24px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .2s;}
+#levels .arrow[disabled]{opacity:0;pointer-events:none;}
+#levels .foot{position:absolute;left:0;right:0;bottom:max(3vh,18px);display:flex;flex-direction:column;align-items:center;gap:10px;z-index:2;}
+#levels .dots{display:flex;gap:8px;}
+#levels .dots i{width:8px;height:8px;border-radius:50%;background:#3a4055;transition:background .2s,transform .2s;}
+#levels .dots i.on{background:var(--fg);transform:scale(1.15);}
+#levels .lv-foot{font:400 12px 'Unbounded',system-ui,sans-serif;color:var(--muted);background:none;border:0;text-decoration:underline;cursor:pointer;}
+#levels button:focus-visible{outline:2px solid var(--fg);outline-offset:3px;}
 /* botones de navegación: esferas de cristal con una órbita y una pequeña luna */
-#levels .back, #levels .arrow, #planets .back, #planets .arrow{
+#levels .back, #levels .arrow{
   width:48px;height:48px;border-radius:50%;padding:0;color:#eaf3ff;
   background:radial-gradient(circle at 34% 28%, rgba(255,255,255,.22), rgba(143,208,255,.08) 38%, rgba(8,12,24,.72) 72%);
   border:1px solid rgba(160,205,255,.38);
   box-shadow:0 0 18px rgba(120,180,255,.16), inset 0 0 14px rgba(143,208,255,.14);
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   display:flex;align-items:center;justify-content:center;transition:transform .25s ease, box-shadow .25s ease, opacity .2s;}
-#levels .back::before, #levels .arrow::before, #planets .back::before, #planets .arrow::before{
+#levels .back::before, #levels .arrow::before{
   content:"";position:absolute;border-radius:50%;border:1px dashed rgba(160,205,255,.32);animation:navorb 14s linear infinite;pointer-events:none;}
-#levels .arrow::after, #planets .arrow::after{
+#levels .arrow::after{
   position:absolute;top:-8px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:#cfe6ff;box-shadow:0 0 6px #8fd0ff;
   transform-origin:2.5px 32px;animation:navmoon 6s linear infinite;pointer-events:none;}
-#levels .arrow.l::after, #planets .arrow.l::after{animation-direction:reverse;}
-#levels .back svg, #levels .arrow svg, #planets .back svg, #planets .arrow svg{filter:drop-shadow(0 0 4px rgba(143,208,255,.6));}
-@keyframes navorb{to{transform:rotate(360deg)}}
-@keyframes navmoon{to{transform:rotate(360deg)}}
-@media (hover:hover){#levels .back:hover, #levels .arrow:hover, #planets .back:hover, #planets .arrow:hover{box-shadow:0 0 26px rgba(143,208,255,.42), inset 0 0 18px rgba(143,208,255,.25);border-color:rgba(190,225,255,.7);}}
-#levels .arrow:active, #planets .arrow:active, #levels .back:active, #planets .back:active{transform:translateY(-50%) scale(.92);}
-@media (prefers-reduced-motion:reduce){#levels .back::before, #levels .arrow::before, #planets .back::before, #planets .arrow::before, #levels .arrow::after, #planets .arrow::after{animation:none;}}
-
+#levels .arrow.l::after{animation-direction:reverse;}
+#levels .back svg, #levels .arrow svg{filter:drop-shadow(0 0 4px rgba(143,208,255,.6));}
+@media (hover:hover){ #levels .back:hover, #levels .arrow:hover{box-shadow:0 0 26px rgba(143,208,255,.42), inset 0 0 18px rgba(143,208,255,.25);border-color:rgba(190,225,255,.7);} }
+#levels .arrow:active, #levels .back:active{transform:translateY(-50%) scale(.92);}
+@media (prefers-reduced-motion:reduce){ #levels .back::before, #levels .arrow::before, #levels .arrow::after{animation:none;} }
 #levels .page{justify-content:flex-end;}
 #levels .num{margin-bottom:auto;}
 #levels .name{letter-spacing:.01em;text-shadow:0 2px 24px rgba(0,0,0,.6);}
@@ -44,7 +82,6 @@
 #levels .fact{max-height:0;overflow:hidden;opacity:0;margin:0;transition:max-height .35s ease, opacity .35s ease, margin .35s ease;font-size:13px;}
 #levels .page.showfact .fact{max-height:160px;opacity:.85;margin-top:12px;}
 #levels .lvshade{background:linear-gradient(to bottom, rgba(5,6,12,.35) 0%, rgba(5,6,12,0) 16%, rgba(5,6,12,0) 46%, rgba(5,6,12,.6) 64%, rgba(5,6,12,.92) 100%);}
-
 /* tarjeta: arreglos y botón con la temática */
 #levels .page{justify-content:safe flex-end;}
 #levels .meta{gap:10px;}
@@ -59,11 +96,9 @@
 #levels .page.done .play::before{background:conic-gradient(from 0deg, rgba(255,211,107,0) 0deg, #ffd36b 70deg, #fff3cf 110deg, #ffd36b 150deg, rgba(255,211,107,0) 220deg, rgba(255,211,107,.25) 300deg, rgba(255,211,107,0) 360deg);}
 #levels .page.done .play::after{background:radial-gradient(120% 160% at 50% 135%, rgba(255,200,90,.45), rgba(255,200,90,.06) 55%, rgba(9,11,22,.96) 80%), #0a0c17;}
 #levels .play[disabled]::before{animation:none;opacity:.25;}
-@media (hover:hover){#levels .play:not([disabled]):hover{box-shadow:0 0 40px rgba(255,90,31,.5), 0 10px 30px rgba(0,0,0,.5);}}
+@media (hover:hover){ #levels .play:not([disabled]):hover{box-shadow:0 0 40px rgba(255,90,31,.5), 0 10px 30px rgba(0,0,0,.5);} }
 #levels .play:active{transform:scale(.97);}
-@keyframes accrete{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){#levels .play::before{animation:none;}}
-
+@media (prefers-reduced-motion:reduce){ #levels .play::before{animation:none;} }
 /* tarjeta v3: datos apilados, progreso como viaje, panel con lo nuevo y un dato real */
 #levels .diff{position:relative;margin-top:12px;display:inline-flex;align-items:center;padding:5px 14px;border-radius:999px;border:1.5px solid var(--lc);color:var(--lc);font-size:11px;font-weight:500;line-height:1;letter-spacing:.08em;}
 #levels .dist{position:relative;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;}
@@ -85,20 +120,14 @@
 #levels .crow small{display:block;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
 #levels .crow.dato span{color:#cfdcf5;}
 #levels .nuevo, #levels .tries, #levels .fact, #levels .prog, #levels .meta{display:none !important;}
-
 #levels .page > *{flex-shrink:0;}
 #levels .name{font-size:clamp(28px,8.6vw,44px);}
-#levels .card{margin-top:14px;} 
-
+#levels .card{margin-top:14px;}
 /* ---- ajustes finales de la tarjeta (alineación y botón) ---- */
 #levels{--art:min(78vw,30vh,340px);}
-@media (max-height:680px){#levels{--art:min(64vw,21vh,240px);}}
+@media (max-height:680px){ #levels{--art:min(64vw,21vh,240px);} }
 #levels .page{padding:calc(max(3vh,18px) + 44px) 22px calc(max(3vh,18px) + 34px);}
-@media (max-height:820px){
-  #levels .name{font-size:clamp(26px,7.5vw,38px);}
-  #levels .lvst{margin-top:10px;} #levels .card{margin-top:10px;} 
-  #levels .crow{padding:8px 14px;font-size:11.5px;}
-}
+@media (max-height:820px){ #levels .name{font-size:clamp(26px,7.5vw,38px);} #levels .lvst{margin-top:10px;} #levels .card{margin-top:10px;} #levels .crow{padding:8px 14px;font-size:11.5px;} }
 /* botón Escapar */
 #levels .play{position:relative;overflow:hidden;isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(white, black);
   width:100%;max-width:300px;padding:16px;border-radius:999px;border:0;background:#0b0d18;color:#fff4ea;
@@ -114,18 +143,16 @@
 #levels .page.done .play{color:#fff6dc;box-shadow:0 0 28px rgba(255,200,90,.32), 0 10px 30px rgba(0,0,0,.5);}
 #levels .page.done .play .ring{background:conic-gradient(from 0deg, rgba(255,211,107,0) 0deg, #ffd36b 70deg, #fff3cf 110deg, #ffd36b 150deg, rgba(255,211,107,0) 220deg, rgba(255,211,107,.25) 300deg, rgba(255,211,107,0) 360deg);}
 #levels .page.done .play .core{background:radial-gradient(120% 160% at 50% 135%, rgba(255,200,90,.45), rgba(255,200,90,.06) 55%, rgba(9,11,22,.96) 80%), #0a0c17;}
-#levels .play[disabled]{color:var(--muted);box-shadow:none;} #levels .play[disabled] .ring{animation:none;opacity:.25;}
-@keyframes accrete2{from{transform:translate(-50%,-50%) rotate(0deg)} to{transform:translate(-50%,-50%) rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){#levels .play .ring{animation:none;}}
-
+#levels .play[disabled]{color:var(--muted);box-shadow:none;}
+#levels .play[disabled] .ring{animation:none;opacity:.25;}
+@media (prefers-reduced-motion:reduce){ #levels .play .ring{animation:none;} }
 /* flechas: dentro de la pantalla, sin la lunita suelta, y del mismo tamaño en todas las tarjetas */
-#levels .arrow::after, #planets .arrow::after{content:none !important;}
+#levels .arrow::after{content:none !important;}
 #levels .arrow{width:46px;height:46px;transform:translateY(-50%);}
-#levels .arrow.l{left:max(18px, env(safe-area-inset-left));} #levels .arrow.r{right:max(18px, env(safe-area-inset-right));}
-#planets .arrow.l{left:18px;} #planets .arrow.r{right:18px;}
-#levels .back{left:18px;} #planets .back{left:18px;}
-#levels .back::before, #levels .arrow::before, #planets .back::before, #planets .arrow::before{inset:-5px;}
-
+#levels .arrow.l{left:max(18px, env(safe-area-inset-left));}
+#levels .arrow.r{right:max(18px, env(safe-area-inset-right));}
+#levels .back{left:18px;}
+#levels .back::before, #levels .arrow::before{inset:-5px;}
 #levels .arrow{top:50%;}
 /* dato real: transmisión recibida */
 #levels .sig{width:100%;max-width:310px;text-align:center;}
@@ -133,18 +160,18 @@
 #levels .sighead span::before{content:'▸ ';}
 #levels .bars{display:inline-flex;align-items:flex-end;gap:2px;height:9px;}
 #levels .bars b{width:2px;background:currentColor;border-radius:1px;opacity:.25;}
-#levels .bars b:nth-child(1){height:3px} #levels .bars b:nth-child(2){height:6px} #levels .bars b:nth-child(3){height:9px}
+#levels .bars b:nth-child(1){height:3px}
+#levels .bars b:nth-child(2){height:6px}
+#levels .bars b:nth-child(3){height:9px}
 #levels .sig.rx .bars b{animation:sigbar 1.1s steps(1) infinite;}
-#levels .sig.rx .bars b:nth-child(2){animation-delay:.18s} #levels .sig.rx .bars b:nth-child(3){animation-delay:.36s}
+#levels .sig.rx .bars b:nth-child(2){animation-delay:.18s}
+#levels .sig.rx .bars b:nth-child(3){animation-delay:.36s}
 #levels .sig.done .bars b{animation:none;opacity:.9;}
-@keyframes sigbar{0%{opacity:.25}50%{opacity:.95}}
 #levels .sig.rx .sighead{animation:sigflick .5s linear 1;}
-@keyframes sigflick{0%{opacity:0}20%{opacity:.9}28%{opacity:.2}40%{opacity:.85}52%{opacity:.4}64%,100%{opacity:.85}}
 #levels .sigtxt{margin:9px 0 0;letter-spacing:-.01em;font-family:'Space Mono',ui-monospace,Menlo,monospace;line-height:1.7;}
 #levels .sigtxt .off{visibility:hidden;}
 #levels .caret{display:inline-block;width:.55em;height:1.05em;margin:0 1px -0.18em;animation:caret .9s steps(1) infinite;}
 #levels .sig.done .caret{animation:caret 1s steps(1) 3 forwards;opacity:0;}
-@keyframes caret{0%{opacity:1}50%{opacity:0}}
 @media (max-height:680px){ #levels .sigtxt{font-size:11.5px;margin-top:6px;} }
 /* paleta: neutros + un color de marca (disco de acreción); la dificultad solo en su pastilla */
 #levels{--brand:#ffa155;--soft:rgba(226,232,246,.58);}
@@ -161,7 +188,6 @@
 #levels .trip .tstar.on path{fill:#ffd36b;stroke:#ffe7a8;}
 #levels .trip .tstar.on{filter:drop-shadow(0 0 4px rgba(255,211,107,.85));}
 #levels .page.perfect .trip .tstar.on{animation:tstarGlow 2.4s ease-in-out infinite;}
-@keyframes tstarGlow{50%{filter:drop-shadow(0 0 8px rgba(255,211,107,1));}}
 #levels .trip .me{z-index:2;}
 /* estrellas: pastilla junto a la dificultad */
 #levels .tags{position:relative;display:flex;align-items:center;justify-content:center;}
@@ -176,7 +202,6 @@
 #levels .tripinfo span:empty{display:none;}
 #levels .tripinfo span:not(:empty) + span::before{content:'·';margin-right:6px;opacity:.6;}
 #levels .trip .exit{border:1.5px solid rgba(236,230,216,.35);}
-
 @media (max-height:820px){ #levels{--art:min(70vw,21vh,260px);} #levels .trip{margin-top:34px;} #levels .sig{margin-top:34px;} }
 @media (max-height:680px){ #levels .trip{margin-top:16px;} #levels .sig{margin-top:14px;} }
 /* dificultad = gravedad (anillos) · estrellas como texto, sin cajas */
@@ -191,9 +216,12 @@
 #levels{--col:300px;--g:30px;}
 #levels .tripinfo{min-height:0;}
 #levels .trip, #levels .tripinfo, #levels .sig, #levels .play{max-width:var(--col);}
-#levels .tags{margin-top:16px;} #levels .dist{margin-top:10px;}
-#levels .trip{margin-top:var(--g);} #levels .tripinfo{margin-top:10px;}
-#levels .sig{margin-top:var(--g);} #levels .play{margin-top:24px;}
+#levels .tags{margin-top:16px;}
+#levels .dist{margin-top:10px;}
+#levels .trip{margin-top:var(--g);}
+#levels .tripinfo{margin-top:10px;}
+#levels .sig{margin-top:var(--g);}
+#levels .play{margin-top:24px;}
 #levels .sigtxt{color:rgba(226,232,246,.62);font-size:11px;}
 @media (max-height:820px){ #levels{--g:26px;} #levels .tags{margin-top:14px;} #levels .dist{margin-top:9px;} #levels .tripinfo{margin-top:9px;} #levels .play{margin-top:20px;} }
 @media (max-height:680px){ #levels{--g:16px;} #levels .tags{margin-top:10px;} #levels .dist{margin-top:7px;} #levels .tripinfo{margin-top:7px;} #levels .play{margin-top:12px;} }
@@ -202,56 +230,28 @@
 #levels .art svg{position:absolute;left:50%;top:50%;width:var(--art);height:var(--art);transform:translate(-50%,-50%);}
 @media (max-height:680px){ #levels .art{max-height:var(--art);} }
 /* flechas: arco de gravedad (sin caja), fino para no competir con la galaxia ni con ESCAPAR */
-#levels .arrow, #planets .arrow{width:54px;height:54px;background:none !important;border:0 !important;box-shadow:none !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;color:var(--fg);display:grid;place-items:center;}
-#levels .arrow::before, #planets .arrow::before, #levels .arrow::after, #planets .arrow::after{content:none !important;}
-#levels .arrow svg, #planets .arrow svg{filter:none;}
-#levels .arrow > svg:not(.arc), #planets .arrow > svg:not(.arc){position:relative;filter:drop-shadow(0 0 6px rgba(0,0,0,.6));transition:transform .25s ease;}
-.arrow svg.arc{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;}
-.arrow .arc path{fill:none;stroke-linecap:round;}
-.arrow .arc .base{stroke:rgba(236,230,216,.5);stroke-width:1.5;transition:stroke .25s;}
-.arrow .arc .hot{stroke:#ffa155;stroke-width:1.9;transform-origin:26px 26px;filter:drop-shadow(0 0 3px rgba(255,150,70,.75));animation:arcBreath 3.2s ease-in-out infinite;}
-@keyframes arcBreath{50%{opacity:.55;}}
-@media (hover:hover){ #levels .arrow:hover .arc .base, #planets .arrow:hover .arc .base{stroke:rgba(236,230,216,.85);}
-  #levels .arrow.r:hover > svg:not(.arc), #planets .arrow.r:hover > svg:not(.arc){transform:translateX(2px);} #levels .arrow.l:hover > svg:not(.arc), #planets .arrow.l:hover > svg:not(.arc){transform:translateX(-2px);} }
-.arrow.r.go .arc .hot{animation:arcSpinR .65s cubic-bezier(.3,.75,.3,1);}
-.arrow.l.go .arc .hot{animation:arcSpinL .65s cubic-bezier(.3,.75,.3,1);}
-@keyframes arcSpinR{from{transform:rotate(0);}to{transform:rotate(360deg);}}
-@keyframes arcSpinL{from{transform:rotate(0);}to{transform:rotate(-360deg);}}
-@media (prefers-reduced-motion:reduce){ .arrow .arc .hot{animation:none !important;} }
+#levels .arrow{width:54px;height:54px;background:none !important;border:0 !important;box-shadow:none !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;color:var(--fg);display:grid;place-items:center;}
+#levels .arrow::before, #levels .arrow::after{content:none !important;}
+#levels .arrow svg{filter:none;}
+#levels .arrow > svg:not(.arc){position:relative;filter:drop-shadow(0 0 6px rgba(0,0,0,.6));transition:transform .25s ease;}
+@media (hover:hover){ #levels .arrow:hover .arc .base{stroke:rgba(236,230,216,.85);} #levels .arrow.r:hover > svg:not(.arc){transform:translateX(2px);} #levels .arrow.l:hover > svg:not(.arc){transform:translateX(-2px);} }
 /* botón de volver: el mismo arco de gravedad */
-#levels .back, #planets .back{width:48px;height:48px;background:none !important;border:0 !important;box-shadow:none !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;color:var(--fg);display:grid;place-items:center;}
-#levels .back::before, #planets .back::before, #levels .back::after, #planets .back::after{content:none !important;}
-#levels .back svg, #planets .back svg{filter:none;}
-#levels .back > svg:not(.arc), #planets .back > svg:not(.arc){position:relative;filter:drop-shadow(0 0 6px rgba(0,0,0,.6));transition:transform .25s ease;}
-#levels .back:active, #planets .back:active{transform:scale(.92);}
-@media (hover:hover){ #levels .back:hover .arc .base, #planets .back:hover .arc .base{stroke:rgba(236,230,216,.85);} #levels .back:hover > svg:not(.arc), #planets .back:hover > svg:not(.arc){transform:translateX(-2px);} }
-.back svg.arc{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;}
-.back .arc path{fill:none;stroke-linecap:round;}
-.back .arc .base{stroke:rgba(236,230,216,.5);stroke-width:1.5;transition:stroke .25s;}
-.back .arc .hot{stroke:#ffa155;stroke-width:1.9;transform-origin:26px 26px;filter:drop-shadow(0 0 3px rgba(255,150,70,.75));animation:arcBreath 3.2s ease-in-out infinite;}
-.back.go .arc .hot{animation:arcSpinL .65s cubic-bezier(.3,.75,.3,1);}
-@media (prefers-reduced-motion:reduce){ .back .arc .hot{animation:none !important;} }
+#levels .back{width:48px;height:48px;background:none !important;border:0 !important;box-shadow:none !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;color:var(--fg);display:grid;place-items:center;}
+#levels .back::before, #levels .back::after{content:none !important;}
+#levels .back svg{filter:none;}
+#levels .back > svg:not(.arc){position:relative;filter:drop-shadow(0 0 6px rgba(0,0,0,.6));transition:transform .25s ease;}
+#levels .back:active{transform:scale(.92);}
+@media (hover:hover){ #levels .back:hover .arc .base{stroke:rgba(236,230,216,.85);} #levels .back:hover > svg:not(.arc){transform:translateX(-2px);} }
 /* barra superior: volver · título · estrellas en una misma línea; sin "Nivel X de 8" (los puntitos ya lo dicen) */
 #levels{--hdr:max(3vh,18px);}
 #levels .back{top:var(--hdr);}
 #levels .top{top:var(--hdr);height:48px;line-height:48px;}
 #levels .num{display:none;}
-/* contador de estrellas: sin caja, estrella dentro de un anillo de progreso (como los anillos del juego) */
-#wallet{display:flex;padding:0;border:0;border-radius:0;background:none;font:500 14px 'Unbounded',system-ui,sans-serif;letter-spacing:.04em;}
-#wallet .wring{width:28px;height:28px;display:block;overflow:visible;}
-#wallet .wb{fill:none;stroke:rgba(255,211,107,.18);stroke-width:1.5;}
-#wallet .wp{fill:none;stroke:#ffd36b;stroke-width:1.8;stroke-linecap:round;transform:rotate(-90deg);transform-origin:14px 14px;filter:drop-shadow(0 0 3px rgba(255,211,107,.7));transition:stroke-dasharray .6s ease;}
-#wallet .ws{fill:#ffd36b;filter:drop-shadow(0 0 4px rgba(255,211,107,.6));}
-#wallet i{font-style:normal;text-shadow:none;}
-#wallet.full .wring{animation:wfull 2.6s ease-in-out infinite;}
-@keyframes wfull{50%{filter:drop-shadow(0 0 8px rgba(255,211,107,.9));}}
-/* contador de estrellas: texto limpio */
-#wallet{gap:6px;color:#ece6d8;text-shadow:none;align-items:center;}
-#wallet .wst{width:15px;height:15px;display:block;fill:#ffd36b;filter:drop-shadow(0 0 5px rgba(255,211,107,.7));}
-#wallet b{font-weight:500;font-size:14px;}
-#wallet i{font-size:12px;color:rgba(236,230,216,.4);}
-#wallet.full b{color:#ffd36b;}
-#wallet.pop .wst{animation:wstar .5s ease-out;}
-@keyframes wstar{40%{transform:scale(1.45) rotate(18deg);filter:drop-shadow(0 0 10px rgba(255,211,107,1));}}
-/* misma fila exacta que el botón de volver y el título: caja de 48px centrada */
-#wallet{top:max(3vh,18px);height:48px;line-height:1;box-sizing:border-box;right:max(22px, env(safe-area-inset-right));}
+@keyframes navorb{to{transform:rotate(360deg)}}
+@keyframes navmoon{to{transform:rotate(360deg)}}
+@keyframes accrete{to{transform:rotate(360deg)}}
+@keyframes accrete2{from{transform:translate(-50%,-50%) rotate(0deg)} to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes sigbar{0%{opacity:.25}50%{opacity:.95}}
+@keyframes sigflick{0%{opacity:0}20%{opacity:.9}28%{opacity:.2}40%{opacity:.85}52%{opacity:.4}64%,100%{opacity:.85}}
+@keyframes caret{0%{opacity:1}50%{opacity:0}}
+@keyframes tstarGlow{50%{filter:drop-shadow(0 0 8px rgba(255,211,107,1));}}

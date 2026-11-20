@@ -1,0 +1,70 @@
+/* durante la partida: marcador, estrellas, botón de pausa, "Intento N" */
+#wallet{position:absolute;z-index:7;font-weight:500;font-size:14px;pointer-events:none;transition:opacity .3s;}
+#wallet.pop{animation:wpop .45s ease-out;}
+#hud{left:0;right:0;text-align:center;pointer-events:none;transition:opacity .3s;}
+#score small{font-size:.38em;font-weight:500;color:var(--muted);letter-spacing:0;margin-left:.15em;}
+#score{font-weight:900;font-size:clamp(44px,12vw,72px);line-height:1;letter-spacing:-.02em;}
+#best{margin-top:6px;font-weight:300;font-size:13px;color:var(--muted);}
+#scorewrap{position:relative;display:grid;place-items:center;margin:0 auto;}
+#scorewrap.arc{width:112px;height:112px;}
+#arc{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);display:none;}
+#scorewrap.arc #arc{display:block;}
+#arc circle{fill:none;stroke-width:2.5;}
+#arc .bg{stroke:rgba(236,230,216,.12);}
+#arc .fg{stroke:var(--sun);stroke-linecap:round;stroke-dasharray:276.5;stroke-dashoffset:276.5;transition:stroke-dashoffset .25s ease-out,stroke .2s;}
+/* contador de estrellas: sin caja, estrella dentro de un anillo de progreso (como los anillos del juego) */
+#wallet{display:flex;padding:0;border:0;border-radius:0;background:none;font:500 14px 'Unbounded',system-ui,sans-serif;letter-spacing:.04em;}
+#wallet .wring{width:28px;height:28px;display:block;overflow:visible;}
+#wallet .wb{fill:none;stroke:rgba(255,211,107,.18);stroke-width:1.5;}
+#wallet .wp{fill:none;stroke:#ffd36b;stroke-width:1.8;stroke-linecap:round;transform:rotate(-90deg);transform-origin:14px 14px;filter:drop-shadow(0 0 3px rgba(255,211,107,.7));transition:stroke-dasharray .6s ease;}
+#wallet .ws{fill:#ffd36b;filter:drop-shadow(0 0 4px rgba(255,211,107,.6));}
+#wallet i{font-style:normal;text-shadow:none;}
+#wallet.full .wring{animation:wfull 2.6s ease-in-out infinite;}
+/* contador de estrellas: texto limpio */
+#wallet{gap:6px;color:#ece6d8;text-shadow:none;align-items:center;}
+#wallet .wst{width:15px;height:15px;display:block;fill:#ffd36b;filter:drop-shadow(0 0 5px rgba(255,211,107,.7));}
+#wallet b{font-weight:500;font-size:14px;}
+#wallet i{font-size:12px;color:rgba(236,230,216,.4);}
+#wallet.full b{color:#ffd36b;}
+#wallet.pop .wst{animation:wstar .5s ease-out;}
+/* misma fila exacta que el botón de volver y el título: caja de 48px centrada */
+#wallet{top:max(3vh,18px);height:48px;line-height:1;box-sizing:border-box;right:max(22px, env(safe-area-inset-right));}
+/* reinicio instantáneo: "Intento N" en el espacio */
+#tryn{position:absolute;left:0;right:0;z-index:5;text-align:center;pointer-events:none;opacity:0;}
+#tryn b{display:block;font-size:12px;font-weight:500;text-transform:uppercase;color:#ffd36b;text-shadow:0 0 14px rgba(255,211,107,.6);}
+#tryn.go{animation:tryn 1.6s ease-out both;}
+/* pausa: salir a los niveles */
+#quit{position:absolute;top:max(3vh,18px);left:max(18px, env(safe-area-inset-left));z-index:8;width:44px;height:44px;padding:0;border:0;background:none;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s;}
+#quit svg{width:100%;height:100%;display:block;}
+body.playing #quit{opacity:.8;pointer-events:auto;}
+#quit:hover{opacity:1;}
+/* "Intento N" más discreto: arriba, bajo el marcador, con la letra de las transmisiones */
+#tryn{font:400 13px 'Space Mono',ui-monospace,Menlo,monospace;letter-spacing:.32em;text-transform:uppercase;color:rgba(236,230,216,.88);text-shadow:0 0 12px rgba(5,7,13,.9);}
+#tryn b{margin-top:6px;font:400 10px 'Space Mono',ui-monospace,Menlo,monospace;letter-spacing:.28em;}
+#tryn.go{animation-duration:1.8s;}
+/* marcador de juego: barra fina arriba en lugar del número grande */
+#scorewrap, #best{display:none !important;}
+#hud{top:max(3vh,18px);height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+#pbar{align-items:center;gap:7px;width:min(44vw,300px);}
+#pbar .bh{flex:0 0 auto;width:11px;height:11px;border-radius:50%;background:#000;box-shadow:0 0 0 1.5px #ff5a1f,0 0 9px rgba(255,90,31,.7);}
+#pbar .ex{flex:0 0 auto;width:11px;height:11px;border-radius:50%;border:1.5px solid rgba(236,230,216,.4);box-sizing:border-box;transition:border-color .3s,box-shadow .3s;}
+#pbar .ln{position:relative;flex:1;height:2px;background:repeating-linear-gradient(90deg, rgba(236,230,216,.22) 0 4px, transparent 4px 8px);}
+#pbar .ln i{position:absolute;left:0;top:0;bottom:0;width:var(--p,0%);background:linear-gradient(90deg, rgba(236,230,216,.1), rgba(236,230,216,.85));transition:width .35s cubic-bezier(.3,.8,.3,1);}
+#pbar .ln u{display:none;position:absolute;top:-5px;left:var(--r,0%);width:2px;height:12px;margin-left:-1px;border-radius:1px;background:#ffd36b;box-shadow:0 0 6px rgba(255,211,107,.8);}
+#pbar.hasrec .ln u{display:block;}
+#pbar .ln b{position:absolute;top:50%;left:var(--p,0%);width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#8fc4ff,#2f6fd8 60%,#123a7a);box-shadow:0 0 8px rgba(143,208,255,.9);transition:left .35s cubic-bezier(.3,.8,.3,1);}
+#pbar.beat .ln i{background:linear-gradient(90deg, rgba(255,211,107,.15), #ffd36b);box-shadow:0 0 8px rgba(255,211,107,.5);}
+#pbar.beat .ln u{opacity:.35;}
+/* la barra en la misma línea que pausa y estrellas; el número cuelga debajo sin moverla */
+#hud{position:absolute;}
+#pnum{margin-top:0;text-align:center;}
+/* vuelve el conteo de anillos, pero discreto: en la línea de pausa y estrellas, sin robar la atención */
+#pbar{display:none !important;}
+#pnum{position:absolute;left:0;right:0;top:0;height:48px;display:flex;align-items:center;justify-content:center;gap:6px;font:600 24px 'Unbounded',system-ui,sans-serif;letter-spacing:.01em;color:rgba(236,230,216,.92);text-shadow:0 0 14px rgba(5,7,13,.8);transition:color .3s;}
+#pnum span{font-size:12px;font-weight:500;letter-spacing:.04em;color:rgba(236,230,216,.4);transform:translateY(3px);}
+#pnum.beat{color:#ffe7a8;text-shadow:0 0 16px rgba(255,211,107,.45);}
+#tryn{top:calc(max(3vh,18px) + 62px);}
+#pnum, #tryn, #wallet{text-shadow:0 0 10px rgba(3,4,10,.95), 0 0 22px rgba(3,4,10,.8), 0 1px 2px rgba(0,0,0,.9);}
+@keyframes wfull{50%{filter:drop-shadow(0 0 8px rgba(255,211,107,.9));}}
+@keyframes wstar{40%{transform:scale(1.45) rotate(18deg);filter:drop-shadow(0 0 10px rgba(255,211,107,1));}}
+@keyframes tryn{0%{opacity:0;transform:translateY(-4px);}12%{opacity:1;transform:none;}70%{opacity:1;}100%{opacity:0;}}

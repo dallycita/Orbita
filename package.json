@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "node dev.mjs",
     "build": "node build.mjs",
-    "check": "node build.mjs --check"
+    "check": "node build.mjs --check",
+    "huella": "node pruebas/huella.mjs"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  }
 }

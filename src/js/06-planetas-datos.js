@@ -74,10 +74,6 @@ function rescuedCards(before){
   return '<div class="wres"><div class="wpl">' + nuevos.map(P => '<span class="wp" title="' + P.name + '">' + planetThumb(P.id) + '</span>').join('') + '</div>' +
     '<small>' + (nuevos.length > 1 ? 'Rescatados' : 'Rescatado') + '</small></div>';
 }
-function rescuedSince(before){
-  const now = unlockedIds(), nuevos = PLANETS_P.filter(P => now.includes(P.id) && !before.includes(P.id));
-  return nuevos.length ? '<div class="msg rec" style="margin-top:14px">¡Rescataste a ' + (nuevos.length > 1 ? nuevos.slice(0, -1).map(P => P.name).join(', ') + ' y ' + nuevos[nuevos.length - 1].name : nuevos[0].name) + '!</div><div class="sub" style="margin-top:4px;font-size:12px">Elígelo en Planetas, en la pantalla de inicio.</div>' : '';
-}
 function saveRunStats(){
   if (perfCount > maxPerf){ maxPerf = perfCount; try{ localStorage.setItem('orbita_p1_maxperf', String(maxPerf)); }catch(e){} }
 }
@@ -117,7 +113,6 @@ let gest = null, pending = false, pendingT = 0;
 let hintsShown = 0;
 try{ hintsShown = parseInt(localStorage.getItem('orbita_p1_pista')||'0',10) || 0; }catch(e){ hintsShown = 0; }
 let showHint = false, hintT = 0;
-function updateDJ(){}
 let swallow = null, holeFlare = 0;
 let streak = 0, jumpClear = 999, culprit = null, culpritT = 0, landPop = 0;
 const PERFECT = 12;

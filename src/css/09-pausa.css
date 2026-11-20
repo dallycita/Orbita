@@ -1,9 +1,4 @@
-/* pausa: salir a los niveles */
-#quit{position:absolute;top:max(3vh,18px);left:max(18px, env(safe-area-inset-left));z-index:8;width:44px;height:44px;padding:0;border:0;background:none;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s;}
-#quit svg{width:100%;height:100%;display:block;}
-body.playing #quit{opacity:.8;pointer-events:auto;}
-#quit:hover{opacity:1;}
-
+/* menú de pausa y cuenta 3·2·1 */
 /* ---------- pausa: la misma pantalla de "Escapaste", con la partida congelada detrás ---------- */
 body.paused #quit{opacity:0 !important;pointer-events:none !important;}
 body.paused #hud, body.paused #wallet{opacity:0 !important;transition:opacity .25s;}
@@ -34,13 +29,14 @@ body.paused #hud, body.paused #wallet{opacity:0 !important;transition:opacity .2
 .pz-vol.fx .line i{background:linear-gradient(90deg,#e0662a,#ffd0a0);box-shadow:0 0 12px rgba(255,140,60,1);}
 .pz-vol.fx .line b{background:radial-gradient(circle at 35% 35%,#ffd2a0,#ff7a2a 60%,#8a2e0c);box-shadow:0 0 0 4px rgba(255,161,85,.22),0 0 16px rgba(255,140,60,1);}
 .pz-vol.drag .line b{transform:scale(1.2);}
-.pz-vol.zero .line i{opacity:0;} .pz-vol.zero .ico{opacity:.55;}
+.pz-vol.zero .line i{opacity:0;}
+.pz-vol.zero .ico{opacity:.55;}
 .pz-vol .val{flex:0 0 auto;width:28px;text-align:right;font:400 11px 'Space Mono',ui-monospace,monospace;color:#fff;}
 /* al seguir: cuenta 3 · 2 · 1 sobre la partida, al ritmo */
 #pzcount{position:absolute;left:0;right:0;top:calc(max(3vh,18px) + 92px);height:150px;z-index:7;pointer-events:none;display:flex;align-items:center;justify-content:center;}
 #pzcount b{position:absolute;font:600 clamp(64px,22vw,110px)/1 'Unbounded',system-ui,sans-serif;color:#ece6d8;text-shadow:0 0 34px rgba(255,161,85,.55),0 0 2px rgba(255,255,255,.6);animation:pzNum .62s cubic-bezier(.2,.8,.3,1) both;}
 #pzcount i{position:absolute;width:130px;height:130px;border-radius:50%;border:2px solid rgba(255,161,85,.8);box-shadow:0 0 22px rgba(255,140,60,.6),inset 0 0 18px rgba(255,140,60,.35);animation:pzRing .62s ease-out both;}
 #pzcount u{position:absolute;top:calc(100% + 6px);font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.32em;text-transform:uppercase;color:rgba(236,230,216,.75);text-decoration:none;text-shadow:0 0 10px rgba(3,4,10,.95);}
+@media (prefers-reduced-motion:reduce){ #pzcount b,#pzcount i{animation-duration:.01s} }
 @keyframes pzNum{0%{opacity:0;transform:scale(1.5);filter:blur(6px)}22%{opacity:1;transform:scale(1);filter:blur(0)}75%{opacity:1}100%{opacity:0;transform:scale(.86)}}
 @keyframes pzRing{0%{opacity:0;transform:scale(.55)}20%{opacity:1}100%{opacity:0;transform:scale(1.9)}}
-@media (prefers-reduced-motion:reduce){#pzcount b,#pzcount i{animation-duration:.01s}}

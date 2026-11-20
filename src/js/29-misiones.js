@@ -112,7 +112,6 @@ function openMissions(){
 function misWhoosh(up){ if (!AC || muted) return; try{ noise(.4, up ? 500 : 2600, up ? 2600 : 500, .1, 'bandpass'); uiTone(ROOT*2*Math.pow(2, (up ? 19 : 12)/12), AC.currentTime + (up ? .12 : 0), .7, .025); }catch(e){} }
 function closeMissions(){ if (!misOpen) return; clearInterval(misTimer); misOpen = false; misWhoosh(false); if (elMis) elMis.classList.add('out'); setTimeout(() => { if (!misOpen && elMis) elMis.classList.add('off'); }, 320); renderHome(); if (elHome) elHome.classList.remove('off'); }
 function misClaimSound(big){ if (!AC || muted) return; try{ const n = AC.currentTime; (big ? [12, 16, 19, 24, 28] : [19, 24, 28]).forEach((sm, i) => uiTone(ROOT*Math.pow(2, sm/12), n + i*.06, 1.2, .045)); }catch(e){} }
-function misGive(n, big){ MIS.polvo += n; misSave(); misClaimSound(big); buzz(big ? [20, 40, 20, 40, 60] : [15, 30, 15]); }
 const MIS_ICO = {
   perf: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><circle cx="12" cy="12" r="3"/>',
   streak: '<path d="M5 15l2-4 2 4M10.5 11l2-4 2 4M16 15l2-4 2 4"/><path d="M4 19h16"/>',
@@ -337,26 +336,5 @@ function misCanvasDraw(c){
     for (let j = 0; j < 4; j++){ const u = ((t*.35 + j/4) % 1); g.strokeStyle = 'rgba(255,111,168,' + (1 - u)*.8 + ')'; g.lineWidth = 3*(1 - u) + .5; g.beginPath(); g.arc(cx, cy, R*(.2 + u*1.1), 0, Math.PI*2); g.stroke(); }
     glow(cx, cy, R*.4, 'rgba(255,194,218,A)', .9);
   }
-}
-// fondo de Misiones: el mismo cielo de la pantalla de planetas; en Logros, la Tierra sobre su órbita
-function renderMissionsScene(dt){
-  t += dt;
-  ctx.save(); ctx.fillStyle = '#05060c'; ctx.fillRect(0, 0, W, H);
-  const neb = ctx.createRadialGradient(W/2, H*.3, 0, W/2, H*.3, Math.max(W, H)*.6); neb.addColorStop(0, rgba(misTab === 'logros' ? '#4f8cff' : '#3fc7b8', .12)); neb.addColorStop(1, rgba('#3fc7b8', 0));
-  ctx.fillStyle = neb; ctx.fillRect(0, 0, W, H);
-  const sr = Math.max(W, H)*.62;
-  for (const s2 of stars){ const a = s2.a + t*.01, x = W/2 + Math.cos(a)*s2.r*sr, y = H*.4 + Math.sin(a)*s2.r*sr; ctx.globalAlpha = .15 + .35*(.5 + .5*Math.sin(t*1.3 + s2.tw)); ctx.fillStyle = BONE; ctx.fillRect(x, y, s2.s*.8, s2.s*.8); }
-  ctx.globalAlpha = 1;
-  const an = misTab === 'logros' && elMis && elMis.querySelector ? elMis.querySelector('.mplanet') : null;
-  if (an && an.getBoundingClientRect){
-    const r = an.getBoundingClientRect(), cv = cvs.getBoundingClientRect ? cvs.getBoundingClientRect() : {left: 0, top: 0}, cx = r.left - cv.left + r.width/2, cy = r.top - cv.top + r.height/2 + Math.sin(t*.8)*3, R = Math.min(r.height*.42, W*.22);
-    const RA = Math.max(W, H)*1.25, acy = cy + RA;
-    ctx.strokeStyle = 'rgba(236,230,216,.16)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(W/2, acy, RA, -Math.PI/2 - 1.2, -Math.PI/2 + 1.2); ctx.stroke();
-    const gl = ctx.createLinearGradient(W/2 - R*1.4, 0, W/2 + R*1.4, 0);
-    if (gl && gl.addColorStop){ gl.addColorStop(0, 'rgba(255,161,85,0)'); gl.addColorStop(.5, 'rgba(255,161,85,.85)'); gl.addColorStop(1, 'rgba(255,161,85,0)'); ctx.strokeStyle = gl; }
-    ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(W/2, acy, RA, -Math.PI/2 - R*1.4/RA, -Math.PI/2 + R*1.4/RA); ctx.stroke();
-    drawBigPlanet('tierra', cx, cy, R, t*.35, false, {x: -.55, y: -.45});
-  }
-  ctx.restore();
 }
 

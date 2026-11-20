@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
+/* base: colores, página y lienzo */
 :root{
   --bg:#0d1220; --fg:#ece6d8; --muted:#8b8f9e; --sun:#ff5a1f;
   box-sizing:border-box;
@@ -24,44 +25,332 @@ body{
 }
 #wrap{position:relative;width:100%;height:100%;}
 canvas{display:block;width:100%;height:100%;touch-action:none;}
-#wallet{position:absolute;z-index:7;font-weight:500;font-size:14px;pointer-events:none;transition:opacity .3s;}
-#wallet.pop{animation:wpop .45s ease-out;}
-@keyframes wpop{40%{transform:scale(1.25)}100%{transform:scale(1)}}
-#hud{left:0;right:0;text-align:center;pointer-events:none;transition:opacity .3s;}
-#score small{font-size:.38em;font-weight:500;color:var(--muted);letter-spacing:0;margin-left:.15em;}
-#score{font-weight:900;font-size:clamp(44px,12vw,72px);line-height:1;letter-spacing:-.02em;}
-#best{margin-top:6px;font-weight:300;font-size:13px;color:var(--muted);}
-#scorewrap{position:relative;display:grid;place-items:center;margin:0 auto;}
-#scorewrap.arc{width:112px;height:112px;}
-#arc{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);display:none;}
-#scorewrap.arc #arc{display:block;}
-#arc circle{fill:none;stroke-width:2.5;}
-#arc .bg{stroke:rgba(236,230,216,.12);}
-#arc .fg{stroke:var(--sun);stroke-linecap:round;stroke-dasharray:276.5;stroke-dashoffset:276.5;transition:stroke-dashoffset .25s ease-out,stroke .2s;}
-.chips{margin-top:26px;display:flex;flex-direction:column;align-items:center;gap:9px;pointer-events:auto;}
-.chips .lbl{font-weight:300;font-size:12px;color:var(--muted);}
-.chips .row{display:flex;gap:8px;}
-.chip{font:500 12px 'Unbounded',system-ui,sans-serif;color:var(--muted);background:transparent;border:1px solid rgba(236,230,216,.2);border-radius:999px;padding:8px 13px;cursor:pointer;}
-.chip.on{color:var(--fg);border-color:var(--sun);}
-.chip:focus-visible{outline:2px solid var(--fg);outline-offset:2px;}
-#panel.hide .chips{pointer-events:none;}
-@keyframes hop{0%{translate:0 0;scale:1}40%{translate:0 -6px;scale:1.07}100%{translate:0 -2px;scale:1.03}}
-@keyframes hopbig{0%{scale:1}45%{scale:1.1}100%{scale:1.05}}
-@media (hover:hover) and (prefers-reduced-motion:no-preference){
-  #home .sm:hover,#home .opt:hover,#levels .arrow:hover,#levels .back:hover,#levels .play:not([disabled]):hover,.chip:hover{animation:hop .35s ease-out forwards;}
-  #home .bigplay:hover{animation:hopbig .4s ease-out forwards;box-shadow:0 0 0 10px rgba(255,90,31,.2),0 0 60px rgba(255,90,31,.55);}
-  #home .sm:hover,#home .opt:hover,.chip:hover{border-color:rgba(236,230,216,.5);}
-}
+@keyframes misRot{to{transform:rotate(360deg)}}
+@keyframes misCore{50%{opacity:.7}}
+/* botones de navegación compartidos: flechas, volver y chips */
+.arrow svg.arc{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;}
+.arrow .arc path{fill:none;stroke-linecap:round;}
+.arrow .arc .base{stroke:rgba(236,230,216,.5);stroke-width:1.5;transition:stroke .25s;}
+.arrow .arc .hot{stroke:#ffa155;stroke-width:1.9;transform-origin:26px 26px;filter:drop-shadow(0 0 3px rgba(255,150,70,.75));animation:arcBreath 3.2s ease-in-out infinite;}
+.arrow.r.go .arc .hot{animation:arcSpinR .65s cubic-bezier(.3,.75,.3,1);}
+.arrow.l.go .arc .hot{animation:arcSpinL .65s cubic-bezier(.3,.75,.3,1);}
+@media (prefers-reduced-motion:reduce){ .arrow .arc .hot{animation:none !important;} }
+.back svg.arc{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;}
+.back .arc path{fill:none;stroke-linecap:round;}
+.back .arc .base{stroke:rgba(236,230,216,.5);stroke-width:1.5;transition:stroke .25s;}
+.back .arc .hot{stroke:#ffa155;stroke-width:1.9;transform-origin:26px 26px;filter:drop-shadow(0 0 3px rgba(255,150,70,.75));animation:arcBreath 3.2s ease-in-out infinite;}
+.back.go .arc .hot{animation:arcSpinL .65s cubic-bezier(.3,.75,.3,1);}
+@media (prefers-reduced-motion:reduce){ .back .arc .hot{animation:none !important;} }
+@keyframes arcBreath{50%{opacity:.55;}}
+@keyframes arcSpinR{from{transform:rotate(0);}to{transform:rotate(360deg);}}
+@keyframes arcSpinL{from{transform:rotate(0);}to{transform:rotate(-360deg);}}
+/* pantalla de inicio */
+@media (hover:hover) and (prefers-reduced-motion:no-preference){ #home .sm:hover,#home .opt:hover{animation:hop .35s ease-out forwards;} #home .bigplay:hover{animation:hopbig .4s ease-out forwards;box-shadow:0 0 0 10px rgba(255,90,31,.2),0 0 60px rgba(255,90,31,.55);} #home .sm:hover,#home .opt:hover{border-color:rgba(236,230,216,.5);} }
 #home .playrow{display:flex;align-items:center;gap:26px;}
 #home .spacer{width:68px;height:68px;}
 #home .plan{position:relative;width:68px;height:68px;border-radius:50%;border:0;background:radial-gradient(circle at 50% 40%,#1d2440,#0f1426);
   box-shadow:0 0 0 2px rgba(143,208,255,.35),0 0 22px rgba(143,208,255,.25);display:flex;align-items:center;justify-content:center;}
 #home .plan svg{width:52px;height:52px;}
 #home .plan .orb{position:absolute;inset:-7px;border-radius:50%;border:1.5px dashed rgba(143,208,255,.5);animation:orbspin 9s linear infinite;}
-@keyframes orbspin{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){#home .plan .orb{animation:none}}
+@media (prefers-reduced-motion:reduce){ #home .plan .orb{animation:none} }
 #home .plabel{position:absolute;top:100%;margin-top:9px;left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:.08em;color:#8fd0ff;white-space:nowrap;}
-@media (hover:hover) and (prefers-reduced-motion:no-preference){#home .plan:hover{animation:hopbig .4s ease-out forwards;box-shadow:0 0 0 3px rgba(143,208,255,.6),0 0 34px rgba(143,208,255,.5);}}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){ #home .plan:hover{animation:hopbig .4s ease-out forwards;box-shadow:0 0 0 3px rgba(143,208,255,.6),0 0 34px rgba(143,208,255,.5);} }
+#home{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  padding-bottom:max(7vh,44px);transition:opacity .9s ease;pointer-events:none;
+  background:linear-gradient(to bottom, rgba(11,15,28,.15) 0%, rgba(11,15,28,0) 35%, rgba(11,15,28,.55) 70%, rgba(11,15,28,.85) 100%);}
+#home.off{opacity:0;}
+#home > *{transition:transform .9s cubic-bezier(.2,.7,.2,1);}
+#home.off > *{transform:translateY(14px);}
+@media (prefers-reduced-motion:reduce){ #home.off > *{transform:none;} }
+#home.off *{pointer-events:none !important;}
+#home button{pointer-events:auto;font-family:'Unbounded',system-ui,sans-serif;cursor:pointer;}
+#home .bigplay{width:104px;height:104px;border-radius:50%;border:0;background:var(--sun);color:#fff;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 8px rgba(255,90,31,.14),0 0 40px rgba(255,90,31,.35);transition:transform .15s;}
+#home .bigplay:active{transform:scale(.94);}
+#home .bigplay svg{width:40px;height:40px;margin-left:6px;}
+#home .playlbl{margin-top:14px;font-size:14px;font-weight:500;letter-spacing:.12em;color:var(--fg);}
+#home .row{display:flex;gap:12px;margin-top:30px;}
+#home .sm{min-width:92px;padding:11px 14px;border-radius:999px;border:1px solid rgba(236,230,216,.22);background:rgba(13,18,32,.6);color:var(--fg);font-size:12px;font-weight:500;}
+#home .sheet{position:absolute;left:50%;bottom:max(7vh,44px);transform:translateX(-50%);width:min(320px,86vw);background:#151a2b;border:1px solid rgba(236,230,216,.14);
+  border-radius:22px;padding:20px;box-sizing:border-box;display:none;flex-direction:column;gap:12px;pointer-events:auto;}
+#home .sheet.on{display:flex;}
+#home .sheet h3{margin:0 0 4px;font-size:15px;font-weight:500;color:var(--fg);text-align:center;}
+#home .sheet .opt{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:14px;border:1px solid rgba(236,230,216,.14);background:transparent;color:var(--fg);font-size:13px;font-weight:400;}
+#home .sheet .opt b{font-weight:500;color:var(--muted);}
+#home .sheet .danger{color:var(--fg);}
+#home button:focus-visible{outline:2px solid var(--fg);outline-offset:3px;}
+#home .plan.new::after{content:"";position:absolute;top:4px;right:4px;width:12px;height:12px;border-radius:50%;background:#ff6b2c;box-shadow:0 0 0 3px #05070d,0 0 10px rgba(255,107,44,.8);}
+/* botón de Misiones: más pequeño que Planetas, sin borde; las lunas giran y las encendidas respiran */
+#home .plan.mis{width:68px;height:68px;box-shadow:none;}
+#home .plan.mis svg{width:50px;height:50px;filter:none;overflow:visible;}
+#home .plan.mis .plabel{color:#8fd0ff;}
+#home .plan.mis .lit{animation:misLit 2.4s ease-in-out infinite;}
+#home .plan.mis .lit{filter:drop-shadow(0 0 2px #ff8a3d);}
+#home .plan.mis.new::after{top:4px;right:4px;width:12px;height:12px;}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){ #home .plan.mis:hover{box-shadow:0 0 0 3px rgba(143,208,255,.5),0 0 26px rgba(143,208,255,.4);} }
+@media (prefers-reduced-motion:reduce){ #home .plan.mis .lit{animation:none} }
+@keyframes hop{0%{translate:0 0;scale:1}40%{translate:0 -6px;scale:1.07}100%{translate:0 -2px;scale:1.03}}
+@keyframes hopbig{0%{scale:1}45%{scale:1.1}100%{scale:1.05}}
+@keyframes orbspin{to{transform:rotate(360deg)}}
+@keyframes misLit{50%{filter:drop-shadow(0 0 4px #ff8a3d) drop-shadow(0 0 8px #ff8a3d)}}
+/* selector de niveles (galaxias) */
+@media (hover:hover) and (prefers-reduced-motion:no-preference){ #levels .arrow:hover,#levels .back:hover,#levels .play:not([disabled]):hover{animation:hop .35s ease-out forwards;} }
+#levels .back{position:absolute;z-index:3;width:40px;height:40px;border-radius:50%;border:1px solid rgba(236,230,216,.22);
+  background:rgba(13,18,32,.6);color:var(--fg);font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+#levels{position:absolute;inset:0;z-index:5;background:#05060c;transition:opacity .3s;touch-action:pan-x pan-y;overflow:hidden;}
+#levels.off{opacity:0;pointer-events:none;}
+#levels .lvbg{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+#levels .lvshade{position:absolute;inset:0;z-index:0;pointer-events:none;}
+#levels.live{background:transparent;}
+#levels.live .art svg{opacity:0;}
+#levels .lvbg{display:none;}
+#levels.live .page::before{opacity:.05;}
+#levels .track{position:absolute;inset:0;z-index:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;scroll-behavior:smooth;}
+#levels .track::-webkit-scrollbar{display:none;}
+#levels .page{flex:0 0 100%;height:100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:safe center;overflow-y:auto;scrollbar-width:none;
+  box-sizing:border-box;text-align:center;position:relative;}
+#levels .page::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 42% at 50% 38%, var(--lc) 0%, transparent 70%);opacity:.14;pointer-events:none;}
+#levels .num{position:relative;font-size:11px;color:var(--muted);letter-spacing:.14em;}
+#levels .art{position:relative;}
+#levels .art svg{display:block;}
+#levels .name{position:relative;font-weight:500;color:var(--fg);line-height:1.1;}
+#levels .badge{position:relative;display:inline-block;margin-top:12px;padding:5px 14px;border-radius:999px;border:1.5px solid currentColor;font-size:12px;font-weight:500;letter-spacing:.04em;}
+#levels .fact{position:relative;max-width:30ch;line-height:1.6;color:var(--fg);font-weight:400;}
+#levels .stats{position:relative;margin-top:20px;width:100%;max-width:300px;}
+#levels .row{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);}
+#levels .row b{color:var(--fg);font-weight:500;}
+#levels .bar{height:6px;border-radius:3px;background:#22283a;margin-top:7px;overflow:hidden;}
+#levels .bar i{display:block;height:100%;background:var(--lc);}
+#levels .nuevo{position:relative;}
+#levels .play{cursor:pointer;}
+#levels .play[disabled]{background:#22283a;cursor:default;}
+#levels .top{position:absolute;left:0;right:0;text-align:center;font-size:13px;color:var(--muted);letter-spacing:.06em;pointer-events:none;z-index:2;}
+#levels .arrow{position:absolute;z-index:2;border-radius:50%;border:1px solid rgba(236,230,216,.22);
+  background:rgba(13,18,32,.6);color:var(--fg);font-size:24px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .2s;}
+#levels .arrow[disabled]{opacity:0;pointer-events:none;}
+#levels .foot{position:absolute;left:0;right:0;bottom:max(3vh,18px);display:flex;flex-direction:column;align-items:center;gap:10px;z-index:2;}
+#levels .dots{display:flex;gap:8px;}
+#levels .dots i{width:8px;height:8px;border-radius:50%;background:#3a4055;transition:background .2s,transform .2s;}
+#levels .dots i.on{background:var(--fg);transform:scale(1.15);}
+#levels .lv-foot{font:400 12px 'Unbounded',system-ui,sans-serif;color:var(--muted);background:none;border:0;text-decoration:underline;cursor:pointer;}
+#levels button:focus-visible{outline:2px solid var(--fg);outline-offset:3px;}
+/* botones de navegación: esferas de cristal con una órbita y una pequeña luna */
+#levels .back, #levels .arrow{
+  width:48px;height:48px;border-radius:50%;padding:0;color:#eaf3ff;
+  background:radial-gradient(circle at 34% 28%, rgba(255,255,255,.22), rgba(143,208,255,.08) 38%, rgba(8,12,24,.72) 72%);
+  border:1px solid rgba(160,205,255,.38);
+  box-shadow:0 0 18px rgba(120,180,255,.16), inset 0 0 14px rgba(143,208,255,.14);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;transition:transform .25s ease, box-shadow .25s ease, opacity .2s;}
+#levels .back::before, #levels .arrow::before{
+  content:"";position:absolute;border-radius:50%;border:1px dashed rgba(160,205,255,.32);animation:navorb 14s linear infinite;pointer-events:none;}
+#levels .arrow::after{
+  position:absolute;top:-8px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:#cfe6ff;box-shadow:0 0 6px #8fd0ff;
+  transform-origin:2.5px 32px;animation:navmoon 6s linear infinite;pointer-events:none;}
+#levels .arrow.l::after{animation-direction:reverse;}
+#levels .back svg, #levels .arrow svg{filter:drop-shadow(0 0 4px rgba(143,208,255,.6));}
+@media (hover:hover){ #levels .back:hover, #levels .arrow:hover{box-shadow:0 0 26px rgba(143,208,255,.42), inset 0 0 18px rgba(143,208,255,.25);border-color:rgba(190,225,255,.7);} }
+#levels .arrow:active, #levels .back:active{transform:translateY(-50%) scale(.92);}
+@media (prefers-reduced-motion:reduce){ #levels .back::before, #levels .arrow::before, #levels .arrow::after{animation:none;} }
+#levels .page{justify-content:flex-end;}
+#levels .num{margin-bottom:auto;}
+#levels .name{letter-spacing:.01em;text-shadow:0 2px 24px rgba(0,0,0,.6);}
+#levels .meta{position:relative;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:10px;font-size:12px;letter-spacing:.06em;max-width:340px;}
+#levels .meta .diff{white-space:nowrap;}
+#levels .meta .dist{color:#9fd0ff;}
+#levels .dot{width:3px;height:3px;border-radius:50%;background:rgba(236,230,216,.4);display:inline-block;}
+#levels .prog{position:relative;display:flex;align-items:center;gap:12px;width:100%;max-width:300px;margin-top:18px;}
+#levels .pbar{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;}
+#levels .pbar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg, var(--lc), #fff7);box-shadow:0 0 10px var(--lc);}
+#levels .prog b{font-size:12px;font-weight:500;color:var(--fg);min-width:44px;text-align:right;white-space:nowrap;}
+#levels .crown{color:#ffd36b;}
+#levels .lvst{position:relative;display:flex;gap:6px;}
+#levels .page.perfect .lvst svg{filter:drop-shadow(0 0 6px rgba(255,211,107,.8));}
+#levels .nuevo{display:flex;align-items:center;gap:10px;margin-top:16px;padding:8px 14px 8px 10px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#dfe8ff;font-size:12px;text-align:left;}
+#levels .nuevo svg{flex:0 0 auto;color:#bfe0ff;}
+#levels .nuevo small{display:block;font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:2px;}
+#levels .play{display:flex;align-items:center;justify-content:center;gap:10px;font-size:16px;
+  }
+#levels .page.done .play{background:linear-gradient(180deg, #ffd36b, #f0a43a);}
+#levels .tries{position:relative;display:flex;align-items:center;gap:10px;margin-top:10px;font-size:11px;color:var(--muted);}
+#levels .info{font:500 11px 'Unbounded',system-ui,sans-serif;color:#9fd0ff;background:none;border:0;padding:4px 2px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+#levels .fact{max-height:0;overflow:hidden;opacity:0;margin:0;transition:max-height .35s ease, opacity .35s ease, margin .35s ease;font-size:13px;}
+#levels .page.showfact .fact{max-height:160px;opacity:.85;margin-top:12px;}
+#levels .lvshade{background:linear-gradient(to bottom, rgba(5,6,12,.35) 0%, rgba(5,6,12,0) 16%, rgba(5,6,12,0) 46%, rgba(5,6,12,.6) 64%, rgba(5,6,12,.92) 100%);}
+/* tarjeta: arreglos y botón con la temática */
+#levels .page{justify-content:safe flex-end;}
+#levels .meta{gap:10px;}
+#levels .meta .diff{display:inline-flex;align-items:center;padding:4px 12px;border-radius:999px;border:1.5px solid var(--lc);color:var(--lc);font-size:11px;font-weight:500;line-height:1;letter-spacing:.06em;}
+#levels .meta .dist{display:inline-flex;align-items:center;line-height:1;font-size:11px;}
+#levels .play::before{content:"";position:absolute;inset:-120%;z-index:-2;
+  background:conic-gradient(from 0deg, rgba(255,90,31,0) 0deg, #ff5a1f 70deg, #ffe2b0 110deg, #ff5a1f 150deg, rgba(255,90,31,0) 220deg, rgba(255,90,31,.25) 300deg, rgba(255,90,31,0) 360deg);
+  animation:accrete 4.5s linear infinite;}
+#levels .play::after{content:"";position:absolute;inset:1.6px;border-radius:999px;z-index:-1;
+  background:radial-gradient(120% 160% at 50% 135%, rgba(255,110,40,.55), rgba(255,90,31,.08) 55%, rgba(9,11,22,.96) 80%), #0a0c17;}
+#levels .play .pin{align-items:center;justify-content:center;gap:12px;}
+#levels .page.done .play::before{background:conic-gradient(from 0deg, rgba(255,211,107,0) 0deg, #ffd36b 70deg, #fff3cf 110deg, #ffd36b 150deg, rgba(255,211,107,0) 220deg, rgba(255,211,107,.25) 300deg, rgba(255,211,107,0) 360deg);}
+#levels .page.done .play::after{background:radial-gradient(120% 160% at 50% 135%, rgba(255,200,90,.45), rgba(255,200,90,.06) 55%, rgba(9,11,22,.96) 80%), #0a0c17;}
+#levels .play[disabled]::before{animation:none;opacity:.25;}
+@media (hover:hover){ #levels .play:not([disabled]):hover{box-shadow:0 0 40px rgba(255,90,31,.5), 0 10px 30px rgba(0,0,0,.5);} }
+#levels .play:active{transform:scale(.97);}
+@media (prefers-reduced-motion:reduce){ #levels .play::before{animation:none;} }
+/* tarjeta v3: datos apilados, progreso como viaje, panel con lo nuevo y un dato real */
+#levels .diff{position:relative;margin-top:12px;display:inline-flex;align-items:center;padding:5px 14px;border-radius:999px;border:1.5px solid var(--lc);color:var(--lc);font-size:11px;font-weight:500;line-height:1;letter-spacing:.08em;}
+#levels .dist{position:relative;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;}
+#levels .trip{position:relative;display:flex;align-items:center;gap:8px;width:100%;max-width:300px;}
+#levels .trip .bh{flex:0 0 auto;width:12px;height:12px;border-radius:50%;background:#000;box-shadow:0 0 0 1.5px #ff5a1f, 0 0 10px rgba(255,90,31,.7);}
+#levels .trip .exit{flex:0 0 auto;width:12px;height:12px;border-radius:50%;box-sizing:border-box;}
+#levels .trip .line{position:relative;flex:1;height:2px;background:repeating-linear-gradient(90deg, rgba(236,230,216,.28) 0 4px, transparent 4px 8px);}
+#levels .trip .line i{position:absolute;left:0;top:0;bottom:0;width:var(--p);}
+#levels .trip .me{position:absolute;top:50%;left:var(--p);width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #8fc4ff, #2f6fd8 60%, #123a7a);box-shadow:0 0 8px rgba(143,208,255,.9);}
+#levels .page.done .trip .line i{background:linear-gradient(90deg, rgba(255,211,107,.2), #ffd36b);box-shadow:0 0 8px rgba(255,211,107,.6);}
+#levels .page.done .trip .exit{border-style:solid;border-color:#ffd36b;background:rgba(255,211,107,.25);box-shadow:0 0 10px rgba(255,211,107,.6);}
+#levels .tripinfo{position:relative;display:flex;width:100%;max-width:300px;font-size:10.5px;letter-spacing:.06em;color:var(--muted);}
+#levels .tripinfo em{font-style:normal;color:#ffd36b;letter-spacing:.14em;text-transform:uppercase;}
+#levels .lvst{margin-top:14px;}
+#levels .card{position:relative;width:100%;max-width:320px;border-radius:16px;background:rgba(12,16,30,.55);border:1px solid rgba(160,205,255,.14);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);text-align:left;overflow:hidden;}
+#levels .crow{display:flex;align-items:flex-start;gap:12px;padding:11px 14px;font-size:12px;line-height:1.45;color:#e4ecff;}
+#levels .crow + .crow{border-top:1px solid rgba(160,205,255,.1);}
+#levels .crow svg{flex:0 0 auto;margin-top:1px;color:#bfe0ff;}
+#levels .crow small{display:block;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+#levels .crow.dato span{color:#cfdcf5;}
+#levels .nuevo, #levels .tries, #levels .fact, #levels .prog, #levels .meta{display:none !important;}
+#levels .page > *{flex-shrink:0;}
+#levels .name{font-size:clamp(28px,8.6vw,44px);}
+#levels .card{margin-top:14px;}
+/* ---- ajustes finales de la tarjeta (alineación y botón) ---- */
+#levels{--art:min(78vw,30vh,340px);}
+@media (max-height:680px){ #levels{--art:min(64vw,21vh,240px);} }
+#levels .page{padding:calc(max(3vh,18px) + 44px) 22px calc(max(3vh,18px) + 34px);}
+@media (max-height:820px){ #levels .name{font-size:clamp(26px,7.5vw,38px);} #levels .lvst{margin-top:10px;} #levels .card{margin-top:10px;} #levels .crow{padding:8px 14px;font-size:11.5px;} }
+/* botón Escapar */
+#levels .play{position:relative;overflow:hidden;isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(white, black);
+  width:100%;max-width:300px;padding:16px;border-radius:999px;border:0;background:#0b0d18;color:#fff4ea;
+  font:500 13px 'Unbounded',system-ui,sans-serif;letter-spacing:.22em;text-transform:uppercase;
+  box-shadow:0 0 28px rgba(255,90,31,.32), 0 10px 30px rgba(0,0,0,.5);}
+#levels .play::before, #levels .play::after{content:none !important;}
+#levels .play .ring{position:absolute;left:50%;top:50%;width:150%;aspect-ratio:1;transform:translate(-50%,-50%);z-index:0;border-radius:50%;
+  background:conic-gradient(from 0deg, rgba(255,90,31,0) 0deg, #ff5a1f 70deg, #ffe2b0 110deg, #ff5a1f 150deg, rgba(255,90,31,0) 220deg, rgba(255,90,31,.25) 300deg, rgba(255,90,31,0) 360deg);
+  animation:accrete2 4.5s linear infinite;}
+#levels .play .core{position:absolute;inset:1.6px;border-radius:999px;z-index:1;
+  background:radial-gradient(120% 160% at 50% 135%, rgba(255,110,40,.55), rgba(255,90,31,.08) 55%, rgba(9,11,22,.96) 80%), #0a0c17;}
+#levels .play .pin{position:relative;z-index:2;display:block;}
+#levels .page.done .play{color:#fff6dc;box-shadow:0 0 28px rgba(255,200,90,.32), 0 10px 30px rgba(0,0,0,.5);}
+#levels .page.done .play .ring{background:conic-gradient(from 0deg, rgba(255,211,107,0) 0deg, #ffd36b 70deg, #fff3cf 110deg, #ffd36b 150deg, rgba(255,211,107,0) 220deg, rgba(255,211,107,.25) 300deg, rgba(255,211,107,0) 360deg);}
+#levels .page.done .play .core{background:radial-gradient(120% 160% at 50% 135%, rgba(255,200,90,.45), rgba(255,200,90,.06) 55%, rgba(9,11,22,.96) 80%), #0a0c17;}
+#levels .play[disabled]{color:var(--muted);box-shadow:none;}
+#levels .play[disabled] .ring{animation:none;opacity:.25;}
+@media (prefers-reduced-motion:reduce){ #levels .play .ring{animation:none;} }
+/* flechas: dentro de la pantalla, sin la lunita suelta, y del mismo tamaño en todas las tarjetas */
+#levels .arrow::after{content:none !important;}
+#levels .arrow{width:46px;height:46px;transform:translateY(-50%);}
+#levels .arrow.l{left:max(18px, env(safe-area-inset-left));}
+#levels .arrow.r{right:max(18px, env(safe-area-inset-right));}
+#levels .back{left:18px;}
+#levels .back::before, #levels .arrow::before{inset:-5px;}
+#levels .arrow{top:50%;}
+/* dato real: transmisión recibida */
+#levels .sig{width:100%;max-width:310px;text-align:center;}
+#levels .sighead{display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Space Mono',ui-monospace,Menlo,monospace;font-size:9.5px;font-weight:400;letter-spacing:.24em;text-transform:uppercase;opacity:.85;}
+#levels .sighead span::before{content:'▸ ';}
+#levels .bars{display:inline-flex;align-items:flex-end;gap:2px;height:9px;}
+#levels .bars b{width:2px;background:currentColor;border-radius:1px;opacity:.25;}
+#levels .bars b:nth-child(1){height:3px}
+#levels .bars b:nth-child(2){height:6px}
+#levels .bars b:nth-child(3){height:9px}
+#levels .sig.rx .bars b{animation:sigbar 1.1s steps(1) infinite;}
+#levels .sig.rx .bars b:nth-child(2){animation-delay:.18s}
+#levels .sig.rx .bars b:nth-child(3){animation-delay:.36s}
+#levels .sig.done .bars b{animation:none;opacity:.9;}
+#levels .sig.rx .sighead{animation:sigflick .5s linear 1;}
+#levels .sigtxt{margin:9px 0 0;letter-spacing:-.01em;font-family:'Space Mono',ui-monospace,Menlo,monospace;line-height:1.7;}
+#levels .sigtxt .off{visibility:hidden;}
+#levels .caret{display:inline-block;width:.55em;height:1.05em;margin:0 1px -0.18em;animation:caret .9s steps(1) infinite;}
+#levels .sig.done .caret{animation:caret 1s steps(1) 3 forwards;opacity:0;}
+@media (max-height:680px){ #levels .sigtxt{font-size:11.5px;margin-top:6px;} }
+/* paleta: neutros + un color de marca (disco de acreción); la dificultad solo en su pastilla */
+#levels{--brand:#ffa155;--soft:rgba(226,232,246,.58);}
+#levels .page::before{display:none;}
+#levels .diff{border-width:1px;border-color:color-mix(in srgb, var(--lc) 60%, transparent);background:color-mix(in srgb, var(--lc) 10%, transparent);}
+#levels .trip .exit{border-color:rgba(236,230,216,.45);}
+#levels .trip .line i{background:linear-gradient(90deg, rgba(236,230,216,.08), rgba(236,230,216,.75));box-shadow:none;}
+#levels .sighead{color:var(--brand);}
+#levels .caret{background:var(--brand);box-shadow:0 0 8px var(--brand);}
+#levels .sigtxt{text-shadow:none;}
+#levels .trip .tstar{position:absolute;top:50%;width:13px;height:13px;margin:-6.5px 0 0 -6.5px;z-index:1;}
+#levels .trip .tstar svg{display:block;width:100%;height:100%;overflow:visible;}
+#levels .trip .tstar path{fill:#070912;stroke:rgba(236,230,216,.5);stroke-width:1.8;stroke-linejoin:round;}
+#levels .trip .tstar.on path{fill:#ffd36b;stroke:#ffe7a8;}
+#levels .trip .tstar.on{filter:drop-shadow(0 0 4px rgba(255,211,107,.85));}
+#levels .page.perfect .trip .tstar.on{animation:tstarGlow 2.4s ease-in-out infinite;}
+#levels .trip .me{z-index:2;}
+/* estrellas: pastilla junto a la dificultad */
+#levels .tags{position:relative;display:flex;align-items:center;justify-content:center;}
+#levels .tags .diff{margin-top:0;}
+#levels .stb{display:inline-flex;align-items:center;border-radius:999px;color:rgba(236,230,216,.65);font-weight:500;line-height:1;}
+#levels .stb svg{width:11px;height:11px;display:block;}
+#levels .stb path{fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round;}
+#levels .stb.on{border-color:rgba(255,211,107,.55);color:#ffd36b;}
+#levels .stb.on path{fill:#ffd36b;stroke:#ffe7a8;}
+#levels .dist{color:rgba(226,232,246,.5);}
+#levels .tripinfo{justify-content:center;gap:6px;}
+#levels .tripinfo span:empty{display:none;}
+#levels .tripinfo span:not(:empty) + span::before{content:'·';margin-right:6px;opacity:.6;}
+#levels .trip .exit{border:1.5px solid rgba(236,230,216,.35);}
+@media (max-height:820px){ #levels{--art:min(70vw,21vh,260px);} #levels .trip{margin-top:34px;} #levels .sig{margin-top:34px;} }
+@media (max-height:680px){ #levels .trip{margin-top:16px;} #levels .sig{margin-top:14px;} }
+/* dificultad = gravedad (anillos) · estrellas como texto, sin cajas */
+#levels .tags{gap:14px;}
+#levels .grav{display:inline-flex;align-items:center;gap:9px;color:var(--lc);font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;line-height:1;}
+#levels .grav svg{width:26px;height:26px;display:block;filter:drop-shadow(0 0 5px color-mix(in srgb, var(--lc) 35%, transparent));}
+#levels .tags .tsep{width:1px;height:16px;background:rgba(236,230,216,.18);}
+#levels .stb{border:0;background:none;padding:0;gap:6px;font-size:11px;letter-spacing:.12em;}
+#levels .stb.on{background:none;}
+#levels .page.perfect .stb{box-shadow:none;text-shadow:0 0 10px rgba(255,211,107,.6);}
+/* ritmo: tres bloques (galaxia · tu viaje · señal y botón), mismo espacio entre bloques, una sola columna */
+#levels{--col:300px;--g:30px;}
+#levels .tripinfo{min-height:0;}
+#levels .trip, #levels .tripinfo, #levels .sig, #levels .play{max-width:var(--col);}
+#levels .tags{margin-top:16px;}
+#levels .dist{margin-top:10px;}
+#levels .trip{margin-top:var(--g);}
+#levels .tripinfo{margin-top:10px;}
+#levels .sig{margin-top:var(--g);}
+#levels .play{margin-top:24px;}
+#levels .sigtxt{color:rgba(226,232,246,.62);font-size:11px;}
+@media (max-height:820px){ #levels{--g:26px;} #levels .tags{margin-top:14px;} #levels .dist{margin-top:9px;} #levels .tripinfo{margin-top:9px;} #levels .play{margin-top:20px;} }
+@media (max-height:680px){ #levels{--g:16px;} #levels .tags{margin-top:10px;} #levels .dist{margin-top:7px;} #levels .tripinfo{margin-top:7px;} #levels .play{margin-top:12px;} }
+/* la imagen ocupa el cielo libre entre "Nivel X de 8" y el nombre, sin crecer de más */
+#levels .art{flex:1 0 auto;width:100%;height:auto;min-height:var(--art);max-height:min(40vh,400px);margin:0;}
+#levels .art svg{position:absolute;left:50%;top:50%;width:var(--art);height:var(--art);transform:translate(-50%,-50%);}
+@media (max-height:680px){ #levels .art{max-height:var(--art);} }
+/* flechas: arco de gravedad (sin caja), fino para no competir con la galaxia ni con ESCAPAR */
+#levels .arrow{width:54px;height:54px;background:none !important;border:0 !important;box-shadow:none !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;color:var(--fg);display:grid;place-items:center;}
+#levels .arrow::before, #levels .arrow::after{content:none !important;}
+#levels .arrow svg{filter:none;}
+#levels .arrow > svg:not(.arc){position:relative;filter:drop-shadow(0 0 6px rgba(0,0,0,.6));transition:transform .25s ease;}
+@media (hover:hover){ #levels .arrow:hover .arc .base{stroke:rgba(236,230,216,.85);} #levels .arrow.r:hover > svg:not(.arc){transform:translateX(2px);} #levels .arrow.l:hover > svg:not(.arc){transform:translateX(-2px);} }
+/* botón de volver: el mismo arco de gravedad */
+#levels .back{width:48px;height:48px;background:none !important;border:0 !important;box-shadow:none !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;color:var(--fg);display:grid;place-items:center;}
+#levels .back::before, #levels .back::after{content:none !important;}
+#levels .back svg{filter:none;}
+#levels .back > svg:not(.arc){position:relative;filter:drop-shadow(0 0 6px rgba(0,0,0,.6));transition:transform .25s ease;}
+#levels .back:active{transform:scale(.92);}
+@media (hover:hover){ #levels .back:hover .arc .base{stroke:rgba(236,230,216,.85);} #levels .back:hover > svg:not(.arc){transform:translateX(-2px);} }
+/* barra superior: volver · título · estrellas en una misma línea; sin "Nivel X de 8" (los puntitos ya lo dicen) */
+#levels{--hdr:max(3vh,18px);}
+#levels .back{top:var(--hdr);}
+#levels .top{top:var(--hdr);height:48px;line-height:48px;}
+#levels .num{display:none;}
+@keyframes navorb{to{transform:rotate(360deg)}}
+@keyframes navmoon{to{transform:rotate(360deg)}}
+@keyframes accrete{to{transform:rotate(360deg)}}
+@keyframes accrete2{from{transform:translate(-50%,-50%) rotate(0deg)} to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes sigbar{0%{opacity:.25}50%{opacity:.95}}
+@keyframes sigflick{0%{opacity:0}20%{opacity:.9}28%{opacity:.2}40%{opacity:.85}52%{opacity:.4}64%,100%{opacity:.85}}
+@keyframes caret{0%{opacity:1}50%{opacity:0}}
+@keyframes tstarGlow{50%{filter:drop-shadow(0 0 8px rgba(255,211,107,1));}}
+/* pantalla de planetas, escaneo y poderes */
 #planets{position:absolute;inset:0;z-index:6;background:transparent;transition:opacity .3s;pointer-events:none;text-align:center;}
 #planets.off{opacity:0;}
 #planets.off *{pointer-events:none !important;}
@@ -70,7 +359,6 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 #planets .ptop{position:absolute;left:0;right:0;top:max(3vh,18px);font-size:13px;}
 #planets .pcount{position:absolute;left:0;right:0;top:calc(max(3vh,18px) + 36px);font-size:11px;color:var(--muted);letter-spacing:.08em;}
 #planets .arrow{position:absolute;top:38%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;border:1px solid rgba(236,230,216,.25);background:rgba(13,18,32,.5);color:var(--fg);font-size:26px;line-height:1;display:flex;align-items:center;justify-content:center;}
-
 #planets .pinfo{position:absolute;left:0;right:0;bottom:max(6vh,36px);padding:0 28px;display:flex;flex-direction:column;align-items:center;}
 #planets .pname{font-size:clamp(28px,8vw,40px);font-weight:500;color:#fff;line-height:1.1;}
 #planets .pchip{margin-top:10px;padding:4px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.35);font-size:11px;letter-spacing:.06em;color:#fff;}
@@ -106,516 +394,48 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 #planets .spsoon{margin-top:6px;font-size:10.5px;line-height:1.4;color:var(--muted);}
 #planets .sclose{margin-top:14px;padding:9px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:12px;letter-spacing:.08em;}
 #planets button:focus-visible{outline:2px solid var(--fg);outline-offset:3px;}
-
-#home{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
-  padding-bottom:max(7vh,44px);transition:opacity .9s ease;pointer-events:none;
-  background:linear-gradient(to bottom, rgba(11,15,28,.15) 0%, rgba(11,15,28,0) 35%, rgba(11,15,28,.55) 70%, rgba(11,15,28,.85) 100%);}
-#home.off{opacity:0;}
-#home > *{transition:transform .9s cubic-bezier(.2,.7,.2,1);}
-#home.off > *{transform:translateY(14px);}
-@media (prefers-reduced-motion:reduce){#home.off > *{transform:none;}}
-#home.off *{pointer-events:none !important;}
-#home button{pointer-events:auto;font-family:'Unbounded',system-ui,sans-serif;cursor:pointer;}
-#home .bigplay{width:104px;height:104px;border-radius:50%;border:0;background:var(--sun);color:#fff;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 0 0 8px rgba(255,90,31,.14),0 0 40px rgba(255,90,31,.35);transition:transform .15s;}
-#home .bigplay:active{transform:scale(.94);}
-#home .bigplay svg{width:40px;height:40px;margin-left:6px;}
-#home .playlbl{margin-top:14px;font-size:14px;font-weight:500;letter-spacing:.12em;color:var(--fg);}
-#home .row{display:flex;gap:12px;margin-top:30px;}
-#home .sm{min-width:92px;padding:11px 14px;border-radius:999px;border:1px solid rgba(236,230,216,.22);background:rgba(13,18,32,.6);color:var(--fg);font-size:12px;font-weight:500;}
-#home .sheet{position:absolute;left:50%;bottom:max(7vh,44px);transform:translateX(-50%);width:min(320px,86vw);background:#151a2b;border:1px solid rgba(236,230,216,.14);
-  border-radius:22px;padding:20px;box-sizing:border-box;display:none;flex-direction:column;gap:12px;pointer-events:auto;}
-#home .sheet.on{display:flex;}
-#home .sheet h3{margin:0 0 4px;font-size:15px;font-weight:500;color:var(--fg);text-align:center;}
-#home .sheet .opt{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:14px;border:1px solid rgba(236,230,216,.14);background:transparent;color:var(--fg);font-size:13px;font-weight:400;}
-#home .sheet .opt b{font-weight:500;color:var(--muted);}
-#home .sheet .danger{color:var(--fg);}
-#home button:focus-visible{outline:2px solid var(--fg);outline-offset:3px;}
-#levels .back{position:absolute;z-index:3;width:40px;height:40px;border-radius:50%;border:1px solid rgba(236,230,216,.22);
-  background:rgba(13,18,32,.6);color:var(--fg);font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-#levels{position:absolute;inset:0;z-index:5;background:#05060c;transition:opacity .3s;touch-action:pan-x pan-y;overflow:hidden;}
-#levels.off{opacity:0;pointer-events:none;}
-#levels .lvbg{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
-#levels .lvshade{position:absolute;inset:0;z-index:0;pointer-events:none;}
-#levels.live{background:transparent;}
-#levels.live .art svg{opacity:0;}
-#levels .lvbg{display:none;}
-#levels.live .page::before{opacity:.05;}
-#levels .track{position:absolute;inset:0;z-index:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;scroll-behavior:smooth;}
-#levels .track::-webkit-scrollbar{display:none;}
-#levels .page{flex:0 0 100%;height:100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:safe center;overflow-y:auto;scrollbar-width:none;
-  box-sizing:border-box;text-align:center;position:relative;}
-#levels .page::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 42% at 50% 38%, var(--lc) 0%, transparent 70%);opacity:.14;pointer-events:none;}
-#levels .num{position:relative;font-size:11px;color:var(--muted);letter-spacing:.14em;}
-#levels .art{position:relative;}
-#levels .art svg{display:block;}
-#levels .name{position:relative;font-weight:500;color:var(--fg);line-height:1.1;}
-#levels .badge{position:relative;display:inline-block;margin-top:12px;padding:5px 14px;border-radius:999px;border:1.5px solid currentColor;font-size:12px;font-weight:500;letter-spacing:.04em;}
-#levels .fact{position:relative;max-width:30ch;line-height:1.6;color:var(--fg);font-weight:400;}
-#levels .stats{position:relative;margin-top:20px;width:100%;max-width:300px;}
-#levels .row{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);}
-#levels .row b{color:var(--fg);font-weight:500;}
-#levels .bar{height:6px;border-radius:3px;background:#22283a;margin-top:7px;overflow:hidden;}
-#levels .bar i{display:block;height:100%;background:var(--lc);}
-#levels .nuevo{position:relative;}
-#levels .play{cursor:pointer;}
-#levels .play[disabled]{background:#22283a;cursor:default;}
-#levels .top{position:absolute;left:0;right:0;text-align:center;font-size:13px;color:var(--muted);letter-spacing:.06em;pointer-events:none;z-index:2;}
-#levels .arrow{position:absolute;z-index:2;border-radius:50%;border:1px solid rgba(236,230,216,.22);
-  background:rgba(13,18,32,.6);color:var(--fg);font-size:24px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .2s;}
-
-#levels .arrow[disabled]{opacity:0;pointer-events:none;}
-#levels .foot{position:absolute;left:0;right:0;bottom:max(3vh,18px);display:flex;flex-direction:column;align-items:center;gap:10px;z-index:2;}
-#levels .dots{display:flex;gap:8px;}
-#levels .dots i{width:8px;height:8px;border-radius:50%;background:#3a4055;transition:background .2s,transform .2s;}
-#levels .dots i.on{background:var(--fg);transform:scale(1.15);}
-#levels .lv-foot{font:400 12px 'Unbounded',system-ui,sans-serif;color:var(--muted);background:none;border:0;text-decoration:underline;cursor:pointer;}
-#levels button:focus-visible{outline:2px solid var(--fg);outline-offset:3px;}
-.chip.act{pointer-events:auto;margin-top:18px;}
-#panel{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;pointer-events:none;padding:0 24px;transition:opacity .25s;}
-#panel.hide{opacity:0;}
-#panel.top{justify-content:flex-start;padding-top:max(9vh,56px);}
-.title{font-weight:900;font-size:clamp(52px,16vw,108px);letter-spacing:-.04em;line-height:.9;
-  color:var(--fg);}
-.big{font-weight:900;font-size:clamp(72px,24vw,140px);line-height:.9;letter-spacing:-.04em;
-}
-.sub{margin-top:18px;font-weight:300;font-size:15px;line-height:1.6;color:var(--muted);max-width:30ch;}
-.msg{margin-top:14px;font-weight:500;font-size:16px;color:var(--fg);}
-.msg.rec{color:var(--sun);}
-.cta{margin-top:34px;font-weight:500;font-size:14px;color:var(--fg);animation:blink 1.1s ease-in-out infinite;}
-@keyframes blink{50%{opacity:.25}}
-@media (prefers-reduced-motion: reduce){ .cta{animation:none} }
-
-/* botones de navegación: esferas de cristal con una órbita y una pequeña luna */
-#levels .back, #levels .arrow, #planets .back, #planets .arrow{
+#planets .back, #planets .arrow{
   width:48px;height:48px;border-radius:50%;padding:0;color:#eaf3ff;
   background:radial-gradient(circle at 34% 28%, rgba(255,255,255,.22), rgba(143,208,255,.08) 38%, rgba(8,12,24,.72) 72%);
   border:1px solid rgba(160,205,255,.38);
   box-shadow:0 0 18px rgba(120,180,255,.16), inset 0 0 14px rgba(143,208,255,.14);
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   display:flex;align-items:center;justify-content:center;transition:transform .25s ease, box-shadow .25s ease, opacity .2s;}
-#levels .back::before, #levels .arrow::before, #planets .back::before, #planets .arrow::before{
+#planets .back::before, #planets .arrow::before{
   content:"";position:absolute;border-radius:50%;border:1px dashed rgba(160,205,255,.32);animation:navorb 14s linear infinite;pointer-events:none;}
-#levels .arrow::after, #planets .arrow::after{
+#planets .arrow::after{
   position:absolute;top:-8px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:#cfe6ff;box-shadow:0 0 6px #8fd0ff;
   transform-origin:2.5px 32px;animation:navmoon 6s linear infinite;pointer-events:none;}
-#levels .arrow.l::after, #planets .arrow.l::after{animation-direction:reverse;}
-#levels .back svg, #levels .arrow svg, #planets .back svg, #planets .arrow svg{filter:drop-shadow(0 0 4px rgba(143,208,255,.6));}
-@keyframes navorb{to{transform:rotate(360deg)}}
-@keyframes navmoon{to{transform:rotate(360deg)}}
-@media (hover:hover){#levels .back:hover, #levels .arrow:hover, #planets .back:hover, #planets .arrow:hover{box-shadow:0 0 26px rgba(143,208,255,.42), inset 0 0 18px rgba(143,208,255,.25);border-color:rgba(190,225,255,.7);}}
-#levels .arrow:active, #planets .arrow:active, #levels .back:active, #planets .back:active{transform:translateY(-50%) scale(.92);}
-@media (prefers-reduced-motion:reduce){#levels .back::before, #levels .arrow::before, #planets .back::before, #planets .arrow::before, #levels .arrow::after, #planets .arrow::after{animation:none;}}
-
-#levels .page{justify-content:flex-end;}
-#levels .num{margin-bottom:auto;}
-#levels .name{letter-spacing:.01em;text-shadow:0 2px 24px rgba(0,0,0,.6);}
-#levels .meta{position:relative;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:10px;font-size:12px;letter-spacing:.06em;max-width:340px;}
-#levels .meta .diff{white-space:nowrap;}
-#levels .meta .dist{color:#9fd0ff;}
-#levels .dot{width:3px;height:3px;border-radius:50%;background:rgba(236,230,216,.4);display:inline-block;}
-#levels .prog{position:relative;display:flex;align-items:center;gap:12px;width:100%;max-width:300px;margin-top:18px;}
-#levels .pbar{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;}
-#levels .pbar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg, var(--lc), #fff7);box-shadow:0 0 10px var(--lc);}
-#levels .prog b{font-size:12px;font-weight:500;color:var(--fg);min-width:44px;text-align:right;white-space:nowrap;}
-#levels .crown{color:#ffd36b;}
-#levels .lvst{position:relative;display:flex;gap:6px;}
-#levels .page.perfect .lvst svg{filter:drop-shadow(0 0 6px rgba(255,211,107,.8));}
-#levels .nuevo{display:flex;align-items:center;gap:10px;margin-top:16px;padding:8px 14px 8px 10px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#dfe8ff;font-size:12px;text-align:left;}
-#levels .nuevo svg{flex:0 0 auto;color:#bfe0ff;}
-#levels .nuevo small{display:block;font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:2px;}
-#levels .play{display:flex;align-items:center;justify-content:center;gap:10px;font-size:16px;
-  }
-#levels .page.done .play{background:linear-gradient(180deg, #ffd36b, #f0a43a);}
-#levels .tries{position:relative;display:flex;align-items:center;gap:10px;margin-top:10px;font-size:11px;color:var(--muted);}
-#levels .info{font:500 11px 'Unbounded',system-ui,sans-serif;color:#9fd0ff;background:none;border:0;padding:4px 2px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
-#levels .fact{max-height:0;overflow:hidden;opacity:0;margin:0;transition:max-height .35s ease, opacity .35s ease, margin .35s ease;font-size:13px;}
-#levels .page.showfact .fact{max-height:160px;opacity:.85;margin-top:12px;}
-#levels .lvshade{background:linear-gradient(to bottom, rgba(5,6,12,.35) 0%, rgba(5,6,12,0) 16%, rgba(5,6,12,0) 46%, rgba(5,6,12,.6) 64%, rgba(5,6,12,.92) 100%);}
-
-/* tarjeta: arreglos y botón con la temática */
-#levels .page{justify-content:safe flex-end;}
-#levels .meta{gap:10px;}
-#levels .meta .diff{display:inline-flex;align-items:center;padding:4px 12px;border-radius:999px;border:1.5px solid var(--lc);color:var(--lc);font-size:11px;font-weight:500;line-height:1;letter-spacing:.06em;}
-#levels .meta .dist{display:inline-flex;align-items:center;line-height:1;font-size:11px;}
-#levels .play::before{content:"";position:absolute;inset:-120%;z-index:-2;
-  background:conic-gradient(from 0deg, rgba(255,90,31,0) 0deg, #ff5a1f 70deg, #ffe2b0 110deg, #ff5a1f 150deg, rgba(255,90,31,0) 220deg, rgba(255,90,31,.25) 300deg, rgba(255,90,31,0) 360deg);
-  animation:accrete 4.5s linear infinite;}
-#levels .play::after{content:"";position:absolute;inset:1.6px;border-radius:999px;z-index:-1;
-  background:radial-gradient(120% 160% at 50% 135%, rgba(255,110,40,.55), rgba(255,90,31,.08) 55%, rgba(9,11,22,.96) 80%), #0a0c17;}
-#levels .play .pin{align-items:center;justify-content:center;gap:12px;}
-#levels .page.done .play::before{background:conic-gradient(from 0deg, rgba(255,211,107,0) 0deg, #ffd36b 70deg, #fff3cf 110deg, #ffd36b 150deg, rgba(255,211,107,0) 220deg, rgba(255,211,107,.25) 300deg, rgba(255,211,107,0) 360deg);}
-#levels .page.done .play::after{background:radial-gradient(120% 160% at 50% 135%, rgba(255,200,90,.45), rgba(255,200,90,.06) 55%, rgba(9,11,22,.96) 80%), #0a0c17;}
-#levels .play[disabled]::before{animation:none;opacity:.25;}
-@media (hover:hover){#levels .play:not([disabled]):hover{box-shadow:0 0 40px rgba(255,90,31,.5), 0 10px 30px rgba(0,0,0,.5);}}
-#levels .play:active{transform:scale(.97);}
-@keyframes accrete{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){#levels .play::before{animation:none;}}
-
-/* tarjeta v3: datos apilados, progreso como viaje, panel con lo nuevo y un dato real */
-#levels .diff{position:relative;margin-top:12px;display:inline-flex;align-items:center;padding:5px 14px;border-radius:999px;border:1.5px solid var(--lc);color:var(--lc);font-size:11px;font-weight:500;line-height:1;letter-spacing:.08em;}
-#levels .dist{position:relative;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;}
-#levels .trip{position:relative;display:flex;align-items:center;gap:8px;width:100%;max-width:300px;}
-#levels .trip .bh{flex:0 0 auto;width:12px;height:12px;border-radius:50%;background:#000;box-shadow:0 0 0 1.5px #ff5a1f, 0 0 10px rgba(255,90,31,.7);}
-#levels .trip .exit{flex:0 0 auto;width:12px;height:12px;border-radius:50%;box-sizing:border-box;}
-#levels .trip .line{position:relative;flex:1;height:2px;background:repeating-linear-gradient(90deg, rgba(236,230,216,.28) 0 4px, transparent 4px 8px);}
-#levels .trip .line i{position:absolute;left:0;top:0;bottom:0;width:var(--p);}
-#levels .trip .me{position:absolute;top:50%;left:var(--p);width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #8fc4ff, #2f6fd8 60%, #123a7a);box-shadow:0 0 8px rgba(143,208,255,.9);}
-#levels .page.done .trip .line i{background:linear-gradient(90deg, rgba(255,211,107,.2), #ffd36b);box-shadow:0 0 8px rgba(255,211,107,.6);}
-#levels .page.done .trip .exit{border-style:solid;border-color:#ffd36b;background:rgba(255,211,107,.25);box-shadow:0 0 10px rgba(255,211,107,.6);}
-#levels .tripinfo{position:relative;display:flex;width:100%;max-width:300px;font-size:10.5px;letter-spacing:.06em;color:var(--muted);}
-#levels .tripinfo em{font-style:normal;color:#ffd36b;letter-spacing:.14em;text-transform:uppercase;}
-#levels .lvst{margin-top:14px;}
-#levels .card{position:relative;width:100%;max-width:320px;border-radius:16px;background:rgba(12,16,30,.55);border:1px solid rgba(160,205,255,.14);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);text-align:left;overflow:hidden;}
-#levels .crow{display:flex;align-items:flex-start;gap:12px;padding:11px 14px;font-size:12px;line-height:1.45;color:#e4ecff;}
-#levels .crow + .crow{border-top:1px solid rgba(160,205,255,.1);}
-#levels .crow svg{flex:0 0 auto;margin-top:1px;color:#bfe0ff;}
-#levels .crow small{display:block;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
-#levels .crow.dato span{color:#cfdcf5;}
-#levels .nuevo, #levels .tries, #levels .fact, #levels .prog, #levels .meta{display:none !important;}
-
-#levels .page > *{flex-shrink:0;}
-#levels .name{font-size:clamp(28px,8.6vw,44px);}
-#levels .card{margin-top:14px;} 
-
-/* ---- ajustes finales de la tarjeta (alineación y botón) ---- */
-#levels{--art:min(78vw,30vh,340px);}
-@media (max-height:680px){#levels{--art:min(64vw,21vh,240px);}}
-#levels .page{padding:calc(max(3vh,18px) + 44px) 22px calc(max(3vh,18px) + 34px);}
-@media (max-height:820px){
-  #levels .name{font-size:clamp(26px,7.5vw,38px);}
-  #levels .lvst{margin-top:10px;} #levels .card{margin-top:10px;} 
-  #levels .crow{padding:8px 14px;font-size:11.5px;}
-}
-/* botón Escapar */
-#levels .play{position:relative;overflow:hidden;isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(white, black);
-  width:100%;max-width:300px;padding:16px;border-radius:999px;border:0;background:#0b0d18;color:#fff4ea;
-  font:500 13px 'Unbounded',system-ui,sans-serif;letter-spacing:.22em;text-transform:uppercase;
-  box-shadow:0 0 28px rgba(255,90,31,.32), 0 10px 30px rgba(0,0,0,.5);}
-#levels .play::before, #levels .play::after{content:none !important;}
-#levels .play .ring{position:absolute;left:50%;top:50%;width:150%;aspect-ratio:1;transform:translate(-50%,-50%);z-index:0;border-radius:50%;
-  background:conic-gradient(from 0deg, rgba(255,90,31,0) 0deg, #ff5a1f 70deg, #ffe2b0 110deg, #ff5a1f 150deg, rgba(255,90,31,0) 220deg, rgba(255,90,31,.25) 300deg, rgba(255,90,31,0) 360deg);
-  animation:accrete2 4.5s linear infinite;}
-#levels .play .core{position:absolute;inset:1.6px;border-radius:999px;z-index:1;
-  background:radial-gradient(120% 160% at 50% 135%, rgba(255,110,40,.55), rgba(255,90,31,.08) 55%, rgba(9,11,22,.96) 80%), #0a0c17;}
-#levels .play .pin{position:relative;z-index:2;display:block;}
-#levels .page.done .play{color:#fff6dc;box-shadow:0 0 28px rgba(255,200,90,.32), 0 10px 30px rgba(0,0,0,.5);}
-#levels .page.done .play .ring{background:conic-gradient(from 0deg, rgba(255,211,107,0) 0deg, #ffd36b 70deg, #fff3cf 110deg, #ffd36b 150deg, rgba(255,211,107,0) 220deg, rgba(255,211,107,.25) 300deg, rgba(255,211,107,0) 360deg);}
-#levels .page.done .play .core{background:radial-gradient(120% 160% at 50% 135%, rgba(255,200,90,.45), rgba(255,200,90,.06) 55%, rgba(9,11,22,.96) 80%), #0a0c17;}
-#levels .play[disabled]{color:var(--muted);box-shadow:none;} #levels .play[disabled] .ring{animation:none;opacity:.25;}
-@keyframes accrete2{from{transform:translate(-50%,-50%) rotate(0deg)} to{transform:translate(-50%,-50%) rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){#levels .play .ring{animation:none;}}
-
-/* flechas: dentro de la pantalla, sin la lunita suelta, y del mismo tamaño en todas las tarjetas */
-#levels .arrow::after, #planets .arrow::after{content:none !important;}
-#levels .arrow{width:46px;height:46px;transform:translateY(-50%);}
-#levels .arrow.l{left:max(18px, env(safe-area-inset-left));} #levels .arrow.r{right:max(18px, env(safe-area-inset-right));}
-#planets .arrow.l{left:18px;} #planets .arrow.r{right:18px;}
-#levels .back{left:18px;} #planets .back{left:18px;}
-#levels .back::before, #levels .arrow::before, #planets .back::before, #planets .arrow::before{inset:-5px;}
-
-#levels .arrow{top:50%;}
-/* dato real: transmisión recibida */
-#levels .sig{width:100%;max-width:310px;text-align:center;}
-#levels .sighead{display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Space Mono',ui-monospace,Menlo,monospace;font-size:9.5px;font-weight:400;letter-spacing:.24em;text-transform:uppercase;opacity:.85;}
-#levels .sighead span::before{content:'▸ ';}
-#levels .bars{display:inline-flex;align-items:flex-end;gap:2px;height:9px;}
-#levels .bars b{width:2px;background:currentColor;border-radius:1px;opacity:.25;}
-#levels .bars b:nth-child(1){height:3px} #levels .bars b:nth-child(2){height:6px} #levels .bars b:nth-child(3){height:9px}
-#levels .sig.rx .bars b{animation:sigbar 1.1s steps(1) infinite;}
-#levels .sig.rx .bars b:nth-child(2){animation-delay:.18s} #levels .sig.rx .bars b:nth-child(3){animation-delay:.36s}
-#levels .sig.done .bars b{animation:none;opacity:.9;}
-@keyframes sigbar{0%{opacity:.25}50%{opacity:.95}}
-#levels .sig.rx .sighead{animation:sigflick .5s linear 1;}
-@keyframes sigflick{0%{opacity:0}20%{opacity:.9}28%{opacity:.2}40%{opacity:.85}52%{opacity:.4}64%,100%{opacity:.85}}
-#levels .sigtxt{margin:9px 0 0;letter-spacing:-.01em;font-family:'Space Mono',ui-monospace,Menlo,monospace;line-height:1.7;}
-#levels .sigtxt .off{visibility:hidden;}
-#levels .caret{display:inline-block;width:.55em;height:1.05em;margin:0 1px -0.18em;animation:caret .9s steps(1) infinite;}
-#levels .sig.done .caret{animation:caret 1s steps(1) 3 forwards;opacity:0;}
-@keyframes caret{0%{opacity:1}50%{opacity:0}}
-@media (max-height:680px){ #levels .sigtxt{font-size:11.5px;margin-top:6px;} }
-/* paleta: neutros + un color de marca (disco de acreción); la dificultad solo en su pastilla */
-#levels{--brand:#ffa155;--soft:rgba(226,232,246,.58);}
-#levels .page::before{display:none;}
-#levels .diff{border-width:1px;border-color:color-mix(in srgb, var(--lc) 60%, transparent);background:color-mix(in srgb, var(--lc) 10%, transparent);}
-#levels .trip .exit{border-color:rgba(236,230,216,.45);}
-#levels .trip .line i{background:linear-gradient(90deg, rgba(236,230,216,.08), rgba(236,230,216,.75));box-shadow:none;}
-#levels .sighead{color:var(--brand);}
-#levels .caret{background:var(--brand);box-shadow:0 0 8px var(--brand);}
-#levels .sigtxt{text-shadow:none;}
-#levels .trip .tstar{position:absolute;top:50%;width:13px;height:13px;margin:-6.5px 0 0 -6.5px;z-index:1;}
-#levels .trip .tstar svg{display:block;width:100%;height:100%;overflow:visible;}
-#levels .trip .tstar path{fill:#070912;stroke:rgba(236,230,216,.5);stroke-width:1.8;stroke-linejoin:round;}
-#levels .trip .tstar.on path{fill:#ffd36b;stroke:#ffe7a8;}
-#levels .trip .tstar.on{filter:drop-shadow(0 0 4px rgba(255,211,107,.85));}
-#levels .page.perfect .trip .tstar.on{animation:tstarGlow 2.4s ease-in-out infinite;}
-@keyframes tstarGlow{50%{filter:drop-shadow(0 0 8px rgba(255,211,107,1));}}
-#levels .trip .me{z-index:2;}
-/* estrellas: pastilla junto a la dificultad */
-#levels .tags{position:relative;display:flex;align-items:center;justify-content:center;}
-#levels .tags .diff{margin-top:0;}
-#levels .stb{display:inline-flex;align-items:center;border-radius:999px;color:rgba(236,230,216,.65);font-weight:500;line-height:1;}
-#levels .stb svg{width:11px;height:11px;display:block;}
-#levels .stb path{fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round;}
-#levels .stb.on{border-color:rgba(255,211,107,.55);color:#ffd36b;}
-#levels .stb.on path{fill:#ffd36b;stroke:#ffe7a8;}
-#levels .dist{color:rgba(226,232,246,.5);}
-#levels .tripinfo{justify-content:center;gap:6px;}
-#levels .tripinfo span:empty{display:none;}
-#levels .tripinfo span:not(:empty) + span::before{content:'·';margin-right:6px;opacity:.6;}
-#levels .trip .exit{border:1.5px solid rgba(236,230,216,.35);}
-
-@media (max-height:820px){ #levels{--art:min(70vw,21vh,260px);} #levels .trip{margin-top:34px;} #levels .sig{margin-top:34px;} }
-@media (max-height:680px){ #levels .trip{margin-top:16px;} #levels .sig{margin-top:14px;} }
-/* dificultad = gravedad (anillos) · estrellas como texto, sin cajas */
-#levels .tags{gap:14px;}
-#levels .grav{display:inline-flex;align-items:center;gap:9px;color:var(--lc);font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;line-height:1;}
-#levels .grav svg{width:26px;height:26px;display:block;filter:drop-shadow(0 0 5px color-mix(in srgb, var(--lc) 35%, transparent));}
-#levels .tags .tsep{width:1px;height:16px;background:rgba(236,230,216,.18);}
-#levels .stb{border:0;background:none;padding:0;gap:6px;font-size:11px;letter-spacing:.12em;}
-#levels .stb.on{background:none;}
-#levels .page.perfect .stb{box-shadow:none;text-shadow:0 0 10px rgba(255,211,107,.6);}
-/* ritmo: tres bloques (galaxia · tu viaje · señal y botón), mismo espacio entre bloques, una sola columna */
-#levels{--col:300px;--g:30px;}
-#levels .tripinfo{min-height:0;}
-#levels .trip, #levels .tripinfo, #levels .sig, #levels .play{max-width:var(--col);}
-#levels .tags{margin-top:16px;} #levels .dist{margin-top:10px;}
-#levels .trip{margin-top:var(--g);} #levels .tripinfo{margin-top:10px;}
-#levels .sig{margin-top:var(--g);} #levels .play{margin-top:24px;}
-#levels .sigtxt{color:rgba(226,232,246,.62);font-size:11px;}
-@media (max-height:820px){ #levels{--g:26px;} #levels .tags{margin-top:14px;} #levels .dist{margin-top:9px;} #levels .tripinfo{margin-top:9px;} #levels .play{margin-top:20px;} }
-@media (max-height:680px){ #levels{--g:16px;} #levels .tags{margin-top:10px;} #levels .dist{margin-top:7px;} #levels .tripinfo{margin-top:7px;} #levels .play{margin-top:12px;} }
-/* la imagen ocupa el cielo libre entre "Nivel X de 8" y el nombre, sin crecer de más */
-#levels .art{flex:1 0 auto;width:100%;height:auto;min-height:var(--art);max-height:min(40vh,400px);margin:0;}
-#levels .art svg{position:absolute;left:50%;top:50%;width:var(--art);height:var(--art);transform:translate(-50%,-50%);}
-@media (max-height:680px){ #levels .art{max-height:var(--art);} }
-/* flechas: arco de gravedad (sin caja), fino para no competir con la galaxia ni con ESCAPAR */
-#levels .arrow, #planets .arrow{width:54px;height:54px;background:none !important;border:0 !important;box-shadow:none !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;color:var(--fg);display:grid;place-items:center;}
-#levels .arrow::before, #planets .arrow::before, #levels .arrow::after, #planets .arrow::after{content:none !important;}
-#levels .arrow svg, #planets .arrow svg{filter:none;}
-#levels .arrow > svg:not(.arc), #planets .arrow > svg:not(.arc){position:relative;filter:drop-shadow(0 0 6px rgba(0,0,0,.6));transition:transform .25s ease;}
-.arrow svg.arc{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;}
-.arrow .arc path{fill:none;stroke-linecap:round;}
-.arrow .arc .base{stroke:rgba(236,230,216,.5);stroke-width:1.5;transition:stroke .25s;}
-.arrow .arc .hot{stroke:#ffa155;stroke-width:1.9;transform-origin:26px 26px;filter:drop-shadow(0 0 3px rgba(255,150,70,.75));animation:arcBreath 3.2s ease-in-out infinite;}
-@keyframes arcBreath{50%{opacity:.55;}}
-@media (hover:hover){ #levels .arrow:hover .arc .base, #planets .arrow:hover .arc .base{stroke:rgba(236,230,216,.85);}
-  #levels .arrow.r:hover > svg:not(.arc), #planets .arrow.r:hover > svg:not(.arc){transform:translateX(2px);} #levels .arrow.l:hover > svg:not(.arc), #planets .arrow.l:hover > svg:not(.arc){transform:translateX(-2px);} }
-.arrow.r.go .arc .hot{animation:arcSpinR .65s cubic-bezier(.3,.75,.3,1);}
-.arrow.l.go .arc .hot{animation:arcSpinL .65s cubic-bezier(.3,.75,.3,1);}
-@keyframes arcSpinR{from{transform:rotate(0);}to{transform:rotate(360deg);}}
-@keyframes arcSpinL{from{transform:rotate(0);}to{transform:rotate(-360deg);}}
-@media (prefers-reduced-motion:reduce){ .arrow .arc .hot{animation:none !important;} }
-/* botón de volver: el mismo arco de gravedad */
-#levels .back, #planets .back{width:48px;height:48px;background:none !important;border:0 !important;box-shadow:none !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;color:var(--fg);display:grid;place-items:center;}
-#levels .back::before, #planets .back::before, #levels .back::after, #planets .back::after{content:none !important;}
-#levels .back svg, #planets .back svg{filter:none;}
-#levels .back > svg:not(.arc), #planets .back > svg:not(.arc){position:relative;filter:drop-shadow(0 0 6px rgba(0,0,0,.6));transition:transform .25s ease;}
-#levels .back:active, #planets .back:active{transform:scale(.92);}
-@media (hover:hover){ #levels .back:hover .arc .base, #planets .back:hover .arc .base{stroke:rgba(236,230,216,.85);} #levels .back:hover > svg:not(.arc), #planets .back:hover > svg:not(.arc){transform:translateX(-2px);} }
-.back svg.arc{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;}
-.back .arc path{fill:none;stroke-linecap:round;}
-.back .arc .base{stroke:rgba(236,230,216,.5);stroke-width:1.5;transition:stroke .25s;}
-.back .arc .hot{stroke:#ffa155;stroke-width:1.9;transform-origin:26px 26px;filter:drop-shadow(0 0 3px rgba(255,150,70,.75));animation:arcBreath 3.2s ease-in-out infinite;}
-.back.go .arc .hot{animation:arcSpinL .65s cubic-bezier(.3,.75,.3,1);}
-@media (prefers-reduced-motion:reduce){ .back .arc .hot{animation:none !important;} }
-/* barra superior: volver · título · estrellas en una misma línea; sin "Nivel X de 8" (los puntitos ya lo dicen) */
-#levels{--hdr:max(3vh,18px);}
-#levels .back{top:var(--hdr);}
-#levels .top{top:var(--hdr);height:48px;line-height:48px;}
-#levels .num{display:none;}
-/* contador de estrellas: sin caja, estrella dentro de un anillo de progreso (como los anillos del juego) */
-#wallet{display:flex;padding:0;border:0;border-radius:0;background:none;font:500 14px 'Unbounded',system-ui,sans-serif;letter-spacing:.04em;}
-#wallet .wring{width:28px;height:28px;display:block;overflow:visible;}
-#wallet .wb{fill:none;stroke:rgba(255,211,107,.18);stroke-width:1.5;}
-#wallet .wp{fill:none;stroke:#ffd36b;stroke-width:1.8;stroke-linecap:round;transform:rotate(-90deg);transform-origin:14px 14px;filter:drop-shadow(0 0 3px rgba(255,211,107,.7));transition:stroke-dasharray .6s ease;}
-#wallet .ws{fill:#ffd36b;filter:drop-shadow(0 0 4px rgba(255,211,107,.6));}
-#wallet i{font-style:normal;text-shadow:none;}
-#wallet.full .wring{animation:wfull 2.6s ease-in-out infinite;}
-@keyframes wfull{50%{filter:drop-shadow(0 0 8px rgba(255,211,107,.9));}}
-/* contador de estrellas: texto limpio */
-#wallet{gap:6px;color:#ece6d8;text-shadow:none;align-items:center;}
-#wallet .wst{width:15px;height:15px;display:block;fill:#ffd36b;filter:drop-shadow(0 0 5px rgba(255,211,107,.7));}
-#wallet b{font-weight:500;font-size:14px;}
-#wallet i{font-size:12px;color:rgba(236,230,216,.4);}
-#wallet.full b{color:#ffd36b;}
-#wallet.pop .wst{animation:wstar .5s ease-out;}
-@keyframes wstar{40%{transform:scale(1.45) rotate(18deg);filter:drop-shadow(0 0 10px rgba(255,211,107,1));}}
-/* misma fila exacta que el botón de volver y el título: caja de 48px centrada */
-#wallet{top:max(3vh,18px);height:48px;line-height:1;box-sizing:border-box;right:max(22px, env(safe-area-inset-right));}
-/* pantalla antes de jugar: mínima */
-#panel .mlv{margin-top:0;font-size:11px;font-weight:500;text-transform:uppercase;}
-#panel .mhelp{display:flex;align-items:center;gap:16px;margin-top:22px;font-size:11.5px;letter-spacing:.06em;color:rgba(236,230,216,.62);}
-#panel .mhelp span{display:inline-flex;align-items:center;gap:7px;}
-#panel .mhelp svg{width:18px;height:18px;color:#ffa155;}
-#panel .mhelp i{width:1px;height:14px;background:rgba(236,230,216,.18);}
-#panel .mgo{font-size:15px;animation:mgoPulse 1.8s ease-in-out infinite;}
-@keyframes mgoPulse{0%,100%{opacity:.55;transform:scale(1);}50%{opacity:1;transform:scale(1.04);}}
-@media (max-width:420px){ #panel .mhelp{flex-direction:column;gap:9px;} #panel .mhelp i{display:none;} }
-@media (prefers-reduced-motion:reduce){ #panel .mgo{animation:none;opacity:1;} }
-/* pantalla de victoria: título, tu premio, planetas rescatados y un solo botón principal */
-#panel.wscr::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;}
-#panel.wscr{z-index:6;isolation:isolate;}
-#panel .wsum{display:flex;align-items:center;gap:14px;margin-top:18px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(236,230,216,.55);}
-#panel .wsum i{width:1px;height:14px;background:rgba(236,230,216,.2);}
-#panel .wsum .wst{color:rgba(236,230,216,.7);font-size:14px;letter-spacing:.06em;font-weight:500;}
-#panel .wsum .wst.on{color:#ffd36b;text-shadow:0 0 12px rgba(255,211,107,.45);}
-#panel .wres{display:flex;flex-direction:column;align-items:center;}
-#panel .wres small{font-size:10px;text-transform:uppercase;}
-#panel .wpl{display:flex;gap:22px;}
-#panel .wp{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:rgba(236,230,216,.8);animation:wpIn .7s cubic-bezier(.2,.8,.3,1.2) both;}
-#panel .wp:nth-child(2){animation-delay:.15s;} #panel .wp:nth-child(3){animation-delay:.3s;}
-#panel .wp img, #panel .wp svg{display:block;}
-#panel .wp b{font-weight:500;}
-@keyframes wpIn{from{opacity:0;transform:scale(.6) translateY(8px);}}
-#panel .wbtn{margin-top:30px;position:relative;padding:15px 34px;border-radius:999px;border:1.5px solid #ff8a3d;background:radial-gradient(120% 160% at 50% 135%, rgba(255,120,40,.45), rgba(255,120,40,.05) 55%, rgba(9,11,22,.95) 80%), #0a0c17;color:#fff4ea;font:500 13px 'Unbounded',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;box-shadow:0 0 24px rgba(255,120,40,.3);pointer-events:auto;}
-#panel .wbtn:hover{box-shadow:0 0 34px rgba(255,140,60,.5);}
-#panel .wlinks{display:flex;align-items:center;gap:14px;margin-top:16px;}
-#panel .wlinks i{width:1px;height:12px;background:rgba(236,230,216,.2);}
-#panel .wlinks button{background:none;border:0;padding:6px 4px;color:rgba(236,230,216,.6);font:500 11px 'Unbounded',system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;pointer-events:auto;}
-#panel .wlinks button:hover{color:var(--fg);}
-/* victoria: una palabra, tus estrellas, lo que rescataste y a dónde sigues */
-#panel .wtit{font-size:clamp(34px,10vw,60px);line-height:1;margin-top:0;}
-#panel .wstars{display:flex;}
-#panel .wstars span{animation:wsIn .45s cubic-bezier(.2,.8,.3,1.4) both;}
-#panel .wstars svg{width:100%;height:100%;display:block;fill:none;stroke:rgba(236,230,216,.35);stroke-width:1.6;stroke-linejoin:round;}
-#panel .wstars .on svg{fill:#ffd36b;stroke:#ffe7a8;filter:drop-shadow(0 0 6px rgba(255,211,107,.7));}
-@keyframes wsIn{from{opacity:0;transform:scale(.3) rotate(-30deg);}}
-#panel .wres{margin-top:24px;gap:8px;}
-#panel .wres small{color:rgba(236,230,216,.45);letter-spacing:.24em;}
-#panel .wp img, #panel .wp svg{width:50px;height:50px;}
-#panel .wact{display:flex;align-items:center;}
-#panel .wact .wbtn{margin-top:0;}
-#panel .wico{border-radius:50%;border:1px solid rgba(236,230,216,.28);background:rgba(10,12,23,.6);color:rgba(236,230,216,.8);display:grid;place-items:center;cursor:pointer;pointer-events:auto;padding:0;}
-#panel .wico:hover{color:var(--fg);border-color:rgba(236,230,216,.6);}
-/* victoria como en Geometry Dash: título, intentos, estrellas y tres botones redondos */
-#panel .wtit{animation:wtIn .7s cubic-bezier(.2,.9,.25,1.3) both;text-shadow:0 0 30px rgba(255,161,85,.35);}
-@keyframes wtIn{from{opacity:0;transform:scale(.55);letter-spacing:.2em;}}
-#panel .wtries{margin-top:12px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(236,230,216,.5);animation:wfade .5s .25s both;}
-@keyframes wfade{from{opacity:0;transform:translateY(6px);}}
-#panel .wstars{margin-top:18px;gap:10px;}
-#panel .wstars span{width:26px;height:26px;}
-#panel .wact{gap:22px;margin-top:34px;animation:wfade .5s .8s both;}
-#panel .wgo{width:84px;height:84px;border-radius:50%;border:0;background:var(--sun);color:#fff;display:grid;place-items:center;cursor:pointer;pointer-events:auto;padding:0;box-shadow:0 0 0 6px rgba(255,107,44,.16),0 0 34px rgba(255,107,44,.45);}
-#panel .wgo svg{width:34px;height:34px;margin-left:4px;}
-#panel .wgo:hover{transform:scale(1.05);} #panel .wgo:active{transform:scale(.94);}
-#panel .wico{width:54px;height:54px;}
-#panel .wico svg{width:22px;height:22px;}
-#home .plan.new::after{content:"";position:absolute;top:4px;right:4px;width:12px;height:12px;border-radius:50%;background:#ff6b2c;box-shadow:0 0 0 3px #05070d,0 0 10px rgba(255,107,44,.8);}
-/* al terminar, el juego queda desenfocado detrás: se siente que la partida acabó */
-#panel.wscr::before{background:radial-gradient(120% 80% at 50% 30%, rgba(5,7,13,.62), rgba(5,7,13,.45));-webkit-backdrop-filter:blur(14px) saturate(.85);backdrop-filter:blur(14px) saturate(.85);animation:wblur .9s ease-out both;}
-@keyframes wblur{from{-webkit-backdrop-filter:blur(0) saturate(1);backdrop-filter:blur(0) saturate(1);opacity:0;}}
-/* pantalla de derrota: número, barra con tu récord y reintentar */
-#panel .drec{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#ffd36b;text-shadow:0 0 12px rgba(255,211,107,.5);margin-bottom:10px;animation:wfade .4s .1s both;}
-#panel .dnum{font-weight:600;font-size:clamp(64px,18vw,104px);line-height:.95;color:var(--fg);animation:wtIn .5s cubic-bezier(.2,.9,.25,1.3) both;}
-#panel .dnum span{font-size:.26em;font-weight:500;color:rgba(236,230,216,.45);margin-left:8px;letter-spacing:.04em;}
-#panel .dnum.rec{color:#ffe7a8;text-shadow:0 0 28px rgba(255,211,107,.45);}
-#panel .dbar{display:flex;align-items:center;gap:8px;width:min(300px,78vw);margin-top:22px;animation:wfade .4s .2s both;}
-#panel .dbar .bh{flex:0 0 auto;width:12px;height:12px;border-radius:50%;background:#000;box-shadow:0 0 0 1.5px #ff5a1f,0 0 10px rgba(255,90,31,.7);}
-#panel .dbar .ex{flex:0 0 auto;width:12px;height:12px;border-radius:50%;border:1.5px solid rgba(236,230,216,.35);box-sizing:border-box;}
-#panel .dbar .ln{position:relative;flex:1;height:2px;background:repeating-linear-gradient(90deg, rgba(236,230,216,.28) 0 4px, transparent 4px 8px);}
-#panel .dbar .ln i{position:absolute;left:0;top:0;bottom:0;width:var(--p);background:linear-gradient(90deg, rgba(236,230,216,.08), rgba(236,230,216,.8));animation:dfill .8s .25s cubic-bezier(.3,.8,.3,1) both;}
-@keyframes dfill{from{width:0;}}
-#panel .dbar .ln u{position:absolute;top:-6px;left:var(--b);width:2px;height:14px;margin-left:-1px;border-radius:1px;background:#ffd36b;box-shadow:0 0 6px rgba(255,211,107,.8);}
-#panel .dbar .ln b{position:absolute;top:50%;left:var(--p);width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#8fc4ff,#2f6fd8 60%,#123a7a);box-shadow:0 0 8px rgba(143,208,255,.9);animation:dmove .8s .25s cubic-bezier(.3,.8,.3,1) both;}
-@keyframes dmove{from{left:0;}}
-#panel .wact .ghost{visibility:hidden;}
-#panel .dre svg{margin-left:0;width:36px;height:36px;}
-/* reinicio instantáneo: "Intento N" en el espacio */
-#tryn{position:absolute;left:0;right:0;z-index:5;text-align:center;pointer-events:none;opacity:0;}
-#tryn b{display:block;font-size:12px;font-weight:500;text-transform:uppercase;color:#ffd36b;text-shadow:0 0 14px rgba(255,211,107,.6);}
-#tryn.go{animation:tryn 1.6s ease-out both;}
-/* pausa: salir a los niveles */
-#quit{position:absolute;top:max(3vh,18px);left:max(18px, env(safe-area-inset-left));z-index:8;width:44px;height:44px;padding:0;border:0;background:none;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s;}
-#quit svg{width:100%;height:100%;display:block;}
-body.playing #quit{opacity:.8;pointer-events:auto;}
-#quit:hover{opacity:1;}
-
-/* ---------- pausa: la misma pantalla de "Escapaste", con la partida congelada detrás ---------- */
-body.paused #quit{opacity:0 !important;pointer-events:none !important;}
-body.paused #hud, body.paused #wallet{opacity:0 !important;transition:opacity .25s;}
-#panel.pzp{z-index:7;pointer-events:none;}
-#panel.pzp::before{-webkit-backdrop-filter:blur(6px) saturate(.8);backdrop-filter:blur(6px) saturate(.8);background:radial-gradient(120% 80% at 50% 40%, rgba(5,7,13,.58), rgba(5,7,13,.42));animation:wblur .45s ease-out both;}
-#panel.pzp .wtit{text-shadow:0 0 30px rgba(143,208,255,.32);}
-#panel.pzp .wact{margin-top:30px;}
-#panel.pzp button, #panel.pzp .pz-vol{pointer-events:auto;}
-.pz-trip{position:relative;display:flex;align-items:center;gap:8px;width:250px;margin:22px auto 0;animation:wfade .5s .35s both;}
-.pz-trip .bh{flex:0 0 auto;width:12px;height:12px;border-radius:50%;background:#000;box-shadow:0 0 0 1.5px #ff5a1f,0 0 10px rgba(255,90,31,.7);}
-.pz-trip .exit{flex:0 0 auto;width:12px;height:12px;border-radius:50%;border:1.5px dashed rgba(236,230,216,.45);box-sizing:border-box;}
-.pz-trip .line{position:relative;flex:1;height:2px;background:repeating-linear-gradient(90deg,rgba(236,230,216,.28) 0 4px,transparent 4px 8px);}
-.pz-trip .line i{position:absolute;left:0;top:0;bottom:0;width:var(--p);background:linear-gradient(90deg,rgba(236,230,216,.08),rgba(236,230,216,.75));}
-.pz-trip .me{position:absolute;top:50%;left:var(--p);width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#8fc4ff,#2f6fd8 60%,#123a7a);box-shadow:0 0 8px rgba(143,208,255,.9);}
-.pz-trip .rec{position:absolute;top:-6px;left:var(--r);width:2px;height:14px;margin-left:-1px;border-radius:1px;background:#ffd36b;box-shadow:0 0 7px rgba(255,211,107,.85);}
-.pz-trip .rec::after{content:'RÉCORD';position:absolute;top:-15px;left:50%;transform:translateX(-50%);font:400 8px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;color:#ffd36b;}
-.pz-sl{display:flex;flex-direction:column;gap:18px;width:270px;margin-top:44px;animation:wfade .5s 1s both;}
-.pz-vol{display:flex;align-items:center;gap:12px;width:100%;touch-action:none;}
-.pz-vol .ico{flex:0 0 auto;width:32px;height:32px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#eaf3ff;cursor:pointer;
-  background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.18),rgba(143,208,255,.06) 40%,rgba(8,12,24,.7) 72%);border:1px solid rgba(160,205,255,.55);box-shadow:0 0 14px rgba(120,180,255,.22),inset 0 0 10px rgba(143,208,255,.16);transition:opacity .2s;}
-.pz-vol .ico svg{width:15px;height:15px;filter:drop-shadow(0 0 3px rgba(143,208,255,.6));}
-.pz-vol.fx .ico{color:#ffe2c8;border-color:rgba(255,170,110,.55);box-shadow:0 0 14px rgba(255,140,60,.22),inset 0 0 10px rgba(255,161,85,.16);}
-.pz-vol .lb{flex:0 0 auto;width:60px;text-align:left;font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.22em;text-transform:uppercase;color:#ece6d8;}
-.pz-vol .line{position:relative;flex:1;height:4px;border-radius:3px;background:rgba(236,230,216,.16);cursor:pointer;}
-.pz-vol .line::before{content:'';position:absolute;left:-10px;right:-10px;top:-16px;bottom:-16px;}
-.pz-vol .line i{position:absolute;left:0;top:0;bottom:0;width:var(--v);border-radius:3px;background:linear-gradient(90deg,#4f8fe0,#cfe8ff);box-shadow:0 0 12px rgba(143,208,255,1);}
-.pz-vol .line b{position:absolute;top:50%;left:var(--v);width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#8fc4ff,#2f6fd8 60%,#123a7a);box-shadow:0 0 0 4px rgba(143,208,255,.22),0 0 16px rgba(143,208,255,1);transition:transform .15s;}
-.pz-vol.fx .line i{background:linear-gradient(90deg,#e0662a,#ffd0a0);box-shadow:0 0 12px rgba(255,140,60,1);}
-.pz-vol.fx .line b{background:radial-gradient(circle at 35% 35%,#ffd2a0,#ff7a2a 60%,#8a2e0c);box-shadow:0 0 0 4px rgba(255,161,85,.22),0 0 16px rgba(255,140,60,1);}
-.pz-vol.drag .line b{transform:scale(1.2);}
-.pz-vol.zero .line i{opacity:0;} .pz-vol.zero .ico{opacity:.55;}
-.pz-vol .val{flex:0 0 auto;width:28px;text-align:right;font:400 11px 'Space Mono',ui-monospace,monospace;color:#fff;}
-/* al seguir: cuenta 3 · 2 · 1 sobre la partida, al ritmo */
-#pzcount{position:absolute;left:0;right:0;top:calc(max(3vh,18px) + 92px);height:150px;z-index:7;pointer-events:none;display:flex;align-items:center;justify-content:center;}
-#pzcount b{position:absolute;font:600 clamp(64px,22vw,110px)/1 'Unbounded',system-ui,sans-serif;color:#ece6d8;text-shadow:0 0 34px rgba(255,161,85,.55),0 0 2px rgba(255,255,255,.6);animation:pzNum .62s cubic-bezier(.2,.8,.3,1) both;}
-#pzcount i{position:absolute;width:130px;height:130px;border-radius:50%;border:2px solid rgba(255,161,85,.8);box-shadow:0 0 22px rgba(255,140,60,.6),inset 0 0 18px rgba(255,140,60,.35);animation:pzRing .62s ease-out both;}
-#pzcount u{position:absolute;top:calc(100% + 6px);font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.32em;text-transform:uppercase;color:rgba(236,230,216,.75);text-decoration:none;text-shadow:0 0 10px rgba(3,4,10,.95);}
-@keyframes pzNum{0%{opacity:0;transform:scale(1.5);filter:blur(6px)}22%{opacity:1;transform:scale(1);filter:blur(0)}75%{opacity:1}100%{opacity:0;transform:scale(.86)}}
-@keyframes pzRing{0%{opacity:0;transform:scale(.55)}20%{opacity:1}100%{opacity:0;transform:scale(1.9)}}
-@media (prefers-reduced-motion:reduce){#pzcount b,#pzcount i{animation-duration:.01s}}
-/* "Intento N" más discreto: arriba, bajo el marcador, con la letra de las transmisiones */
-#tryn{font:400 13px 'Space Mono',ui-monospace,Menlo,monospace;letter-spacing:.32em;text-transform:uppercase;color:rgba(236,230,216,.88);text-shadow:0 0 12px rgba(5,7,13,.9);}
-#tryn b{margin-top:6px;font:400 10px 'Space Mono',ui-monospace,Menlo,monospace;letter-spacing:.28em;}
-@keyframes tryn{0%{opacity:0;transform:translateY(-4px);}12%{opacity:1;transform:none;}70%{opacity:1;}100%{opacity:0;}}
-#tryn.go{animation-duration:1.8s;}
-/* marcador de juego: barra fina arriba en lugar del número grande */
-#scorewrap, #best{display:none !important;}
-#hud{top:max(3vh,18px);height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-#pbar{align-items:center;gap:7px;width:min(44vw,300px);}
-#pbar .bh{flex:0 0 auto;width:11px;height:11px;border-radius:50%;background:#000;box-shadow:0 0 0 1.5px #ff5a1f,0 0 9px rgba(255,90,31,.7);}
-#pbar .ex{flex:0 0 auto;width:11px;height:11px;border-radius:50%;border:1.5px solid rgba(236,230,216,.4);box-sizing:border-box;transition:border-color .3s,box-shadow .3s;}
-#pbar .ln{position:relative;flex:1;height:2px;background:repeating-linear-gradient(90deg, rgba(236,230,216,.22) 0 4px, transparent 4px 8px);}
-#pbar .ln i{position:absolute;left:0;top:0;bottom:0;width:var(--p,0%);background:linear-gradient(90deg, rgba(236,230,216,.1), rgba(236,230,216,.85));transition:width .35s cubic-bezier(.3,.8,.3,1);}
-#pbar .ln u{display:none;position:absolute;top:-5px;left:var(--r,0%);width:2px;height:12px;margin-left:-1px;border-radius:1px;background:#ffd36b;box-shadow:0 0 6px rgba(255,211,107,.8);}
-#pbar.hasrec .ln u{display:block;}
-#pbar .ln b{position:absolute;top:50%;left:var(--p,0%);width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#8fc4ff,#2f6fd8 60%,#123a7a);box-shadow:0 0 8px rgba(143,208,255,.9);transition:left .35s cubic-bezier(.3,.8,.3,1);}
-#pbar.beat .ln i{background:linear-gradient(90deg, rgba(255,211,107,.15), #ffd36b);box-shadow:0 0 8px rgba(255,211,107,.5);}
-#pbar.beat .ln u{opacity:.35;}
-/* la barra en la misma línea que pausa y estrellas; el número cuelga debajo sin moverla */
-#hud{position:absolute;}
-#pnum{margin-top:0;text-align:center;}
-/* vuelve el conteo de anillos, pero discreto: en la línea de pausa y estrellas, sin robar la atención */
-#pbar{display:none !important;}
-#pnum{position:absolute;left:0;right:0;top:0;height:48px;display:flex;align-items:center;justify-content:center;gap:6px;font:600 24px 'Unbounded',system-ui,sans-serif;letter-spacing:.01em;color:rgba(236,230,216,.92);text-shadow:0 0 14px rgba(5,7,13,.8);transition:color .3s;}
-#pnum span{font-size:12px;font-weight:500;letter-spacing:.04em;color:rgba(236,230,216,.4);transform:translateY(3px);}
-#pnum.beat{color:#ffe7a8;text-shadow:0 0 16px rgba(255,211,107,.45);}
-#tryn{top:calc(max(3vh,18px) + 62px);}
-/* antes de jugar: el nivel como dato del panel (letra de terminal) y la invitación en la letra del juego */
-#panel .mlv{font:400 10.5px 'Space Mono',ui-monospace,Menlo,monospace;letter-spacing:.26em;}
-#panel .mlv::before{content:'▸ ';color:#ffa155;letter-spacing:0;}
-#panel .mgo{margin-top:22px;font:500 17px 'Unbounded',system-ui,sans-serif;letter-spacing:.06em;text-transform:none;color:var(--fg);text-shadow:none;}
-/* textos legibles sobre fondos brillantes (galaxias y nebulosas) */
-#panel .mlv, #panel .mgo, #pnum, #tryn, #wallet{text-shadow:0 0 10px rgba(3,4,10,.95), 0 0 22px rgba(3,4,10,.8), 0 1px 2px rgba(0,0,0,.9);}
-#panel .mlv{color:rgba(236,230,216,.78);}
+#planets .arrow.l::after{animation-direction:reverse;}
+#planets .back svg, #planets .arrow svg{filter:drop-shadow(0 0 4px rgba(143,208,255,.6));}
+@media (hover:hover){ #planets .back:hover, #planets .arrow:hover{box-shadow:0 0 26px rgba(143,208,255,.42), inset 0 0 18px rgba(143,208,255,.25);border-color:rgba(190,225,255,.7);} }
+#planets .arrow:active, #planets .back:active{transform:translateY(-50%) scale(.92);}
+@media (prefers-reduced-motion:reduce){ #planets .back::before, #planets .arrow::before, #planets .arrow::after{animation:none;} }
+#planets .arrow::after{content:none !important;}
+#planets .arrow.l{left:18px;}
+#planets .arrow.r{right:18px;}
+#planets .back{left:18px;}
+#planets .back::before, #planets .arrow::before{inset:-5px;}
+#planets .arrow{width:54px;height:54px;background:none !important;border:0 !important;box-shadow:none !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;color:var(--fg);display:grid;place-items:center;}
+#planets .arrow::before, #planets .arrow::after{content:none !important;}
+#planets .arrow svg{filter:none;}
+#planets .arrow > svg:not(.arc){position:relative;filter:drop-shadow(0 0 6px rgba(0,0,0,.6));transition:transform .25s ease;}
+@media (hover:hover){ #planets .arrow:hover .arc .base{stroke:rgba(236,230,216,.85);} #planets .arrow.r:hover > svg:not(.arc){transform:translateX(2px);} #planets .arrow.l:hover > svg:not(.arc){transform:translateX(-2px);} }
+#planets .back{width:48px;height:48px;background:none !important;border:0 !important;box-shadow:none !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;color:var(--fg);display:grid;place-items:center;}
+#planets .back::before, #planets .back::after{content:none !important;}
+#planets .back svg{filter:none;}
+#planets .back > svg:not(.arc){position:relative;filter:drop-shadow(0 0 6px rgba(0,0,0,.6));transition:transform .25s ease;}
+#planets .back:active{transform:scale(.92);}
+@media (hover:hover){ #planets .back:hover .arc .base{stroke:rgba(236,230,216,.85);} #planets .back:hover > svg:not(.arc){transform:translateX(-2px);} }
 /* planetas en órbita (prueba) */
 #planets .pswipe{position:absolute;inset:0;pointer-events:auto;touch-action:pan-y;cursor:grab;}
 #planets .arrow, #planets .pcount, #planets .scanbtn, #planets .pchip{display:none !important;}
 #planets .ptop{height:48px;line-height:48px;letter-spacing:.22em;color:rgba(236,230,216,.66);}
 #planets .pinfo.po{bottom:auto;top:58%;pointer-events:none;animation:poIn .45s cubic-bezier(.2,.8,.3,1) both;}
-@keyframes poIn{from{opacity:0;transform:translateX(calc(var(--dir) * 28px));}}
 #planets .pidx{font:400 10.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.26em;color:rgba(236,230,216,.45);}
 #planets .po .pname{margin-top:8px;font-size:clamp(32px,8.5vw,44px);font-weight:600;color:var(--fg);}
 #planets .ppow{display:inline-flex;align-items:center;font-size:11.5px;}
-#planets .ppow.off{border-color:rgba(236,230,216,.18);} 
+#planets .ppow.off{border-color:rgba(236,230,216,.18);}
 #planets .po .pdesc{margin-top:16px;max-width:40ch;font:400 11.5px/1.65 'Space Mono',ui-monospace,monospace;color:rgba(236,230,216,.66);opacity:1;}
 #planets .po .plock{margin-top:22px;font:400 11px/1.6 'Space Mono',ui-monospace,monospace;letter-spacing:.06em;color:rgba(236,230,216,.6);}
 #planets .po .pbtn{pointer-events:auto;margin-top:24px;min-width:0;padding:15px 40px;border-radius:999px;font:500 13px 'Unbounded',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#fff4ea;border:1.5px solid #ff8a3d;
@@ -627,17 +447,18 @@ body.paused #hud, body.paused #wallet{opacity:0 !important;transition:opacity .2
 #planets .pscan svg{width:40px;height:40px;padding:9px;border-radius:50%;box-sizing:border-box;background:rgba(8,12,24,.7);box-shadow:inset 0 0 0 1px rgba(143,208,255,.45),0 0 14px rgba(143,208,255,.18);transition:transform .3s;}
 #planets .pscan span{font:400 9.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.22em;text-transform:uppercase;color:rgba(143,208,255,.85);}
 #planets .pscan:hover svg{transform:rotate(45deg);}
-#planets .pscan.on{color:#ffa155;} #planets .pscan.on svg{box-shadow:inset 0 0 0 1px rgba(255,161,85,.6),0 0 16px rgba(255,161,85,.3);} #planets .pscan.on span{color:rgba(255,161,85,.9);}
+#planets .pscan.on{color:#ffa155;}
+#planets .pscan.on svg{box-shadow:inset 0 0 0 1px rgba(255,161,85,.6),0 0 16px rgba(255,161,85,.3);}
+#planets .pscan.on span{color:rgba(255,161,85,.9);}
 #planets .plines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;}
 #planets .plines path{fill:none;stroke:#8fd0ff;stroke-opacity:.55;stroke-width:1;stroke-dasharray:400;stroke-dashoffset:400;animation:plDraw .5s ease-out forwards;}
 #planets .plines circle{fill:#8fd0ff;opacity:0;animation:plFade .3s forwards;}
-@keyframes plDraw{to{stroke-dashoffset:0;}} @keyframes plFade{to{opacity:1;}}
 #planets .pdat{position:absolute;z-index:2;display:flex;flex-direction:column;gap:3px;opacity:0;animation:plIn .4s ease-out forwards;pointer-events:none;}
-#planets .pdat.l{align-items:flex-end;text-align:right;} #planets .pdat.r{align-items:flex-start;text-align:left;}
+#planets .pdat.l{align-items:flex-end;text-align:right;}
+#planets .pdat.r{align-items:flex-start;text-align:left;}
 #planets .pdat small{font:400 9px 'Space Mono',ui-monospace,monospace;letter-spacing:.22em;text-transform:uppercase;color:rgba(236,230,216,.55);}
 #planets .pdat b{font:500 17px 'Unbounded',system-ui,sans-serif;letter-spacing:.02em;text-shadow:0 0 12px rgba(5,7,13,.9);}
 #planets .pdat em{font:400 9.5px 'Space Mono',ui-monospace,monospace;font-style:normal;color:rgba(143,208,255,.75);}
-@keyframes plIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 @media (max-width:460px){ #planets .pdat b{font-size:14px;} #planets .pdat em{font-size:8.5px;} #planets .pscan span{display:none;} }
 /* lectura del escaneo: tres columnas bajo el nombre, con la mira sobre el planeta */
 #planets .pread{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;width:min(420px,88vw);margin-top:16px;padding:14px 6px;border-top:1px solid rgba(143,208,255,.22);border-bottom:1px solid rgba(143,208,255,.22);
@@ -656,27 +477,36 @@ body.paused #hud, body.paused #wallet{opacity:0 !important;transition:opacity .2
 #planets .ppow::after{transform:scaleX(-1);}
 #planets .ppow svg{width:16px;height:16px;fill:none;stroke:#ffd36b;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
 #planets .ppow svg .f{fill:#ffd36b;stroke:none;}
-#planets .ppow.off{color:rgba(236,230,216,.5);} #planets .ppow.off svg{stroke:rgba(236,230,216,.5);fill:none;} #planets .ppow.off::before,#planets .ppow.off::after{background:rgba(236,230,216,.2);}
+#planets .ppow.off{color:rgba(236,230,216,.5);}
+#planets .ppow.off svg{stroke:rgba(236,230,216,.5);fill:none;}
+#planets .ppow.off::before,#planets .ppow.off::after{background:rgba(236,230,216,.2);}
 /* en uso: ya no es un botón, es un estado */
 #planets .pinuse{margin-top:24px;padding:16px 0;display:inline-flex;align-items:center;gap:10px;font:400 11px 'Space Mono',ui-monospace,monospace;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,211,107,.85);}
 #planets .pinuse i{width:7px;height:7px;border-radius:50%;background:#ffd36b;box-shadow:0 0 10px #ffd36b;animation:puPulse 1.6s ease-in-out infinite;}
+@keyframes poIn{from{opacity:0;transform:translateX(calc(var(--dir) * 28px));}}
+@keyframes plDraw{to{stroke-dashoffset:0;}}
+@keyframes plFade{to{opacity:1;}}
+@keyframes plIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 @keyframes puPulse{50%{opacity:.35;transform:scale(.7);}}
+/* misiones, logros y polvo estelar */
 /* ---------- Misiones ---------- */
 #missions{position:absolute;inset:0;z-index:6;overflow:hidden;color:var(--fg);}
 #missions::before{content:'';position:absolute;inset:0;background:rgba(5,6,12,.18);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);animation:misFade .35s ease-out both;}
 #missions .mpanel{position:absolute;left:0;right:0;bottom:0;top:calc(max(3vh,18px) + 62px);border-radius:28px 28px 0 0;background:rgba(6,8,16,.38);border-top:1px solid rgba(236,230,216,.18);-webkit-backdrop-filter:blur(9px) saturate(1.15);backdrop-filter:blur(9px) saturate(1.15);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;animation:misUp .45s cubic-bezier(.2,.8,.3,1) both;}
-#missions.out .mpanel{animation:misDown .3s ease-in both;} #missions.out::before{animation:misFade .3s ease-in reverse both;}
-@keyframes misUp{from{transform:translateY(100%)}to{transform:none}} @keyframes misDown{to{transform:translateY(100%)}} @keyframes misFade{from{opacity:0}}
+#missions.out .mpanel{animation:misDown .3s ease-in both;}
+#missions.out::before{animation:misFade .3s ease-in reverse both;}
 #missions .back,#missions .mtop,#missions .mwal{animation:misFade .4s ease-out both;}
 #missions.off{display:none;}
 #missions .back{position:absolute;top:max(3vh,18px);left:18px;width:48px;height:48px;background:none;border:0;color:var(--fg);display:grid;place-items:center;cursor:pointer;z-index:2;}
 #missions .mtop{position:absolute;left:0;right:0;top:max(3vh,18px);height:48px;line-height:48px;text-align:center;font:400 13px 'Unbounded',system-ui,sans-serif;letter-spacing:.22em;color:rgba(236,230,216,.66);pointer-events:none;}
 #missions .mwal{position:absolute;right:18px;top:calc(max(3vh,18px) + 4px);display:flex;flex-direction:column;align-items:flex-end;gap:6px;z-index:2;}
 #missions .mwal .s{display:flex;align-items:center;gap:7px;color:#ffd36b;font:500 14px 'Unbounded',system-ui,sans-serif;letter-spacing:.04em;text-shadow:0 0 12px rgba(255,211,107,.35);}
-#missions .mwal .s b{font-weight:500;} #missions .mwal .s i{font-style:normal;font-size:11px;color:rgba(236,230,216,.45);text-shadow:none;}
+#missions .mwal .s b{font-weight:500;}
+#missions .mwal .s i{font-style:normal;font-size:11px;color:rgba(236,230,216,.45);text-shadow:none;}
 #missions .mwal .st{width:13px;height:13px;fill:#ffd36b;filter:drop-shadow(0 0 4px rgba(255,211,107,.6));}
 #missions .mwal .c{display:flex;align-items:center;gap:6px;color:#9ff0e4;font:500 12.5px 'Unbounded',system-ui,sans-serif;letter-spacing:.04em;text-shadow:0 0 12px rgba(63,199,184,.35);}
-#missions .mwal .c b{font-weight:500;} #missions .mwal .c.pop{animation:wpop .45s ease-out;}
+#missions .mwal .c b{font-weight:500;}
+#missions .mwal .c.pop{animation:wpop .45s ease-out;}
 #missions .cr{width:13px;height:13px;flex:none;}
 #missions .mwrap{max-width:440px;margin:0 auto;padding:22px 28px 56px;}
 #missions .mtabs{display:flex;justify-content:center;gap:52px;border-bottom:1px solid rgba(236,230,216,.08);}
@@ -701,7 +531,8 @@ body.paused #hud, body.paused #wallet{opacity:0 !important;transition:opacity .2
 #missions .mr h3{font:500 15px/1.3 'Unbounded',system-ui,sans-serif;color:#ece6d8;}
 #missions .mr p{margin-top:6px;font:400 11px/1.5 'Space Mono',ui-monospace,monospace;color:rgba(236,230,216,.55);}
 #missions .rw{font:500 14px 'Unbounded',system-ui,sans-serif;color:#9ff0e4;letter-spacing:.02em;flex:none;}
-#missions .rw.ok{color:#ece6d8;} #missions .rw.dim{color:rgba(236,230,216,.35);}
+#missions .rw.ok{color:#ece6d8;}
+#missions .rw.dim{color:rgba(236,230,216,.35);}
 #missions .mbar{margin-top:10px;width:120px;height:2px;border-radius:2px;background:rgba(236,230,216,.12);}
 #missions .mbar u{display:block;height:100%;border-radius:2px;background:#ff8a3d;box-shadow:0 0 6px #ff8a3d;}
 #missions .mr.got{opacity:.35;}
@@ -725,18 +556,6 @@ body.paused #hud, body.paused #wallet{opacity:0 !important;transition:opacity .2
 #missions .mfact b{display:block;margin-bottom:4px;font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:#9ff0e4;}
 #missions .mfact.out{opacity:0;}
 @media (max-width:380px){ #missions .mwrap{padding-left:20px;padding-right:20px;} #missions .mr h3{font-size:13.5px;} #missions .claim{padding:10px 12px;letter-spacing:.14em;} }
-/* botón de Misiones: más pequeño que Planetas, sin borde; las lunas giran y las encendidas respiran */
-#home .plan.mis{width:68px;height:68px;box-shadow:none;}
-#home .plan.mis svg{width:50px;height:50px;filter:none;overflow:visible;}
-#home .plan.mis .plabel{color:#8fd0ff;}
-#home .plan.mis .lit{animation:misLit 2.4s ease-in-out infinite;}
-@keyframes misRot{to{transform:rotate(360deg)}}
-#home .plan.mis .lit{filter:drop-shadow(0 0 2px #ff8a3d);}
-@keyframes misLit{50%{filter:drop-shadow(0 0 4px #ff8a3d) drop-shadow(0 0 8px #ff8a3d)}}
-@keyframes misCore{50%{opacity:.7}}
-#home .plan.mis.new::after{top:4px;right:4px;width:12px;height:12px;}
-@media (hover:hover) and (prefers-reduced-motion:no-preference){#home .plan.mis:hover{box-shadow:0 0 0 3px rgba(143,208,255,.5),0 0 26px rgba(143,208,255,.4);}}
-@media (prefers-reduced-motion:reduce){#home .plan.mis .lit{animation:none}}
 #missions .mnew{margin-top:16px;text-align:center;font:400 10.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.12em;color:rgba(236,230,216,.45);}
 #missions .mnew .mtime{color:rgba(236,230,216,.75);}
 #missions .mlist{margin-top:18px;}
@@ -750,14 +569,12 @@ body.paused #hud, body.paused #wallet{opacity:0 !important;transition:opacity .2
 #missions .fd{margin-top:8px;font:400 11px 'Space Mono',ui-monospace,monospace;color:rgba(236,230,216,.55);text-align:center;}
 #missions .mgrab{width:38px;height:4px;border-radius:4px;background:rgba(236,230,216,.22);margin:10px auto 0;}
 #missions .mr.flash,#missions .mbonus.flash,#missions .mfeat.flash{animation:misFlash .9s ease-out;}
-@keyframes misFlash{0%{background:rgba(159,240,228,.28);box-shadow:inset 0 0 0 1px rgba(159,240,228,.6);}100%{background:transparent;box-shadow:none;}}
 #missions .mfly{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;z-index:9;pointer-events:none;filter:drop-shadow(0 0 6px rgba(63,199,184,.9));}
 #missions .mfly svg{width:100%;height:100%;display:block;}
 #misping{position:fixed;top:calc(max(3vh,18px) + 5px);right:max(20px, env(safe-area-inset-right));width:34px;height:34px;z-index:8;pointer-events:none;opacity:0;}
 #misping svg{width:100%;height:100%;overflow:visible;}
 #misping .lit{filter:drop-shadow(0 0 5px #ff8a3d);}
 #misping.go{animation:misPing 1.9s ease-out both;}
-@keyframes misPing{0%{opacity:0;transform:translateY(-8px) scale(.7)}15%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0;transform:translateY(-6px)}}
 /* Misiones · tarjetas (vuelta al primer diseño, con el estilo del juego) */
 #missions .mhead{display:flex;justify-content:space-between;align-items:center;margin:22px 2px 12px;font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:rgba(236,230,216,.5);}
 #missions .mhead em{font-style:normal;color:#8fd0ff;}
@@ -777,7 +594,8 @@ body.paused #hud, body.paused #wallet{opacity:0 !important;transition:opacity .2
 #missions .mc .rw span{display:flex;align-items:center;gap:4px;}
 #missions .mc .rw small{font:400 8.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:rgba(236,230,216,.4);}
 #missions .mc.go{border-color:rgba(255,138,61,.55);background:radial-gradient(120% 140% at 50% 140%,rgba(255,120,40,.2),rgba(255,120,40,0) 60%),linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));box-shadow:0 0 22px rgba(255,120,40,.18);}
-#missions .mc.got{opacity:.42;} #missions .mc.got .rw{color:#ece6d8;}
+#missions .mc.got{opacity:.42;}
+#missions .mc.got .rw{color:#ece6d8;}
 #missions .mc .claim{padding:10px 14px;letter-spacing:.16em;font-size:9.5px;}
 #missions .mpl{display:flex;justify-content:space-between;gap:2px;margin-top:9px;}
 #missions .mpl span{width:18px;height:18px;display:grid;place-items:center;filter:grayscale(1) brightness(.35);}
@@ -838,8 +656,8 @@ body.paused #hud, body.paused #wallet{opacity:0 !important;transition:opacity .2
 /* al cambiar de pestaña: el panel no se mueve, solo el contenido cambia con un fundido corto */
 #missions.still .mpanel,#missions.still::before,#missions.still .back,#missions.still .mtop,#missions.still .mwal{animation:none;}
 #missions .mwrap.swap > :not(.mtabs){animation:misSwap .32s cubic-bezier(.2,.8,.3,1) both;}
-@keyframes misSwap{from{opacity:0;transform:translateX(var(--sd,0))}to{opacity:1;transform:none}}
-#missions.out.still .mpanel{animation:misDown .3s ease-in both;} #missions.out.still::before{animation:misFade .3s ease-in reverse both;}
+#missions.out.still .mpanel{animation:misDown .3s ease-in both;}
+#missions.out.still::before{animation:misFade .3s ease-in reverse both;}
 /* vista desplegada de un logro */
 #missions [data-open]{cursor:pointer;}
 #missions .mdet{position:absolute;inset:0;z-index:5;display:flex;align-items:flex-end;justify-content:center;}
@@ -847,7 +665,8 @@ body.paused #hud, body.paused #wallet{opacity:0 !important;transition:opacity .2
 #missions .mdcard{position:relative;width:min(440px,100%);max-height:88%;overflow:auto;padding:4px 28px calc(28px + env(safe-area-inset-bottom));border-radius:28px 28px 0 0;
   background:linear-gradient(180deg,color-mix(in srgb,var(--hc) 8%,rgba(8,10,20,.92)),rgba(6,8,16,.95) 45%);border-top:1px solid color-mix(in srgb,var(--hc) 35%,transparent);
   display:flex;flex-direction:column;align-items:center;text-align:center;animation:misUp .4s cubic-bezier(.2,.8,.3,1) both;}
-#missions .mdet.out .mdcard{animation:misDown .24s ease-in both;} #missions .mdet.out .mdbg{animation:misFade .24s ease-in reverse both;}
+#missions .mdet.out .mdcard{animation:misDown .24s ease-in both;}
+#missions .mdet.out .mdbg{animation:misFade .24s ease-in reverse both;}
 #missions .mdx{position:absolute;top:14px;right:16px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(236,230,216,.18);background:rgba(255,255,255,.04);color:rgba(236,230,216,.7);font:300 20px/1 'Unbounded',system-ui,sans-serif;cursor:pointer;}
 #missions .mbig{width:100%;height:210px;display:block;margin-top:6px;}
 #missions .mdt{margin-top:4px;font:600 24px/1.2 'Unbounded',system-ui,sans-serif;color:#ece6d8;max-width:300px;}
@@ -864,6 +683,235 @@ body.paused #hud, body.paused #wallet{opacity:0 !important;transition:opacity .2
 #missions .mdk::after{content:'';flex:1;max-width:30px;height:1px;background:linear-gradient(90deg,var(--hc),transparent);opacity:.6;}
 #missions .mdf p{margin-top:8px;font:400 11px/1.65 'Space Mono',ui-monospace,monospace;color:rgba(236,230,216,.75);}
 #missions .mdcard .mgrab{margin:10px auto 0;}
+@keyframes wpop{40%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes misUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes misDown{to{transform:translateY(100%)}}
+@keyframes misFade{from{opacity:0}}
+@keyframes misFlash{0%{background:rgba(159,240,228,.28);box-shadow:inset 0 0 0 1px rgba(159,240,228,.6);}100%{background:transparent;box-shadow:none;}}
+@keyframes misPing{0%{opacity:0;transform:translateY(-8px) scale(.7)}15%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0;transform:translateY(-6px)}}
+@keyframes misSwap{from{opacity:0;transform:translateX(var(--sd,0))}to{opacity:1;transform:none}}
+/* durante la partida: marcador, estrellas, botón de pausa, "Intento N" */
+#wallet{position:absolute;z-index:7;font-weight:500;font-size:14px;pointer-events:none;transition:opacity .3s;}
+#wallet.pop{animation:wpop .45s ease-out;}
+#hud{left:0;right:0;text-align:center;pointer-events:none;transition:opacity .3s;}
+#score small{font-size:.38em;font-weight:500;color:var(--muted);letter-spacing:0;margin-left:.15em;}
+#score{font-weight:900;font-size:clamp(44px,12vw,72px);line-height:1;letter-spacing:-.02em;}
+#best{margin-top:6px;font-weight:300;font-size:13px;color:var(--muted);}
+#scorewrap{position:relative;display:grid;place-items:center;margin:0 auto;}
+#scorewrap.arc{width:112px;height:112px;}
+#arc{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);display:none;}
+#scorewrap.arc #arc{display:block;}
+#arc circle{fill:none;stroke-width:2.5;}
+#arc .bg{stroke:rgba(236,230,216,.12);}
+#arc .fg{stroke:var(--sun);stroke-linecap:round;stroke-dasharray:276.5;stroke-dashoffset:276.5;transition:stroke-dashoffset .25s ease-out,stroke .2s;}
+/* contador de estrellas: sin caja, estrella dentro de un anillo de progreso (como los anillos del juego) */
+#wallet{display:flex;padding:0;border:0;border-radius:0;background:none;font:500 14px 'Unbounded',system-ui,sans-serif;letter-spacing:.04em;}
+#wallet .wring{width:28px;height:28px;display:block;overflow:visible;}
+#wallet .wb{fill:none;stroke:rgba(255,211,107,.18);stroke-width:1.5;}
+#wallet .wp{fill:none;stroke:#ffd36b;stroke-width:1.8;stroke-linecap:round;transform:rotate(-90deg);transform-origin:14px 14px;filter:drop-shadow(0 0 3px rgba(255,211,107,.7));transition:stroke-dasharray .6s ease;}
+#wallet .ws{fill:#ffd36b;filter:drop-shadow(0 0 4px rgba(255,211,107,.6));}
+#wallet i{font-style:normal;text-shadow:none;}
+#wallet.full .wring{animation:wfull 2.6s ease-in-out infinite;}
+/* contador de estrellas: texto limpio */
+#wallet{gap:6px;color:#ece6d8;text-shadow:none;align-items:center;}
+#wallet .wst{width:15px;height:15px;display:block;fill:#ffd36b;filter:drop-shadow(0 0 5px rgba(255,211,107,.7));}
+#wallet b{font-weight:500;font-size:14px;}
+#wallet i{font-size:12px;color:rgba(236,230,216,.4);}
+#wallet.full b{color:#ffd36b;}
+#wallet.pop .wst{animation:wstar .5s ease-out;}
+/* misma fila exacta que el botón de volver y el título: caja de 48px centrada */
+#wallet{top:max(3vh,18px);height:48px;line-height:1;box-sizing:border-box;right:max(22px, env(safe-area-inset-right));}
+/* reinicio instantáneo: "Intento N" en el espacio */
+#tryn{position:absolute;left:0;right:0;z-index:5;text-align:center;pointer-events:none;opacity:0;}
+#tryn b{display:block;font-size:12px;font-weight:500;text-transform:uppercase;color:#ffd36b;text-shadow:0 0 14px rgba(255,211,107,.6);}
+#tryn.go{animation:tryn 1.6s ease-out both;}
+/* pausa: salir a los niveles */
+#quit{position:absolute;top:max(3vh,18px);left:max(18px, env(safe-area-inset-left));z-index:8;width:44px;height:44px;padding:0;border:0;background:none;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s;}
+#quit svg{width:100%;height:100%;display:block;}
+body.playing #quit{opacity:.8;pointer-events:auto;}
+#quit:hover{opacity:1;}
+/* "Intento N" más discreto: arriba, bajo el marcador, con la letra de las transmisiones */
+#tryn{font:400 13px 'Space Mono',ui-monospace,Menlo,monospace;letter-spacing:.32em;text-transform:uppercase;color:rgba(236,230,216,.88);text-shadow:0 0 12px rgba(5,7,13,.9);}
+#tryn b{margin-top:6px;font:400 10px 'Space Mono',ui-monospace,Menlo,monospace;letter-spacing:.28em;}
+#tryn.go{animation-duration:1.8s;}
+/* marcador de juego: barra fina arriba en lugar del número grande */
+#scorewrap, #best{display:none !important;}
+#hud{top:max(3vh,18px);height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+#pbar{align-items:center;gap:7px;width:min(44vw,300px);}
+#pbar .bh{flex:0 0 auto;width:11px;height:11px;border-radius:50%;background:#000;box-shadow:0 0 0 1.5px #ff5a1f,0 0 9px rgba(255,90,31,.7);}
+#pbar .ex{flex:0 0 auto;width:11px;height:11px;border-radius:50%;border:1.5px solid rgba(236,230,216,.4);box-sizing:border-box;transition:border-color .3s,box-shadow .3s;}
+#pbar .ln{position:relative;flex:1;height:2px;background:repeating-linear-gradient(90deg, rgba(236,230,216,.22) 0 4px, transparent 4px 8px);}
+#pbar .ln i{position:absolute;left:0;top:0;bottom:0;width:var(--p,0%);background:linear-gradient(90deg, rgba(236,230,216,.1), rgba(236,230,216,.85));transition:width .35s cubic-bezier(.3,.8,.3,1);}
+#pbar .ln u{display:none;position:absolute;top:-5px;left:var(--r,0%);width:2px;height:12px;margin-left:-1px;border-radius:1px;background:#ffd36b;box-shadow:0 0 6px rgba(255,211,107,.8);}
+#pbar.hasrec .ln u{display:block;}
+#pbar .ln b{position:absolute;top:50%;left:var(--p,0%);width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#8fc4ff,#2f6fd8 60%,#123a7a);box-shadow:0 0 8px rgba(143,208,255,.9);transition:left .35s cubic-bezier(.3,.8,.3,1);}
+#pbar.beat .ln i{background:linear-gradient(90deg, rgba(255,211,107,.15), #ffd36b);box-shadow:0 0 8px rgba(255,211,107,.5);}
+#pbar.beat .ln u{opacity:.35;}
+/* la barra en la misma línea que pausa y estrellas; el número cuelga debajo sin moverla */
+#hud{position:absolute;}
+#pnum{margin-top:0;text-align:center;}
+/* vuelve el conteo de anillos, pero discreto: en la línea de pausa y estrellas, sin robar la atención */
+#pbar{display:none !important;}
+#pnum{position:absolute;left:0;right:0;top:0;height:48px;display:flex;align-items:center;justify-content:center;gap:6px;font:600 24px 'Unbounded',system-ui,sans-serif;letter-spacing:.01em;color:rgba(236,230,216,.92);text-shadow:0 0 14px rgba(5,7,13,.8);transition:color .3s;}
+#pnum span{font-size:12px;font-weight:500;letter-spacing:.04em;color:rgba(236,230,216,.4);transform:translateY(3px);}
+#pnum.beat{color:#ffe7a8;text-shadow:0 0 16px rgba(255,211,107,.45);}
+#tryn{top:calc(max(3vh,18px) + 62px);}
+#pnum, #tryn, #wallet{text-shadow:0 0 10px rgba(3,4,10,.95), 0 0 22px rgba(3,4,10,.8), 0 1px 2px rgba(0,0,0,.9);}
+@keyframes wfull{50%{filter:drop-shadow(0 0 8px rgba(255,211,107,.9));}}
+@keyframes wstar{40%{transform:scale(1.45) rotate(18deg);filter:drop-shadow(0 0 10px rgba(255,211,107,1));}}
+@keyframes tryn{0%{opacity:0;transform:translateY(-4px);}12%{opacity:1;transform:none;}70%{opacity:1;}100%{opacity:0;}}
+/* panel central: antes de jugar, victoria y derrota */
+.chips{margin-top:26px;display:flex;flex-direction:column;align-items:center;gap:9px;pointer-events:auto;}
+.chips .lbl{font-weight:300;font-size:12px;color:var(--muted);}
+.chips .row{display:flex;gap:8px;}
+.chip{font:500 12px 'Unbounded',system-ui,sans-serif;color:var(--muted);background:transparent;border:1px solid rgba(236,230,216,.2);border-radius:999px;padding:8px 13px;cursor:pointer;}
+.chip.on{color:var(--fg);border-color:var(--sun);}
+.chip:focus-visible{outline:2px solid var(--fg);outline-offset:2px;}
+#panel.hide .chips{pointer-events:none;}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){ .chip:hover{animation:hop .35s ease-out forwards;} .chip:hover{border-color:rgba(236,230,216,.5);} }
+.chip.act{pointer-events:auto;margin-top:18px;}
+#panel{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;pointer-events:none;padding:0 24px;transition:opacity .25s;}
+#panel.hide{opacity:0;}
+#panel.top{justify-content:flex-start;padding-top:max(9vh,56px);}
+.title{font-weight:900;font-size:clamp(52px,16vw,108px);letter-spacing:-.04em;line-height:.9;
+  color:var(--fg);}
+.big{font-weight:900;font-size:clamp(72px,24vw,140px);line-height:.9;letter-spacing:-.04em;
+}
+.sub{margin-top:18px;font-weight:300;font-size:15px;line-height:1.6;color:var(--muted);max-width:30ch;}
+.msg{margin-top:14px;font-weight:500;font-size:16px;color:var(--fg);}
+.msg.rec{color:var(--sun);}
+.cta{margin-top:34px;font-weight:500;font-size:14px;color:var(--fg);animation:blink 1.1s ease-in-out infinite;}
+@media (prefers-reduced-motion: reduce){ .cta{animation:none} }
+/* pantalla antes de jugar: mínima */
+#panel .mlv{margin-top:0;font-size:11px;font-weight:500;text-transform:uppercase;}
+#panel .mhelp{display:flex;align-items:center;gap:16px;margin-top:22px;font-size:11.5px;letter-spacing:.06em;color:rgba(236,230,216,.62);}
+#panel .mhelp span{display:inline-flex;align-items:center;gap:7px;}
+#panel .mhelp svg{width:18px;height:18px;color:#ffa155;}
+#panel .mhelp i{width:1px;height:14px;background:rgba(236,230,216,.18);}
+#panel .mgo{font-size:15px;animation:mgoPulse 1.8s ease-in-out infinite;}
+@media (max-width:420px){ #panel .mhelp{flex-direction:column;gap:9px;} #panel .mhelp i{display:none;} }
+@media (prefers-reduced-motion:reduce){ #panel .mgo{animation:none;opacity:1;} }
+/* pantalla de victoria: título, tu premio, planetas rescatados y un solo botón principal */
+#panel.wscr::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;}
+#panel.wscr{z-index:6;isolation:isolate;}
+#panel .wsum{display:flex;align-items:center;gap:14px;margin-top:18px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(236,230,216,.55);}
+#panel .wsum i{width:1px;height:14px;background:rgba(236,230,216,.2);}
+#panel .wsum .wst{color:rgba(236,230,216,.7);font-size:14px;letter-spacing:.06em;font-weight:500;}
+#panel .wsum .wst.on{color:#ffd36b;text-shadow:0 0 12px rgba(255,211,107,.45);}
+#panel .wres{display:flex;flex-direction:column;align-items:center;}
+#panel .wres small{font-size:10px;text-transform:uppercase;}
+#panel .wpl{display:flex;gap:22px;}
+#panel .wp{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:rgba(236,230,216,.8);animation:wpIn .7s cubic-bezier(.2,.8,.3,1.2) both;}
+#panel .wp:nth-child(2){animation-delay:.15s;}
+#panel .wp:nth-child(3){animation-delay:.3s;}
+#panel .wp img, #panel .wp svg{display:block;}
+#panel .wp b{font-weight:500;}
+#panel .wbtn{margin-top:30px;position:relative;padding:15px 34px;border-radius:999px;border:1.5px solid #ff8a3d;background:radial-gradient(120% 160% at 50% 135%, rgba(255,120,40,.45), rgba(255,120,40,.05) 55%, rgba(9,11,22,.95) 80%), #0a0c17;color:#fff4ea;font:500 13px 'Unbounded',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;box-shadow:0 0 24px rgba(255,120,40,.3);pointer-events:auto;}
+#panel .wbtn:hover{box-shadow:0 0 34px rgba(255,140,60,.5);}
+#panel .wlinks{display:flex;align-items:center;gap:14px;margin-top:16px;}
+#panel .wlinks i{width:1px;height:12px;background:rgba(236,230,216,.2);}
+#panel .wlinks button{background:none;border:0;padding:6px 4px;color:rgba(236,230,216,.6);font:500 11px 'Unbounded',system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;pointer-events:auto;}
+#panel .wlinks button:hover{color:var(--fg);}
+/* victoria: una palabra, tus estrellas, lo que rescataste y a dónde sigues */
+#panel .wtit{font-size:clamp(34px,10vw,60px);line-height:1;margin-top:0;}
+#panel .wstars{display:flex;}
+#panel .wstars span{animation:wsIn .45s cubic-bezier(.2,.8,.3,1.4) both;}
+#panel .wstars svg{width:100%;height:100%;display:block;fill:none;stroke:rgba(236,230,216,.35);stroke-width:1.6;stroke-linejoin:round;}
+#panel .wstars .on svg{fill:#ffd36b;stroke:#ffe7a8;filter:drop-shadow(0 0 6px rgba(255,211,107,.7));}
+#panel .wres{margin-top:24px;gap:8px;}
+#panel .wres small{color:rgba(236,230,216,.45);letter-spacing:.24em;}
+#panel .wp img, #panel .wp svg{width:50px;height:50px;}
+#panel .wact{display:flex;align-items:center;}
+#panel .wact .wbtn{margin-top:0;}
+#panel .wico{border-radius:50%;border:1px solid rgba(236,230,216,.28);background:rgba(10,12,23,.6);color:rgba(236,230,216,.8);display:grid;place-items:center;cursor:pointer;pointer-events:auto;padding:0;}
+#panel .wico:hover{color:var(--fg);border-color:rgba(236,230,216,.6);}
+/* victoria como en Geometry Dash: título, intentos, estrellas y tres botones redondos */
+#panel .wtit{animation:wtIn .7s cubic-bezier(.2,.9,.25,1.3) both;text-shadow:0 0 30px rgba(255,161,85,.35);}
+#panel .wtries{margin-top:12px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(236,230,216,.5);animation:wfade .5s .25s both;}
+#panel .wstars{margin-top:18px;gap:10px;}
+#panel .wstars span{width:26px;height:26px;}
+#panel .wact{gap:22px;margin-top:34px;animation:wfade .5s .8s both;}
+#panel .wgo{width:84px;height:84px;border-radius:50%;border:0;background:var(--sun);color:#fff;display:grid;place-items:center;cursor:pointer;pointer-events:auto;padding:0;box-shadow:0 0 0 6px rgba(255,107,44,.16),0 0 34px rgba(255,107,44,.45);}
+#panel .wgo svg{width:34px;height:34px;margin-left:4px;}
+#panel .wgo:hover{transform:scale(1.05);}
+#panel .wgo:active{transform:scale(.94);}
+#panel .wico{width:54px;height:54px;}
+#panel .wico svg{width:22px;height:22px;}
+/* al terminar, el juego queda desenfocado detrás: se siente que la partida acabó */
+#panel.wscr::before{background:radial-gradient(120% 80% at 50% 30%, rgba(5,7,13,.62), rgba(5,7,13,.45));-webkit-backdrop-filter:blur(14px) saturate(.85);backdrop-filter:blur(14px) saturate(.85);animation:wblur .9s ease-out both;}
+/* pantalla de derrota: número, barra con tu récord y reintentar */
+#panel .drec{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#ffd36b;text-shadow:0 0 12px rgba(255,211,107,.5);margin-bottom:10px;animation:wfade .4s .1s both;}
+#panel .dnum{font-weight:600;font-size:clamp(64px,18vw,104px);line-height:.95;color:var(--fg);animation:wtIn .5s cubic-bezier(.2,.9,.25,1.3) both;}
+#panel .dnum span{font-size:.26em;font-weight:500;color:rgba(236,230,216,.45);margin-left:8px;letter-spacing:.04em;}
+#panel .dnum.rec{color:#ffe7a8;text-shadow:0 0 28px rgba(255,211,107,.45);}
+#panel .dbar{display:flex;align-items:center;gap:8px;width:min(300px,78vw);margin-top:22px;animation:wfade .4s .2s both;}
+#panel .dbar .bh{flex:0 0 auto;width:12px;height:12px;border-radius:50%;background:#000;box-shadow:0 0 0 1.5px #ff5a1f,0 0 10px rgba(255,90,31,.7);}
+#panel .dbar .ex{flex:0 0 auto;width:12px;height:12px;border-radius:50%;border:1.5px solid rgba(236,230,216,.35);box-sizing:border-box;}
+#panel .dbar .ln{position:relative;flex:1;height:2px;background:repeating-linear-gradient(90deg, rgba(236,230,216,.28) 0 4px, transparent 4px 8px);}
+#panel .dbar .ln i{position:absolute;left:0;top:0;bottom:0;width:var(--p);background:linear-gradient(90deg, rgba(236,230,216,.08), rgba(236,230,216,.8));animation:dfill .8s .25s cubic-bezier(.3,.8,.3,1) both;}
+#panel .dbar .ln u{position:absolute;top:-6px;left:var(--b);width:2px;height:14px;margin-left:-1px;border-radius:1px;background:#ffd36b;box-shadow:0 0 6px rgba(255,211,107,.8);}
+#panel .dbar .ln b{position:absolute;top:50%;left:var(--p);width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#8fc4ff,#2f6fd8 60%,#123a7a);box-shadow:0 0 8px rgba(143,208,255,.9);animation:dmove .8s .25s cubic-bezier(.3,.8,.3,1) both;}
+#panel .wact .ghost{visibility:hidden;}
+#panel .dre svg{margin-left:0;width:36px;height:36px;}
+/* antes de jugar: el nivel como dato del panel (letra de terminal) y la invitación en la letra del juego */
+#panel .mlv{font:400 10.5px 'Space Mono',ui-monospace,Menlo,monospace;letter-spacing:.26em;}
+#panel .mlv::before{content:'▸ ';color:#ffa155;letter-spacing:0;}
+#panel .mgo{margin-top:22px;font:500 17px 'Unbounded',system-ui,sans-serif;letter-spacing:.06em;text-transform:none;color:var(--fg);text-shadow:none;}
+/* textos legibles sobre fondos brillantes (galaxias y nebulosas) */
+#panel .mlv, #panel .mgo{text-shadow:0 0 10px rgba(3,4,10,.95), 0 0 22px rgba(3,4,10,.8), 0 1px 2px rgba(0,0,0,.9);}
+#panel .mlv{color:rgba(236,230,216,.78);}
+@keyframes blink{50%{opacity:.25}}
+@keyframes mgoPulse{0%,100%{opacity:.55;transform:scale(1);}50%{opacity:1;transform:scale(1.04);}}
+@keyframes wpIn{from{opacity:0;transform:scale(.6) translateY(8px);}}
+@keyframes wsIn{from{opacity:0;transform:scale(.3) rotate(-30deg);}}
+@keyframes wtIn{from{opacity:0;transform:scale(.55);letter-spacing:.2em;}}
+@keyframes wfade{from{opacity:0;transform:translateY(6px);}}
+@keyframes wblur{from{-webkit-backdrop-filter:blur(0) saturate(1);backdrop-filter:blur(0) saturate(1);opacity:0;}}
+@keyframes dfill{from{width:0;}}
+@keyframes dmove{from{left:0;}}
+/* menú de pausa y cuenta 3·2·1 */
+/* ---------- pausa: la misma pantalla de "Escapaste", con la partida congelada detrás ---------- */
+body.paused #quit{opacity:0 !important;pointer-events:none !important;}
+body.paused #hud, body.paused #wallet{opacity:0 !important;transition:opacity .25s;}
+#panel.pzp{z-index:7;pointer-events:none;}
+#panel.pzp::before{-webkit-backdrop-filter:blur(6px) saturate(.8);backdrop-filter:blur(6px) saturate(.8);background:radial-gradient(120% 80% at 50% 40%, rgba(5,7,13,.58), rgba(5,7,13,.42));animation:wblur .45s ease-out both;}
+#panel.pzp .wtit{text-shadow:0 0 30px rgba(143,208,255,.32);}
+#panel.pzp .wact{margin-top:30px;}
+#panel.pzp button, #panel.pzp .pz-vol{pointer-events:auto;}
+.pz-trip{position:relative;display:flex;align-items:center;gap:8px;width:250px;margin:22px auto 0;animation:wfade .5s .35s both;}
+.pz-trip .bh{flex:0 0 auto;width:12px;height:12px;border-radius:50%;background:#000;box-shadow:0 0 0 1.5px #ff5a1f,0 0 10px rgba(255,90,31,.7);}
+.pz-trip .exit{flex:0 0 auto;width:12px;height:12px;border-radius:50%;border:1.5px dashed rgba(236,230,216,.45);box-sizing:border-box;}
+.pz-trip .line{position:relative;flex:1;height:2px;background:repeating-linear-gradient(90deg,rgba(236,230,216,.28) 0 4px,transparent 4px 8px);}
+.pz-trip .line i{position:absolute;left:0;top:0;bottom:0;width:var(--p);background:linear-gradient(90deg,rgba(236,230,216,.08),rgba(236,230,216,.75));}
+.pz-trip .me{position:absolute;top:50%;left:var(--p);width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#8fc4ff,#2f6fd8 60%,#123a7a);box-shadow:0 0 8px rgba(143,208,255,.9);}
+.pz-trip .rec{position:absolute;top:-6px;left:var(--r);width:2px;height:14px;margin-left:-1px;border-radius:1px;background:#ffd36b;box-shadow:0 0 7px rgba(255,211,107,.85);}
+.pz-trip .rec::after{content:'RÉCORD';position:absolute;top:-15px;left:50%;transform:translateX(-50%);font:400 8px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;color:#ffd36b;}
+.pz-sl{display:flex;flex-direction:column;gap:18px;width:270px;margin-top:44px;animation:wfade .5s 1s both;}
+.pz-vol{display:flex;align-items:center;gap:12px;width:100%;touch-action:none;}
+.pz-vol .ico{flex:0 0 auto;width:32px;height:32px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#eaf3ff;cursor:pointer;
+  background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.18),rgba(143,208,255,.06) 40%,rgba(8,12,24,.7) 72%);border:1px solid rgba(160,205,255,.55);box-shadow:0 0 14px rgba(120,180,255,.22),inset 0 0 10px rgba(143,208,255,.16);transition:opacity .2s;}
+.pz-vol .ico svg{width:15px;height:15px;filter:drop-shadow(0 0 3px rgba(143,208,255,.6));}
+.pz-vol.fx .ico{color:#ffe2c8;border-color:rgba(255,170,110,.55);box-shadow:0 0 14px rgba(255,140,60,.22),inset 0 0 10px rgba(255,161,85,.16);}
+.pz-vol .lb{flex:0 0 auto;width:60px;text-align:left;font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.22em;text-transform:uppercase;color:#ece6d8;}
+.pz-vol .line{position:relative;flex:1;height:4px;border-radius:3px;background:rgba(236,230,216,.16);cursor:pointer;}
+.pz-vol .line::before{content:'';position:absolute;left:-10px;right:-10px;top:-16px;bottom:-16px;}
+.pz-vol .line i{position:absolute;left:0;top:0;bottom:0;width:var(--v);border-radius:3px;background:linear-gradient(90deg,#4f8fe0,#cfe8ff);box-shadow:0 0 12px rgba(143,208,255,1);}
+.pz-vol .line b{position:absolute;top:50%;left:var(--v);width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#8fc4ff,#2f6fd8 60%,#123a7a);box-shadow:0 0 0 4px rgba(143,208,255,.22),0 0 16px rgba(143,208,255,1);transition:transform .15s;}
+.pz-vol.fx .line i{background:linear-gradient(90deg,#e0662a,#ffd0a0);box-shadow:0 0 12px rgba(255,140,60,1);}
+.pz-vol.fx .line b{background:radial-gradient(circle at 35% 35%,#ffd2a0,#ff7a2a 60%,#8a2e0c);box-shadow:0 0 0 4px rgba(255,161,85,.22),0 0 16px rgba(255,140,60,1);}
+.pz-vol.drag .line b{transform:scale(1.2);}
+.pz-vol.zero .line i{opacity:0;}
+.pz-vol.zero .ico{opacity:.55;}
+.pz-vol .val{flex:0 0 auto;width:28px;text-align:right;font:400 11px 'Space Mono',ui-monospace,monospace;color:#fff;}
+/* al seguir: cuenta 3 · 2 · 1 sobre la partida, al ritmo */
+#pzcount{position:absolute;left:0;right:0;top:calc(max(3vh,18px) + 92px);height:150px;z-index:7;pointer-events:none;display:flex;align-items:center;justify-content:center;}
+#pzcount b{position:absolute;font:600 clamp(64px,22vw,110px)/1 'Unbounded',system-ui,sans-serif;color:#ece6d8;text-shadow:0 0 34px rgba(255,161,85,.55),0 0 2px rgba(255,255,255,.6);animation:pzNum .62s cubic-bezier(.2,.8,.3,1) both;}
+#pzcount i{position:absolute;width:130px;height:130px;border-radius:50%;border:2px solid rgba(255,161,85,.8);box-shadow:0 0 22px rgba(255,140,60,.6),inset 0 0 18px rgba(255,140,60,.35);animation:pzRing .62s ease-out both;}
+#pzcount u{position:absolute;top:calc(100% + 6px);font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.32em;text-transform:uppercase;color:rgba(236,230,216,.75);text-decoration:none;text-shadow:0 0 10px rgba(3,4,10,.95);}
+@media (prefers-reduced-motion:reduce){ #pzcount b,#pzcount i{animation-duration:.01s} }
+@keyframes pzNum{0%{opacity:0;transform:scale(1.5);filter:blur(6px)}22%{opacity:1;transform:scale(1);filter:blur(0)}75%{opacity:1}100%{opacity:0;transform:scale(.86)}}
+@keyframes pzRing{0%{opacity:0;transform:scale(.55)}20%{opacity:1}100%{opacity:0;transform:scale(1.9)}}
 </style>
 </head>
 <body>
@@ -1767,10 +1815,6 @@ function rescuedCards(before){
   return '<div class="wres"><div class="wpl">' + nuevos.map(P => '<span class="wp" title="' + P.name + '">' + planetThumb(P.id) + '</span>').join('') + '</div>' +
     '<small>' + (nuevos.length > 1 ? 'Rescatados' : 'Rescatado') + '</small></div>';
 }
-function rescuedSince(before){
-  const now = unlockedIds(), nuevos = PLANETS_P.filter(P => now.includes(P.id) && !before.includes(P.id));
-  return nuevos.length ? '<div class="msg rec" style="margin-top:14px">¡Rescataste a ' + (nuevos.length > 1 ? nuevos.slice(0, -1).map(P => P.name).join(', ') + ' y ' + nuevos[nuevos.length - 1].name : nuevos[0].name) + '!</div><div class="sub" style="margin-top:4px;font-size:12px">Elígelo en Planetas, en la pantalla de inicio.</div>' : '';
-}
 function saveRunStats(){
   if (perfCount > maxPerf){ maxPerf = perfCount; try{ localStorage.setItem('orbita_p1_maxperf', String(maxPerf)); }catch(e){} }
 }
@@ -1810,7 +1854,6 @@ let gest = null, pending = false, pendingT = 0;
 let hintsShown = 0;
 try{ hintsShown = parseInt(localStorage.getItem('orbita_p1_pista')||'0',10) || 0; }catch(e){ hintsShown = 0; }
 let showHint = false, hintT = 0;
-function updateDJ(){}
 let swallow = null, holeFlare = 0;
 let streak = 0, jumpClear = 999, culprit = null, culpritT = 0, landPop = 0;
 const PERFECT = 12;
@@ -1854,8 +1897,6 @@ function beatPhase(){ return (AC && musicOn && musicStart >= 0) ? frac(beatTime(
 function beatKick(){ const x = beatPhase(); return x < 0 ? 0 : Math.exp(-x*7)*(reduceMotion ? .35 : 1); }
 // respiración lenta con el bajo (cada dos golpes)
 function bassBreath(){ return (AC && musicOn && musicStart >= 0) ? .5 - .5*Math.cos(2*Math.PI*frac(beatTime()/(2*TB))) : 0; }
-// distancia (en segundos) al golpe más cercano
-function beatError(){ const x = beatPhase(); return x < 0 ? 9 : Math.min(x, 1 - x)*TB; }
 let jumpOnBeat = false, lastBeatIdx = -1;
 const ON_BEAT = .055;
 function beatTime(){ return (AC && musicStart >= 0) ? AC.currentTime - musicStart - (AC.outputLatency || AC.baseLatency || 0) : t; }
@@ -1979,15 +2020,6 @@ function powerName(){ const P = curP(); return P && P.power ? P.power[0] : ''; }
 let bhWob = 0, BURN_DUR = 1.5;
 function powerShout(col){ pfx.push({k: 'ignite', t: 0, col: col || '#ffd36b'}); pulse = 1; try{ if (AC && !muted){ const n = AC.currentTime; [0, 5, 12].forEach((sm, i) => uiTone(ROOT*Math.pow(2, (sm + ({luna: 3, mercurio: 9, venus: 2, marte: -2, jupiter: -5, saturno: 4, urano: 7, neptuno: 10, pluton: -7, sol: 0})[curPlanet] || 0)/12), n + i*.05, .8, .04)); } }catch(e){}
   texts = texts.filter(x => !x.tip && x.key !== 'pow' && x.y !== -R0-96 && x.y !== -R0-76); texts.push({txt: powerName(), x: 0, y: -R0-96, life: 1.4, size: 20, col: col || '#ffd36b', center: true, key: 'pow'}); }
-function nextGapOffset(ring, R){   // cuánto girar el anillo para dejar un hueco justo encima de ti
-  let best = null;
-  for (let i = 0; i < 360; i++){
-    const th = pAng + (i % 2 ? 1 : -1)*Math.floor((i + 1)/2)*Math.PI/180; let ok = true;
-    for (const o of ring.obs){ const da = Math.abs(Math.atan2(Math.sin(obsAng(ring, o) - th), Math.cos(obsAng(ring, o) - th))); if (da*R < PR*sizeK() + obsRad(ring, o) + 6){ ok = false; break; } }
-    if (ok){ best = Math.atan2(Math.sin(pAng - th), Math.cos(pAng - th)); break; }
-  }
-  return best;
-}
 function usePower(mid){
   const id = curPlanet; if (id === 'pluton'){ if (!texts.some(x => x.key === 'pow')) texts.push({txt: shieldLeft > 0 ? 'Caronte está listo: te salvará una vez' : 'Caronte ya te salvó', x: 0, y: -R0-30, life: 1.2, size: 13, col: '#d9c7b4', center: true, key: 'pow'}); return; }
   charge = 0; showHint = false; pending = false; usedDouble = true; noteDouble(); buzz([15,30,25]);
@@ -3090,41 +3122,6 @@ function upgradeToDouble(){
   noise(.25, 300, 6000, .25, 'bandpass'); cowbell(SCALE[4] + 12); buzz([15,30,25]);
 }
 // ---- la Tierra escapa: fuera del alcance del agujero negro ----
-function tutRespawn(x, y){
-  state = 'dead'; flash = .4; shake = reduceMotion ? 0 : 6; buzz(30); noise(.35, 3000, 200, .35, 'lowpass');
-  for (let i=0;i<24;i++){ const a = Math.random()*Math.PI*2, v = 40 + Math.random()*120; particles.push({x, y, vx:Math.cos(a)*v, vy:Math.sin(a)*v, life:.6 + Math.random()*.4, col:['#2b63c9','#4fa35a','#ffffff','#8fd0ff'][i%4], s:2 + Math.random()*2}); }
-  texts.push({txt:'Otra vez', x:0, y:-R0-70, life:1.2, size:18, col:BONE, center:true});
-  setTimeout(() => {
-    state = 'play'; jumping = false; jumpTarget = 1; pLevel = level; pending = false; gest = null;
-    sunLevel = Math.min(sunLevel, level - 1.6); lastEaten = Math.floor(sunLevel); swallow = null; culprit = null; culpritT = 0;
-    if (level >= 8) charge = 3;
-  }, 700);
-}
-function tutorialWin(){
-  state = 'win'; winT = 0; canRestart = false; flash = .5; pulse = 1;
-  tutorialDone = true; try{ localStorage.setItem('orbita_p1_tutorial', '1'); }catch(e){}
-  stopMusic(); winSound(); buzz([30,50,90]); elHud.style.opacity = 0;
-  setTimeout(() => {
-    elPanel.classList.remove('top');
-    elPanel.innerHTML = '<div class="title" style="font-size:clamp(28px,8vw,50px);line-height:1.1">Ganaste tiempo…</div>' +
-      '<div class="sub" style="margin-top:12px;font-size:17px;color:var(--fg)">…pero sigue tras de ti.</div>' +
-      '<div class="msg" style="margin-top:22px;color:var(--muted);font-weight:400;font-size:13px;letter-spacing:.08em">TUTORIAL COMPLETADO</div>' +
-      '<div class="sub" style="margin-top:10px">¿A dónde quieres escapar?</div>' +
-      '<button type="button" class="chip act" data-act="lvl1" style="margin-top:22px;background:var(--sun);border-color:var(--sun);color:#fff;padding:12px 22px">Jugar el Sistema solar</button>' +
-      '<button type="button" class="chip act" data-act="levels" style="margin-top:12px">Ver todos los niveles</button>';
-    elPanel.classList.remove('hide');
-    setTimeout(() => { canRestart = true; }, 600);
-  }, 2200);
-}
-function startTutorial(){
-  homeAmbience(false);
-  if (elLv) elLv.classList.add('off');
-  tutorial = true; setup(); state = 'play'; winT = 0; perfCount = 0;
-  runRecord = 0; newRec = false; updateRingHUD();
-  elHud.style.opacity = 1; elPanel.classList.add('hide');
-  charge = 0; jumpTarget = 1; pending = false; gest = null; showHint = false; shieldLeft = 1; usedDouble = false;
-  startMusic();
-}
 const LV_END = ['La Tierra dejó atrás al agujero negro.',
   'Cruzaste las Nubes de Magallanes, las dos galaxias que danzan alrededor de la nuestra.',
   'Escapaste hacia Andrómeda. Algún día, ella también vendrá por nosotros.',
@@ -3294,11 +3291,6 @@ function eatRings(){
     if (lvl === 2 && state === 'play' && !reduceMotion) shake = Math.max(shake, 3.5);
   }
 }
-function nearMiss(x,y){
-  timeScale = .32; slowTimer = .2;
-  texts.push({txt:'¡Cerca!', x, y:y-20, life:.9, size:14, col:BONE});
-  noise(.3, 500, 5000, .22, 'bandpass'); buzz(12);
-}
 function die(x,y,cause,who){
   if (tutorial){ tutRespawn(x, y); return; }
   state = 'dead'; deadT = 0; canRestart = false;
@@ -3339,6 +3331,42 @@ function showTry(recRing){
   el.classList.remove('go'); void el.offsetWidth; el.classList.add('go');
 }
 
+// ---------- el tutorial: reaparecer sin perder, terminarlo y empezarlo ----------
+function tutRespawn(x, y){
+  state = 'dead'; flash = .4; shake = reduceMotion ? 0 : 6; buzz(30); noise(.35, 3000, 200, .35, 'lowpass');
+  for (let i=0;i<24;i++){ const a = Math.random()*Math.PI*2, v = 40 + Math.random()*120; particles.push({x, y, vx:Math.cos(a)*v, vy:Math.sin(a)*v, life:.6 + Math.random()*.4, col:['#2b63c9','#4fa35a','#ffffff','#8fd0ff'][i%4], s:2 + Math.random()*2}); }
+  texts.push({txt:'Otra vez', x:0, y:-R0-70, life:1.2, size:18, col:BONE, center:true});
+  setTimeout(() => {
+    state = 'play'; jumping = false; jumpTarget = 1; pLevel = level; pending = false; gest = null;
+    sunLevel = Math.min(sunLevel, level - 1.6); lastEaten = Math.floor(sunLevel); swallow = null; culprit = null; culpritT = 0;
+    if (level >= 8) charge = 3;
+  }, 700);
+}
+function tutorialWin(){
+  state = 'win'; winT = 0; canRestart = false; flash = .5; pulse = 1;
+  tutorialDone = true; try{ localStorage.setItem('orbita_p1_tutorial', '1'); }catch(e){}
+  stopMusic(); winSound(); buzz([30,50,90]); elHud.style.opacity = 0;
+  setTimeout(() => {
+    elPanel.classList.remove('top');
+    elPanel.innerHTML = '<div class="title" style="font-size:clamp(28px,8vw,50px);line-height:1.1">Ganaste tiempo…</div>' +
+      '<div class="sub" style="margin-top:12px;font-size:17px;color:var(--fg)">…pero sigue tras de ti.</div>' +
+      '<div class="msg" style="margin-top:22px;color:var(--muted);font-weight:400;font-size:13px;letter-spacing:.08em">TUTORIAL COMPLETADO</div>' +
+      '<div class="sub" style="margin-top:10px">¿A dónde quieres escapar?</div>' +
+      '<button type="button" class="chip act" data-act="lvl1" style="margin-top:22px;background:var(--sun);border-color:var(--sun);color:#fff;padding:12px 22px">Jugar el Sistema solar</button>' +
+      '<button type="button" class="chip act" data-act="levels" style="margin-top:12px">Ver todos los niveles</button>';
+    elPanel.classList.remove('hide');
+    setTimeout(() => { canRestart = true; }, 600);
+  }, 2200);
+}
+function startTutorial(){
+  homeAmbience(false);
+  if (elLv) elLv.classList.add('off');
+  tutorial = true; setup(); state = 'play'; winT = 0; perfCount = 0;
+  runRecord = 0; newRec = false; updateRingHUD();
+  elHud.style.opacity = 1; elPanel.classList.add('hide');
+  charge = 0; jumpTarget = 1; pending = false; gest = null; showHint = false; shieldLeft = 1; usedDouble = false;
+  startMusic();
+}
 // ---------- pausa ----------
 // Todo se congela de verdad: el juego deja de avanzar y el sonido se suspende (la música sigue justo donde quedó, al ritmo).
 // Se ve como la pantalla de "Escapaste": la misma letra, los mismos tres botones. Al seguir, una cuenta 3·2·1 para no volver de golpe.
@@ -3935,32 +3963,6 @@ function drawBgPlanet(id, x, y, R, alpha){
   const h = R*res.pad; ctx.drawImage(res.cv, x - h, y - h, 2*h, 2*h);
   planetRing(id, x, y, R, 'front', false);
   ctx.restore();
-}
-function drawSolarJourney(){
-  if (!PLGL.ok()) return;
-  solarJ += (Math.min(1, camLevel/GOAL) - solarJ)*.08;
-  const M = Math.min(W, H), span = H*4.2;
-  for (const P of SOLAR_PATH){
-    const y = H*.46 + (solarJ - P.at)*span;
-    if (P.belt){
-      if (!beltRocks){ beltRocks = []; for (let i = 0; i < 70; i++) beltRocks.push({x: Math.random(), y: (Math.random() - .5)*.5, z: .3 + Math.random()*.7, s: Math.random(), a: Math.random()*6.28, sp: (Math.random() - .5)*.6}); }
-      for (const b of beltRocks){
-        const yy = y + b.y*H*1.1*(1 + b.z), xx = ((b.x*W + t*6*b.z) % W + W) % W;
-        if (yy < -20 || yy > H + 20) continue;
-        const rs = (1.2 + b.s*3.2)*(.5 + b.z)*(M/700 + .6);
-        ctx.save(); ctx.globalAlpha = .22 + .35*b.z; ctx.translate(xx, yy); ctx.rotate(b.a + t*b.sp);
-        ctx.fillStyle = b.z > .7 ? '#8a7f74' : '#5a5650';
-        ctx.beginPath(); ctx.moveTo(rs, 0); ctx.lineTo(rs*.3, rs*.8); ctx.lineTo(-rs*.7, rs*.5); ctx.lineTo(-rs, -rs*.2); ctx.lineTo(-rs*.2, -rs*.9); ctx.lineTo(rs*.6, -rs*.6); ctx.closePath(); ctx.fill();
-        ctx.restore();
-      }
-      continue;
-    }
-    const R = P.r*M*(W > H ? .8 : 1);
-    if (y < -R*2.5 || y > H + R*2.5) continue;
-    const x = P.x*W;
-    drawBgPlanet(P.id, x, y, R, .62);
-    if (P.moon) drawBgPlanet('luna', x - R*1.9, y - R*.9, R*.27, .62);
-  }
 }
 function renderScene(){
   const z = zoneOf(level);
@@ -5945,20 +5947,6 @@ const STAT_ROWS = [
   ['vel', 'Velocidad', v => v <= -10 ? 'Lento: salta flotando' : v >= 5 ? 'Rápido: salta al instante' : 'Salto normal', P => 'Velocidad en su órbita: ' + P.v, v => v > 0],
   ['res', 'Resistencia', v => v <= -30 ? 'Frágil: el agujero negro lo alcanza antes' : v <= -8 ? 'Algo frágil' : 'Firme cerca del agujero negro', P => 'Densidad real: ' + P.rho, v => v > 0],
 ];
-function scanHTML(P){
-  const rows = STAT_ROWS.map(([k, lab, hint, dat, good], i) => {
-    const v = P.st[k], cls = v === 0 ? '#ece6d8' : good(v) ? '#7ad38a' : '#ff8a4d';
-    return '<div class="srow"><div class="shead"><span>' + lab + '<small>' + hint(v) + '</small></span><span class="sval" style="color:' + cls + '">' + (v > 0 ? '+' : '') + v + ' %</span></div>' +
-      '<div class="sdat">' + dat(P) + '</div><div class="sbar"><b></b><i data-v="' + v + '" style="background:' + cls + ';transition-delay:' + (i*.15) + 's"></i></div></div>';
-  }).join('');
-  const ch = P.st.charge, chCol = ch < 3 ? '#7ad38a' : ch > 3 ? '#ff8a4d' : '#ece6d8';
-  const charge = '<div class="srow"><div class="shead"><span>Carga<small>Perfectos para tu poder</small></span><span class="sval" style="color:' + chCol + '">' + ch + '</span></div>' +
-    '<div class="sdat">Un día allí dura ' + P.day + ': mientras más rápido gira, más rápido carga</div><div class="spips">' + Array.from({length: ch}, (_, i) => '<i class="on" style="transition-delay:' + (.45 + i*.08) + 's"></i>').join('') + '</div></div>';
-  const soon = '';
-  return '<div class="sname">' + P.name + '</div>' + rows + charge +
-    '<div class="spower"><div class="spk">PODER ESPECIAL</div><div class="spn">' + P.power[0] + '</div><div class="spd">' + P.power[1] + '</div><div class="spf">' + P.power[2] + '</div>' + soon + '</div>' +
-    '<button type="button" class="sclose">Cerrar escaneo</button>';
-}
 // las barras crecen desde el centro (la Tierra) cuando el planeta termina de encogerse
 function applyScanBars(){
   if (!elPl || !elPl.querySelectorAll || !elPl.querySelector) return;
@@ -6215,12 +6203,11 @@ function drawGalBG(i){
   ctx.globalAlpha = 1;
 }
 
+// Fondos en WebGL: lo que comparten todos los shaders de fondo
 // ---------- fondos en WebGL: capas, movimiento, gas y la luz doblada por el agujero negro ----------
 // Se dibuja con la tarjeta gráfica a media resolución (el gas es suave) y se copia al lienzo del juego.
-const GLBG = (() => {
-  let cv = null, gl = null, progs = {}, buf = null, failed = false, flow = 0, photoTex = {}, lastKey = '';
-  const VS = 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }';
-  const COMMON = `
+const BG_VS = 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }';
+const BG_COMMON = `
 precision highp float;
 uniform vec2 uRes; uniform float uT, uFlow, uBeat, uJour; uniform vec3 uBH; uniform vec4 uWH; // xy: centro (px), z: radio de Einstein (px)
 float h21(vec2 p){ p = fract(p*vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x*p.y); }
@@ -6243,8 +6230,9 @@ vec3 stars(vec2 q, float sc, float dens){
   return c;
 }
 `;
-  // Andrómeda: disco inclinado ~77°, núcleo de estrellas viejas, brazos azules, franjas de polvo, regiones rosadas, M32 y M110
-  const FS_AND = COMMON + `
+// Andrómeda (nivel 3): el shader de la galaxia vista desde dentro
+// Andrómeda: disco inclinado ~77°, núcleo de estrellas viejas, brazos azules, franjas de polvo, regiones rosadas, M32 y M110
+const FS_AND = BG_COMMON + `
 uniform float uScale; uniform float uSpd; uniform float uBand;   // 0 visible · 1 ultravioleta · 2 infrarrojo · 3 todas las luces
 vec2 galC(){ return vec2((mix(.62, .5, uJour) + .03*sin(uT*.045))*uRes.x, (mix(-.32, .34, uJour) + .015*cos(uT*.037))*uRes.y); }
 vec3 galaxy(vec2 q){
@@ -6339,10 +6327,195 @@ void main(){
   col += (h21(q + fract(uT*7.3)*91.) - .5)*.035;                               // grano de cámara
   gl_FragColor = vec4(pow(max(col, 0.), vec3(.95)), 1.);
 }`;
-  // fondo con fotografía: la foto real en capas, con la luz doblada por el agujero negro
-  // Sistema solar: la Vía Láctea como en una foto de cielo profundo (muchísimas estrellas, polvo oscuro, nebulosas rojizas)
-  // y, al salir del sistema solar, la galaxia vista desde fuera con sus brazos espirales
-  const FS_MW = COMMON + `
+// Andrómeda: el viaje pasa por sus lugares reales, de las afueras al núcleo
+const FS_AND2 = BG_COMMON + `
+uniform float uScale;
+float fbm7(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 7; i++){ s += a*vn(p); p = m*p; a *= .5; } return s; }
+float rid(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 5; i++){ s += a*(1. - abs(vn(p)*2. - 1.)); p = m*p; a *= .5; } return s; }
+vec3 starsD(vec2 q, float sc, float dens, float bmul){
+  vec2 g = q/sc, id = floor(g), f = fract(g); vec3 c = vec3(0.);
+  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++){
+    vec2 o = vec2(x, y), cid = id + o; float n = h21(cid); if (n > dens) continue;
+    vec2 sp = o + h22(cid*1.7); float dd = length(f - sp)*sc;
+    float b = (pow(h21(cid + 7.1), 9.)*2.2 + .18)*bmul, tw = .8 + .2*sin(uT*(1. + 3.*n) + n*40.);
+    vec3 col = mix(vec3(1., .78, .6), vec3(.72, .84, 1.), h21(cid + 3.3));
+    c += col*b*tw*exp(-dd*dd*2.2);
+  }
+  return c;
+}
+vec2 sceneD(vec2 q, float drift){ return (q - .5*uRes)/uScale + vec2(.05*sin(uT*.05 + drift*300.), .07*sin(uFlow*drift*1.5 + uT*.04)); }   // se mece sin irse de la pantalla
+float win(float j, float a, float b){ return smoothstep(a - .05, a + .05, j)*(1. - smoothstep(b - .05, b + .05, j)); }
+vec3 meteors(vec2 q){
+  vec3 c = vec3(0.);
+  for (int i = 0; i < 3; i++){
+    float fi = float(i), per = 5. + fi*2.3, tt = uT + fi*3.7, k = floor(tt/per), ph = fract(tt/per);
+    if (ph > .18) continue;
+    vec2 a0 = vec2(h21(vec2(k, fi)), .55 + .45*h21(vec2(fi, k + 3.)))*uRes;
+    vec2 dir = normalize(vec2(-.8 + 1.6*h21(vec2(k + 9., fi)), -1.));
+    vec2 hd = a0 + dir*ph/.18*uRes.y*.7;
+    vec2 rel = q - hd; float along = dot(rel, -dir), perp = abs(dot(rel, vec2(-dir.y, dir.x)));
+    float L = uRes.y*.18;
+    float tr = step(0., along)*(1. - smoothstep(0., L, along))*exp(-perp*perp*.6);
+    float fade = sin(ph/.18*3.14159);
+    c += vec3(.85, .92, 1.)*tr*fade*.9 + vec3(1.)*exp(-dot(rel, rel)*.25)*fade;
+  }
+  return c;
+}
+mat2 rot(float a){ return mat2(cos(a), -sin(a), sin(a), cos(a)); }
+vec3 bokeh(vec2 q){
+  vec3 c = vec3(0.); vec2 g = (q + vec2(uT*14., uFlow*9.))/(uRes.y*.22), id = floor(g), f = fract(g);
+  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++){
+    vec2 o = vec2(x, y), cid = id + o; if (h21(cid + 31.) > .22) continue;
+    float rr = .12 + .2*h21(cid + 5.); float dd = length(f - o - h22(cid + 9.));
+    vec3 tint = mix(vec3(1., .4, .65), vec3(.45, .7, 1.), h21(cid + 2.));
+    c += tint*smoothstep(rr, rr*.75, dd)*(.05 + .04*sin(uT + h21(cid)*20.));
+  }
+  return c;
+}
+vec3 flares(vec2 q){
+  vec3 c = vec3(0.); vec2 g = (q + vec2(0., uFlow*3.))/(uRes.y*.3), id = floor(g), f = fract(g);
+  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++){
+    vec2 o = vec2(x, y), cid = id + o; float per = 3. + 5.*h21(cid + 3.), ph = fract(uT/per + h21(cid + 7.));
+    if (ph > .12) continue;
+    float e = sin(ph/.12*3.14159); vec2 pp = (f - o - h22(cid))*uRes.y*.3;
+    vec3 tint = mix(vec3(1., .8, .6), vec3(.7, .85, 1.), h21(cid + 1.));
+    c += tint*e*(exp(-dot(pp, pp)*.08)*2. + (exp(-abs(pp.x)*.9)*exp(-abs(pp.y)*.04) + exp(-abs(pp.y)*.9)*exp(-abs(pp.x)*.04))*.5);
+  }
+  return c;
+}
+// un disco espiral inclinado (Andrómeda está casi de canto: ~77°)
+vec3 disk(vec2 d, float tilt, float bright){
+  vec2 e = d; e.y /= tilt; float r = length(e), a = atan(e.y, e.x);
+  float sp = a - log(r + .03)*3.4 - uT*.03;
+  float arms = pow(.5 + .5*cos(2.*sp + fbm(e*3.)*2.), 2.5)*smoothstep(.05, .2, r);
+  float ring = exp(-pow((r - .55)/.12, 2.));
+  float cl = fbm7(e*8. + 2.);
+  vec3 col = vec3(.5, .65, 1.)*(arms + ring*.9)*exp(-r*1.4)*(.4 + 1.8*cl);
+  col += vec3(1., .3, .5)*smoothstep(.7, .84, fbm7(e*11. + 5.))*(arms + ring)*exp(-r*1.2)*1.3;
+  col += vec3(1., .86, .62)*exp(-r*r*14.)*1.2;
+  col *= .45 + 1.1*fbm7(e*24. + 7.);
+  col *= 1. - .75*smoothstep(.55, .78, rid(vec2(sp*1.2, r*9.) + 3.))*smoothstep(.08, .3, r)*exp(-r*.8);
+  return col*bright;
+}
+// 1 · las afueras: los brazos azules y polvo, con la galaxia ocupando todo el cielo
+vec3 outer(vec2 q){
+  vec2 d = rot(-.55 + uT*.008)*(sceneD(q, .003) - vec2(.15, .35));
+  return disk(d*.75, .3, 1.3) + vec3(.9, .94, 1.)*starsD(q, 2.4, .5*exp(-length(d)*1.5), .7);
+}
+// 2 · NGC 206: la nube de estrellas jóvenes más grande de Andrómeda, azul y llena de destellos
+vec3 ngc206(vec2 q){
+  vec2 d = sceneD(q, .004) - vec2(-.05, .22);
+  vec2 w = d + .1*vec2(fbm(d*3. + uT*.08), fbm(d*3. - uT*.07 + 4.));
+  float cloud = exp(-length(w*vec2(1., 1.6))*3.)*(.3 + 1.4*fbm7(w*7. + 1.));
+  vec3 col = vec3(.35, .6, 1.)*cloud*1.1 + vec3(.6, .45, 1.)*smoothstep(.55, .8, fbm7(w*4. + 6.))*cloud*.5;
+  col += vec3(1., .35, .55)*smoothstep(.76, .88, fbm7(w*14. + 3.))*cloud*1.6;
+  col += vec3(.8, .9, 1.)*starsD(q, 1.9, .95*clamp(cloud*1.5, 0., 1.), 1.5) + vec3(.6, .8, 1.)*starsD(q, 4.5, .55*clamp(cloud*1.4, 0., 1.), 2.6);
+  col *= 1. - .6*smoothstep(.62, .82, rid(w*vec2(6., 10.) + 9.))*smoothstep(.1, .5, cloud);
+  return col*(1. + .2*uBeat);
+}
+// 3 · M32: la pequeña galaxia elíptica que pasa rozando y arranca estrellas del disco
+vec3 m32(vec2 q){
+  vec2 d = sceneD(q, .004);
+  vec3 col = disk(rot(-.9)*(d - vec2(-.3, .5))*.6, .28, .7);
+  vec2 m = d - vec2(.12 + .05*sin(uT*.15), .28);
+  float r = length(m*vec2(1., 1.25));
+  col += vec3(1., .85, .6)*(exp(-r*r*220.)*1.6 + exp(-r*12.)*.5);
+  vec2 tt = rot(.5)*m; float tail = exp(-pow(tt.y/(.03 + .1*abs(tt.x)), 2.))*exp(-abs(tt.x)*3.)*fbm7(tt*8. - vec2(uT*.1, 0.));
+  col += vec3(1., .8, .6)*tail*.8;
+  col += vec3(1., .9, .75)*starsD(q, 2.2, .8*exp(-r*7.), 1.);
+  return col;
+}
+// 4 · el anillo de fuego: así se ve Andrómeda en infrarrojo, anillos de polvo encendido
+vec3 fireRing(vec2 q){
+  vec2 d = rot(-.5 + uT*.01)*(sceneD(q, .003) - vec2(0., .2)); d.y /= .42;
+  float r = length(d), a = atan(d.y, d.x);
+  float g = fbm7(vec2(a*4., r*10.) + uT*.06);
+  float rings = exp(-pow((r - .45 - .03*sin(a*3.))/.05, 2.))*1.4 + exp(-pow((r - .22)/.03, 2.))*.7 + exp(-pow((r - .75)/.07, 2.))*.5;
+  vec3 col = mix(vec3(1., .22, .08), vec3(1., .7, .25), g)*rings*(.4 + 1.4*g);
+  col += vec3(1., .5, .2)*pow(rid(vec2(a*6., r*14.) + uT*.05), 6.)*rings*1.2;
+  col += vec3(.6, .15, .1)*exp(-r*2.)*fbm7(d*5.)*.4;
+  col += vec3(1., .85, .6)*exp(-r*r*60.)*.9;
+  return col*(1. + .3*uBeat);
+}
+// 5 · el núcleo: bulbo dorado, el doble núcleo y el viento que sopla el agujero negro (en rayos X, violeta)
+vec3 core(vec2 q){
+  vec2 d = sceneD(q, .002) - vec2(0., .26);
+  float r = length(d*vec2(1., 1.3));
+  vec3 col = vec3(1., .78, .45)*exp(-r*6.5)*(.4 + 1.1*fbm7(d*9. + uT*.05));
+  col += vec3(1., .95, .8)*(exp(-dot(d - vec2(.015, 0.), d - vec2(.015, 0.))*3000.) + exp(-dot(d + vec2(.015, 0.), d + vec2(.015, 0.))*2200.)*.8)*1.6;
+  vec2 rr = rot(uT*.02)*d; float a = atan(rr.y, rr.x);
+  float wind = pow(.5 + .5*cos(a*2.), 6.)*exp(-r*3.)*fbm7(d*6. - uT*.1)*(1. + .5*sin(uT*1.5 - r*30.));
+  col += vec3(.65, .35, 1.)*wind*2.6;
+  for (int i = 0; i < 3; i++){ float ph = fract(uT*.2 + float(i)/3.); col += vec3(.8, .6, 1.)*exp(-pow((r - ph*.5)/.01, 2.))*(1. - ph)*.6; }
+  col += vec3(1., .9, .7)*starsD(q, 2., .9*exp(-r*5.), 1.2);
+  return col;
+}
+// salida: Andrómeda y la Vía Láctea, que dentro de 4500 millones de años chocarán
+vec3 collide(vec2 q){
+  vec2 d = (q - .5*uRes)/uScale;
+  vec3 col = disk(rot(-.6)*(d - vec2(-.18, .36))*2.6, .32, 1.) + disk(rot(.9 + uT*.01)*(d - vec2(.22, .28))*3.4, .7, .85);
+  return col;
+}
+uniform float uSpd;
+// ---- capa final, igual para todos los niveles: lo que hace que "pegue" como un juego ----
+vec3 hueRot(vec3 c, float a){ const vec3 k = vec3(.57735); float ca = cos(a); return c*ca + cross(k, c)*sin(a) + k*dot(k, c)*(1. - ca); }
+// rayas de velocidad: al saltar, las estrellas se estiran desde el centro como en un salto al hiperespacio
+vec3 warp(vec2 q0){
+  vec2 d = q0 - .5*uRes; float r = length(d)/uRes.y, a = atan(d.y, d.x);
+  float bins = 90., id = floor((a/6.2831 + .5)*bins), fa = fract((a/6.2831 + .5)*bins) - .5;
+  float off = h21(vec2(id, 3.)), z = fract(log(r + .05)*1.6 - uFlow*.05 - uT*.25 + off*7.);
+  float streak = smoothstep(.0, .05, z)*smoothstep(.35, .05, z)*exp(-fa*fa*60.)*step(.55, h21(vec2(id, 9.)));
+  vec3 tint = mix(vec3(.7, .85, 1.), vec3(1., .75, .9), h21(vec2(id, 5.)));
+  return tint*streak*smoothstep(.12, .45, r);
+}
+vec3 post(vec3 col, vec2 q0){
+  float lum = dot(col, vec3(.3, .55, .15));
+  col = max(vec3(0.), mix(vec3(lum), col, 1.3));                                   // colores más vivos sin perder lo natural
+  float hA = .22*sin(uT*.11 + uJour*5.) + .1*sin(uT*.27);                           // la paleta se mece dentro de colores reales del espacio
+  col = max(vec3(0.), hueRot(col, hA));
+  col.g = min(col.g, max(col.r, col.b)*1.02 + .01);                                // en el espacio casi no hay verde: se evita que el color derive a verde
+  col *= 1. + .32*uBeat;                                                             // todo late con la música
+  col += warp(q0)*smoothstep(.25, .9, uSpd)*(1.3 + .6*uBeat);
+  vec2 v = (q0 - .5*uRes)/uRes.y; float vg = dot(v, v);
+  col *= 1. - .55*vg;                                                                // viñeta de cine
+  float rp = length(q0 - uBH.xy)/uRes.y;
+  col *= .82 - .5*exp(-pow(rp/.34, 2.));                                             // donde juegas el cielo se calla: los anillos mandan
+  col += vec3(.25, .1, .35)*vg*.06*(1. + uBeat);                                     // un borde de color muy tenue
+  return col;
+}
+void main(){
+  vec2 q0 = gl_FragCoord.xy, ctr = .5*uRes;
+  float ra = uT*.006, zb = 1. + .02*sin(uT*.25);
+  vec2 q = ctr + rot(ra)*(q0 - ctr)/zb;
+  float j = uJour;
+  float w1 = win(j, -1., .18), w2 = win(j, .18, .36), w3 = win(j, .36, .54), w4 = win(j, .54, .72), w5 = win(j, .72, .88);
+  float out_ = smoothstep(.85, .97, j);
+  vec3 col = vec3(.016, .018, .036);
+  if (w1 > .001) col += outer(q)*w1;
+  if (w2 > .001) col += ngc206(q)*w2;
+  if (w3 > .001) col += m32(q)*w3;
+  if (w4 > .001) col += fireRing(q)*w4;
+  if (w5 > .001) col += core(q)*w5;
+  col += starsD(q + vec2(0., uFlow*1.2), 2.6, .12, .55);
+  col += starsD(q + vec2(0., uFlow*2.4), 5., .1, .9);
+  col += starsD(q + vec2(0., uFlow*5.), 11., .09, 1.25);
+  col += meteors(q0) + flares(q);
+  float wave = (q0.x*.6 + q0.y)/uRes.y*3. - uT*.5;
+  col *= 1. + .2*vec3(sin(wave), sin(wave + 2.1), sin(wave + 4.2));
+  float tr = exp(-pow((j - .18)/.015, 2.)) + exp(-pow((j - .36)/.015, 2.)) + exp(-pow((j - .54)/.015, 2.)) + exp(-pow((j - .72)/.015, 2.)) + exp(-pow((j - .88)/.015, 2.));
+  col += vec3(.9, .85, 1.)*tr*.18*(.6 + .4*fbm(q0/uRes.y*3. + uT));
+  col += bokeh(q0);
+  col += collide(q)*out_;
+  col += vec3(1., .45, .18)*.05*exp(-length(q0 - uBH.xy)/(uRes.y*.4));
+  col = post(col, q0);
+  col = col/(1. + col*.5);
+  gl_FragColor = vec4(col, 1.);
+}`;
+// Vía Láctea / Sistema solar (nivel 1)
+// fondo con fotografía: la foto real en capas, con la luz doblada por el agujero negro
+// Sistema solar: la Vía Láctea como en una foto de cielo profundo (muchísimas estrellas, polvo oscuro, nebulosas rojizas)
+// y, al salir del sistema solar, la galaxia vista desde fuera con sus brazos espirales
+const FS_MW = BG_COMMON + `
 uniform float uScale;
 float fbm7(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 7; i++){ s += a*vn(p); p = m*p; a *= .5; } return s; }
 float rid(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 5; i++){ s += a*(1. - abs(vn(p)*2. - 1.)); p = m*p; a *= .5; } return s; }
@@ -6571,8 +6744,9 @@ void main(){
   col = col/(1. + col*.5);
   gl_FragColor = vec4(col, 1.);
 }`;
-  // Nubes de Magallanes: el viaje pasa por sus lugares reales
-  const FS_LMC = COMMON + `
+// Nubes de Magallanes (nivel 2)
+// Nubes de Magallanes: el viaje pasa por sus lugares reales
+const FS_LMC = BG_COMMON + `
 uniform float uScale;
 float fbm7(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 7; i++){ s += a*vn(p); p = m*p; a *= .5; } return s; }
 float rid(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 5; i++){ s += a*(1. - abs(vn(p)*2. - 1.)); p = m*p; a *= .5; } return s; }
@@ -6799,192 +6973,8 @@ void main(){
   col = col/(1. + col*.5);
   gl_FragColor = vec4(col, 1.);
 }`;
-  // Andrómeda: el viaje pasa por sus lugares reales, de las afueras al núcleo
-  const FS_AND2 = COMMON + `
-uniform float uScale;
-float fbm7(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 7; i++){ s += a*vn(p); p = m*p; a *= .5; } return s; }
-float rid(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 5; i++){ s += a*(1. - abs(vn(p)*2. - 1.)); p = m*p; a *= .5; } return s; }
-vec3 starsD(vec2 q, float sc, float dens, float bmul){
-  vec2 g = q/sc, id = floor(g), f = fract(g); vec3 c = vec3(0.);
-  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++){
-    vec2 o = vec2(x, y), cid = id + o; float n = h21(cid); if (n > dens) continue;
-    vec2 sp = o + h22(cid*1.7); float dd = length(f - sp)*sc;
-    float b = (pow(h21(cid + 7.1), 9.)*2.2 + .18)*bmul, tw = .8 + .2*sin(uT*(1. + 3.*n) + n*40.);
-    vec3 col = mix(vec3(1., .78, .6), vec3(.72, .84, 1.), h21(cid + 3.3));
-    c += col*b*tw*exp(-dd*dd*2.2);
-  }
-  return c;
-}
-vec2 sceneD(vec2 q, float drift){ return (q - .5*uRes)/uScale + vec2(.05*sin(uT*.05 + drift*300.), .07*sin(uFlow*drift*1.5 + uT*.04)); }   // se mece sin irse de la pantalla
-float win(float j, float a, float b){ return smoothstep(a - .05, a + .05, j)*(1. - smoothstep(b - .05, b + .05, j)); }
-vec3 meteors(vec2 q){
-  vec3 c = vec3(0.);
-  for (int i = 0; i < 3; i++){
-    float fi = float(i), per = 5. + fi*2.3, tt = uT + fi*3.7, k = floor(tt/per), ph = fract(tt/per);
-    if (ph > .18) continue;
-    vec2 a0 = vec2(h21(vec2(k, fi)), .55 + .45*h21(vec2(fi, k + 3.)))*uRes;
-    vec2 dir = normalize(vec2(-.8 + 1.6*h21(vec2(k + 9., fi)), -1.));
-    vec2 hd = a0 + dir*ph/.18*uRes.y*.7;
-    vec2 rel = q - hd; float along = dot(rel, -dir), perp = abs(dot(rel, vec2(-dir.y, dir.x)));
-    float L = uRes.y*.18;
-    float tr = step(0., along)*(1. - smoothstep(0., L, along))*exp(-perp*perp*.6);
-    float fade = sin(ph/.18*3.14159);
-    c += vec3(.85, .92, 1.)*tr*fade*.9 + vec3(1.)*exp(-dot(rel, rel)*.25)*fade;
-  }
-  return c;
-}
-mat2 rot(float a){ return mat2(cos(a), -sin(a), sin(a), cos(a)); }
-vec3 bokeh(vec2 q){
-  vec3 c = vec3(0.); vec2 g = (q + vec2(uT*14., uFlow*9.))/(uRes.y*.22), id = floor(g), f = fract(g);
-  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++){
-    vec2 o = vec2(x, y), cid = id + o; if (h21(cid + 31.) > .22) continue;
-    float rr = .12 + .2*h21(cid + 5.); float dd = length(f - o - h22(cid + 9.));
-    vec3 tint = mix(vec3(1., .4, .65), vec3(.45, .7, 1.), h21(cid + 2.));
-    c += tint*smoothstep(rr, rr*.75, dd)*(.05 + .04*sin(uT + h21(cid)*20.));
-  }
-  return c;
-}
-vec3 flares(vec2 q){
-  vec3 c = vec3(0.); vec2 g = (q + vec2(0., uFlow*3.))/(uRes.y*.3), id = floor(g), f = fract(g);
-  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++){
-    vec2 o = vec2(x, y), cid = id + o; float per = 3. + 5.*h21(cid + 3.), ph = fract(uT/per + h21(cid + 7.));
-    if (ph > .12) continue;
-    float e = sin(ph/.12*3.14159); vec2 pp = (f - o - h22(cid))*uRes.y*.3;
-    vec3 tint = mix(vec3(1., .8, .6), vec3(.7, .85, 1.), h21(cid + 1.));
-    c += tint*e*(exp(-dot(pp, pp)*.08)*2. + (exp(-abs(pp.x)*.9)*exp(-abs(pp.y)*.04) + exp(-abs(pp.y)*.9)*exp(-abs(pp.x)*.04))*.5);
-  }
-  return c;
-}
-// un disco espiral inclinado (Andrómeda está casi de canto: ~77°)
-vec3 disk(vec2 d, float tilt, float bright){
-  vec2 e = d; e.y /= tilt; float r = length(e), a = atan(e.y, e.x);
-  float sp = a - log(r + .03)*3.4 - uT*.03;
-  float arms = pow(.5 + .5*cos(2.*sp + fbm(e*3.)*2.), 2.5)*smoothstep(.05, .2, r);
-  float ring = exp(-pow((r - .55)/.12, 2.));
-  float cl = fbm7(e*8. + 2.);
-  vec3 col = vec3(.5, .65, 1.)*(arms + ring*.9)*exp(-r*1.4)*(.4 + 1.8*cl);
-  col += vec3(1., .3, .5)*smoothstep(.7, .84, fbm7(e*11. + 5.))*(arms + ring)*exp(-r*1.2)*1.3;
-  col += vec3(1., .86, .62)*exp(-r*r*14.)*1.2;
-  col *= .45 + 1.1*fbm7(e*24. + 7.);
-  col *= 1. - .75*smoothstep(.55, .78, rid(vec2(sp*1.2, r*9.) + 3.))*smoothstep(.08, .3, r)*exp(-r*.8);
-  return col*bright;
-}
-// 1 · las afueras: los brazos azules y polvo, con la galaxia ocupando todo el cielo
-vec3 outer(vec2 q){
-  vec2 d = rot(-.55 + uT*.008)*(sceneD(q, .003) - vec2(.15, .35));
-  return disk(d*.75, .3, 1.3) + vec3(.9, .94, 1.)*starsD(q, 2.4, .5*exp(-length(d)*1.5), .7);
-}
-// 2 · NGC 206: la nube de estrellas jóvenes más grande de Andrómeda, azul y llena de destellos
-vec3 ngc206(vec2 q){
-  vec2 d = sceneD(q, .004) - vec2(-.05, .22);
-  vec2 w = d + .1*vec2(fbm(d*3. + uT*.08), fbm(d*3. - uT*.07 + 4.));
-  float cloud = exp(-length(w*vec2(1., 1.6))*3.)*(.3 + 1.4*fbm7(w*7. + 1.));
-  vec3 col = vec3(.35, .6, 1.)*cloud*1.1 + vec3(.6, .45, 1.)*smoothstep(.55, .8, fbm7(w*4. + 6.))*cloud*.5;
-  col += vec3(1., .35, .55)*smoothstep(.76, .88, fbm7(w*14. + 3.))*cloud*1.6;
-  col += vec3(.8, .9, 1.)*starsD(q, 1.9, .95*clamp(cloud*1.5, 0., 1.), 1.5) + vec3(.6, .8, 1.)*starsD(q, 4.5, .55*clamp(cloud*1.4, 0., 1.), 2.6);
-  col *= 1. - .6*smoothstep(.62, .82, rid(w*vec2(6., 10.) + 9.))*smoothstep(.1, .5, cloud);
-  return col*(1. + .2*uBeat);
-}
-// 3 · M32: la pequeña galaxia elíptica que pasa rozando y arranca estrellas del disco
-vec3 m32(vec2 q){
-  vec2 d = sceneD(q, .004);
-  vec3 col = disk(rot(-.9)*(d - vec2(-.3, .5))*.6, .28, .7);
-  vec2 m = d - vec2(.12 + .05*sin(uT*.15), .28);
-  float r = length(m*vec2(1., 1.25));
-  col += vec3(1., .85, .6)*(exp(-r*r*220.)*1.6 + exp(-r*12.)*.5);
-  vec2 tt = rot(.5)*m; float tail = exp(-pow(tt.y/(.03 + .1*abs(tt.x)), 2.))*exp(-abs(tt.x)*3.)*fbm7(tt*8. - vec2(uT*.1, 0.));
-  col += vec3(1., .8, .6)*tail*.8;
-  col += vec3(1., .9, .75)*starsD(q, 2.2, .8*exp(-r*7.), 1.);
-  return col;
-}
-// 4 · el anillo de fuego: así se ve Andrómeda en infrarrojo, anillos de polvo encendido
-vec3 fireRing(vec2 q){
-  vec2 d = rot(-.5 + uT*.01)*(sceneD(q, .003) - vec2(0., .2)); d.y /= .42;
-  float r = length(d), a = atan(d.y, d.x);
-  float g = fbm7(vec2(a*4., r*10.) + uT*.06);
-  float rings = exp(-pow((r - .45 - .03*sin(a*3.))/.05, 2.))*1.4 + exp(-pow((r - .22)/.03, 2.))*.7 + exp(-pow((r - .75)/.07, 2.))*.5;
-  vec3 col = mix(vec3(1., .22, .08), vec3(1., .7, .25), g)*rings*(.4 + 1.4*g);
-  col += vec3(1., .5, .2)*pow(rid(vec2(a*6., r*14.) + uT*.05), 6.)*rings*1.2;
-  col += vec3(.6, .15, .1)*exp(-r*2.)*fbm7(d*5.)*.4;
-  col += vec3(1., .85, .6)*exp(-r*r*60.)*.9;
-  return col*(1. + .3*uBeat);
-}
-// 5 · el núcleo: bulbo dorado, el doble núcleo y el viento que sopla el agujero negro (en rayos X, violeta)
-vec3 core(vec2 q){
-  vec2 d = sceneD(q, .002) - vec2(0., .26);
-  float r = length(d*vec2(1., 1.3));
-  vec3 col = vec3(1., .78, .45)*exp(-r*6.5)*(.4 + 1.1*fbm7(d*9. + uT*.05));
-  col += vec3(1., .95, .8)*(exp(-dot(d - vec2(.015, 0.), d - vec2(.015, 0.))*3000.) + exp(-dot(d + vec2(.015, 0.), d + vec2(.015, 0.))*2200.)*.8)*1.6;
-  vec2 rr = rot(uT*.02)*d; float a = atan(rr.y, rr.x);
-  float wind = pow(.5 + .5*cos(a*2.), 6.)*exp(-r*3.)*fbm7(d*6. - uT*.1)*(1. + .5*sin(uT*1.5 - r*30.));
-  col += vec3(.65, .35, 1.)*wind*2.6;
-  for (int i = 0; i < 3; i++){ float ph = fract(uT*.2 + float(i)/3.); col += vec3(.8, .6, 1.)*exp(-pow((r - ph*.5)/.01, 2.))*(1. - ph)*.6; }
-  col += vec3(1., .9, .7)*starsD(q, 2., .9*exp(-r*5.), 1.2);
-  return col;
-}
-// salida: Andrómeda y la Vía Láctea, que dentro de 4500 millones de años chocarán
-vec3 collide(vec2 q){
-  vec2 d = (q - .5*uRes)/uScale;
-  vec3 col = disk(rot(-.6)*(d - vec2(-.18, .36))*2.6, .32, 1.) + disk(rot(.9 + uT*.01)*(d - vec2(.22, .28))*3.4, .7, .85);
-  return col;
-}
-uniform float uSpd;
-// ---- capa final, igual para todos los niveles: lo que hace que "pegue" como un juego ----
-vec3 hueRot(vec3 c, float a){ const vec3 k = vec3(.57735); float ca = cos(a); return c*ca + cross(k, c)*sin(a) + k*dot(k, c)*(1. - ca); }
-// rayas de velocidad: al saltar, las estrellas se estiran desde el centro como en un salto al hiperespacio
-vec3 warp(vec2 q0){
-  vec2 d = q0 - .5*uRes; float r = length(d)/uRes.y, a = atan(d.y, d.x);
-  float bins = 90., id = floor((a/6.2831 + .5)*bins), fa = fract((a/6.2831 + .5)*bins) - .5;
-  float off = h21(vec2(id, 3.)), z = fract(log(r + .05)*1.6 - uFlow*.05 - uT*.25 + off*7.);
-  float streak = smoothstep(.0, .05, z)*smoothstep(.35, .05, z)*exp(-fa*fa*60.)*step(.55, h21(vec2(id, 9.)));
-  vec3 tint = mix(vec3(.7, .85, 1.), vec3(1., .75, .9), h21(vec2(id, 5.)));
-  return tint*streak*smoothstep(.12, .45, r);
-}
-vec3 post(vec3 col, vec2 q0){
-  float lum = dot(col, vec3(.3, .55, .15));
-  col = max(vec3(0.), mix(vec3(lum), col, 1.3));                                   // colores más vivos sin perder lo natural
-  float hA = .22*sin(uT*.11 + uJour*5.) + .1*sin(uT*.27);                           // la paleta se mece dentro de colores reales del espacio
-  col = max(vec3(0.), hueRot(col, hA));
-  col.g = min(col.g, max(col.r, col.b)*1.02 + .01);                                // en el espacio casi no hay verde: se evita que el color derive a verde
-  col *= 1. + .32*uBeat;                                                             // todo late con la música
-  col += warp(q0)*smoothstep(.25, .9, uSpd)*(1.3 + .6*uBeat);
-  vec2 v = (q0 - .5*uRes)/uRes.y; float vg = dot(v, v);
-  col *= 1. - .55*vg;                                                                // viñeta de cine
-  float rp = length(q0 - uBH.xy)/uRes.y;
-  col *= .82 - .5*exp(-pow(rp/.34, 2.));                                             // donde juegas el cielo se calla: los anillos mandan
-  col += vec3(.25, .1, .35)*vg*.06*(1. + uBeat);                                     // un borde de color muy tenue
-  return col;
-}
-void main(){
-  vec2 q0 = gl_FragCoord.xy, ctr = .5*uRes;
-  float ra = uT*.006, zb = 1. + .02*sin(uT*.25);
-  vec2 q = ctr + rot(ra)*(q0 - ctr)/zb;
-  float j = uJour;
-  float w1 = win(j, -1., .18), w2 = win(j, .18, .36), w3 = win(j, .36, .54), w4 = win(j, .54, .72), w5 = win(j, .72, .88);
-  float out_ = smoothstep(.85, .97, j);
-  vec3 col = vec3(.016, .018, .036);
-  if (w1 > .001) col += outer(q)*w1;
-  if (w2 > .001) col += ngc206(q)*w2;
-  if (w3 > .001) col += m32(q)*w3;
-  if (w4 > .001) col += fireRing(q)*w4;
-  if (w5 > .001) col += core(q)*w5;
-  col += starsD(q + vec2(0., uFlow*1.2), 2.6, .12, .55);
-  col += starsD(q + vec2(0., uFlow*2.4), 5., .1, .9);
-  col += starsD(q + vec2(0., uFlow*5.), 11., .09, 1.25);
-  col += meteors(q0) + flares(q);
-  float wave = (q0.x*.6 + q0.y)/uRes.y*3. - uT*.5;
-  col *= 1. + .2*vec3(sin(wave), sin(wave + 2.1), sin(wave + 4.2));
-  float tr = exp(-pow((j - .18)/.015, 2.)) + exp(-pow((j - .36)/.015, 2.)) + exp(-pow((j - .54)/.015, 2.)) + exp(-pow((j - .72)/.015, 2.)) + exp(-pow((j - .88)/.015, 2.));
-  col += vec3(.9, .85, 1.)*tr*.18*(.6 + .4*fbm(q0/uRes.y*3. + uT));
-  col += bokeh(q0);
-  col += collide(q)*out_;
-  col += vec3(1., .45, .18)*.05*exp(-length(q0 - uBH.xy)/(uRes.y*.4));
-  col = post(col, q0);
-  col = col/(1. + col*.5);
-  gl_FragColor = vec4(col, 1.);
-}`;
-  // Centaurus A, Remolino, Sombrero, M87 y Sagitario A*: escenas reales con los tonos medidos en fotos de Hubble, ESO, Webb y el EHT
-  const FS_GX = COMMON + `
+// Galaxias lejanas (niveles 4 a 8): lo que comparten sus fondos (estrellas, cúmulos, meteoros, destellos)
+const GX_BASE = `
 uniform float uScale; uniform float uKind;
 float fbm7(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 7; i++){ s += a*vn(p); p = m*p; a *= .5; } return s; }
 float rid(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 5; i++){ s += a*(1. - abs(vn(p)*2. - 1.)); p = m*p; a *= .5; } return s; }
@@ -7070,7 +7060,9 @@ vec3 flares(vec2 q){
   }
   return c;
 }
-// ===================== CENTAURUS A =====================
+`;
+// Centaurus A (nivel 4): cuerpo, franja de polvo, chorros y lóbulos
+const GX_CENTAURUS = `// ===================== CENTAURUS A =====================
 // tonos de las fotos de ESO: cuerpo crema-gris #d6c5c1, franja de polvo café con borde naranja, cúmulos azules,
 // regiones rosadas; chorros en rayos X azules (#6a8ad8) y lóbulos naranjas en submilimétrico
 vec3 cenGalaxy(vec2 d, float sc){
@@ -7130,7 +7122,9 @@ vec3 cenLobes(vec2 q){
   vec2 jj = rot(-.95)*d; col += vec3(.55, .7, 1.)*exp(-pow(jj.y/(.006 + .03*abs(jj.x)), 2.))*exp(-abs(jj.x)*3.)*.8;
   return col;
 }
-// ===================== REMOLINO M51 =====================
+`;
+// El Remolino, M51 (nivel 5): el viaje por dentro de la galaxia
+const GX_REMOLINO = `// ===================== REMOLINO M51 =====================
 // Hubble: brazos azul-grisáceos #8aa0b8, núcleo amarillo #e8d0a8, regiones HII rojo-rosa muy marcadas, polvo café #5f4f49,
 // la compañera NGC 5195 amarillo-café con polvo cruzándola
 vec3 m51Spiral(vec2 d, float sc, float spin){
@@ -7292,7 +7286,9 @@ vec3 m51Pair(vec2 q){
   col += comp + vec3(.4, .6, 1.)*bridge*1.5 + vec3(1., .2, .5)*smoothstep(.78, .9, fbm7(t*30.))*bridge*2.6;
   return col;
 }
-// ===================== SOMBRERO M104 =====================
+`;
+// El Sombrero, M104 (nivel 6): bulbo, anillo de polvo y cúmulos globulares
+const GX_SOMBRERO = `// ===================== SOMBRERO M104 =====================
 // Hubble: bulbo plateado con un toque lavanda #d1ccdc, halo gris #8c8687, anillo de polvo café oscuro #2a1e18 con borde
 // cálido #6f5848, y cientos de cúmulos globulares alrededor
 vec3 sombGalaxy(vec2 d, float sc){
@@ -7338,7 +7334,9 @@ vec3 sombCore(vec2 q){
   col += sombGalaxy(rot(-.08)*(d + vec2(0., .04)), 2.3)*.6;
   return col + vec3(1., .95, .9)*starsD(q, 2.2, .8*exp(-r*5.), 1.) + globs(q*1.3 + 20., .25, .06)*.5;
 }
-// ===================== M87 =====================
+`;
+// M87 (nivel 7): halo, chorro, gas y el anillo del Event Horizon Telescope
+const GX_M87 = `// ===================== M87 =====================
 // Hubble: halo crema-amarillo #ca9f72 → #d5c7b8 muy suave, el chorro azul-violeta con nudos, miles de cúmulos globulares;
 // el Event Horizon Telescope: anillo naranja #f38f14 / amarillo #fcd05b / rojo #911c01, más brillante abajo
 vec3 m87Halo(vec2 q){
@@ -7397,7 +7395,9 @@ vec3 m87Shadow(vec2 q){
   vec2 j = rot(.55)*d; col += vec3(.55, .6, 1.)*exp(-pow(j.y/(.01 + .08*max(j.x - .18, 0.)), 2.))*step(.18, j.x)*exp(-(j.x - .18)*3.)*.35;   // la base del chorro
   return col;
 }
-// ===================== SAGITARIO A* =====================
+`;
+// Sagitario A* (nivel 8): el centro de nuestra galaxia
+const GX_SAGITARIO = `// ===================== SAGITARIO A* =====================
 // centro galáctico: en luz visible nubes doradas y polvo; el compuesto de NASA (Hubble+Spitzer+Chandra) en violeta #3e3775,
 // azul #454b9f, magenta #7e4774 y filamentos dorados; los filamentos de radio de MeerKAT; las estrellas S girando;
 // el anillo del EHT naranja #e36402 / #fa9728 / #f7d883
@@ -7465,7 +7465,9 @@ vec3 sgrShadow(vec2 q){
   col += vec3(1., .8, .55)*starsD(q, 3., .45*exp(-r*2.5)*smoothstep(.2, .35, r), 1.3);
   return col;
 }
-// la Vía Láctea vista desde fuera: el regreso a casa
+`;
+// Galaxias lejanas: la Vía Láctea vista desde fuera, la capa final y main(); aquí se arma FS_GX
+const GX_FINAL = `// la Vía Láctea vista desde fuera: el regreso a casa
 vec3 homeGalaxy(vec2 q){
   vec2 d = (q - vec2(.5*uRes.x, .74*uRes.y))/(uScale*.36); d = rot(.4 + uT*.01)*d; d.y /= .6;
   float r = length(d), ph = atan(d.y, d.x);
@@ -7552,7 +7554,10 @@ void main(){
   col = col/(1. + col*.5);
   gl_FragColor = vec4(col, 1.);
 }`;
-  const FS_PHOTO = COMMON + `
+// Centaurus A, Remolino, Sombrero, M87 y Sagitario A*: escenas reales con los tonos medidos en fotos de Hubble, ESO, Webb y el EHT
+const FS_GX = BG_COMMON + GX_BASE + GX_CENTAURUS + GX_REMOLINO + GX_SOMBRERO + GX_M87 + GX_SAGITARIO + GX_FINAL;
+// fotos reales como fondo (si hay)
+const FS_PHOTO = BG_COMMON + `
 uniform sampler2D uImg; uniform vec2 uImgSize; uniform vec4 uFit; // xy: centro de la foto en pantalla (0-1), z: zoom
 vec3 photo(vec2 q, float depth){
   float asp = uImgSize.x/uImgSize.y, sasp = uRes.x/uRes.y;
@@ -7579,6 +7584,9 @@ void main(){
   col *= 1. + uBeat*.08;
   gl_FragColor = vec4(col, 1.);
 }`;
+// ---------- fondos en WebGL: el motor que dibuja el shader de cada galaxia ----------
+const GLBG = (() => {
+  let cv = null, gl = null, progs = {}, buf = null, failed = false, flow = 0, photoTex = {}, lastKey = '';
   function init(){
     if (gl || failed) return !!gl;
     try{
@@ -7593,7 +7601,7 @@ void main(){
   function prog(name, fs){
     if (progs[name] !== undefined) return progs[name];
     const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)){ console.warn(gl.getShaderInfoLog(s)); return null; } return s; };
-    const v = sh(gl.VERTEX_SHADER, VS), f = sh(gl.FRAGMENT_SHADER, fs);
+    const v = sh(gl.VERTEX_SHADER, BG_VS), f = sh(gl.FRAGMENT_SHADER, fs);
     if (!v || !f){ progs[name] = null; return null; }
     const p = gl.createProgram(); gl.attachShader(p, v); gl.attachShader(p, f); gl.bindAttribLocation(p, 0, 'p'); gl.linkProgram(p);
     if (!gl.getProgramParameter(p, gl.LINK_STATUS)){ progs[name] = null; return null; }
@@ -8046,7 +8054,6 @@ function openMissions(){
 function misWhoosh(up){ if (!AC || muted) return; try{ noise(.4, up ? 500 : 2600, up ? 2600 : 500, .1, 'bandpass'); uiTone(ROOT*2*Math.pow(2, (up ? 19 : 12)/12), AC.currentTime + (up ? .12 : 0), .7, .025); }catch(e){} }
 function closeMissions(){ if (!misOpen) return; clearInterval(misTimer); misOpen = false; misWhoosh(false); if (elMis) elMis.classList.add('out'); setTimeout(() => { if (!misOpen && elMis) elMis.classList.add('off'); }, 320); renderHome(); if (elHome) elHome.classList.remove('off'); }
 function misClaimSound(big){ if (!AC || muted) return; try{ const n = AC.currentTime; (big ? [12, 16, 19, 24, 28] : [19, 24, 28]).forEach((sm, i) => uiTone(ROOT*Math.pow(2, sm/12), n + i*.06, 1.2, .045)); }catch(e){} }
-function misGive(n, big){ MIS.polvo += n; misSave(); misClaimSound(big); buzz(big ? [20, 40, 20, 40, 60] : [15, 30, 15]); }
 const MIS_ICO = {
   perf: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><circle cx="12" cy="12" r="3"/>',
   streak: '<path d="M5 15l2-4 2 4M10.5 11l2-4 2 4M16 15l2-4 2 4"/><path d="M4 19h16"/>',
@@ -8271,27 +8278,6 @@ function misCanvasDraw(c){
     for (let j = 0; j < 4; j++){ const u = ((t*.35 + j/4) % 1); g.strokeStyle = 'rgba(255,111,168,' + (1 - u)*.8 + ')'; g.lineWidth = 3*(1 - u) + .5; g.beginPath(); g.arc(cx, cy, R*(.2 + u*1.1), 0, Math.PI*2); g.stroke(); }
     glow(cx, cy, R*.4, 'rgba(255,194,218,A)', .9);
   }
-}
-// fondo de Misiones: el mismo cielo de la pantalla de planetas; en Logros, la Tierra sobre su órbita
-function renderMissionsScene(dt){
-  t += dt;
-  ctx.save(); ctx.fillStyle = '#05060c'; ctx.fillRect(0, 0, W, H);
-  const neb = ctx.createRadialGradient(W/2, H*.3, 0, W/2, H*.3, Math.max(W, H)*.6); neb.addColorStop(0, rgba(misTab === 'logros' ? '#4f8cff' : '#3fc7b8', .12)); neb.addColorStop(1, rgba('#3fc7b8', 0));
-  ctx.fillStyle = neb; ctx.fillRect(0, 0, W, H);
-  const sr = Math.max(W, H)*.62;
-  for (const s2 of stars){ const a = s2.a + t*.01, x = W/2 + Math.cos(a)*s2.r*sr, y = H*.4 + Math.sin(a)*s2.r*sr; ctx.globalAlpha = .15 + .35*(.5 + .5*Math.sin(t*1.3 + s2.tw)); ctx.fillStyle = BONE; ctx.fillRect(x, y, s2.s*.8, s2.s*.8); }
-  ctx.globalAlpha = 1;
-  const an = misTab === 'logros' && elMis && elMis.querySelector ? elMis.querySelector('.mplanet') : null;
-  if (an && an.getBoundingClientRect){
-    const r = an.getBoundingClientRect(), cv = cvs.getBoundingClientRect ? cvs.getBoundingClientRect() : {left: 0, top: 0}, cx = r.left - cv.left + r.width/2, cy = r.top - cv.top + r.height/2 + Math.sin(t*.8)*3, R = Math.min(r.height*.42, W*.22);
-    const RA = Math.max(W, H)*1.25, acy = cy + RA;
-    ctx.strokeStyle = 'rgba(236,230,216,.16)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(W/2, acy, RA, -Math.PI/2 - 1.2, -Math.PI/2 + 1.2); ctx.stroke();
-    const gl = ctx.createLinearGradient(W/2 - R*1.4, 0, W/2 + R*1.4, 0);
-    if (gl && gl.addColorStop){ gl.addColorStop(0, 'rgba(255,161,85,0)'); gl.addColorStop(.5, 'rgba(255,161,85,.85)'); gl.addColorStop(1, 'rgba(255,161,85,0)'); ctx.strokeStyle = gl; }
-    ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(W/2, acy, RA, -Math.PI/2 - R*1.4/RA, -Math.PI/2 + R*1.4/RA); ctx.stroke();
-    drawBigPlanet('tierra', cx, cy, R, t*.35, false, {x: -.55, y: -.45});
-  }
-  ctx.restore();
 }
 
 function frame(now){

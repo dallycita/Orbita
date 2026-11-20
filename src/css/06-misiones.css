@@ -1,19 +1,22 @@
+/* misiones, logros y polvo estelar */
 /* ---------- Misiones ---------- */
 #missions{position:absolute;inset:0;z-index:6;overflow:hidden;color:var(--fg);}
 #missions::before{content:'';position:absolute;inset:0;background:rgba(5,6,12,.18);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);animation:misFade .35s ease-out both;}
 #missions .mpanel{position:absolute;left:0;right:0;bottom:0;top:calc(max(3vh,18px) + 62px);border-radius:28px 28px 0 0;background:rgba(6,8,16,.38);border-top:1px solid rgba(236,230,216,.18);-webkit-backdrop-filter:blur(9px) saturate(1.15);backdrop-filter:blur(9px) saturate(1.15);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;animation:misUp .45s cubic-bezier(.2,.8,.3,1) both;}
-#missions.out .mpanel{animation:misDown .3s ease-in both;} #missions.out::before{animation:misFade .3s ease-in reverse both;}
-@keyframes misUp{from{transform:translateY(100%)}to{transform:none}} @keyframes misDown{to{transform:translateY(100%)}} @keyframes misFade{from{opacity:0}}
+#missions.out .mpanel{animation:misDown .3s ease-in both;}
+#missions.out::before{animation:misFade .3s ease-in reverse both;}
 #missions .back,#missions .mtop,#missions .mwal{animation:misFade .4s ease-out both;}
 #missions.off{display:none;}
 #missions .back{position:absolute;top:max(3vh,18px);left:18px;width:48px;height:48px;background:none;border:0;color:var(--fg);display:grid;place-items:center;cursor:pointer;z-index:2;}
 #missions .mtop{position:absolute;left:0;right:0;top:max(3vh,18px);height:48px;line-height:48px;text-align:center;font:400 13px 'Unbounded',system-ui,sans-serif;letter-spacing:.22em;color:rgba(236,230,216,.66);pointer-events:none;}
 #missions .mwal{position:absolute;right:18px;top:calc(max(3vh,18px) + 4px);display:flex;flex-direction:column;align-items:flex-end;gap:6px;z-index:2;}
 #missions .mwal .s{display:flex;align-items:center;gap:7px;color:#ffd36b;font:500 14px 'Unbounded',system-ui,sans-serif;letter-spacing:.04em;text-shadow:0 0 12px rgba(255,211,107,.35);}
-#missions .mwal .s b{font-weight:500;} #missions .mwal .s i{font-style:normal;font-size:11px;color:rgba(236,230,216,.45);text-shadow:none;}
+#missions .mwal .s b{font-weight:500;}
+#missions .mwal .s i{font-style:normal;font-size:11px;color:rgba(236,230,216,.45);text-shadow:none;}
 #missions .mwal .st{width:13px;height:13px;fill:#ffd36b;filter:drop-shadow(0 0 4px rgba(255,211,107,.6));}
 #missions .mwal .c{display:flex;align-items:center;gap:6px;color:#9ff0e4;font:500 12.5px 'Unbounded',system-ui,sans-serif;letter-spacing:.04em;text-shadow:0 0 12px rgba(63,199,184,.35);}
-#missions .mwal .c b{font-weight:500;} #missions .mwal .c.pop{animation:wpop .45s ease-out;}
+#missions .mwal .c b{font-weight:500;}
+#missions .mwal .c.pop{animation:wpop .45s ease-out;}
 #missions .cr{width:13px;height:13px;flex:none;}
 #missions .mwrap{max-width:440px;margin:0 auto;padding:22px 28px 56px;}
 #missions .mtabs{display:flex;justify-content:center;gap:52px;border-bottom:1px solid rgba(236,230,216,.08);}
@@ -38,7 +41,8 @@
 #missions .mr h3{font:500 15px/1.3 'Unbounded',system-ui,sans-serif;color:#ece6d8;}
 #missions .mr p{margin-top:6px;font:400 11px/1.5 'Space Mono',ui-monospace,monospace;color:rgba(236,230,216,.55);}
 #missions .rw{font:500 14px 'Unbounded',system-ui,sans-serif;color:#9ff0e4;letter-spacing:.02em;flex:none;}
-#missions .rw.ok{color:#ece6d8;} #missions .rw.dim{color:rgba(236,230,216,.35);}
+#missions .rw.ok{color:#ece6d8;}
+#missions .rw.dim{color:rgba(236,230,216,.35);}
 #missions .mbar{margin-top:10px;width:120px;height:2px;border-radius:2px;background:rgba(236,230,216,.12);}
 #missions .mbar u{display:block;height:100%;border-radius:2px;background:#ff8a3d;box-shadow:0 0 6px #ff8a3d;}
 #missions .mr.got{opacity:.35;}
@@ -62,18 +66,6 @@
 #missions .mfact b{display:block;margin-bottom:4px;font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:#9ff0e4;}
 #missions .mfact.out{opacity:0;}
 @media (max-width:380px){ #missions .mwrap{padding-left:20px;padding-right:20px;} #missions .mr h3{font-size:13.5px;} #missions .claim{padding:10px 12px;letter-spacing:.14em;} }
-/* botón de Misiones: más pequeño que Planetas, sin borde; las lunas giran y las encendidas respiran */
-#home .plan.mis{width:68px;height:68px;box-shadow:none;}
-#home .plan.mis svg{width:50px;height:50px;filter:none;overflow:visible;}
-#home .plan.mis .plabel{color:#8fd0ff;}
-#home .plan.mis .lit{animation:misLit 2.4s ease-in-out infinite;}
-@keyframes misRot{to{transform:rotate(360deg)}}
-#home .plan.mis .lit{filter:drop-shadow(0 0 2px #ff8a3d);}
-@keyframes misLit{50%{filter:drop-shadow(0 0 4px #ff8a3d) drop-shadow(0 0 8px #ff8a3d)}}
-@keyframes misCore{50%{opacity:.7}}
-#home .plan.mis.new::after{top:4px;right:4px;width:12px;height:12px;}
-@media (hover:hover) and (prefers-reduced-motion:no-preference){#home .plan.mis:hover{box-shadow:0 0 0 3px rgba(143,208,255,.5),0 0 26px rgba(143,208,255,.4);}}
-@media (prefers-reduced-motion:reduce){#home .plan.mis .lit{animation:none}}
 #missions .mnew{margin-top:16px;text-align:center;font:400 10.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.12em;color:rgba(236,230,216,.45);}
 #missions .mnew .mtime{color:rgba(236,230,216,.75);}
 #missions .mlist{margin-top:18px;}
@@ -87,14 +79,12 @@
 #missions .fd{margin-top:8px;font:400 11px 'Space Mono',ui-monospace,monospace;color:rgba(236,230,216,.55);text-align:center;}
 #missions .mgrab{width:38px;height:4px;border-radius:4px;background:rgba(236,230,216,.22);margin:10px auto 0;}
 #missions .mr.flash,#missions .mbonus.flash,#missions .mfeat.flash{animation:misFlash .9s ease-out;}
-@keyframes misFlash{0%{background:rgba(159,240,228,.28);box-shadow:inset 0 0 0 1px rgba(159,240,228,.6);}100%{background:transparent;box-shadow:none;}}
 #missions .mfly{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;z-index:9;pointer-events:none;filter:drop-shadow(0 0 6px rgba(63,199,184,.9));}
 #missions .mfly svg{width:100%;height:100%;display:block;}
 #misping{position:fixed;top:calc(max(3vh,18px) + 5px);right:max(20px, env(safe-area-inset-right));width:34px;height:34px;z-index:8;pointer-events:none;opacity:0;}
 #misping svg{width:100%;height:100%;overflow:visible;}
 #misping .lit{filter:drop-shadow(0 0 5px #ff8a3d);}
 #misping.go{animation:misPing 1.9s ease-out both;}
-@keyframes misPing{0%{opacity:0;transform:translateY(-8px) scale(.7)}15%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0;transform:translateY(-6px)}}
 /* Misiones · tarjetas (vuelta al primer diseño, con el estilo del juego) */
 #missions .mhead{display:flex;justify-content:space-between;align-items:center;margin:22px 2px 12px;font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:rgba(236,230,216,.5);}
 #missions .mhead em{font-style:normal;color:#8fd0ff;}
@@ -114,7 +104,8 @@
 #missions .mc .rw span{display:flex;align-items:center;gap:4px;}
 #missions .mc .rw small{font:400 8.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:rgba(236,230,216,.4);}
 #missions .mc.go{border-color:rgba(255,138,61,.55);background:radial-gradient(120% 140% at 50% 140%,rgba(255,120,40,.2),rgba(255,120,40,0) 60%),linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));box-shadow:0 0 22px rgba(255,120,40,.18);}
-#missions .mc.got{opacity:.42;} #missions .mc.got .rw{color:#ece6d8;}
+#missions .mc.got{opacity:.42;}
+#missions .mc.got .rw{color:#ece6d8;}
 #missions .mc .claim{padding:10px 14px;letter-spacing:.16em;font-size:9.5px;}
 #missions .mpl{display:flex;justify-content:space-between;gap:2px;margin-top:9px;}
 #missions .mpl span{width:18px;height:18px;display:grid;place-items:center;filter:grayscale(1) brightness(.35);}
@@ -175,8 +166,8 @@
 /* al cambiar de pestaña: el panel no se mueve, solo el contenido cambia con un fundido corto */
 #missions.still .mpanel,#missions.still::before,#missions.still .back,#missions.still .mtop,#missions.still .mwal{animation:none;}
 #missions .mwrap.swap > :not(.mtabs){animation:misSwap .32s cubic-bezier(.2,.8,.3,1) both;}
-@keyframes misSwap{from{opacity:0;transform:translateX(var(--sd,0))}to{opacity:1;transform:none}}
-#missions.out.still .mpanel{animation:misDown .3s ease-in both;} #missions.out.still::before{animation:misFade .3s ease-in reverse both;}
+#missions.out.still .mpanel{animation:misDown .3s ease-in both;}
+#missions.out.still::before{animation:misFade .3s ease-in reverse both;}
 /* vista desplegada de un logro */
 #missions [data-open]{cursor:pointer;}
 #missions .mdet{position:absolute;inset:0;z-index:5;display:flex;align-items:flex-end;justify-content:center;}
@@ -184,7 +175,8 @@
 #missions .mdcard{position:relative;width:min(440px,100%);max-height:88%;overflow:auto;padding:4px 28px calc(28px + env(safe-area-inset-bottom));border-radius:28px 28px 0 0;
   background:linear-gradient(180deg,color-mix(in srgb,var(--hc) 8%,rgba(8,10,20,.92)),rgba(6,8,16,.95) 45%);border-top:1px solid color-mix(in srgb,var(--hc) 35%,transparent);
   display:flex;flex-direction:column;align-items:center;text-align:center;animation:misUp .4s cubic-bezier(.2,.8,.3,1) both;}
-#missions .mdet.out .mdcard{animation:misDown .24s ease-in both;} #missions .mdet.out .mdbg{animation:misFade .24s ease-in reverse both;}
+#missions .mdet.out .mdcard{animation:misDown .24s ease-in both;}
+#missions .mdet.out .mdbg{animation:misFade .24s ease-in reverse both;}
 #missions .mdx{position:absolute;top:14px;right:16px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(236,230,216,.18);background:rgba(255,255,255,.04);color:rgba(236,230,216,.7);font:300 20px/1 'Unbounded',system-ui,sans-serif;cursor:pointer;}
 #missions .mbig{width:100%;height:210px;display:block;margin-top:6px;}
 #missions .mdt{margin-top:4px;font:600 24px/1.2 'Unbounded',system-ui,sans-serif;color:#ece6d8;max-width:300px;}
@@ -201,3 +193,10 @@
 #missions .mdk::after{content:'';flex:1;max-width:30px;height:1px;background:linear-gradient(90deg,var(--hc),transparent);opacity:.6;}
 #missions .mdf p{margin-top:8px;font:400 11px/1.65 'Space Mono',ui-monospace,monospace;color:rgba(236,230,216,.75);}
 #missions .mdcard .mgrab{margin:10px auto 0;}
+@keyframes wpop{40%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes misUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes misDown{to{transform:translateY(100%)}}
+@keyframes misFade{from{opacity:0}}
+@keyframes misFlash{0%{background:rgba(159,240,228,.28);box-shadow:inset 0 0 0 1px rgba(159,240,228,.6);}100%{background:transparent;box-shadow:none;}}
+@keyframes misPing{0%{opacity:0;transform:translateY(-8px) scale(.7)}15%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0;transform:translateY(-6px)}}
+@keyframes misSwap{from{opacity:0;transform:translateX(var(--sd,0))}to{opacity:1;transform:none}}

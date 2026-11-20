@@ -6,15 +6,6 @@ function powerName(){ const P = curP(); return P && P.power ? P.power[0] : ''; }
 let bhWob = 0, BURN_DUR = 1.5;
 function powerShout(col){ pfx.push({k: 'ignite', t: 0, col: col || '#ffd36b'}); pulse = 1; try{ if (AC && !muted){ const n = AC.currentTime; [0, 5, 12].forEach((sm, i) => uiTone(ROOT*Math.pow(2, (sm + ({luna: 3, mercurio: 9, venus: 2, marte: -2, jupiter: -5, saturno: 4, urano: 7, neptuno: 10, pluton: -7, sol: 0})[curPlanet] || 0)/12), n + i*.05, .8, .04)); } }catch(e){}
   texts = texts.filter(x => !x.tip && x.key !== 'pow' && x.y !== -R0-96 && x.y !== -R0-76); texts.push({txt: powerName(), x: 0, y: -R0-96, life: 1.4, size: 20, col: col || '#ffd36b', center: true, key: 'pow'}); }
-function nextGapOffset(ring, R){   // cuánto girar el anillo para dejar un hueco justo encima de ti
-  let best = null;
-  for (let i = 0; i < 360; i++){
-    const th = pAng + (i % 2 ? 1 : -1)*Math.floor((i + 1)/2)*Math.PI/180; let ok = true;
-    for (const o of ring.obs){ const da = Math.abs(Math.atan2(Math.sin(obsAng(ring, o) - th), Math.cos(obsAng(ring, o) - th))); if (da*R < PR*sizeK() + obsRad(ring, o) + 6){ ok = false; break; } }
-    if (ok){ best = Math.atan2(Math.sin(pAng - th), Math.cos(pAng - th)); break; }
-  }
-  return best;
-}
 function usePower(mid){
   const id = curPlanet; if (id === 'pluton'){ if (!texts.some(x => x.key === 'pow')) texts.push({txt: shieldLeft > 0 ? 'Caronte está listo: te salvará una vez' : 'Caronte ya te salvó', x: 0, y: -R0-30, life: 1.2, size: 13, col: '#d9c7b4', center: true, key: 'pow'}); return; }
   charge = 0; showHint = false; pending = false; usedDouble = true; noteDouble(); buzz([15,30,25]);

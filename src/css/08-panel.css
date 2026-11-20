@@ -1,3 +1,26 @@
+/* panel central: antes de jugar, victoria y derrota */
+.chips{margin-top:26px;display:flex;flex-direction:column;align-items:center;gap:9px;pointer-events:auto;}
+.chips .lbl{font-weight:300;font-size:12px;color:var(--muted);}
+.chips .row{display:flex;gap:8px;}
+.chip{font:500 12px 'Unbounded',system-ui,sans-serif;color:var(--muted);background:transparent;border:1px solid rgba(236,230,216,.2);border-radius:999px;padding:8px 13px;cursor:pointer;}
+.chip.on{color:var(--fg);border-color:var(--sun);}
+.chip:focus-visible{outline:2px solid var(--fg);outline-offset:2px;}
+#panel.hide .chips{pointer-events:none;}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){ .chip:hover{animation:hop .35s ease-out forwards;} .chip:hover{border-color:rgba(236,230,216,.5);} }
+.chip.act{pointer-events:auto;margin-top:18px;}
+#panel{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;pointer-events:none;padding:0 24px;transition:opacity .25s;}
+#panel.hide{opacity:0;}
+#panel.top{justify-content:flex-start;padding-top:max(9vh,56px);}
+.title{font-weight:900;font-size:clamp(52px,16vw,108px);letter-spacing:-.04em;line-height:.9;
+  color:var(--fg);}
+.big{font-weight:900;font-size:clamp(72px,24vw,140px);line-height:.9;letter-spacing:-.04em;
+}
+.sub{margin-top:18px;font-weight:300;font-size:15px;line-height:1.6;color:var(--muted);max-width:30ch;}
+.msg{margin-top:14px;font-weight:500;font-size:16px;color:var(--fg);}
+.msg.rec{color:var(--sun);}
+.cta{margin-top:34px;font-weight:500;font-size:14px;color:var(--fg);animation:blink 1.1s ease-in-out infinite;}
+@media (prefers-reduced-motion: reduce){ .cta{animation:none} }
 /* pantalla antes de jugar: mínima */
 #panel .mlv{margin-top:0;font-size:11px;font-weight:500;text-transform:uppercase;}
 #panel .mhelp{display:flex;align-items:center;gap:16px;margin-top:22px;font-size:11.5px;letter-spacing:.06em;color:rgba(236,230,216,.62);}
@@ -5,7 +28,6 @@
 #panel .mhelp svg{width:18px;height:18px;color:#ffa155;}
 #panel .mhelp i{width:1px;height:14px;background:rgba(236,230,216,.18);}
 #panel .mgo{font-size:15px;animation:mgoPulse 1.8s ease-in-out infinite;}
-@keyframes mgoPulse{0%,100%{opacity:.55;transform:scale(1);}50%{opacity:1;transform:scale(1.04);}}
 @media (max-width:420px){ #panel .mhelp{flex-direction:column;gap:9px;} #panel .mhelp i{display:none;} }
 @media (prefers-reduced-motion:reduce){ #panel .mgo{animation:none;opacity:1;} }
 /* pantalla de victoria: título, tu premio, planetas rescatados y un solo botón principal */
@@ -19,10 +41,10 @@
 #panel .wres small{font-size:10px;text-transform:uppercase;}
 #panel .wpl{display:flex;gap:22px;}
 #panel .wp{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:rgba(236,230,216,.8);animation:wpIn .7s cubic-bezier(.2,.8,.3,1.2) both;}
-#panel .wp:nth-child(2){animation-delay:.15s;} #panel .wp:nth-child(3){animation-delay:.3s;}
+#panel .wp:nth-child(2){animation-delay:.15s;}
+#panel .wp:nth-child(3){animation-delay:.3s;}
 #panel .wp img, #panel .wp svg{display:block;}
 #panel .wp b{font-weight:500;}
-@keyframes wpIn{from{opacity:0;transform:scale(.6) translateY(8px);}}
 #panel .wbtn{margin-top:30px;position:relative;padding:15px 34px;border-radius:999px;border:1.5px solid #ff8a3d;background:radial-gradient(120% 160% at 50% 135%, rgba(255,120,40,.45), rgba(255,120,40,.05) 55%, rgba(9,11,22,.95) 80%), #0a0c17;color:#fff4ea;font:500 13px 'Unbounded',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;box-shadow:0 0 24px rgba(255,120,40,.3);pointer-events:auto;}
 #panel .wbtn:hover{box-shadow:0 0 34px rgba(255,140,60,.5);}
 #panel .wlinks{display:flex;align-items:center;gap:14px;margin-top:16px;}
@@ -35,7 +57,6 @@
 #panel .wstars span{animation:wsIn .45s cubic-bezier(.2,.8,.3,1.4) both;}
 #panel .wstars svg{width:100%;height:100%;display:block;fill:none;stroke:rgba(236,230,216,.35);stroke-width:1.6;stroke-linejoin:round;}
 #panel .wstars .on svg{fill:#ffd36b;stroke:#ffe7a8;filter:drop-shadow(0 0 6px rgba(255,211,107,.7));}
-@keyframes wsIn{from{opacity:0;transform:scale(.3) rotate(-30deg);}}
 #panel .wres{margin-top:24px;gap:8px;}
 #panel .wres small{color:rgba(236,230,216,.45);letter-spacing:.24em;}
 #panel .wp img, #panel .wp svg{width:50px;height:50px;}
@@ -45,21 +66,18 @@
 #panel .wico:hover{color:var(--fg);border-color:rgba(236,230,216,.6);}
 /* victoria como en Geometry Dash: título, intentos, estrellas y tres botones redondos */
 #panel .wtit{animation:wtIn .7s cubic-bezier(.2,.9,.25,1.3) both;text-shadow:0 0 30px rgba(255,161,85,.35);}
-@keyframes wtIn{from{opacity:0;transform:scale(.55);letter-spacing:.2em;}}
 #panel .wtries{margin-top:12px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(236,230,216,.5);animation:wfade .5s .25s both;}
-@keyframes wfade{from{opacity:0;transform:translateY(6px);}}
 #panel .wstars{margin-top:18px;gap:10px;}
 #panel .wstars span{width:26px;height:26px;}
 #panel .wact{gap:22px;margin-top:34px;animation:wfade .5s .8s both;}
 #panel .wgo{width:84px;height:84px;border-radius:50%;border:0;background:var(--sun);color:#fff;display:grid;place-items:center;cursor:pointer;pointer-events:auto;padding:0;box-shadow:0 0 0 6px rgba(255,107,44,.16),0 0 34px rgba(255,107,44,.45);}
 #panel .wgo svg{width:34px;height:34px;margin-left:4px;}
-#panel .wgo:hover{transform:scale(1.05);} #panel .wgo:active{transform:scale(.94);}
+#panel .wgo:hover{transform:scale(1.05);}
+#panel .wgo:active{transform:scale(.94);}
 #panel .wico{width:54px;height:54px;}
 #panel .wico svg{width:22px;height:22px;}
-#home .plan.new::after{content:"";position:absolute;top:4px;right:4px;width:12px;height:12px;border-radius:50%;background:#ff6b2c;box-shadow:0 0 0 3px #05070d,0 0 10px rgba(255,107,44,.8);}
 /* al terminar, el juego queda desenfocado detrás: se siente que la partida acabó */
 #panel.wscr::before{background:radial-gradient(120% 80% at 50% 30%, rgba(5,7,13,.62), rgba(5,7,13,.45));-webkit-backdrop-filter:blur(14px) saturate(.85);backdrop-filter:blur(14px) saturate(.85);animation:wblur .9s ease-out both;}
-@keyframes wblur{from{-webkit-backdrop-filter:blur(0) saturate(1);backdrop-filter:blur(0) saturate(1);opacity:0;}}
 /* pantalla de derrota: número, barra con tu récord y reintentar */
 #panel .drec{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#ffd36b;text-shadow:0 0 12px rgba(255,211,107,.5);margin-bottom:10px;animation:wfade .4s .1s both;}
 #panel .dnum{font-weight:600;font-size:clamp(64px,18vw,104px);line-height:.95;color:var(--fg);animation:wtIn .5s cubic-bezier(.2,.9,.25,1.3) both;}
@@ -70,13 +88,23 @@
 #panel .dbar .ex{flex:0 0 auto;width:12px;height:12px;border-radius:50%;border:1.5px solid rgba(236,230,216,.35);box-sizing:border-box;}
 #panel .dbar .ln{position:relative;flex:1;height:2px;background:repeating-linear-gradient(90deg, rgba(236,230,216,.28) 0 4px, transparent 4px 8px);}
 #panel .dbar .ln i{position:absolute;left:0;top:0;bottom:0;width:var(--p);background:linear-gradient(90deg, rgba(236,230,216,.08), rgba(236,230,216,.8));animation:dfill .8s .25s cubic-bezier(.3,.8,.3,1) both;}
-@keyframes dfill{from{width:0;}}
 #panel .dbar .ln u{position:absolute;top:-6px;left:var(--b);width:2px;height:14px;margin-left:-1px;border-radius:1px;background:#ffd36b;box-shadow:0 0 6px rgba(255,211,107,.8);}
 #panel .dbar .ln b{position:absolute;top:50%;left:var(--p);width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#8fc4ff,#2f6fd8 60%,#123a7a);box-shadow:0 0 8px rgba(143,208,255,.9);animation:dmove .8s .25s cubic-bezier(.3,.8,.3,1) both;}
-@keyframes dmove{from{left:0;}}
 #panel .wact .ghost{visibility:hidden;}
 #panel .dre svg{margin-left:0;width:36px;height:36px;}
-/* reinicio instantáneo: "Intento N" en el espacio */
-#tryn{position:absolute;left:0;right:0;z-index:5;text-align:center;pointer-events:none;opacity:0;}
-#tryn b{display:block;font-size:12px;font-weight:500;text-transform:uppercase;color:#ffd36b;text-shadow:0 0 14px rgba(255,211,107,.6);}
-#tryn.go{animation:tryn 1.6s ease-out both;}
+/* antes de jugar: el nivel como dato del panel (letra de terminal) y la invitación en la letra del juego */
+#panel .mlv{font:400 10.5px 'Space Mono',ui-monospace,Menlo,monospace;letter-spacing:.26em;}
+#panel .mlv::before{content:'▸ ';color:#ffa155;letter-spacing:0;}
+#panel .mgo{margin-top:22px;font:500 17px 'Unbounded',system-ui,sans-serif;letter-spacing:.06em;text-transform:none;color:var(--fg);text-shadow:none;}
+/* textos legibles sobre fondos brillantes (galaxias y nebulosas) */
+#panel .mlv, #panel .mgo{text-shadow:0 0 10px rgba(3,4,10,.95), 0 0 22px rgba(3,4,10,.8), 0 1px 2px rgba(0,0,0,.9);}
+#panel .mlv{color:rgba(236,230,216,.78);}
+@keyframes blink{50%{opacity:.25}}
+@keyframes mgoPulse{0%,100%{opacity:.55;transform:scale(1);}50%{opacity:1;transform:scale(1.04);}}
+@keyframes wpIn{from{opacity:0;transform:scale(.6) translateY(8px);}}
+@keyframes wsIn{from{opacity:0;transform:scale(.3) rotate(-30deg);}}
+@keyframes wtIn{from{opacity:0;transform:scale(.55);letter-spacing:.2em;}}
+@keyframes wfade{from{opacity:0;transform:translateY(6px);}}
+@keyframes wblur{from{-webkit-backdrop-filter:blur(0) saturate(1);backdrop-filter:blur(0) saturate(1);opacity:0;}}
+@keyframes dfill{from{width:0;}}
+@keyframes dmove{from{left:0;}}

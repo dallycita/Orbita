@@ -5,8 +5,6 @@ function beatPhase(){ return (AC && musicOn && musicStart >= 0) ? frac(beatTime(
 function beatKick(){ const x = beatPhase(); return x < 0 ? 0 : Math.exp(-x*7)*(reduceMotion ? .35 : 1); }
 // respiración lenta con el bajo (cada dos golpes)
 function bassBreath(){ return (AC && musicOn && musicStart >= 0) ? .5 - .5*Math.cos(2*Math.PI*frac(beatTime()/(2*TB))) : 0; }
-// distancia (en segundos) al golpe más cercano
-function beatError(){ const x = beatPhase(); return x < 0 ? 9 : Math.min(x, 1 - x)*TB; }
 let jumpOnBeat = false, lastBeatIdx = -1;
 const ON_BEAT = .055;
 function beatTime(){ return (AC && musicStart >= 0) ? AC.currentTime - musicStart - (AC.outputLatency || AC.baseLatency || 0) : t; }

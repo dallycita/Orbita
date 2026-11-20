@@ -25,32 +25,6 @@ function drawBgPlanet(id, x, y, R, alpha){
   planetRing(id, x, y, R, 'front', false);
   ctx.restore();
 }
-function drawSolarJourney(){
-  if (!PLGL.ok()) return;
-  solarJ += (Math.min(1, camLevel/GOAL) - solarJ)*.08;
-  const M = Math.min(W, H), span = H*4.2;
-  for (const P of SOLAR_PATH){
-    const y = H*.46 + (solarJ - P.at)*span;
-    if (P.belt){
-      if (!beltRocks){ beltRocks = []; for (let i = 0; i < 70; i++) beltRocks.push({x: Math.random(), y: (Math.random() - .5)*.5, z: .3 + Math.random()*.7, s: Math.random(), a: Math.random()*6.28, sp: (Math.random() - .5)*.6}); }
-      for (const b of beltRocks){
-        const yy = y + b.y*H*1.1*(1 + b.z), xx = ((b.x*W + t*6*b.z) % W + W) % W;
-        if (yy < -20 || yy > H + 20) continue;
-        const rs = (1.2 + b.s*3.2)*(.5 + b.z)*(M/700 + .6);
-        ctx.save(); ctx.globalAlpha = .22 + .35*b.z; ctx.translate(xx, yy); ctx.rotate(b.a + t*b.sp);
-        ctx.fillStyle = b.z > .7 ? '#8a7f74' : '#5a5650';
-        ctx.beginPath(); ctx.moveTo(rs, 0); ctx.lineTo(rs*.3, rs*.8); ctx.lineTo(-rs*.7, rs*.5); ctx.lineTo(-rs, -rs*.2); ctx.lineTo(-rs*.2, -rs*.9); ctx.lineTo(rs*.6, -rs*.6); ctx.closePath(); ctx.fill();
-        ctx.restore();
-      }
-      continue;
-    }
-    const R = P.r*M*(W > H ? .8 : 1);
-    if (y < -R*2.5 || y > H + R*2.5) continue;
-    const x = P.x*W;
-    drawBgPlanet(P.id, x, y, R, .62);
-    if (P.moon) drawBgPlanet('luna', x - R*1.9, y - R*.9, R*.27, .62);
-  }
-}
 function renderScene(){
   const z = zoneOf(level);
   ctx.save();
