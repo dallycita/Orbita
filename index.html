@@ -984,6 +984,10 @@ const zoneOf = k => (lvl >= 3 && !tutorial) ? ZONE_LV[lvl] : (lvl === 1 && !tuto
 // ---------- estrellas ----------
 const stars = Array.from({length:140}, () => ({a:Math.random()*Math.PI*2, r:Math.sqrt(Math.random())*1.2, s:Math.random()*1.3+.3, tw:Math.random()*6}));
 
+// utilidades
+const frac = x => x - Math.floor(x);
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const buzz = p => { try{ if (navigator.vibrate) navigator.vibrate(p); }catch(e){} };
 // ---------- audio ----------
 let AC = null, master = null, musicBus = null, NOISE = null, shaper = null, outBus = null, musVol = null;
 // volumen de la música y de los efectos (0–100), se guardan; la curva es cuadrática para que el control se sienta parejo
@@ -1631,6 +1635,7 @@ function stepCosmos(s, t0){
   if (fast){ if ([0, 3, 6, 8, 11, 14].includes(b)) hzTaiko(t0, b === 0 || b === 8 ? .7 : .45); if (b === 4 || b === 12) hzSnare(t0, .22); if (b % 2 === 1) noiseHit(t0, .025, 'highpass', 9000, .045, musicBus); }
 }
 
+// ---------- el reproductor: qué estilo suena, cuándo arranca y cuándo para ----------
 function scheduleStep(s, t0){
   if (musicStyle === 'espacial' && state === 'play' && level >= SW_AT){
     if (!riserOn && s % 32 === 16){ riserOn = true; riser(t0, 16*STEP); }
@@ -1695,7 +1700,6 @@ function stopMusic(quick){
     musicBus.gain.exponentialRampToValueAtTime(.0001, n + (quick ? .06 : .35));
   }catch(e){}
 }
-const buzz = p => { try{ if (navigator.vibrate) navigator.vibrate(p); }catch(e){} };
 
 // ---------- récord ----------
 let best = 0;
@@ -1828,6 +1832,7 @@ const PLANET_SVG = {
   pluton:'<circle cx="50" cy="50" r="17" fill="#d9c7b4"/><path d="M52 62 C44 57 45 49 52 52 C59 49 60 57 52 62 Z" fill="#f4ebe0"/>',
 };
                      // nivel 1: el sistema solar termina en el anillo 50
+// ---------- estado de la partida: contadores, tutorial, efectos en pantalla ----------
 let winT = 0, perfCount = 0, attempts = 0;
 try{ attempts = parseInt(localStorage.getItem('orbita_p1_intentos')||'0',10) || 0; }catch(e){ attempts = 0; }
 const veterano = attempts > 0;
@@ -2547,33 +2552,7 @@ function drawInside(al){
   ctx.globalAlpha = .25; ctx.beginPath(); ctx.arc(ex, ey, rr3, 0, Math.PI*2); ctx.stroke();
   ctx.restore();
 }
-function render(){
-  hideEarth = false; viewInside = false;
-  if (!wh){ renderScene(); if (whShock) drawShock(); return; }
-  if (wh.ph === 'orb'){ viewInside = true; renderScene(); drawInside(1); viewInside = false; return; }
-  if (wh.ph === 'in'){
-    const p = clamp(wh.t/WH_IN, 0, 1), z = 1 + .18*p*p, cx = CX + wh.wx*S, cy = CY + wh.wy*S;
-    hideEarth = p > .62;
-    ctx.save(); ctx.translate(cx, cy); ctx.rotate(.12*p*p); ctx.scale(z, z); ctx.translate(-cx, -cy); renderScene(); ctx.restore();
-    hideEarth = false;
-    // ya adentro: el mismo cielo a través de la garganta
-    if (p > .8){ ctx.save(); ctx.globalAlpha = (p - .8)/.2; viewInside = true; hideEarth = true; renderScene(); drawInside(1); viewInside = false; hideEarth = false; ctx.restore(); }
-    return;
-  }
-  // salida
-  const p = clamp(wh.t/WH_OUT, 0, 1);
-  renderScene();
-  if (p < .3){ ctx.save(); ctx.globalAlpha = 1 - p/.3; drawInside(1); ctx.restore(); }
-}
 // al salir: ondas que recorren los anillos
-function drawShock(){
-  const s = whShock; if (!s) return;
-  const u = clamp(s.t/1.1, 0, 1), R = 300*s.t*S;
-  ctx.save(); ctx.globalCompositeOperation = 'lighter';
-  const g = ctx.createRadialGradient(s.cx, s.cy, Math.max(0, R - 40*S), s.cx, s.cy, R + 40*S);
-  if (g && g.addColorStop){ g.addColorStop(0, 'rgba(200,190,255,0)'); g.addColorStop(.5, 'rgba(200,190,255,' + (.16*(1 - u)) + ')'); g.addColorStop(1, 'rgba(200,190,255,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
-  ctx.restore();
-}
 
 // ---- espacio doblado (nivel 1, anillos 27–33): un agujero de gusano flota delante de ti y dobla el espacio.
 // Es una lente gravitacional de verdad: todo lo que pasa cerca (anillos, asteroides y tu planeta) se ve empujado
@@ -3736,8 +3715,6 @@ function update(dt){
 }
 
 // ---------- dibujo ----------
-const frac = x => x - Math.floor(x);
-const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 // asteroides con volumen: roca sombreada iluminada por el disco del agujero negro (borde naranja hacia el centro) y con cráteres.
 // Se dibujan una vez en pequeñas imágenes (8 formas × 12 giros × tamaño) y luego solo se copian: rápido incluso en celulares.
 
@@ -3936,6 +3913,33 @@ function powerReadySound(){
   try{ const n = AC.currentTime; [0, 7, 12, 16, 19, 24].forEach((sm, i) => uiTone(ROOT*2*Math.pow(2, sm/12), n + i*.045, .9, .05));
     const o = AC.createOscillator(), g = AC.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(ROOT, n); o.frequency.exponentialRampToValueAtTime(ROOT*4, n + .3);
     g.gain.setValueAtTime(.0001, n); g.gain.exponentialRampToValueAtTime(.08, n + .05); g.gain.exponentialRampToValueAtTime(.0001, n + .4); o.connect(g); g.connect(uiOut()); o.start(n); o.stop(n + .45); }catch(e){}
+}
+// el cuadro completo: elige qué dibujar (dentro o fuera del agujero de gusano) y la onda al salir
+function render(){
+  hideEarth = false; viewInside = false;
+  if (!wh){ renderScene(); if (whShock) drawShock(); return; }
+  if (wh.ph === 'orb'){ viewInside = true; renderScene(); drawInside(1); viewInside = false; return; }
+  if (wh.ph === 'in'){
+    const p = clamp(wh.t/WH_IN, 0, 1), z = 1 + .18*p*p, cx = CX + wh.wx*S, cy = CY + wh.wy*S;
+    hideEarth = p > .62;
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(.12*p*p); ctx.scale(z, z); ctx.translate(-cx, -cy); renderScene(); ctx.restore();
+    hideEarth = false;
+    // ya adentro: el mismo cielo a través de la garganta
+    if (p > .8){ ctx.save(); ctx.globalAlpha = (p - .8)/.2; viewInside = true; hideEarth = true; renderScene(); drawInside(1); viewInside = false; hideEarth = false; ctx.restore(); }
+    return;
+  }
+  // salida
+  const p = clamp(wh.t/WH_OUT, 0, 1);
+  renderScene();
+  if (p < .3){ ctx.save(); ctx.globalAlpha = 1 - p/.3; drawInside(1); ctx.restore(); }
+}
+function drawShock(){
+  const s = whShock; if (!s) return;
+  const u = clamp(s.t/1.1, 0, 1), R = 300*s.t*S;
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  const g = ctx.createRadialGradient(s.cx, s.cy, Math.max(0, R - 40*S), s.cx, s.cy, R + 40*S);
+  if (g && g.addColorStop){ g.addColorStop(0, 'rgba(200,190,255,0)'); g.addColorStop(.5, 'rgba(200,190,255,' + (.16*(1 - u)) + ')'); g.addColorStop(1, 'rgba(200,190,255,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
+  ctx.restore();
 }
 // ---------- el viaje por el Sistema solar: los planetas pasan en el fondo, en su orden real ----------
 // at: en qué parte del nivel (0–1) cruza el centro de la pantalla · x: lado (fracción del ancho) · r: tamaño (fracción del lado menor)
@@ -7938,7 +7942,6 @@ function drawLevelsBG(){
   elLv.classList.toggle('live', !!soft);
 }
 
-let last = performance.now();
 
 // ---------- misiones y polvo estelar ----------
 // estrellas = habilidad (desbloquean) · polvo estelar = constancia (compra). Diarias: tres al día, cambian a medianoche.
@@ -8280,6 +8283,7 @@ function misCanvasDraw(c){
   }
 }
 
+let last = performance.now();
 function frame(now){
   const dt = Math.min((now - last)/1000, .05); last = now;
   requestAnimationFrame(frame);

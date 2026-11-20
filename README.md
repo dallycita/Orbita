@@ -10,12 +10,13 @@ Abre `index.html` en el navegador. Es un solo archivo con todo adentro.
 
 ## Trabajar en el juego
 
-Necesitas [Node.js](https://nodejs.org) 18 o más nuevo. No hay nada que instalar con npm.
+Necesitas [Node.js](https://nodejs.org) 18 o más nuevo. La primera vez corre `npm install` (solo instala el analizador que revisa las dependencias).
 
 ```bash
 npm run dev      # abre http://localhost:5173 y recarga solo cada vez que guardas
 npm run build    # arma index.html a partir de src/
-npm run check    # comprueba que index.html está al día con src/
+npm run check    # comprueba que index.html está al día y que cada archivo declara lo que usa
+npm run deps     # vuelve a escribir las cabeceras de dependencias (después de un cambio a propósito)
 ```
 
 **La regla más importante: se edita `src/`, nunca `index.html`.** `index.html` se genera solo; si lo editas a mano, el próximo `build` borra el cambio. Antes de subir un cambio, corre `npm run build` (con `npm run dev` abierto se hace solo). GitHub también lo revisa en cada subida.
@@ -44,38 +45,47 @@ Un archivo por pantalla: `01-base` (colores y página), `02-navegacion` (flechas
 
 | Archivo | Qué tiene |
 |---|---|
-| `01-elementos-y-medidas` | elementos de la página, tamaño de pantalla, zonas, estrellas del fondo |
+| `01-pantalla-y-utilidades` | elementos de la página, tamaño de pantalla, zonas, estrellas del fondo, utilidades (`clamp`, `frac`, vibración) |
 | `02-audio` | el motor de sonido: canales de música y SFX, volúmenes, golpes y ruido |
 | `03-musica-ritmos` | ritmos y la música de Andrómeda, Magallanes y los niveles 4 a 8 |
 | `04-musica-horizonte` | "Horizonte de sucesos", la banda sonora del Sistema solar |
-| `05-record-y-estado` | récords y el estado general de la partida |
-| `06-planetas-datos` | los planetas: datos reales, estadísticas y poderes |
-| `07-ritmo-y-objetos` | sincronía con la música, estrellas (moneda), nebulosas, púlsares y recorridos |
-| `08-peligros-datos` | dónde aparecen cometas, rayos, llamaradas, supernovas y novas |
-| `09-poderes` | los poderes de cada planeta y sus efectos visuales |
-| `10-agujero-de-gusano` | el modo Órbita dentro del gusano y la lente que dobla el espacio |
-| `11-peligros` | cómo se mueven y dibujan los peligros (ondas, novas, cometas…) |
-| `12-partida` | anillos, inicio, saltos, aterrizar, ganar y morir |
-| `12-tutorial` | el tutorial |
-| `13-pausa` | el menú de pausa, sus sonidos y la cuenta 3·2·1 |
-| `14-controles` | toques, deslizamientos y teclado |
-| `15-logica` | lo que pasa en cada cuadro (`update`) |
-| `16-dibujo` | cómo se dibuja cada cuadro (`render`) |
-| `17-viaje-sistema-solar` | los planetas que pasan en el fondo del Sistema solar |
-| `18-intro` | la historia: el agujero negro entra al sistema solar |
-| `19-presentacion` | la presentación con el logotipo |
-| `20-selector-niveles` | la pantalla para elegir galaxia |
-| `21-pantalla-inicio` | el inicio, ajustes y sonido |
-| `22-inicio-animacion` | la animación del inicio |
-| `23-sonidos-interfaz` | los sonidos de cristal de los botones |
-| `24-planetas-hd` | la pantalla de planetas y los planetas en 3D (WebGL) |
-| `25-escanear` | el escaneo de datos de cada planeta |
-| `26-fondos-galaxias` | los fondos 2D (respaldo si no hay WebGL) |
-| `27-fondos-1-comun` … `27-fondos-6-foto` | los shaders de cada fondo, uno por galaxia: Andrómeda, Vía Láctea, Magallanes, y las lejanas (Centaurus A, Remolino, Sombrero, M87, Sagitario A\*) |
-| `27-fondos-9-motor` | el motor que dibuja esos shaders y la lente gravitacional |
-| `28-tarjetas-niveles` | las galaxias en movimiento del selector |
-| `29-misiones` | misiones diarias, logros y polvo estelar |
-| `30-bucle-principal` | el bucle que mueve todo (`frame`) |
+| `05-musica-reproductor` | qué música suena, cuándo arranca y cuándo para |
+| `06-record-y-estado` | récords y el estado general (nivel, anillo, posición) |
+| `07-planetas` | los planetas: datos reales, estadísticas y poderes |
+| `08-partida-estado` | contadores, tutorial y efectos en pantalla de la partida |
+| `09-recorridos` | los recorridos de anillos de cada nivel |
+| `10-ritmo-y-objetos` | sincronía con la música, estrellas (moneda), nebulosas y púlsares |
+| `11-peligros-datos` | dónde aparecen cometas, rayos, llamaradas, supernovas y novas |
+| `12-poderes` | los poderes de cada planeta y sus efectos visuales |
+| `13-agujero-de-gusano` | el modo Órbita dentro del gusano y su portal |
+| `14-lente-gravitacional` | la lente que dobla el espacio alrededor del gusano |
+| `15-peligros` | cómo se mueven y dibujan los peligros (novas, ondas, cometas…) |
+| `16-partida` | anillos, inicio, saltos, aterrizar, ganar y morir |
+| `17-tutorial` | el tutorial |
+| `18-pausa` | el menú de pausa, sus sonidos y la cuenta 3·2·1 |
+| `19-controles` | toques, deslizamientos y teclado |
+| `20-logica` | lo que pasa en cada cuadro (`update`) |
+| `21-dibujo` | cómo se dibuja cada cuadro (`render`) |
+| `22-viaje-sistema-solar` | los planetas que pasan en el fondo del Sistema solar |
+| `23-intro` | la historia: el agujero negro entra al sistema solar |
+| `24-presentacion` | la presentación con el logotipo |
+| `25-selector-niveles` | la pantalla para elegir galaxia |
+| `26-pantalla-inicio` | el inicio, ajustes y sonido |
+| `27-inicio-animacion` | la animación del inicio |
+| `28-sonidos-interfaz` | los sonidos de cristal de los botones |
+| `29-planetas-hd` | la pantalla de planetas y los planetas en 3D (WebGL) |
+| `30-escanear` | el escaneo de datos de cada planeta |
+| `31-fondos-2d` | los fondos 2D (respaldo si no hay WebGL) |
+| `32-fondos-*` | los shaders de cada fondo, uno por galaxia, y `32-fondos-9-motor` que los dibuja |
+| `33-tarjetas-niveles` | las galaxias en movimiento del selector |
+| `34-misiones` | misiones diarias, logros y polvo estelar |
+| `35-bucle-principal` | el bucle que mueve todo (`frame`) |
+
+### Cada archivo declara qué usa de los demás
+
+Cada archivo empieza con una cabecera que dice **qué da** (lo que otros archivos pueden usar; todo lo demás es privado), **qué usa** de cada otro archivo y **qué cambia** de otros archivos (estado compartido, lo más delicado). `docs/dependencias.md` tiene el mapa completo.
+
+Las cabeceras se generan con `npm run deps`, y `npm run check` (que también corre en GitHub) falla si el código usa algo de otro archivo que no está declarado. Así, cuando tocas algo que "da" un archivo, su cabecera te dice exactamente qué archivos lo usan; y lo que no está en "da" lo puedes cambiar sin miedo a romper otro archivo.
 
 Todos los archivos de `js/` comparten el mismo espacio de nombres: una función de un archivo puede usar las variables de otro. El número al principio fija el orden en que se unen, y ese orden importa: un archivo puede usar al cargar lo que se definió en un archivo anterior, no en uno posterior. Si agregas un archivo nuevo, ponle el número del lugar donde va.
 

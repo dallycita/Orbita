@@ -7,9 +7,14 @@
     "dev": "node dev.mjs",
     "build": "node build.mjs",
     "check": "node build.mjs --check",
-    "huella": "node pruebas/huella.mjs"
+    "huella": "node pruebas/huella.mjs",
+    "deps": "node build.mjs --deps"
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "eslint-scope": "^8.4.0",
+    "espree": "^10.4.0"
   }
 }
