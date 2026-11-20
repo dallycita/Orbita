@@ -4917,6 +4917,7 @@ function renderHome(){
     '<div class="sheet" role="dialog" aria-label="Ajustes"><h3>Ajustes</h3>' +
     '<button type="button" class="opt" data-h="snd"><span>Sonido</span><b>' + (muted ? 'Apagado' : 'Encendido') + '</b></button>' +
     '<button type="button" class="opt" data-h="allp"><span>Todos los planetas (pruebas)</span><b>' + (allPlanets ? 'Sí' : 'No') + '</b></button>' +
+    '<button type="button" class="opt" data-h="medir"><span>Medidor de rendimiento (pruebas)</span><b>' + (MEDIR ? 'Sí' : 'No') + '</b></button>' +
     '<button type="button" class="opt danger" data-h="reset"><span>Borrar progreso</span><b>Empezar de cero</b></button>' +
     '<button type="button" class="opt" data-h="close" style="justify-content:center"><span>Cerrar</span></button></div>';
   if (!elHome.querySelectorAll) return;
@@ -4931,6 +4932,7 @@ function homeAction(a, b){
   else if (a === 'cfg'){ if (sheet) sheet.classList.add('on'); }
   else if (a === 'planets'){ openPlanets(); }
   else if (a === 'missions'){ openMissions(); }
+  else if (a === 'medir'){ MEDIR = !MEDIR; try{ localStorage.setItem('orbita_medidor', MEDIR ? '1' : '0'); }catch(e){} if (!MEDIR && medEl){ medEl.remove(); medEl = null; } medPrev = 0; const v = b.querySelector('b'); if (v) v.textContent = MEDIR ? 'Sí' : 'No'; }
   else if (a === 'allp'){ allPlanets = !allPlanets; try{ localStorage.setItem('orbita_p1_todos', allPlanets ? '1' : '0'); }catch(e){} const v = b.querySelector('b'); if (v) v.textContent = allPlanets ? 'Sí' : 'No'; }
   else if (a === 'close'){ if (sheet) sheet.classList.remove('on'); }
   else if (a === 'snd'){ muted = !muted; try{ localStorage.setItem('orbita_p1_sonido', muted ? '0' : '1'); }catch(e){} applyMute(); const v = b.querySelector('b'); if (v) v.textContent = muted ? 'Apagado' : 'Encendido'; }
@@ -8283,8 +8285,36 @@ function misCanvasDraw(c){
   }
 }
 
+// ---------- medidor de rendimiento (pruebas) ----------
+// Se enciende en Ajustes ("Medidor de rendimiento") o agregando ?medir al enlace. Apagado no hace nada.
+// Muestra, de los últimos 2 segundos: cuadros por segundo, ms entre cuadros (mediana y peor 5 %), cuánto de cada cuadro
+// es nuestro código (lógica y dibujo) y cuántos "tirones" hubo (cuadros de más de 25 ms) en los últimos 10 segundos.
+// Si los ms entre cuadros son altos pero nuestro código tarda poco, el que no da abasto es la tarjeta gráfica.
+let MEDIR = false;
+try{ MEDIR = localStorage.getItem('orbita_medidor') === '1' || /[?&#]medir\b/.test(location.search + location.hash); }catch(e){}
+let medEl = null, medPrev = 0, medMid = 0, medShow = 0;
+const medInt = [], medJs = [], medUpd = [], medJank = [];
+function medFrame(now, t0){
+  const t1 = performance.now();
+  if (medPrev){ medInt.push(now - medPrev); if (now - medPrev > 25) medJank.push(now); }
+  medPrev = now; medJs.push(t1 - t0); medUpd.push(medMid ? medMid - t0 : -1); medMid = 0;
+  while (medInt.length > 120) medInt.shift(); while (medJs.length > 120){ medJs.shift(); medUpd.shift(); }
+  while (medJank.length && now - medJank[0] > 10000) medJank.shift();
+  if (now - medShow < 500) return; medShow = now;
+  if (!medEl){ medEl = document.createElement('div'); medEl.id = 'medidor'; medEl.setAttribute('aria-hidden', 'true');
+    medEl.style.cssText = 'position:fixed;left:10px;bottom:10px;z-index:50;pointer-events:none;padding:8px 10px;border-radius:10px;background:rgba(5,7,13,.78);border:1px solid rgba(236,230,216,.18);font:400 10px/1.55 "Space Mono",ui-monospace,monospace;color:#ece6d8;white-space:pre;letter-spacing:.02em';
+    document.body.appendChild(medEl); }
+  const srt = a => [...a].sort((x, y) => x - y), q = (s, p) => s.length ? s[Math.min(s.length - 1, Math.floor(p*s.length))] : 0;
+  const iv = srt(medInt), js = srt(medJs), up = medUpd.filter(x => x >= 0), med = q(iv, .5), fps = med ? 1000/med : 0;
+  const upm = up.length ? q(srt(up), .5) : -1, jsm = q(js, .5);
+  const col = fps >= 55 ? '#8ff0c0' : fps >= 40 ? '#ffd36b' : '#ff7a6b';
+  medEl.innerHTML = '<b style="color:' + col + ';font-weight:400">FPS ' + fps.toFixed(0).padStart(3) + '</b>   cuadro ' + med.toFixed(1) + ' ms (peor ' + q(iv, .95).toFixed(1) + ')\n' +
+    'código ' + jsm.toFixed(1) + ' ms' + (upm >= 0 ? ' (lógica ' + upm.toFixed(1) + ' · dibujo ' + (jsm - upm).toFixed(1) + ')' : '') + '\n' +
+    'tirones ' + medJank.length + ' en 10 s   partículas ' + particles.length;
+}
 let last = performance.now();
 function frame(now){
+  const m0 = MEDIR ? performance.now() : 0;
   const dt = Math.min((now - last)/1000, .05); last = now;
   requestAnimationFrame(frame);
   { const pl = state === 'play' || state === 'dead'; if (pl !== frame.pl){ frame.pl = pl; if (document.body && document.body.classList) document.body.classList.toggle('playing', pl); } }
@@ -8299,9 +8329,10 @@ function frame(now){
       homeT += dt; update(dt); updateHomeShow(dt); renderHomeIntro();
     }
     else if (paused){ /* congelado: el lienzo conserva el último cuadro */ }
-    else { update(dt); render(); }
+    else { update(dt); if (MEDIR) medMid = performance.now(); render(); }
     if (misOpen) misPlanetDraw();
   }catch(e){ try{ ctx.restore(); }catch(_){} console.error(e); }
+  if (MEDIR) medFrame(now, m0);
 }
 requestAnimationFrame(frame);
 })();

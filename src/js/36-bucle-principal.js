@@ -1,4 +1,4 @@
-// ┌─ 35-bucle-principal.js
+// ┌─ 36-bucle-principal.js
 // │ da:     last
 // │ lo usan: 18-pausa
 // │ usa 01-pantalla-y-utilidades: ctx
@@ -15,11 +15,14 @@
 // │ usa 29-planetas-hd: renderPlanetsScene
 // │ usa 33-tarjetas-niveles: drawLevelsBG
 // │ usa 34-misiones: misOpen, misPlanetDraw
+// │ usa 35-medidor: medFrame, MEDIR, medMid
 // │ cambia 08-partida-estado: t
 // │ cambia 27-inicio-animacion: homeT
+// │ cambia 35-medidor: medMid
 // └─ generado por `node build.mjs --deps`; no se edita a mano
 let last = performance.now();
 function frame(now){
+  const m0 = MEDIR ? performance.now() : 0;
   const dt = Math.min((now - last)/1000, .05); last = now;
   requestAnimationFrame(frame);
   { const pl = state === 'play' || state === 'dead'; if (pl !== frame.pl){ frame.pl = pl; if (document.body && document.body.classList) document.body.classList.toggle('playing', pl); } }
@@ -34,8 +37,9 @@ function frame(now){
       homeT += dt; update(dt); updateHomeShow(dt); renderHomeIntro();
     }
     else if (paused){ /* congelado: el lienzo conserva el último cuadro */ }
-    else { update(dt); render(); }
+    else { update(dt); if (MEDIR) medMid = performance.now(); render(); }
     if (misOpen) misPlanetDraw();
   }catch(e){ try{ ctx.restore(); }catch(_){} console.error(e); }
+  if (MEDIR) medFrame(now, m0);
 }
 requestAnimationFrame(frame);

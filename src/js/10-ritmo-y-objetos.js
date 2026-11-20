@@ -4,7 +4,7 @@
 // │        OBJ_PULSAR, objChime, obsAng, obsRad, placeInGap, PUL_AT, pushFrom, pushing, pushT, RING_MUL, runCoins,
 // │        starBoost, starLaunch, starPush, stretchAt, updateWallet, wallet
 // │ lo usan: 09-recorridos, 12-poderes, 13-agujero-de-gusano, 15-peligros, 16-partida, 18-pausa, 19-controles,
-// │        20-logica, 22-viaje-sistema-solar, 25-selector-niveles, 34-misiones, 35-bucle-principal
+// │        20-logica, 22-viaje-sistema-solar, 25-selector-niveles, 34-misiones, 36-bucle-principal
 // │ usa 01-pantalla-y-utilidades: ctx, frac, reduceMotion
 // │ usa 02-audio: AC, ROOT
 // │ usa 03-musica-ritmos: musicOn, musicStart, TB

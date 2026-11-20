@@ -1,7 +1,7 @@
 // ┌─ 24-presentacion.js
 // │ da:     bhCore, bhDiskK, BR0, BR1, brandHole, drawLogo, renderSplash, sfl, SK, skipSplash, splashT, updateSplash
 // │ lo usan: 19-controles, 22-viaje-sistema-solar, 23-intro, 27-inicio-animacion, 33-tarjetas-niveles,
-// │        35-bucle-principal
+// │        36-bucle-principal
 // │ usa 01-pantalla-y-utilidades: BONE, buzz, clamp, ctx, CX, CY, elHud, elPanel, H, stars, W
 // │ usa 02-audio: AC, master, NOISE, noiseHit, ROOT
 // │ usa 06-record-y-estado: state

@@ -79,7 +79,8 @@ Un archivo por pantalla: `01-base` (colores y página), `02-navegacion` (flechas
 | `32-fondos-*` | los shaders de cada fondo, uno por galaxia, y `32-fondos-9-motor` que los dibuja |
 | `33-tarjetas-niveles` | las galaxias en movimiento del selector |
 | `34-misiones` | misiones diarias, logros y polvo estelar |
-| `35-bucle-principal` | el bucle que mueve todo (`frame`) |
+| `35-medidor` | el medidor de rendimiento (Ajustes o `?medir`) |
+| `36-bucle-principal` | el bucle que mueve todo (`frame`) |
 
 ### Cada archivo declara qué usa de los demás
 

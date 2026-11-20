@@ -1,6 +1,6 @@
 // ┌─ 34-misiones.js
 // │ da:     misEvent, misMoons, misOpen, misPlanetDraw, misReady, misWin, openMissions
-// │ lo usan: 13-agujero-de-gusano, 15-peligros, 16-partida, 23-intro, 26-pantalla-inicio, 35-bucle-principal
+// │ lo usan: 13-agujero-de-gusano, 15-peligros, 16-partida, 23-intro, 26-pantalla-inicio, 36-bucle-principal
 // │ usa 00-iconos-flechas: ARC_L, CHEV_L
 // │ usa 01-pantalla-y-utilidades: buzz
 // │ usa 02-audio: AC, noise, ROOT

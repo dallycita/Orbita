@@ -1,6 +1,6 @@
 // ┌─ 33-tarjetas-niveles.js
 // │ da:     drawLevelsBG, lvArts, lvCanvas
-// │ lo usan: 25-selector-niveles, 35-bucle-principal
+// │ lo usan: 25-selector-niveles, 36-bucle-principal
 // │ usa 01-pantalla-y-utilidades: ctx, H, W
 // │ usa 08-partida-estado: t
 // │ usa 24-presentacion: bhCore, bhDiskK, BR0, BR1, SK

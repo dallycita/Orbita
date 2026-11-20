@@ -1,6 +1,6 @@
 // ┌─ 21-dibujo.js
 // │ da:     drawAst, drawCharge, drawEarth, drawPowerAura, powerReadySound, render
-// │ lo usan: 16-partida, 22-viaje-sistema-solar, 23-intro, 29-planetas-hd, 35-bucle-principal
+// │ lo usan: 16-partida, 22-viaje-sistema-solar, 23-intro, 29-planetas-hd, 36-bucle-principal
 // │ usa 01-pantalla-y-utilidades: BONE, clamp, ctx, CX, CY, frac, H, PR, S, W
 // │ usa 02-audio: AC, ROOT
 // │ usa 06-record-y-estado: charge

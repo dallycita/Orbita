@@ -1,6 +1,6 @@
 // ┌─ 20-logica.js
 // │ da:     update
-// │ lo usan: 35-bucle-principal
+// │ lo usan: 36-bucle-principal
 // │ usa 01-pantalla-y-utilidades: BONE, buzz, CX, CY, PR, R0, reduceMotion, S, SUN, zoneOf
 // │ usa 02-audio: AC, noise, thump
 // │ usa 03-musica-ritmos: alarmTick, andFast, dangerFlash, dangerNow, kickQueue, musicOn, musicStart, switchAt,

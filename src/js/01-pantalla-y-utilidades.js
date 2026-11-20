@@ -6,7 +6,7 @@
 // │        13-agujero-de-gusano, 14-lente-gravitacional, 15-peligros, 16-partida, 17-tutorial, 18-pausa, 19-controles,
 // │        20-logica, 21-dibujo, 22-viaje-sistema-solar, 23-intro, 24-presentacion, 25-selector-niveles,
 // │        26-pantalla-inicio, 27-inicio-animacion, 29-planetas-hd, 31-fondos-2d, 32-fondos-9-motor,
-// │        33-tarjetas-niveles, 34-misiones, 35-bucle-principal
+// │        33-tarjetas-niveles, 34-misiones, 36-bucle-principal
 // │ usa 06-record-y-estado: lvl
 // │ usa 08-partida-estado: tutorial
 // └─ generado por `node build.mjs --deps`; no se edita a mano

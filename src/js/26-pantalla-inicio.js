@@ -2,7 +2,7 @@
 // │ da:     applyMute, elHome, muted, openHome, renderHome, storyReturn
 // │ lo usan: 02-audio, 03-musica-ritmos, 10-ritmo-y-objetos, 12-poderes, 13-agujero-de-gusano, 15-peligros, 18-pausa,
 // │        19-controles, 21-dibujo, 23-intro, 25-selector-niveles, 27-inicio-animacion, 28-sonidos-interfaz,
-// │        29-planetas-hd, 30-escanear, 34-misiones, 35-bucle-principal
+// │        29-planetas-hd, 30-escanear, 34-misiones, 36-bucle-principal
 // │ usa 01-pantalla-y-utilidades: elHud, elPanel
 // │ usa 02-audio: AC, initAudio, outBus
 // │ usa 05-musica-reproductor: stopMusic
@@ -17,11 +17,13 @@
 // │ usa 28-sonidos-interfaz: showStart, showStop
 // │ usa 29-planetas-hd: openPlanets
 // │ usa 34-misiones: misMoons, misReady, openMissions
+// │ usa 35-medidor: medEl, MEDIR, medPrev
 // │ cambia 06-record-y-estado: state
 // │ cambia 07-planetas: allPlanets
 // │ cambia 08-partida-estado: tutorial
 // │ cambia 25-selector-niveles: pendingTut, tutAfterStory
 // │ cambia 27-inicio-animacion: homeT, hsBoost, hsEvents, hsFlare, hsJet, hsRipple, hsShake, logoT0
+// │ cambia 35-medidor: medEl, MEDIR, medPrev
 // └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- pantalla de inicio (como Geometry Dash): se queda hasta que eliges ----------
 const elHome = document.getElementById('home');
@@ -40,6 +42,7 @@ function renderHome(){
     '<div class="sheet" role="dialog" aria-label="Ajustes"><h3>Ajustes</h3>' +
     '<button type="button" class="opt" data-h="snd"><span>Sonido</span><b>' + (muted ? 'Apagado' : 'Encendido') + '</b></button>' +
     '<button type="button" class="opt" data-h="allp"><span>Todos los planetas (pruebas)</span><b>' + (allPlanets ? 'Sí' : 'No') + '</b></button>' +
+    '<button type="button" class="opt" data-h="medir"><span>Medidor de rendimiento (pruebas)</span><b>' + (MEDIR ? 'Sí' : 'No') + '</b></button>' +
     '<button type="button" class="opt danger" data-h="reset"><span>Borrar progreso</span><b>Empezar de cero</b></button>' +
     '<button type="button" class="opt" data-h="close" style="justify-content:center"><span>Cerrar</span></button></div>';
   if (!elHome.querySelectorAll) return;
@@ -54,6 +57,7 @@ function homeAction(a, b){
   else if (a === 'cfg'){ if (sheet) sheet.classList.add('on'); }
   else if (a === 'planets'){ openPlanets(); }
   else if (a === 'missions'){ openMissions(); }
+  else if (a === 'medir'){ MEDIR = !MEDIR; try{ localStorage.setItem('orbita_medidor', MEDIR ? '1' : '0'); }catch(e){} if (!MEDIR && medEl){ medEl.remove(); medEl = null; } medPrev = 0; const v = b.querySelector('b'); if (v) v.textContent = MEDIR ? 'Sí' : 'No'; }
   else if (a === 'allp'){ allPlanets = !allPlanets; try{ localStorage.setItem('orbita_p1_todos', allPlanets ? '1' : '0'); }catch(e){} const v = b.querySelector('b'); if (v) v.textContent = allPlanets ? 'Sí' : 'No'; }
   else if (a === 'close'){ if (sheet) sheet.classList.remove('on'); }
   else if (a === 'snd'){ muted = !muted; try{ localStorage.setItem('orbita_p1_sonido', muted ? '0' : '1'); }catch(e){} applyMute(); const v = b.querySelector('b'); if (v) v.textContent = muted ? 'Apagado' : 'Encendido'; }

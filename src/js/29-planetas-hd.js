@@ -2,7 +2,7 @@
 // │ da:     drawBigPlanet, drawPlayer, elPl, openPlanets, planetRing, planetStep, PLGL, renderPlanetsScene, uiGlass
 // │ lo usan: 07-planetas, 12-poderes, 19-controles, 21-dibujo, 22-viaje-sistema-solar, 23-intro, 26-pantalla-inicio,
 // │        27-inicio-animacion, 28-sonidos-interfaz, 30-escanear, 33-tarjetas-niveles, 34-misiones,
-// │        35-bucle-principal
+// │        36-bucle-principal
 // │ usa 00-iconos-flechas: ARC_L, CHEV_L
 // │ usa 01-pantalla-y-utilidades: BONE, ctx, cvs, CX, CY, H, rgba, S, stars, W
 // │ usa 02-audio: AC, ROOT

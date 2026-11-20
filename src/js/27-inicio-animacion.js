@@ -2,7 +2,7 @@
 // │ da:     camZoom, HOME_BIG, HOME_IN, homeAmbience, homeT, hsBoost, hsEvents, hsFlare, hsJet, hsRipple, hsShake,
 // │        logoSounds, logoT0, renderHomeIntro, updateHomeShow
 // │ lo usan: 17-tutorial, 19-controles, 22-viaje-sistema-solar, 23-intro, 25-selector-niveles, 26-pantalla-inicio,
-// │        35-bucle-principal
+// │        36-bucle-principal
 // │ usa 01-pantalla-y-utilidades: BONE, buzz, clamp, ctx, CX, CY, H, PR, reduceMotion, S, stars, SUN, W
 // │ usa 02-audio: AC, master, noiseHit, ROOT
 // │ usa 03-musica-ritmos: echoBus
