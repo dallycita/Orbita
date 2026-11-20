@@ -138,9 +138,10 @@ let astPre = null, astPreK = '';
 function astPrebake(){
   const k = S + '_' + DPR; if (k !== astPreK){ astPreK = k; astPre = null; }
   if (!astPre){
-    // tamaño en pantalla: asteroides de 9 a 10.5, que aparecen desde el 40 % y al derretirse crecen hasta 115 %
-    const bk = r => AST_B.find(v => v >= r) || AST_B[AST_B.length - 1], full0 = bk(9*S*DPR), full1 = bk(10.5*S*DPR), top = bk(10.5*S*DPR*1.15);
-    const sizes = AST_B.filter(v => v >= full0 && v <= full1).concat(AST_B.filter(v => (v < full0 || v > full1) && v <= top).reverse());
+    // tamaño en pantalla: los asteroides comunes miden 9 a 10.5 y aparecen desde el 40 %; primero esos.
+    // Después los de "Respiración" (24, se encogen hasta el 30 %), que llegan más tarde; al derretirse crecen hasta 115 %
+    const bk = r => AST_B.find(v => v >= r) || AST_B[AST_B.length - 1], full0 = bk(9*S*DPR), full1 = bk(10.5*S*DPR), top = bk(24*S*DPR*1.15);
+    const sizes = AST_B.filter(v => v >= full0 && v <= full1).concat(AST_B.filter(v => v < full0).reverse(), AST_B.filter(v => v > full1 && v <= top));
     astPre = []; for (const rp of sizes) for (let f = 0; f < 12; f++) for (let s = 0; s < 8; s++) astPre.push([s, f, rp]);
   }
   if (!astPre.length || !ASTGL.ok()) return;
