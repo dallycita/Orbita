@@ -1,6 +1,8 @@
 // ---------- pausa ----------
-// Todo se congela de verdad: el juego deja de avanzar y el sonido se suspende (la música sigue justo donde quedó, al ritmo).
-// Se ve como la pantalla de "Escapaste": la misma letra, los mismos tres botones. Al seguir, una cuenta 3·2·1 para no volver de golpe.
+// Todo se congela de verdad: el juego deja de avanzar y el sonido se suspende (la música sigue
+// justo donde quedó, al ritmo).
+// Se ve como la pantalla de "Escapaste": la misma letra, los mismos tres botones. Al seguir, una
+// cuenta 3·2·1 para no volver de golpe.
 let paused = false,
   pzCount = null,
   pzPanelCls = '',
