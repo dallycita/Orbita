@@ -85,10 +85,6 @@ function noteDouble() {
     localStorage.setItem('orbita_p1_dobles', String(doblesHechos));
   } catch (e) {}
 }
-const HINT_TAP =
-  '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4.2" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".55"/><path d="M12 7v10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7" r="1.8" fill="currentColor"/></svg>';
-const HINT_UP =
-  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6.5 10.5 12 5l5.5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const MENU_HTML = () => {
   const L = LEVELS[lvl] || LEVELS[0];
   return (
