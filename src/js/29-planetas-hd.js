@@ -411,7 +411,9 @@ void main(){
   function prog(fs) {
     const v = mk(gl.VERTEX_SHADER, VS),
       f = mk(gl.FRAGMENT_SHADER, fs);
-    if (!v || !f) return null;
+    if (!v || !f) {
+      return null;
+    }
     const p = gl.createProgram();
     gl.attachShader(p, v);
     gl.attachShader(p, f);
@@ -424,7 +426,9 @@ void main(){
     return p;
   }
   function init() {
-    if (gl || failed) return !!gl;
+    if (gl || failed) {
+      return !!gl;
+    }
     try {
       cv = document.createElement('canvas');
       cv.width = cv.height = 64;
@@ -469,7 +473,9 @@ void main(){
         new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
         gl.STATIC_DRAW,
       );
-      for (const n of ['uK', 'uL']) UB[n] = gl.getUniformLocation(bakeP, n);
+      for (const n of ['uK', 'uL']) {
+        UB[n] = gl.getUniformLocation(bakeP, n);
+      }
       for (const n of [
         'uT0',
         'uT1',
@@ -490,8 +496,9 @@ void main(){
         'uK',
         'uDer',
         'uLay',
-      ])
+      ]) {
         US[n] = gl.getUniformLocation(sphP, n);
+      }
       return true;
     } catch (e) {
       failed = true;
@@ -546,7 +553,9 @@ void main(){
     if (cache[key]) {
       if (big) {
         const i = bigOrder.indexOf(key);
-        if (i >= 0) bigOrder.splice(i, 1);
+        if (i >= 0) {
+          bigOrder.splice(i, 1);
+        }
         bigOrder.push(key);
       }
       return cache[key];
@@ -562,7 +571,9 @@ void main(){
           o = cache[k];
         if (o) {
           gl.deleteTexture(o.t0);
-          if (o.t1) gl.deleteTexture(o.t1);
+          if (o.t1) {
+            gl.deleteTexture(o.t1);
+          }
         }
         delete cache[k];
       }
@@ -571,7 +582,9 @@ void main(){
   }
   // dibuja el planeta y devuelve el lienzo (cuadrado de lado 2·R·pad)
   function render(id, px, rot, light, lightCol, time) {
-    if (!init() || KIND[id] === undefined) return null;
+    if (!init() || KIND[id] === undefined) {
+      return null;
+    }
     const pad = id === 'sol' ? 1.35 : 1.12;
     const N = Math.max(8, Math.min(1400, Math.ceil(px * pad)));
     const T = texFor(id, px > 260);
@@ -620,13 +633,17 @@ void main(){
     render,
     ok: () => init(),
     warm: (id, big) => {
-      if (init() && KIND[id] !== undefined) texFor(id, !!big);
+      if (init() && KIND[id] !== undefined) {
+        texFor(id, !!big);
+      }
     },
   };
 })();
 // anillos con sus divisiones reales (C, B, Cassini, A, Encke) dibujados nítidos en 2D
 function planetRing(id, cx, cy, R, half, locked) {
-  if (id !== 'saturno' && id !== 'urano') return;
+  if (id !== 'saturno' && id !== 'urano') {
+    return;
+  }
   ctx.save();
   ctx.translate(cx, cy);
   const bst = id === 'saturno' ? ringBoostNow : 0;
@@ -638,8 +655,11 @@ function planetRing(id, cx, cy, R, half, locked) {
     ctx.scale(1, 0.68);
   }
   ctx.beginPath();
-  if (half === 'back') ctx.rect(-R * 3, -R * 12, R * 6, R * 12);
-  else ctx.rect(-R * 3, 0, R * 6, R * 12);
+  if (half === 'back') {
+    ctx.rect(-R * 3, -R * 12, R * 6, R * 12);
+  } else {
+    ctx.rect(-R * 3, 0, R * 6, R * 12);
+  }
   ctx.clip();
   if (locked) {
     ctx.strokeStyle = '#2a2f42';
@@ -681,7 +701,9 @@ function planetRing(id, cx, cy, R, half, locked) {
     r1 = stops[stops.length - 1][0];
   const g = ctx.createRadialGradient(0, 0, R * r0, 0, 0, R * r1);
   if (g && g.addColorStop) {
-    for (const [r, c] of stops) g.addColorStop((r - r0) / (r1 - r0), c);
+    for (const [r, c] of stops) {
+      g.addColorStop((r - r0) / (r1 - r0), c);
+    }
     ctx.fillStyle = g;
   }
   ctx.beginPath();
@@ -737,7 +759,9 @@ function planetRing(id, cx, cy, R, half, locked) {
 
 // light: 'left' (pantalla de planetas, luz del Sol) o 'below' (en el juego, luz del disco del agujero negro)
 function drawBigPlanet(id, cx, cy, R, rot, locked, light) {
-  if (locked || !(R > 0.5)) return drawBigPlanet2D(id, cx, cy, R, rot, locked, light);
+  if (locked || !(R > 0.5)) {
+    return drawBigPlanet2D(id, cx, cy, R, rot, locked, light);
+  }
   let sc = 1;
   try {
     const m = ctx.getTransform && ctx.getTransform();
@@ -755,7 +779,9 @@ function drawBigPlanet(id, cx, cy, R, rot, locked, light) {
     LC = [1.12, 1.06, 0.98];
   }
   const res = PLGL.render(id, 2 * R * sc, rot, Lv, LC, t);
-  if (!res) return drawBigPlanet2D(id, cx, cy, R, rot, locked, light);
+  if (!res) {
+    return drawBigPlanet2D(id, cx, cy, R, rot, locked, light);
+  }
   if (id === 'sol') {
     const ag = ctx.createRadialGradient(cx, cy, R * 0.9, cx, cy, R * 2.6);
     if (ag && ag.addColorStop) {
@@ -818,14 +844,19 @@ function drawBigPlanet2D(id, cx, cy, R, rot, locked, light) {
     if (bands) {
       ctx.fillStyle = bands[0];
       for (const y of bands[1]) {
-        if (id === 'urano') ctx.fillRect(cx + y * R, cy - R, R * 0.14, R * 2);
-        else ctx.fillRect(cx - R, cy + y * R, R * 2, R * 0.16);
+        if (id === 'urano') {
+          ctx.fillRect(cx + y * R, cy - R, R * 0.14, R * 2);
+        } else {
+          ctx.fillRect(cx - R, cy + y * R, R * 2, R * 0.16);
+        }
       }
     }
     for (const [lon, lat, w, h, c2] of PFEAT[id] || []) {
       const a = lon - rot,
         c = Math.cos(a);
-      if (c <= 0.02) continue;
+      if (c <= 0.02) {
+        continue;
+      }
       const fx = cx + Math.sin(a) * R * Math.cos(lat),
         fy = cy + Math.sin(lat) * R;
       ctx.fillStyle = c2;
@@ -896,13 +927,18 @@ function drawPlayer(px, py, rad) {
     }
   }
   const r = rad * sizeK();
-  if (curPlanet === 'pluton' && !tutorial) drawCaronteBack(px, py); // Caronte, cuando pasa por detrás
+  if (curPlanet === 'pluton' && !tutorial) {
+    drawCaronteBack(px, py);
+  } // Caronte, cuando pasa por detrás
   ringBoostNow =
     curPlanet === 'saturno' && shieldT > 0 && !tutorial
       ? Math.min(1 - Math.pow(1 - Math.min(1, (1.5 - shieldT) / 0.28), 3), shieldT / 0.35)
       : 0;
-  if (curPlanet === 'tierra' || !curPlanet) drawEarth(px, py, r);
-  else drawBigPlanet(curPlanet, px, py, r, t * 0.6, false, 'below');
+  if (curPlanet === 'tierra' || !curPlanet) {
+    drawEarth(px, py, r);
+  } else {
+    drawBigPlanet(curPlanet, px, py, r, t * 0.6, false, 'below');
+  }
   ringBoostNow = 0;
   if (waveProx > 0.05 && !tutorial && state === 'play') {
     // aviso: la onda está por alcanzarte
@@ -934,7 +970,9 @@ function drawPlayer(px, py, rad) {
       ctx.restore();
     }
   }
-  if (hot && !tutorial) drawHot(px, py, r);
+  if (hot && !tutorial) {
+    drawHot(px, py, r);
+  }
 }
 // sobrecalentado: brilla al rojo vivo, la atmósfera chisporrotea y sale humo (se queda así el resto del intento)
 function drawHot(px, py, r) {
@@ -960,7 +998,9 @@ function drawHot(px, py, r) {
   ctx.stroke();
   for (let i = 0; i < 6; i++) {
     const a = t * (1.5 + i * 0.3) + i * 1.7;
-    if (Math.sin(t * 9 + i * 3) < 0.6) continue; // chispas en la atmósfera
+    if (Math.sin(t * 9 + i * 3) < 0.6) {
+      continue;
+    } // chispas en la atmósfera
     ctx.globalAlpha = 0.9 * k;
     ctx.fillStyle = '#fff1c4';
     ctx.beginPath();
@@ -989,9 +1029,13 @@ function renderPlanetsScene(dt) {
   pSwap = Math.max(0, pSwap - dt * 3.2);
   const target = scanOn ? 1 : 0;
   scanK += (target - scanK) * Math.min(1, dt * 4.2);
-  if (Math.abs(target - scanK) < 0.003) scanK = target;
+  if (Math.abs(target - scanK) < 0.003) {
+    scanK = target;
+  }
   pRot += dt * (0.35 + 7 * Math.sin(Math.PI * scanK));
-  if (scanOn && scanK > 0.9 && scanLineT < 1) scanLineT = Math.min(1, scanLineT + dt / 0.75);
+  if (scanOn && scanK > 0.9 && scanLineT < 1) {
+    scanLineT = Math.min(1, scanLineT + dt / 0.75);
+  }
   if (scanApplyAt && performance.now() >= scanApplyAt) {
     scanApplyAt = 0;
     applyScanBars();
@@ -1056,7 +1100,9 @@ function drawPlanetOrbit(dt, P) {
   pPos += (pTarget - pPos) * Math.min(1, dt * 7.5);
   const pos = pPos + pDrag;
   pSK += ((pScan ? 1 : 0) - pSK) * Math.min(1, dt * 3.2);
-  if (Math.abs((pScan ? 1 : 0) - pSK) < 0.002) pSK = pScan ? 1 : 0;
+  if (Math.abs((pScan ? 1 : 0) - pSK) < 0.002) {
+    pSK = pScan ? 1 : 0;
+  }
   pRot += dt * 6.5 * Math.sin(Math.PI * pSK); // al entrar y salir del escaneo el planeta rueda rápido
   const G = pGeom(),
     R0 = G.R0 * (1 - 0.3 * pSK),
@@ -1097,7 +1143,9 @@ function drawPlanetOrbit(dt, P) {
     let o = i - pos;
     o = (((o % N) + N + N / 2) % N) - N / 2;
     const ao = Math.abs(o);
-    if (ao > 2.7) continue;
+    if (ao > 2.7) {
+      continue;
+    }
     let x, y, r;
     const a1 = arcSlot(Math.sign(o) || 1),
       r1 = R0 * 0.36;
@@ -1287,7 +1335,9 @@ const POW_ICO = {
   sol: '<path d="M12 21.5c-4 0-6.5-2.8-6.5-6.3 0-3.7 3-5.4 3.5-9.7 2.4 1.6 3.4 3.8 3.4 5.6 1-.7 1.7-2 1.8-3.4 2.3 1.9 4.3 4.3 4.3 7.5 0 3.5-2.5 6.3-6.5 6.3z"/>',
 };
 function renderPlanets() {
-  if (!elPl) return;
+  if (!elPl) {
+    return;
+  }
   const P = PLANETS_P[pIndex],
     ok = planetOk(P),
     sel = P.id === curPlanet,
@@ -1375,7 +1425,9 @@ function renderPlanets() {
         : '<div class="plock">▸ ' + P.how + '</div>') +
     '</div>';
   elPl.classList.toggle('scanning', scanOn && !hide);
-  if (!elPl.querySelectorAll || !elPl.querySelector) return;
+  if (!elPl.querySelectorAll || !elPl.querySelector) {
+    return;
+  }
   elPl
     .querySelectorAll('.arrow')
     .forEach(b => b.addEventListener('click', () => planetStep(Number(b.dataset.d))));
@@ -1391,13 +1443,17 @@ function renderPlanets() {
       } catch (_) {}
     });
     sw.addEventListener('pointermove', e => {
-      if (x0 === null) return;
+      if (x0 === null) {
+        return;
+      }
       const dx = e.clientX - x0;
       moved = Math.max(moved, Math.abs(dx));
       pDrag = -dx / Math.max(160, W * 0.32);
     });
     const end = e => {
-      if (x0 === null) return;
+      if (x0 === null) {
+        return;
+      }
       const dx = e.clientX - x0;
       x0 = null;
       if (moved > 30) {
@@ -1416,7 +1472,9 @@ function renderPlanets() {
       let best = null;
       for (const sl of pSlots) {
         const d2 = Math.hypot(x - sl.x, y - sl.y);
-        if (d2 < sl.r * 1.2 && (!best || Math.abs(sl.o) < Math.abs(best.o))) best = sl;
+        if (d2 < sl.r * 1.2 && (!best || Math.abs(sl.o) < Math.abs(best.o))) {
+          best = sl;
+        }
       }
       if (best && Math.abs(best.o) > 0.5) {
         const n = Math.round(best.o);
@@ -1431,7 +1489,7 @@ function renderPlanets() {
     });
   }
   const pb = elPl.querySelector('.pbtn');
-  if (pb && !pb.disabled)
+  if (pb && !pb.disabled) {
     pb.addEventListener('click', () => {
       curPlanet = P.id;
       pUse = 1;
@@ -1447,12 +1505,17 @@ function renderPlanets() {
       }
       renderPlanets();
     });
+  }
   const bk = elPl.querySelector('.back');
-  if (bk) bk.addEventListener('click', closePlanets);
+  if (bk) {
+    bk.addEventListener('click', closePlanets);
+  }
   const sb = elPl.querySelector('.scanbtn');
-  if (sb) sb.addEventListener('click', () => setScan(true));
+  if (sb) {
+    sb.addEventListener('click', () => setScan(true));
+  }
   const ps = elPl.querySelector('.pscan');
-  if (ps)
+  if (ps) {
     ps.addEventListener('click', () => {
       pScan = !pScan;
       pScanT = 0;
@@ -1475,10 +1538,17 @@ function renderPlanets() {
       }
       renderPlanets();
     });
+  }
   const sc = elPl.querySelector('.sclose');
-  if (sc) sc.addEventListener('click', () => setScan(false));
-  if (scanOn && !hide) scanApplyAt = performance.now() + 120;
-  if (scanOn && hide) scanOn = false;
+  if (sc) {
+    sc.addEventListener('click', () => setScan(false));
+  }
+  if (scanOn && !hide) {
+    scanApplyAt = performance.now() + 120;
+  }
+  if (scanOn && hide) {
+    scanOn = false;
+  }
 }
 function planetStep(d) {
   pScan = false;
@@ -1494,7 +1564,9 @@ function warmNext(d) {
   const n = PLANETS_P[(pIndex + (d || 1) + PLANETS_P.length) % PLANETS_P.length];
   setTimeout(() => {
     try {
-      if (state === 'planets') PLGL.warm(n.id, true);
+      if (state === 'planets') {
+        PLGL.warm(n.id, true);
+      }
     } catch (e) {}
   }, 450);
 }
@@ -1514,19 +1586,31 @@ function openPlanets() {
   pSwap = 0;
   pScan = false;
   renderPlanets();
-  if (elPl) elPl.classList.remove('off');
-  if (elHome) elHome.classList.add('off');
+  if (elPl) {
+    elPl.classList.remove('off');
+  }
+  if (elHome) {
+    elHome.classList.add('off');
+  }
 }
 function closePlanets() {
   scanOn = false;
-  if (elPl) elPl.classList.remove('scanning');
-  if (elPl) elPl.classList.add('off');
+  if (elPl) {
+    elPl.classList.remove('scanning');
+  }
+  if (elPl) {
+    elPl.classList.add('off');
+  }
   state = 'home';
-  if (elHome) elHome.classList.remove('off');
+  if (elHome) {
+    elHome.classList.remove('off');
+  }
 }
 // sonido de cristal para las flechas: dos notas que suben (siguiente) o bajan (anterior)
 function uiGlass(dir) {
-  if (!AC || muted) return;
+  if (!AC || muted) {
+    return;
+  }
   try {
     const n = AC.currentTime,
       a = [12, 19],
