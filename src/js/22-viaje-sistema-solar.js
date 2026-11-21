@@ -14,7 +14,9 @@ const SOLAR_PATH = [
 let solarJ = 0,
   beltRocks = null;
 function drawBgPlanet(id, x, y, R, alpha) {
-  if (!(R > 1)) return;
+  if (!(R > 1)) {
+    return;
+  }
   let sc = 1;
   try {
     const m = ctx.getTransform && ctx.getTransform();
@@ -32,7 +34,9 @@ function drawBgPlanet(id, x, y, R, alpha) {
     [1.35, 0.82, 0.58],
     t,
   ); // a menor resolución: queda suave, como fuera de foco
-  if (!res) return;
+  if (!res) {
+    return;
+  }
   ctx.save();
   ctx.globalAlpha = alpha;
   ctx.imageSmoothingEnabled = true;
@@ -47,7 +51,9 @@ function renderScene() {
   ctx.save();
   ctx.fillStyle = z.bg;
   ctx.fillRect(0, 0, W, H);
-  if (shake > 0) ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
+  if (shake > 0) {
+    ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
+  }
   if (lvl === 2 && !tutorial && !reduceMotion) {
     camZoom += (1 + 0.05 * dangerNow() - camZoom) * 0.06;
     ctx.translate(CX, CY);
@@ -71,13 +77,18 @@ function renderScene() {
     const [wx, wy] = bendW();
     lw = [CX + wx * S, CY + wy * S, bendRad() * S * 0.92, bend.str];
   }
-  if (solar) GLBG.draw('mw', { beat: beatKick(), wh: lw });
+  if (solar) {
+    GLBG.draw('mw', { beat: beatKick(), wh: lw });
+  }
   if (andro) {
     if (lvl === 1) {
-      if (!GLBG.draw('lmc', { beat: beatKick() })) drawMagallanes();
+      if (!GLBG.draw('lmc', { beat: beatKick() })) {
+        drawMagallanes();
+      }
     } else if (lvl === 2) {
-      if (!GLBG.draw('and2', { beat: beatKick() }) && !GLBG.draw('and', { beat: beatKick() }))
+      if (!GLBG.draw('and2', { beat: beatKick() }) && !GLBG.draw('and', { beat: beatKick() })) {
         drawAndromeda();
+      }
     } else if (lvl >= 3 && GLBG.draw('gx', { beat: beatKick(), kind: lvl, wh: lw })) {
     } else if (lvl === 4) {
       const src = remolinoSource();
@@ -91,9 +102,12 @@ function renderScene() {
           fy: 0.42,
           zoom: REMOLINO_PHOTO ? 1.2 : 1.05,
         })
-      )
+      ) {
         drawGalBG(lvl);
-    } else drawGalBG(lvl);
+      }
+    } else {
+      drawGalBG(lvl);
+    }
   }
   if (skyFlash > 0 && lvl === 1) {
     // la Gran Nube se ilumina con la explosión
@@ -109,7 +123,7 @@ function renderScene() {
     ctx.fillRect(0, 0, W, H);
     ctx.restore();
   }
-  if ((!andro && !solar) || ww > 0)
+  if ((!andro && !solar) || ww > 0) {
     for (const s of stars) {
       const a = s.a + t * 0.015,
         rad = s.r * sr * (1 + ww * frac(winT * 0.35 + s.tw) * 0.8),
@@ -129,6 +143,7 @@ function renderScene() {
       ctx.fillStyle = BONE;
       ctx.fillRect(x, y, s.s * 0.8, s.s * 0.8);
     }
+  }
   ctx.globalAlpha = 1;
 
   // agujero negro: crece desde el centro y se traga los anillos
@@ -183,14 +198,21 @@ function renderScene() {
   const keys = [...rings.keys()].sort((a, b) => a - b);
   for (const k of keys) {
     const R = rr(k);
-    if (k <= sunLevel || R < sunW + 2) continue;
+    if (k <= sunLevel || R < sunW + 2) {
+      continue;
+    }
     const ring = rings.get(k),
       zc = zoneOf(k);
     let alpha;
-    if (k < level) alpha = clamp((R - SUN) / (R0 - SUN), 0, 1) * 0.35;
-    else alpha = [1, 0.85, 0.14, 0.07, 0.04, 0.02, 0.01][Math.min(k - level, 6)];
+    if (k < level) {
+      alpha = clamp((R - SUN) / (R0 - SUN), 0, 1) * 0.35;
+    } else {
+      alpha = [1, 0.85, 0.14, 0.07, 0.04, 0.02, 0.01][Math.min(k - level, 6)];
+    }
     alpha *= clamp((226 - R) / 30, 0, 1);
-    if (alpha <= 0.01) continue;
+    if (alpha <= 0.01) {
+      continue;
+    }
     const cur = k === level && state !== 'dead';
     const rb = k <= level + 1 ? bk : 0;
     ctx.globalAlpha = Math.min(1, alpha * (cur ? 0.9 : 0.55) + rb * 0.35 * alpha);
@@ -221,9 +243,11 @@ function renderScene() {
         ctx.closePath();
         return;
       }
-      if (ring.type === 'marea')
+      if (ring.type === 'marea') {
         ctx.ellipse(CX, CY, R * S * 1.05, R * S * 0.95, ring.tid, 0, Math.PI * 2);
-      else ctx.arc(CX, CY, R * S, 0, Math.PI * 2);
+      } else {
+        ctx.arc(CX, CY, R * S, 0, Math.PI * 2);
+      }
     };
     if (!tutorial && k >= level) {
       // con los cielos nuevos: contorno oscuro detrás y el anillo en blanco más firme
@@ -284,9 +308,11 @@ function renderScene() {
       aA = 0.3;
       sc = 0.8;
     }
-    if (aA > 0.01)
+    if (aA > 0.01) {
       for (const o of ring.obs) {
-        if (o.star || o.gone) continue;
+        if (o.star || o.gone) {
+          continue;
+        }
         if (o.melt) {
           const u = Math.min(1, (t - o.melt) / (o.burn ? 0.16 : 0.7)),
             oa = obsAng(ring, o),
@@ -362,7 +388,7 @@ function renderScene() {
           ctx.rotate(-ang);
           drawAst(0, 0, obsRad(ring, o) * S * sc, o.seed, t * 0.8 + o.seed, zc.ast, aA);
           ctx.restore();
-        } else
+        } else {
           drawAst(
             CX + lx * S,
             CY + ly * S,
@@ -372,23 +398,30 @@ function renderScene() {
             zc.ast,
             aA,
           );
+        }
       }
-    if (k >= level && k <= level + 2 && (ring.frozenT > 0 || ring.revT > 0 || ring.windT > 0))
+    }
+    if (k >= level && k <= level + 2 && (ring.frozenT > 0 || ring.revT > 0 || ring.windT > 0)) {
       drawRingPower(ring, R, Math.max(alpha, k === level + 2 ? 0.5 : alpha));
-    if (ring.type === 'nova' && !tutorial && k >= level && k <= level + 2)
+    }
+    if (ring.type === 'nova' && !tutorial && k >= level && k <= level + 2) {
       drawNova(
         ring,
         R,
         k === level + 1 ? Math.max(aA, 0.0) : k === level ? Math.max(0.25, aA) : 0.35 * alpha,
         k === level + 1,
       );
+    }
     if (aA > 0.01 && k === level + 1) {
       if (ring.obj && !ring.obj.got) {
         const sa = ring.obj.a + ring.phase - (ring.poff || 0),
           ox = CX + Math.cos(sa) * R * S,
           oy = CY + Math.sin(sa) * R * S;
-        if (ring.obj.kind === 'pulsar') drawPulsar(ox, oy, 4.5 * S, aA);
-        else drawNebula(ox, oy, 5 * S, aA);
+        if (ring.obj.kind === 'pulsar') {
+          drawPulsar(ox, oy, 4.5 * S, aA);
+        } else {
+          drawNebula(ox, oy, 5 * S, aA);
+        }
       }
       if (ring.coin && !ring.coin.got) {
         const sa = ring.coin.a + ring.phase - (ring.poff || 0);
@@ -490,10 +523,12 @@ function renderScene() {
   }
 
   drawBendSphere(); // la boca tapa lo que pasa detrás de ella
-  if (state === 'play' || state === 'dead') drawPowerScene();
+  if (state === 'play' || state === 'dead') {
+    drawPowerScene();
+  }
   // estela y jugador
   if (state !== 'dead' && !hideEarth) {
-    if (!bend.fixed)
+    if (!bend.fixed) {
       for (let i = 1; i < trail.length; i++) {
         const p0 = trail[i - 1],
           p1 = trail[i],
@@ -511,14 +546,19 @@ function renderScene() {
         ctx.lineTo(CX + bx * S, CY + by * S);
         ctx.stroke();
       }
+    }
     ctx.globalAlpha = 1;
     const onM = !jumping && rings.get(level) && rings.get(level).type === 'marea';
     const pr = rr(pLevel) * S * (onM ? stretchAt(rings.get(level), pAng) : 1),
       [lpx, lpy] = lensP((Math.cos(pAng) * pr) / S, (Math.sin(pAng) * pr) / S),
       px = CX + lpx * S,
       py = CY + lpy * S;
-    if (state === 'play') drawHazards();
-    if (state === 'play') drawPowerAura(px, py);
+    if (state === 'play') {
+      drawHazards();
+    }
+    if (state === 'play') {
+      drawPowerAura(px, py);
+    }
     if (bend.str > 0.01 && !viewInside) {
       const [mt, mr, ang] = lensJ((Math.cos(pAng) * pr) / S, (Math.sin(pAng) * pr) / S);
       ctx.save();
@@ -585,7 +625,9 @@ function renderScene() {
       ctx.arc(CX + p.x * S, CY + p.y * S, p.s * 0.55, 0, Math.PI * 2);
       ctx.fill();
     } // las partículas grandes, redondas
-    else ctx.fillRect(CX + p.x * S - p.s / 2, CY + p.y * S - p.s / 2, p.s, p.s);
+    else {
+      ctx.fillRect(CX + p.x * S - p.s / 2, CY + p.y * S - p.s / 2, p.s, p.s);
+    }
   }
   ctx.globalAlpha = 1;
 
@@ -643,8 +685,9 @@ function renderScene() {
     ctx.fillText(tip, CX, Math.max(150, H * 0.24));
     ctx.restore();
   }
-  if (state === 'home' && homeT >= logoT0)
+  if (state === 'home' && homeT >= logoT0) {
     drawLogo(W / 2, Math.max(120, H * 0.24), Math.min(46, W * 0.1), homeT - logoT0);
+  }
   if (dangerFlash > 0 && state === 'play') {
     // borde rojo que late con la alarma
     const g = ctx.createRadialGradient(
