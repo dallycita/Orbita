@@ -14,7 +14,9 @@ const HZ_PROG = [
 const HZ_EARTH = [24, 15, 19, 15, 22, 15, 19, 15]; // la frase de la Tierra, sobre una nota fija
 let hzS = null;
 function hzEnsure() {
-  if (hzS && hzS.ac === AC) return hzS;
+  if (hzS && hzS.ac === AC) {
+    return hzS;
+  }
   const len = Math.floor(AC.sampleRate * 6.5),
     buf = AC.createBuffer(2, len, AC.sampleRate);
   for (let c = 0; c < 2; c++) {
@@ -50,7 +52,9 @@ function hzOut(node, dry, wet) {
 // el agujero negro: un zumbido continuo con dos voces casi iguales que "laten" entre sí
 function hzDroneStart() {
   const S = hzEnsure();
-  if (S.drone) return;
+  if (S.drone) {
+    return;
+  }
   const n = AC.currentTime,
     g = AC.createGain(),
     lp = AC.createBiquadFilter();
@@ -81,7 +85,9 @@ function hzDroneStart() {
   S.drone = { g, lp, oA, oB, oS, f };
 }
 function hzDroneStop(quick) {
-  if (!hzS || !hzS.drone) return;
+  if (!hzS || !hzS.drone) {
+    return;
+  }
   const D = hzS.drone;
   hzS.drone = null;
   hzS.sec = null;
@@ -165,7 +171,9 @@ function hzShepard(t0, dur, gain, rate) {
   for (let i = 0; i < 7; i++) {
     const x0 = (i + p0) % 7,
       x1 = x0 + rate;
-    if (x1 >= 7) continue;
+    if (x1 >= 7) {
+      continue;
+    }
     const o = AC.createOscillator(),
       g = AC.createGain();
     o.type = 'sine';
@@ -185,7 +193,9 @@ function hzShepard(t0, dur, gain, rate) {
 // ---- producción: bus propio con compresión (para que suene lleno y fuerte) y más instrumentos ----
 function hzBus() {
   const S = hzEnsure();
-  if (S.bus) return S.bus;
+  if (S.bus) {
+    return S.bus;
+  }
   const g = AC.createGain(),
     comp = AC.createDynamicsCompressor(),
     out = AC.createGain();
@@ -202,7 +212,9 @@ function hzBus() {
   return g;
 }
 function hzPan(node, pan) {
-  if (!AC.createStereoPanner) return node;
+  if (!AC.createStereoPanner) {
+    return node;
+  }
   const p = AC.createStereoPanner();
   p.pan.value = pan;
   node.connect(p);
@@ -486,11 +498,21 @@ const HZ_OSTS = {
 };
 // la sección según qué tan lejos vas
 function hzSection(L, fast) {
-  if (fast) return 'climax';
-  if (L < 7) return 'vacio';
-  if (L < 15) return 'caza';
-  if (L < 23) return 'eco';
-  if (L < 28) return 'respiro';
+  if (fast) {
+    return 'climax';
+  }
+  if (L < 7) {
+    return 'vacio';
+  }
+  if (L < 15) {
+    return 'caza';
+  }
+  if (L < 23) {
+    return 'eco';
+  }
+  if (L < 28) {
+    return 'respiro';
+  }
   return 'carrera';
 }
 // voz principal: un sintetizador cálido parecido a cuerdas/metal suave, con vibrato que llega tarde
@@ -534,7 +556,9 @@ function hzLead(t0, f, gain, dur, bright, pan) {
 function stepCosmos(s, t0) {
   hzEnsure();
   hzBus();
-  if (!hzS.drone) hzDroneStart();
+  if (!hzS.drone) {
+    hzDroneStart();
+  }
   const b = s % 16,
     s32 = s % 32,
     phrase = Math.floor(s / 32),
@@ -582,7 +606,7 @@ function stepCosmos(s, t0) {
     );
   }
   // el tono que sube sin fin (más presente en el respiro: la tensión no se va)
-  if (b === 0 && L >= 6)
+  if (b === 0 && L >= 6) {
     hzShepard(
       t0,
       16 * STEP,
@@ -590,13 +614,20 @@ function stepCosmos(s, t0) {
         (silence ? 1.6 : 1),
       0.05 + 0.14 * dz + 0.04 * prog + (fast ? 0.1 : 0),
     );
+  }
   if (roll) {
     const k = s32 - 16,
       every = k < 6 ? 2 : 1;
-    if (k % every === 0) hzSnare(t0, 0.05 + 0.035 * k);
-    if (k === 0) hzSwell(t0, 12 * STEP, 0.12);
+    if (k % every === 0) {
+      hzSnare(t0, 0.05 + 0.035 * k);
+    }
+    if (k === 0) {
+      hzSwell(t0, 12 * STEP, 0.12);
+    }
   }
-  if (silence) return;
+  if (silence) {
+    return;
+  }
   if (andFast && s32 === 0 && !hzS.crashed) {
     hzS.crashed = true;
     hzCrash(t0, 0.5);
@@ -619,18 +650,21 @@ function stepCosmos(s, t0) {
       prog * 0.7 + (fast ? 0.4 : 0),
     );
   }
-  if (L >= 12 && s % 64 === 48 && sec !== 'respiro') hzSwell(t0, 16 * STEP, 0.05 + 0.05 * prog);
+  if (L >= 12 && s % 64 === 48 && sec !== 'respiro') {
+    hzSwell(t0, 16 * STEP, 0.05 + 0.05 * prog);
+  }
   // el perseguidor: dos notas que caen, cada vez más seguido; con metales desde la mitad
   const every = fast ? 16 : dz > 0.6 || L >= 34 ? 16 : L >= 18 ? 32 : 64;
   if (s % every === 0) {
     hzPull(t0, hzf(root - 12 + 3), (0.05 + 0.04 * prog + 0.05 * dz) * (fast ? 1.2 : 1));
-    if (L >= 16 && sec !== 'respiro')
+    if (L >= 16 && sec !== 'respiro') {
       hzBraam(
         t0,
         hzf(root - 24 + 3),
         0.08 + 0.07 * prog + 0.06 * dz + (fast ? 0.06 : 0),
         fast ? 1.5 : 2.6,
       );
+    }
   }
   // cuerdas en staccato: cada sección con su propio patrón
   const ost =
@@ -647,9 +681,13 @@ function stepCosmos(s, t0) {
         -0.25,
         acc ? 0.22 : 0.13,
       );
-      if (L >= 24 || fast) hzString(t0, f * 2, (acc ? 0.04 : 0.02) * (fast ? 1.3 : 1), 0.3, 0.12);
+      if (L >= 24 || fast) {
+        hzString(t0, f * 2, (acc ? 0.04 : 0.02) * (fast ? 1.3 : 1), 0.3, 0.12);
+      }
     }
-  } else if (sec === 'respiro' && b % 8 === 0) hzString(t0, hzf(root - 12), 0.05, -0.2, 0.5); // en el respiro, solo un pulso lento
+  } else if (sec === 'respiro' && b % 8 === 0) {
+    hzString(t0, hzf(root - 12), 0.05, -0.2, 0.5);
+  } // en el respiro, solo un pulso lento
   // LA MELODÍA: el mismo gancho, contado de otra forma en cada sección
   const hook = phrase % 2 === 0 ? HZ_HOOK_A : HZ_HOOK_B,
     shift = cd; // se mueve con los acordes (secuencia)
@@ -663,7 +701,9 @@ function stepCosmos(s, t0) {
   } else if (sec === 'caza') {
     // el gancho completo, en cristal
     const n = note(hook, s32);
-    if (n !== null) hzGlass(t0, hzf(n), 0.034 + 0.01 * prog, 1.1);
+    if (n !== null) {
+      hzGlass(t0, hzf(n), 0.034 + 0.01 * prog, 1.1);
+    }
   } else if (sec === 'eco') {
     // ahora lo canta una voz cálida, y el cristal le responde una octava arriba
     const n = note(hook, s32);
@@ -671,7 +711,9 @@ function stepCosmos(s, t0) {
       hzLead(t0, hzf(n), 0.04, s32 % 8 === 6 || s32 % 8 === 0 ? 0.32 : 0.24, 0.35, -0.15);
     }
     const e = note(hook, (s32 + 29) % 32);
-    if (e !== null && b % 2 === 1) hzGlass(t0, hzf(e + 12), 0.018, 0.7);
+    if (e !== null && b % 2 === 1) {
+      hzGlass(t0, hzf(e + 12), 0.018, 0.7);
+    }
   } else if (sec === 'respiro') {
     // la misma melodía, lenta y enorme, en el coro y la voz: el respiro antes de la carrera
     const n = note(HZ_HOOK_C, s32);
@@ -679,7 +721,9 @@ function stepCosmos(s, t0) {
       hzLead(t0, hzf(n), 0.045, 8 * STEP * 1.1, 0.15, 0);
       hzChoir(t0, [hzf(n + 12)], 8 * STEP, 0.03);
     }
-    if (b % 4 === 0) hzGlass(t0, hzf(root + 19 + (b === 8 ? 3 : 0)), 0.016, 1.4);
+    if (b % 4 === 0) {
+      hzGlass(t0, hzf(root + 19 + (b === 8 ? 3 : 0)), 0.016, 1.4);
+    }
   } else if (sec === 'carrera') {
     // la melodía en voz brillante + el bajo la responde invertida
     const n = note(hook, s32);
@@ -688,8 +732,9 @@ function stepCosmos(s, t0) {
       hzLead(t0, hzf(n - 12), 0.025, 0.22, 0.3, 0.15);
     }
     const inv = note(hook, s32);
-    if (inv !== null && s32 % 8 === 0)
+    if (inv !== null && s32 % 8 === 0) {
       hzString(t0, hzf(root - 24 + (14 - (hook[s32] - 7))), 0.05, 0, 0.4);
+    }
   } else {
     // clímax: todo junto, una octava arriba, con coro y cristal doblando
     const n = note(hook, s32);
@@ -698,32 +743,55 @@ function stepCosmos(s, t0) {
       hzLead(t0, hzf(n), 0.04, 0.2, 0.6, 0.1);
       hzGlass(t0, hzf(n + 24), 0.015, 0.35);
     }
-    if (s32 % 8 === 0) hzChoir(t0, [hzf(root + 12), hzf(root + 19)], 8 * STEP, 0.025);
+    if (s32 % 8 === 0) {
+      hzChoir(t0, [hzf(root + 12), hzf(root + 19)], 8 * STEP, 0.025);
+    }
   }
   // cuerdas agudas temblando: ansiedad
-  if (s32 === 0 && (L >= 20 || dz > 0.35))
+  if (s32 === 0 && (L >= 20 || dz > 0.35)) {
     hzTremolo(
       t0,
       [hzf(root + 24), hzf(root + 25), hzf(root + 31)],
       32 * STEP,
       (0.006 + 0.012 * prog + 0.03 * dz + (fast ? 0.012 : 0)) * (sec === 'respiro' ? 1.8 : 1),
     );
+  }
   // tambores: cambian por sección
   if (sec === 'respiro') {
-    if (s32 === 0) hzTaiko(t0, 0.4);
-    if (s32 === 0 || s32 === 2) softKick(t0, s32 === 0 ? 0.3 + 0.3 * dz : 0.2 + 0.2 * dz);
+    if (s32 === 0) {
+      hzTaiko(t0, 0.4);
+    }
+    if (s32 === 0 || s32 === 2) {
+      softKick(t0, s32 === 0 ? 0.3 + 0.3 * dz : 0.2 + 0.2 * dz);
+    }
     return;
   }
-  if (L >= 12 && (b === 0 || b === 2)) softKick(t0, b === 0 ? 0.55 + 0.25 * dz : 0.35 + 0.2 * dz);
-  if (sec === 'caza' && (b === 0 || b === 10)) hzTaiko(t0, 0.35);
-  if (sec === 'eco' && (b === 0 || b === 6 || b === 10)) hzTaiko(t0, 0.4);
+  if (L >= 12 && (b === 0 || b === 2)) {
+    softKick(t0, b === 0 ? 0.55 + 0.25 * dz : 0.35 + 0.2 * dz);
+  }
+  if (sec === 'caza' && (b === 0 || b === 10)) {
+    hzTaiko(t0, 0.35);
+  }
+  if (sec === 'eco' && (b === 0 || b === 6 || b === 10)) {
+    hzTaiko(t0, 0.4);
+  }
   if (sec === 'carrera') {
-    if (b === 0 || b === 6 || b === 10 || b === 13) hzTaiko(t0, 0.5);
-    if (b === 4 || b === 12) hzSnare(t0, 0.14);
+    if (b === 0 || b === 6 || b === 10 || b === 13) {
+      hzTaiko(t0, 0.5);
+    }
+    if (b === 4 || b === 12) {
+      hzSnare(t0, 0.14);
+    }
   }
   if (fast) {
-    if ([0, 3, 6, 8, 11, 14].includes(b)) hzTaiko(t0, b === 0 || b === 8 ? 0.7 : 0.45);
-    if (b === 4 || b === 12) hzSnare(t0, 0.22);
-    if (b % 2 === 1) noiseHit(t0, 0.025, 'highpass', 9000, 0.045, musicBus);
+    if ([0, 3, 6, 8, 11, 14].includes(b)) {
+      hzTaiko(t0, b === 0 || b === 8 ? 0.7 : 0.45);
+    }
+    if (b === 4 || b === 12) {
+      hzSnare(t0, 0.22);
+    }
+    if (b % 2 === 1) {
+      noiseHit(t0, 0.025, 'highpass', 9000, 0.045, musicBus);
+    }
   }
 }
