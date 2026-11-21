@@ -1,7 +1,11 @@
-// ---- espacio doblado (nivel 1, anillos 27–33): un agujero de gusano flota delante de ti y dobla el espacio.
-// Es una lente gravitacional de verdad: todo lo que pasa cerca (anillos, asteroides y tu planeta) se ve empujado
-// hacia afuera de la esfera, se estira en arcos y corre más rápido alrededor de su borde. Dentro se ve el cielo del otro lado.
-// Dato real: la gravedad dobla la luz (Einstein, 1915); así se calculó la imagen del agujero de gusano de Interstellar.
+// ---- espacio doblado (nivel 1, anillos 27–33): un agujero de gusano flota delante de ti y dobla
+// el espacio.
+// Es una lente gravitacional de verdad: todo lo que pasa cerca (anillos, asteroides y tu planeta)
+// se ve empujado
+// hacia afuera de la esfera, se estira en arcos y corre más rápido alrededor de su borde. Dentro se
+// ve el cielo del otro lado.
+// Dato real: la gravedad dobla la luz (Einstein, 1915); así se calculó la imagen del agujero de
+// gusano de Interstellar.
 const BEND_AT = { 3: [26, 28] },
   BEND_R = 23,
   WORM_COL = '#d4c8ff',
@@ -87,7 +91,8 @@ function drawBendSphere() {
     R = bendRad() * S * 0.92,
     cv = GLBG.canvas && GLBG.canvas();
   ctx.save();
-  // la esfera tapa los anillos que pasan detrás: dentro se ve el otro lado (el mismo cielo calculado en la GPU)
+  // la esfera tapa los anillos que pasan detrás: dentro se ve el otro lado (el mismo cielo
+  // calculado en la GPU)
   ctx.beginPath();
   ctx.arc(x, y, R, 0, Math.PI * 2);
   ctx.clip();
