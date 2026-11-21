@@ -194,7 +194,7 @@ En la fase 8 los módulos de verdad (`import`/`export`) reemplazan esto de forma
   - ❌ "ahora", "antes", "nuevo", "v3", "ajuste final", "arreglado", "como pidió…", "por fin".
 - **No comentes lo obvio** (`i++ // suma uno`). Sin emojis ni signos de exclamación.
 
-### Fase 8 · Módulos de verdad (la más grande; hacerla al final)
+### Fase 8 · Módulos de verdad (la más grande)
 
 - Cambia los archivos de `src/js` a módulos con `import`/`export`. Cada archivo declara lo que usa en sus `import`, que es la forma normal de hacer lo que hacían las cabeceras.
 - `build.mjs` los une en el mismo `index.html` de un solo archivo, con un empaquetador como esbuild.
