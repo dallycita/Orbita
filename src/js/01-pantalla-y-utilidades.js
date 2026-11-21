@@ -24,7 +24,9 @@ function chipsHTML() {
 } // indicador fijo en "Faltan N"; la música cambia sola
 {
   const c0 = document.getElementById('chips0');
-  if (c0) c0.innerHTML = chipsHTML();
+  if (c0) {
+    c0.innerHTML = chipsHTML();
+  }
 }
 function refreshChips() {
   document
@@ -105,6 +107,8 @@ const frac = x => x - Math.floor(x);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const buzz = p => {
   try {
-    if (navigator.vibrate) navigator.vibrate(p);
+    if (navigator.vibrate) {
+      navigator.vibrate(p);
+    }
   } catch (e) {}
 };
