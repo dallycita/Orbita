@@ -12,12 +12,18 @@ let volMus = 100,
 try {
   const a = localStorage.getItem('orbita_vol_mus'),
     b = localStorage.getItem('orbita_vol_sfx');
-  if (a !== null) volMus = Math.max(0, Math.min(100, +a || 0));
-  if (b !== null) volSfx = Math.max(0, Math.min(100, +b || 0));
+  if (a !== null) {
+    volMus = Math.max(0, Math.min(100, +a || 0));
+  }
+  if (b !== null) {
+    volSfx = Math.max(0, Math.min(100, +b || 0));
+  }
 } catch (e) {}
 const volGain = v => Math.pow(v / 100, 2);
 function applyVolumes() {
-  if (!AC || !master || !musVol) return;
+  if (!AC || !master || !musVol) {
+    return;
+  }
   try {
     const n = AC.currentTime;
     master.gain.setTargetAtTime(volGain(volSfx), n, 0.03);
@@ -31,7 +37,9 @@ function saveVolumes() {
   } catch (e) {}
 }
 function initAudio() {
-  if (AC) return;
+  if (AC) {
+    return;
+  }
   try {
     AC = new (window.AudioContext || window.webkitAudioContext)();
     outBus = AC.createGain();
@@ -51,7 +59,9 @@ function initAudio() {
     const len = AC.sampleRate * 2;
     NOISE = AC.createBuffer(1, len, AC.sampleRate);
     const d = NOISE.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    for (let i = 0; i < len; i++) {
+      d[i] = Math.random() * 2 - 1;
+    }
   } catch (e) {
     AC = null;
   }
@@ -59,7 +69,9 @@ function initAudio() {
 const ROOT = 415.3; // tonalidad: Sol# menor
 const SCALE = [0, 3, 5, 7, 10, 12, 15, 17];
 function cowbell(semi) {
-  if (!AC) return;
+  if (!AC) {
+    return;
+  }
   try {
     const t0 = AC.currentTime,
       f = ROOT * Math.pow(2, semi / 12);
@@ -93,7 +105,9 @@ function noiseHit(t0, dur, type, freq, gain, dest, f1) {
   f.type = type;
   f.Q.value = 0.9;
   f.frequency.setValueAtTime(freq, t0);
-  if (f1) f.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+  if (f1) {
+    f.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+  }
   const g = AC.createGain();
   g.gain.setValueAtTime(gain, t0);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
@@ -104,13 +118,17 @@ function noiseHit(t0, dur, type, freq, gain, dest, f1) {
   src.stop(t0 + dur + 0.02);
 }
 function noise(dur, f0, f1, gain, type) {
-  if (!AC) return;
+  if (!AC) {
+    return;
+  }
   try {
     noiseHit(AC.currentTime, dur, type, f0, gain, master, f1);
   } catch (e) {}
 }
 function thump() {
-  if (!AC) return;
+  if (!AC) {
+    return;
+  }
   try {
     const t0 = AC.currentTime,
       o = AC.createOscillator(),
@@ -127,7 +145,9 @@ function thump() {
   } catch (e) {}
 }
 function suck() {
-  if (!AC) return;
+  if (!AC) {
+    return;
+  }
   try {
     const t0 = AC.currentTime,
       o = AC.createOscillator(),
@@ -146,7 +166,9 @@ function suck() {
   } catch (e) {}
 }
 function sub() {
-  if (!AC) return;
+  if (!AC) {
+    return;
+  }
   try {
     const t0 = AC.currentTime,
       o = AC.createOscillator(),
