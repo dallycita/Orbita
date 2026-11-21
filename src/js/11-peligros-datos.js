@@ -1,5 +1,6 @@
 // ---------- peligros que no son asteroides ----------
-// cometas (desde el Sombrero): cruzan entre tu anillo y el siguiente; su cola apunta lejos del agujero negro
+// cometas (desde el Sombrero): cruzan entre tu anillo y el siguiente; su cola apunta lejos del
+// agujero negro
 // rayos de energía (desde M87): un anillo brilla como aviso y luego dispara
 // llamaradas y estrellas veloces (Sagitario A*)
 const COMET_AT = {
@@ -20,13 +21,18 @@ let comets = [],
   sstars = [],
   beamCount = 0;
 // Nubes de Magallanes · onda de supernova (como la 1987A)
-// Sale del centro al ritmo de la música y se apaga en un anillo límite (marcado en rosa). Si cruzas ese anillo antes de
-// que llegue, estás a salvo. Si te alcanza, tu planeta se sobrecalienta y se queda así el resto del intento; un segundo golpe te destruye.
-const SN_AT = { 1: { 5: 1, 19: 1, 27: 1, 32: 1, 35: 1, 40: 2 } }; // sale justo antes de una muralla o un contragiro: o pasas el primer hueco o te alcanza
+// Sale del centro al ritmo de la música y se apaga en un anillo límite (marcado en rosa). Si cruzas
+// ese anillo antes de
+// que llegue, estás a salvo. Si te alcanza, tu planeta se sobrecalienta y se queda así el resto del
+// intento; un segundo golpe te destruye.
+// sale justo antes de una muralla o un contragiro: o pasas el primer hueco o te alcanza
+const SN_AT = { 1: { 5: 1, 19: 1, 27: 1, 32: 1, 35: 1, 40: 2 } };
 let waves = [],
   hot = 0,
   hotT = 0,
   skyFlash = 0;
-// Andrómeda · nova recurrente (como la M31N 2008-12a, que estalla cada año): una estrella fuera del centro que, al ritmo de la música,
-// lanza cáscaras de gas verde esmeralda (oxígeno). Las cáscaras cruzan los anillos de lado: si saltas a través de un filamento, mueres; por un hueco, pasas.
+// Andrómeda · nova recurrente (como la M31N 2008-12a, que estalla cada año): una estrella fuera del
+// centro que, al ritmo de la música,
+// lanza cáscaras de gas verde esmeralda (oxígeno). Las cáscaras cruzan los anillos de lado: si
+// saltas a través de un filamento, mueres; por un hueco, pasas.
 let novaSrc = [];
