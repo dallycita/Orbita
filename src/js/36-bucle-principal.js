@@ -8,11 +8,13 @@ function frame(now) {
     const pl = state === 'play' || state === 'dead';
     if (pl !== frame.pl) {
       frame.pl = pl;
-      if (document.body && document.body.classList) document.body.classList.toggle('playing', pl);
+      if (document.body && document.body.classList) {
+        document.body.classList.toggle('playing', pl);
+      }
     }
   }
   try {
-    if (elWallet)
+    if (elWallet) {
       elWallet.style.opacity =
         state === 'splash' ||
         state === 'pretitle' ||
@@ -21,6 +23,7 @@ function frame(now) {
         misOpen
           ? '0'
           : '1';
+    }
     if (state === 'splash' || state === 'pretitle') {
       updateSplash(dt);
       renderSplash();
@@ -40,8 +43,9 @@ function frame(now) {
         elHome &&
         elHome.classList.contains &&
         elHome.classList.contains('off')
-      )
+      ) {
         elHome.classList.remove('off');
+      }
       update(dt);
       render();
     } else if (state === 'home' && homeT < HOME_IN) {
@@ -53,10 +57,14 @@ function frame(now) {
       /* congelado: el lienzo conserva el último cuadro */
     } else {
       update(dt);
-      if (MEDIR) medMid = performance.now();
+      if (MEDIR) {
+        medMid = performance.now();
+      }
       render();
     }
-    if (misOpen) misPlanetDraw();
+    if (misOpen) {
+      misPlanetDraw();
+    }
     // en pantallas tranquilas, adelantar las rocas de la partida (ver astPrebake)
     if (
       state === 'menu' ||
@@ -65,14 +73,17 @@ function frame(now) {
       paused ||
       (state === 'dead' && deadT > 0.6) ||
       (state === 'home' && homeT >= HOME_IN + 2.5)
-    )
+    ) {
       astPrebake();
+    }
   } catch (e) {
     try {
       ctx.restore();
     } catch (_) {}
     console.error(e);
   }
-  if (MEDIR) medFrame(now, m0);
+  if (MEDIR) {
+    medFrame(now, m0);
+  }
 }
 requestAnimationFrame(frame);
