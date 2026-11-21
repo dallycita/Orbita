@@ -11188,6 +11188,14 @@ function drawBendSphere() {
   ctx.fill();
   ctx.restore();
 }
+/**
+ * Peligros de la partida: ondas de supernova, novas, cometas, chorros de energía, llamaradas y
+ * estrellas veloces. Los crea al aterrizar, los avanza cada cuadro, detecta si alcanzan al
+ * planeta, los dibuja y les pone sonido. Su estado vive en 11-peligros-datos.
+ */
+// Novas por nivel y anillo: sp es la velocidad de la cáscara (unidades del juego por segundo),
+// per el periodo entre cáscaras en golpes, gaps y gw el número y ancho (radianes) de los huecos,
+// n cuántas cáscaras salen y big marca la gran nova final.
 const NOVA_AT = {
   2: {
     6: { sp: 52, per: 8, gaps: 3, gw: 0.62, n: 3 },
@@ -11197,7 +11205,12 @@ const NOVA_AT = {
     43: { sp: 40, per: 99, gaps: 1, gw: 0.55, n: 1, big: 1 },
   },
 };
-const NOVA_LIFE = 5.2;
+const NOVA_LIFE = 5.2; // segundos que vive cada cáscara de nova (más en la grande)
+/**
+ * Sacudida, vibración y sonido de cristal cuando una nova lanza una cáscara.
+ *
+ * @param {object} s Fuente de nova (de novaSrc); s.big indica la gran nova.
+ */
 function novaBurst(s) {
   shake = Math.max(shake, reduceMotion ? 0 : s.big ? 9 : 3);
   buzz(s.big ? [30, 30, 80] : 18);
@@ -11216,6 +11229,13 @@ function novaBurst(s) {
     } catch (e) {}
   }
 }
+/**
+ * Crea una fuente de nova a un lado del agujero, dos anillos por encima (cuatro si es la grande),
+ * sincronizada con los golpes de la música.
+ *
+ * @param {number} L Nivel de anillo donde aterrizó el planeta.
+ * @param {object} cfg Configuración de NOVA_AT para ese anillo.
+ */
 function novaSpawn(L, cfg) {
   const side = Math.random() < 0.5 ? -1 : 1,
     bt = beatTime(),
@@ -11236,7 +11256,14 @@ function novaSpawn(L, cfg) {
     lastB: -1,
   });
 }
-// las cáscaras vivas en el instante tt (tiempo de la música): [{cx, cy, r, age, s}]
+/**
+ * Lista las cáscaras de nova vivas en un instante.
+ *
+ * @param {number} tt Tiempo de la música, en segundos.
+ * @param {number} camL Nivel de anillo de la cámara.
+ * @returns {Array<object>} Cáscaras {cx, cy, r, age, s, i}: centro y radio en unidades del
+ *   juego, edad en segundos, fuente e índice de la cáscara.
+ */
 function novaShells(tt, camL) {
   const out = [];
   for (const s of novaSrc) {
@@ -11254,7 +11281,15 @@ function novaShells(tt, camL) {
   }
   return out;
 }
-// ¿el planeta en (px, py) toca un filamento (no un hueco) de alguna cáscara?
+/**
+ * Dice si el planeta toca un filamento (no un hueco) de alguna cáscara de nova.
+ *
+ * @param {number} px Posición horizontal del planeta, en unidades del juego desde el centro.
+ * @param {number} py Posición vertical del planeta, en unidades del juego desde el centro.
+ * @param {number} tt Tiempo de la música, en segundos.
+ * @param {number} camL Nivel de anillo de la cámara.
+ * @returns {boolean} true si lo toca.
+ */
 function novaHit(px, py, tt, camL) {
   const hitR = PR * sizeK() + 3.5;
   for (const sh of novaShells(tt, camL)) {
@@ -11279,12 +11314,18 @@ function novaHit(px, py, tt, camL) {
   }
   return false;
 }
+// Ajustes finos por nivel, probados con jugadores simulados: cg multiplica la velocidad de los
+// contragiros según el anillo, wv la duración de la onda, hg es el ancho de los huecos de las
+// murallas (radianes) y arc el número de piedras de cada arco del contragiro.
 const TUNE = {
   1: { cg: k => (k >= 44 ? 2.0 : 1.7), wv: 0.48, hg: 0.4, arc: 10 },
   2: { cg: k => 1.8, wv: 1, hg: 0.46, arc: 10 },
-}; // contragiros más rápidos (sin esperas eternas), onda más rápida, murallas más justas
+};
+// waveProx: qué tan cerca está la onda del planeta (0 a 1, suavizado); waveBeepT: segundos hasta
+// el siguiente pitido de aviso.
 let waveProx = 0,
-  waveBeepT = 0; // ajustes finos por nivel (probados con jugadores simulados)
+  waveBeepT = 0;
+/** Borra todos los peligros activos (al empezar o reiniciar una partida). */
 function hazardsReset() {
   comets = [];
   beams = [];
@@ -11295,6 +11336,14 @@ function hazardsReset() {
   novaSrc = [];
   sstars = [];
 }
+/**
+ * Muestra una sola vez (guardado en localStorage) el aviso que explica un peligro nuevo.
+ *
+ * @param {string} key Clave del peligro en seenTypes.
+ * @param {string} title Título del aviso.
+ * @param {string} sub Explicación corta.
+ * @param {string} col Color CSS del título.
+ */
 function hazardTip(key, title, sub, col) {
   if (seenTypes[key]) {
     return;
@@ -11316,6 +11365,10 @@ function hazardTip(key, title, sub, col) {
     tip: true,
   });
 }
+/**
+ * Al aterrizar en un anillo, lanza los peligros que el nivel tiene programados para ese anillo
+ * (cometas, chorros, ondas de supernova, novas y llamaradas). No hace nada en el tutorial.
+ */
 function hazardsOnLand() {
   if (tutorial) {
     return;
@@ -11408,6 +11461,15 @@ function hazardsOnLand() {
     hazardTip('llamarada', 'Llamarada', 'El agujero negro te ciega: sigue tu ritmo', '#ffe2b0');
   }
 }
+/**
+ * Posición de una estrella veloz en su órbita elíptica, resolviendo la ecuación de Kepler
+ * (M = E - e·sen E) con cinco pasos de Newton.
+ *
+ * @param {object} s Órbita: P periodo (segundos), M0 anomalía media inicial, e excentricidad,
+ *   a semieje mayor (unidades del juego) y w argumento del periapsis (radianes).
+ * @param {number} tt Tiempo, en segundos.
+ * @returns {number[]} [x, y] respecto al agujero negro, en unidades del juego.
+ */
 function keplerPos(s, tt) {
   const M = 2 * Math.PI * (tt / s.P) + s.M0;
   let E = M;
@@ -11419,7 +11481,13 @@ function keplerPos(s, tt) {
     an = nu + s.w;
   return [Math.cos(an) * r, Math.sin(an) * r];
 }
-// devuelve la causa si un peligro alcanza al planeta
+/**
+ * Programa una onda de supernova: sale en un golpe de la música (la grande, al inicio de un
+ * compás) y llega al anillo límite en otro golpe. Mientras espera suena un rumor que crece.
+ *
+ * @param {number} L Nivel de anillo límite hasta donde llega la onda.
+ * @param {number} reach Cuántos anillos por encima del planeta llega (3 o más es la grande).
+ */
 function spawnWave(L, reach) {
   const learn = !seenTypes.onda,
     ph = beatPhase();
@@ -11489,6 +11557,11 @@ function spawnWave(L, reach) {
     } catch (e) {}
   }
 }
+/**
+ * Suelta la onda desde el agujero negro: sacudida, destello y el estampido con su silbido.
+ *
+ * @param {object} w Onda de supernova (de waves).
+ */
 function waveRelease(w) {
   w.released = true;
   w.k0 = Math.max(sunLevel + 0.35, level - 2.4);
@@ -11555,6 +11628,11 @@ function waveRelease(w) {
     } catch (e) {}
   }
 }
+/**
+ * La onda choca contra su anillo límite y se rompe en partículas, con un acorde brillante.
+ *
+ * @param {object} w Onda de supernova (de waves).
+ */
 function waveBreak(w) {
   w.broken = 0.001;
   const R = rr(w.L);
@@ -11599,6 +11677,11 @@ function waveBreak(w) {
     } catch (e) {}
   }
 }
+/**
+ * El planeta quedó por encima del límite de la onda: cuenta para las misiones y suena el aviso.
+ *
+ * @param {object} w Onda de supernova (de waves).
+ */
 function waveSafe(w) {
   w.safe = true;
   misEvent('onda');
@@ -11612,7 +11695,14 @@ function waveSafe(w) {
     } catch (e) {}
   }
 }
-// te alcanzó: la primera vez te sobrecalienta; la segunda, estando caliente, te destruye
+/**
+ * La onda alcanzó al planeta: la primera vez lo sobrecalienta; si ya estaba caliente, lo destruye.
+ *
+ * @param {object} w Onda de supernova (de waves).
+ * @param {number} px Posición horizontal del planeta, en unidades del juego desde el centro.
+ * @param {number} py Posición vertical del planeta, en unidades del juego desde el centro.
+ * @returns {string|undefined} 'onda' si el planeta muere.
+ */
 function waveCatch(w, px, py) {
   w.hitDone = true;
   if (hot) {
@@ -11667,6 +11757,14 @@ function waveCatch(w, px, py) {
   }
   return null;
 }
+/**
+ * Avanza todos los peligros un cuadro y revisa si alguno alcanza al planeta.
+ *
+ * @param {number} d Tiempo del cuadro, en segundos.
+ * @param {number} px Posición horizontal del planeta, en unidades del juego desde el centro.
+ * @param {number} py Posición vertical del planeta, en unidades del juego desde el centro.
+ * @returns {string|null} La causa ('onda', 'comet', 'beam', 'sstar') si lo alcanza, o null.
+ */
 function hazardsUpdate(d, px, py) {
   const hitR = PR * sizeK();
   // onda de supernova
@@ -11805,8 +11903,17 @@ function hazardsUpdate(d, px, py) {
   }
   return null;
 }
-// la onda de supernova, como en las fotos: un frente irregular con filamentos, nudos brillantes y
-// restos que siguen brillando
+/**
+ * Radio del frente irregular de la onda en un punto, sumando senos de varias frecuencias que se
+ * mueven con el tiempo.
+ *
+ * @param {object} w Onda de supernova (sus fases aleatorias en w.ph).
+ * @param {number} R Radio medio, en píxeles de pantalla.
+ * @param {number} i Índice del punto en el contorno.
+ * @param {number} N Número de puntos del contorno.
+ * @param {number} wob Amplitud de la irregularidad, en píxeles de pantalla.
+ * @returns {number} Radio en ese punto, en píxeles de pantalla.
+ */
 function waveShape(w, R, i, N, wob) {
   const th = (i / N) * Math.PI * 2,
     p = w.ph;
@@ -11820,6 +11927,12 @@ function waveShape(w, R, i, N, wob) {
         0.08 * Math.sin(41 * th + p[1] * 3 + t * 3.3))
   );
 }
+/**
+ * Dibuja la onda de supernova como en las fotos: un frente irregular con filamentos, nudos
+ * brillantes y restos que siguen brillando, más el anillo límite que marca hasta dónde llega.
+ *
+ * @param {object} w Onda de supernova (de waves).
+ */
 function drawWave(w) {
   const N = 128,
     bk = beatKick();
@@ -11984,8 +12097,15 @@ function drawWave(w) {
   }
   ctx.restore();
 }
-// la nova: estrella azul-blanca con picos de difracción; tres arcos de carga (uno por golpe) y al
-// estallar, destello, ondas y restos
+/**
+ * Dibuja la nova de un anillo: estrella azul-blanca con picos de difracción, tres arcos de carga
+ * (uno por golpe) y, al estallar, destello, ondas y restos.
+ *
+ * @param {object} ring Anillo de tipo 'nova' (posición de la estrella en ring.na + ring.phase).
+ * @param {number} Rw Radio del anillo, en unidades del juego.
+ * @param {number} a Opacidad, de 0 a 1.
+ * @param {boolean} next true si es el anillo siguiente al del planeta (el único que estalla).
+ */
 function drawNova(ring, Rw, a, next) {
   const tau = novaTau(beatTime()),
     bar = NOVA_BAR(),
@@ -12117,9 +12237,12 @@ function drawNova(ring, Rw, a, next) {
     ctx.restore();
   }
 }
-let novaBeat = -1;
+let novaBeat = -1; // último golpe en que sonó la nova; -1 si no hay nova en el anillo siguiente
+/**
+ * Sonido de la nova del anillo siguiente: en cada golpe una nota de cristal que sube (carga) y,
+ * al empezar el compás, el estallido. Se llama cada cuadro.
+ */
 function novaSound() {
-  // golpes de carga (tres notas de cristal que suben) y el estallido al empezar el compás
   const nr = rings.get(level + 1);
   if (!nr || nr.type !== 'nova' || state !== 'play') {
     novaBeat = -1;
@@ -12170,6 +12293,7 @@ function novaSound() {
     } catch (e) {}
   }
 }
+/** Dibuja las cáscaras de nova (gas verde con nudos de oxígeno) y sus estrellas. */
 function drawNovaShells() {
   const bt = beatTime(),
     N = 140;
@@ -12285,6 +12409,7 @@ function drawNovaShells() {
   }
   ctx.restore();
 }
+/** Dibuja todos los peligros activos: ondas, novas, estrellas veloces, chorros y cometas. */
 function drawHazards() {
   for (const w of waves) {
     drawWave(w);
@@ -12456,6 +12581,7 @@ function drawHazards() {
   }
   ctx.globalAlpha = 1;
 }
+/** Dibuja el destello blanco de la llamarada del agujero negro sobre toda la pantalla. */
 function drawFlare() {
   if (flareT <= 0) {
     return;
