@@ -1,6 +1,8 @@
 // Andrómeda (nivel 3): el shader de la galaxia vista desde dentro
 // Andrómeda: disco inclinado ~77°, núcleo de estrellas viejas, brazos azules, franjas de polvo, regiones rosadas, M32 y M110
-const FS_AND = BG_COMMON + `
+const FS_AND =
+  BG_COMMON +
+  `
 uniform float uScale; uniform float uSpd; uniform float uBand;   // 0 visible · 1 ultravioleta · 2 infrarrojo · 3 todas las luces
 vec2 galC(){ return vec2((mix(.62, .5, uJour) + .03*sin(uT*.045))*uRes.x, (mix(-.32, .34, uJour) + .015*cos(uT*.037))*uRes.y); }
 vec3 galaxy(vec2 q){
@@ -96,7 +98,9 @@ void main(){
   gl_FragColor = vec4(pow(max(col, 0.), vec3(.95)), 1.);
 }`;
 // Andrómeda: el viaje pasa por sus lugares reales, de las afueras al núcleo
-const FS_AND2 = BG_COMMON + `
+const FS_AND2 =
+  BG_COMMON +
+  `
 uniform float uScale;
 float fbm7(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 7; i++){ s += a*vn(p); p = m*p; a *= .5; } return s; }
 float rid(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 5; i++){ s += a*(1. - abs(vn(p)*2. - 1.)); p = m*p; a *= .5; } return s; }
