@@ -615,7 +615,8 @@ function hazardsUpdate(d, px, py) {
   }
   return null;
 }
-// la onda de supernova, como en las fotos: un frente irregular con filamentos, nudos brillantes y restos que siguen brillando
+// la onda de supernova, como en las fotos: un frente irregular con filamentos, nudos brillantes y
+// restos que siguen brillando
 function waveShape(w, R, i, N, wob) {
   const th = (i / N) * Math.PI * 2,
     p = w.ph;
@@ -793,7 +794,8 @@ function drawWave(w) {
   }
   ctx.restore();
 }
-// la nova: estrella azul-blanca con picos de difracción; tres arcos de carga (uno por golpe) y al estallar, destello, ondas y restos
+// la nova: estrella azul-blanca con picos de difracción; tres arcos de carga (uno por golpe) y al
+// estallar, destello, ondas y restos
 function drawNova(ring, Rw, a, next) {
   const tau = novaTau(beatTime()),
     bar = NOVA_BAR(),
