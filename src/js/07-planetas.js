@@ -1,6 +1,7 @@
 // ---------- planetas para rescatar y jugar ----------
 // ---------- planetas: estadísticas sacadas de datos reales ----------
-// size: diámetro real (escala logarítmica)  ·  vel: velocidad orbital real  ·  res: densidad real (resistencia a la fuerza de marea)  ·  charge: rotación real
+// size: diámetro real (escala logarítmica) · vel: velocidad orbital real · res: densidad real
+// (resistencia a la fuerza de marea) · charge: rotación real
 const PLANETS_P = [
   {
     id: 'luna',
@@ -221,9 +222,13 @@ const planetOk = P => allPlanets || P.ok();
 const curP = () => PLANETS_P.find(P => P.id === curPlanet) || PLANETS_P[3];
 const pst = () => curP().st;
 const chargeMax = () => pst().charge; // rotación real
-const sizeK = () => 1 + (pst().size / 100) * 0.7; // de Plutón (×0.85) a Júpiter (×1.22): se ve y se siente, sin ser abismal                              // diámetro real
-const jumpDur = () => Math.max(0.09, JUMP_DUR * (1 - (pst().vel / 100) * 0.75)); // los lentos flotan (hasta ~40% más de tiempo en el aire)                  // velocidad orbital real
-const catchMargin = () => 0.18 - (pst().res / 100) * 0.6; // los frágiles: el agujero negro los alcanza hasta ~media vuelta de anillo antes                       // densidad real: los menos densos se despedazan antes
+// de Plutón (×0.85) a Júpiter (×1.22): se ve y se siente, sin ser abismal // diámetro real
+const sizeK = () => 1 + (pst().size / 100) * 0.7;
+// los lentos flotan (hasta ~40% más de tiempo en el aire) // velocidad orbital real
+const jumpDur = () => Math.max(0.09, JUMP_DUR * (1 - (pst().vel / 100) * 0.75));
+// los frágiles: el agujero negro los alcanza hasta ~media vuelta de anillo antes // densidad real:
+// los menos densos se despedazan antes
+const catchMargin = () => 0.18 - (pst().res / 100) * 0.6;
 const unlockedIds = () => PLANETS_P.filter(planetOk).map(P => P.id);
 function planetThumb(id) {
   try {
