@@ -18894,7 +18894,11 @@ function gwChirp() {
     }
   } catch (e) {}
 }
-// ---------- pantalla de planetas: el planeta girando en el espacio ----------
+/**
+ * Planetas en HD y pantalla de planetas: texturas procedurales en WebGL (PLGL), anillos, el
+ * planeta del jugador en la partida y el carrusel de planetas con su escáner.
+ * Sin WebGL todo cae a un dibujo 2D más simple (drawBigPlanet2D).
+ */
 const elPl = document.getElementById('planets');
 let pIndex = 0,
   pSwap = 0,
@@ -18993,8 +18997,11 @@ const PBANDS = {
   jupiter: ['rgba(130,80,45,.45)', [-0.7, -0.42, -0.12, 0.1, 0.38, 0.62]],
   venus: ['rgba(200,160,90,.25)', [-0.5, 0.05, 0.45]],
 };
-// ---------- planetas en HD: textura procedural 3D horneada una vez + esfera iluminada en WebGL
-// ----------
+/**
+ * Motor WebGL de planetas: hornea una vez la textura procedural de cada planeta (mapa de
+ * longitud y latitud) y luego dibuja una esfera iluminada que la usa.
+ * Devuelve `render`, `ok` (hay WebGL) y `warm` (prepara una textura por adelantado).
+ */
 const PLGL = (() => {
   let gl = null,
     cv = null,
@@ -19478,7 +19485,18 @@ void main(){
     }
     return e;
   }
-  // dibuja el planeta y devuelve el lienzo (cuadrado de lado 2·R·pad)
+  /**
+   * Dibuja el planeta en el lienzo WebGL propio y lo devuelve para copiarlo al lienzo 2D.
+   *
+   * @param {string} id Planeta (tierra, luna, ..., sol).
+   * @param {number} px Diámetro del planeta, en píxeles del dispositivo.
+   * @param {number} rot Giro sobre su eje, en radianes.
+   * @param {number[]} light Dirección de la luz [x, y, z].
+   * @param {number[]} lightCol Color de la luz [r, g, b], cerca de 1.
+   * @param {number} time Tiempo del juego, en segundos (anima nubes y el Sol).
+   * @returns {{cv: HTMLCanvasElement, pad: number}|null} Lienzo cuadrado de lado 2·R·pad, o null
+   *   si no hay WebGL o el planeta no existe.
+   */
   function render(id, px, rot, light, lightCol, time) {
     if (!init() || KIND[id] === undefined) {
       return null;
@@ -19537,7 +19555,18 @@ void main(){
     },
   };
 })();
-// anillos con sus divisiones reales (C, B, Cassini, A, Encke) dibujados nítidos en 2D
+/**
+ * Dibuja media capa de los anillos de Saturno o Urano, con sus divisiones reales (anillos C, B,
+ * división de Cassini, A y división de Encke). Se llama dos veces, detrás y delante del planeta.
+ * Con el poder de anillos activo (ringBoostNow) el disco se abre y gira.
+ *
+ * @param {string} id Planeta; solo hace algo con 'saturno' y 'urano'.
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} R Radio del planeta, en píxeles de pantalla.
+ * @param {string} half 'back' (mitad de atrás) o 'front' (mitad de adelante).
+ * @param {boolean} locked Planeta bloqueado: dibuja solo un anillo gris.
+ */
 function planetRing(id, cx, cy, R, half, locked) {
   if (id !== 'saturno' && id !== 'urano') {
     return;
@@ -19609,8 +19638,8 @@ function planetRing(id, cx, cy, R, half, locked) {
   ctx.arc(0, 0, R * r0, 0, Math.PI * 2, true);
   ctx.fill('evenodd');
   if (bst > 0) {
-    // Anillos protectores: el disco de hielo se abre y gira (los de adentro más rápido, como en el
-    // Saturno real)
+    // Anillos protectores: el disco de hielo se abre y gira; los de adentro van más rápido, como
+    // en el Saturno real (ley de Kepler: velocidad angular proporcional a r^-1.5).
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = 0.16 * bst;
     ctx.strokeStyle = '#fff0cc';
@@ -19656,8 +19685,19 @@ function planetRing(id, cx, cy, R, half, locked) {
   ctx.restore();
 }
 
-// light: 'left' (pantalla de planetas, luz del Sol) o 'below' (en el juego, luz del disco del
-// agujero negro)
+/**
+ * Dibuja un planeta grande en HD con WebGL, con sus anillos detrás y delante.
+ * Si está bloqueado o no hay WebGL, usa el dibujo 2D.
+ *
+ * @param {string} id Planeta (tierra, luna, ..., sol).
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} R Radio, en píxeles de pantalla.
+ * @param {number} rot Giro sobre su eje, en radianes.
+ * @param {boolean} locked Planeta bloqueado (silueta oscura).
+ * @param {string|{x: number, y: number}} light 'left' (pantalla de planetas, luz del Sol),
+ *   'below' (en el juego, luz del disco del agujero negro) o una dirección {x, y}.
+ */
 function drawBigPlanet(id, cx, cy, R, rot, locked, light) {
   if (locked || !(R > 0.5)) {
     return drawBigPlanet2D(id, cx, cy, R, rot, locked, light);
@@ -19699,6 +19739,10 @@ function drawBigPlanet(id, cx, cy, R, rot, locked, light) {
   ctx.drawImage(res.cv, cx - h, cy - h, 2 * h, 2 * h);
   planetRing(id, cx, cy, R, 'front', false);
 }
+/**
+ * Versión 2D de drawBigPlanet, sin WebGL: color base, bandas y manchas que giran con `rot`.
+ * Recibe los mismos parámetros que drawBigPlanet.
+ */
 function drawBigPlanet2D(id, cx, cy, R, rot, locked, light) {
   const ring = (from, to) => {
     if (id === 'saturno') {
@@ -19811,7 +19855,14 @@ function drawBigPlanet2D(id, cx, cy, R, rot, locked, light) {
   }
   ring(0, Math.PI);
 }
-// el planeta del jugador en el juego: su tamaño real (en escala) cambia cómo se ve
+/**
+ * Dibuja el planeta del jugador en la partida, con sus efectos (escudo, Caronte, aviso de onda,
+ * sobrecalentamiento). Su tamaño real, en escala, cambia cómo se ve.
+ *
+ * @param {number} px Posición horizontal, en píxeles de pantalla.
+ * @param {number} py Posición vertical, en píxeles de pantalla.
+ * @param {number} rad Radio base, en píxeles de pantalla (se multiplica por sizeK()).
+ */
 function drawPlayer(px, py, rad) {
   if (!tutorial) {
     // un halo oscuro detrás de tu planeta para que siempre se despegue del fondo
@@ -19874,8 +19925,14 @@ function drawPlayer(px, py, rad) {
     drawHot(px, py, r);
   }
 }
-// sobrecalentado: brilla al rojo vivo, la atmósfera chisporrotea y sale humo (se queda así el resto
-// del intento)
+/**
+ * Planeta sobrecalentado: brilla al rojo vivo, la atmósfera chisporrotea y sale humo.
+ * Se queda así el resto del intento.
+ *
+ * @param {number} px Posición horizontal, en píxeles de pantalla.
+ * @param {number} py Posición vertical, en píxeles de pantalla.
+ * @param {number} r Radio, en píxeles de pantalla.
+ */
 function drawHot(px, py, r) {
   const k = Math.min(1, hotT / 0.4),
     pl = 0.5 + 0.5 * Math.sin(t * 6);
@@ -19925,6 +19982,11 @@ function drawHot(px, py, r) {
     });
   }
 }
+/**
+ * Dibuja un cuadro de la pantalla de planetas: fondo, carrusel en órbita y escáner.
+ *
+ * @param {number} dt Tiempo desde el cuadro anterior, en segundos.
+ */
 function renderPlanetsScene(dt) {
   t += dt;
   pSwap = Math.max(0, pSwap - dt * 3.2);
@@ -19995,8 +20057,13 @@ function renderPlanetsScene(dt) {
   ctx.globalAlpha = 1;
   ctx.restore();
 }
-// pantalla de planetas en órbita: el elegido grande arriba y los demás sobre una órbita; al
-// cambiar, todo gira contigo
+/**
+ * Carrusel de la pantalla de planetas: el elegido grande arriba y los demás sobre una órbita;
+ * al cambiar de planeta, todo gira con él.
+ *
+ * @param {number} dt Tiempo desde el cuadro anterior, en segundos.
+ * @param {object} P Planeta elegido (de PLANETS_P).
+ */
 function drawPlanetOrbit(dt, P) {
   const N = PLANETS_P.length;
   pPos += (pTarget - pPos) * Math.min(1, dt * 7.5);
@@ -20236,6 +20303,7 @@ const POW_ICO = {
   pluton: '<circle cx="9" cy="12" r="5.5"/><circle cx="18.5" cy="8" r="2.8"/>',
   sol: '<path d="M12 21.5c-4 0-6.5-2.8-6.5-6.3 0-3.7 3-5.4 3.5-9.7 2.4 1.6 3.4 3.8 3.4 5.6 1-.7 1.7-2 1.8-3.4 2.3 1.9 4.3 4.3 4.3 7.5 0 3.5-2.5 6.3-6.5 6.3z"/>',
 };
+/** Actualiza el HTML de la pantalla de planetas para el planeta elegido. */
 function renderPlanets() {
   if (!elPl) {
     return;
@@ -20452,6 +20520,11 @@ function renderPlanets() {
     scanOn = false;
   }
 }
+/**
+ * Pasa al planeta siguiente o anterior del carrusel.
+ *
+ * @param {number} d Pasos: 1 siguiente, -1 anterior.
+ */
 function planetStep(d) {
   pScan = false;
   pTarget += d;
@@ -20461,7 +20534,11 @@ function planetStep(d) {
   renderPlanets();
   warmNext(d);
 }
-// prepara en segundo plano la textura HD del siguiente planeta para que el cambio no dé tirón
+/**
+ * Prepara en segundo plano la textura HD del planeta que viene, para que el cambio sea fluido.
+ *
+ * @param {number} d Dirección del último paso: 1 o -1.
+ */
 function warmNext(d) {
   const n = PLANETS_P[(pIndex + (d || 1) + PLANETS_P.length) % PLANETS_P.length];
   setTimeout(() => {
@@ -20472,6 +20549,7 @@ function warmNext(d) {
     } catch (e) {}
   }, 450);
 }
+/** Abre la pantalla de planetas con el planeta que usa el jugador al centro. */
 function openPlanets() {
   try {
     localStorage.removeItem('orbita_pl_nuevo');
@@ -20495,6 +20573,7 @@ function openPlanets() {
     elHome.classList.add('off');
   }
 }
+/** Cierra la pantalla de planetas y vuelve al inicio. */
 function closePlanets() {
   scanOn = false;
   if (elPl) {
@@ -20508,7 +20587,11 @@ function closePlanets() {
     elHome.classList.remove('off');
   }
 }
-// sonido de cristal para las flechas: dos notas que suben (siguiente) o bajan (anterior)
+/**
+ * Sonido de cristal para las flechas: dos notas que suben (siguiente) o bajan (anterior).
+ *
+ * @param {number} dir Dirección: negativo baja, positivo sube.
+ */
 function uiGlass(dir) {
   if (!AC || muted) {
     return;
