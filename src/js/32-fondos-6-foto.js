@@ -1,5 +1,7 @@
 // fotos reales como fondo (si hay)
-const FS_PHOTO = BG_COMMON + `
+const FS_PHOTO =
+  BG_COMMON +
+  `
 uniform sampler2D uImg; uniform vec2 uImgSize; uniform vec4 uFit; // xy: centro de la foto en pantalla (0-1), z: zoom
 vec3 photo(vec2 q, float depth){
   float asp = uImgSize.x/uImgSize.y, sasp = uRes.x/uRes.y;
