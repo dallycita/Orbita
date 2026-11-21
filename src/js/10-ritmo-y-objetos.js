@@ -14,9 +14,7 @@ function bassBreath() {
     ? 0.5 - 0.5 * Math.cos(2 * Math.PI * frac(beatTime() / (2 * TB)))
     : 0;
 }
-let jumpOnBeat = false,
-  lastBeatIdx = -1;
-const ON_BEAT = 0.055;
+let lastBeatIdx = -1;
 function beatTime() {
   return AC && musicStart >= 0
     ? AC.currentTime - musicStart - (AC.outputLatency || AC.baseLatency || 0)
