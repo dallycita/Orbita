@@ -1,4 +1,5 @@
-// ---- los poderes de cada planeta (se cargan con Perfectos y se usan deslizando hacia arriba, o con la tecla D) ----
+// ---- los poderes de cada planeta (se cargan con Perfectos y se usan deslizando hacia arriba, o
+// con la tecla D) ----
 // Cada uno nace de un dato real del planeta y tiene su propio efecto visual.
 let ghostT = 0,
   shieldT = 0,
@@ -154,7 +155,9 @@ function usePower(mid) {
     // Empujón gravitacional: aleja al agujero negro
     sunLevel = Math.max(-1.6, sunLevel - 0.4);
     lastEaten = Math.min(lastEaten, Math.floor(sunLevel));
-    pfx.push({ k: 'empujon', t: 0, a: pAng, l: pLevel, left: 0.8 }); // el resto del empujón llega con la onda shake = reduceMotion ? 0 : 6;   // el agujero negro tiembla cuando le llega la onda (ver powerUpdate)
+    // el resto del empujón llega con la onda shake = reduceMotion ? 0 : 6; // el agujero negro
+    // tiembla cuando le llega la onda (ver powerUpdate)
+    pfx.push({ k: 'empujon', t: 0, a: pAng, l: pLevel, left: 0.8 });
     sub();
     noise(0.8, 2500, 120, 0.4, 'lowpass');
     powerShout('#f0c08a');
@@ -251,7 +254,8 @@ function caronteSaves(x, y, tx, ty) {
   noise(0.6, 3000, 200, 0.35, 'lowpass'); // el choque te frena: el agujero negro se acerca
   {
     const cx = x + Math.cos(ta) * PR * sizeK() * 1.9,
-      cy = y + Math.sin(ta) * PR * sizeK() * 1.9; // Caronte se rompe en pedazos de hielo (gris, con su polo rojizo)
+      // Caronte se rompe en pedazos de hielo (gris, con su polo rojizo)
+      cy = y + Math.sin(ta) * PR * sizeK() * 1.9;
     for (let i = 0; i < 46; i++) {
       const a = ta + (Math.random() - 0.5) * 2.6,
         v = 50 + Math.random() * 210;
@@ -440,7 +444,8 @@ function heatHaze(px, py, r, col, k) {
   }
   ctx.restore();
 }
-// Júpiter: auroras en sus dos polos (las más potentes del sistema solar, que Hubble ve en ultravioleta)
+// Júpiter: auroras en sus dos polos (las más potentes del sistema solar, que Hubble ve en
+// ultravioleta)
 function drawAurora(px, py, r, tt) {
   const k = Math.min(1, tt / 0.12) * Math.min(1, (1.4 - tt) / 0.5);
   if (k <= 0) {
@@ -942,7 +947,8 @@ function drawPowerScene() {
   const sunW = Math.max(rr(sunLevel), SUN) * S;
   for (const f of pfx) {
     if (f.k === 'empujon' && f.t < 1.4) {
-      // Júpiter: su magnetosfera (la estructura más grande del sistema solar) se infla y golpea al agujero negro
+      // Júpiter: su magnetosfera (la estructura más grande del sistema solar) se infla y golpea al
+      // agujero negro
       const [px, py] = plPos(),
         r = PR * S * 1.15 * sizeK(),
         e = 1 - Math.pow(1 - Math.min(1, f.t / 0.4), 3),
@@ -957,7 +963,9 @@ function drawPowerScene() {
       ctx.lineCap = 'round';
       const Ls = [2.2, 3.1, 4.2, 5.5, 7];
       for (let li = 0; li < Ls.length; li++) {
-        const L = Ls[li] * r * (0.25 + 0.75 * e); // líneas del campo magnético (un dipolo), aplastadas del lado del agujero negro y estiradas en la cola
+        // líneas del campo magnético (un dipolo), aplastadas del lado del agujero negro y estiradas
+        // en la cola
+        const L = Ls[li] * r * (0.25 + 0.75 * e);
         for (const sd of [-1, 1]) {
           const pts = [];
           for (let j = 0; j <= 36; j++) {
@@ -1047,7 +1055,8 @@ function drawPowerScene() {
       }
       ctx.restore();
     } else if (f.k === 'destello') {
-      // Mercurio: una línea de luz con los colores separados y copias del planeta en el camino del salto instantáneo
+      // Mercurio: una línea de luz con los colores separados y copias del planeta en el camino del
+      // salto instantáneo
       const u = f.t / 0.55;
       if (u >= 1) {
         continue;
@@ -1233,7 +1242,9 @@ function drawPowerScene() {
   for (const f of pfx) {
     if (f.k !== 'calor' || f.t > 1.4) {
       continue;
-    } // Venus: sus nubes de ácido, que giran muy rápido y tienen relámpagos dentro, suben hacia el anillo de arriba
+      // Venus: sus nubes de ácido, que giran muy rápido y tienen relámpagos dentro, suben hacia el
+      // anillo de arriba
+    }
     const u = f.t / 1.4,
       pr = rr(pLevel) * S,
       R1 = rr(level + 1) * S,
@@ -1263,7 +1274,8 @@ function drawPowerScene() {
           Math.sin(t * 2 + i) * 0.04,
         bx = CX + Math.cos(ang) * rad,
         by = CY + Math.sin(ang) * rad,
-        br = (9 + 14 * h1) * S * (0.5 + reach) * (1 + 0.25 * Math.sin(t * 3 + i)); // giran en un solo sentido, como la superrotación de Venus
+        // giran en un solo sentido, como la superrotación de Venus
+        br = (9 + 14 * h1) * S * (0.5 + reach) * (1 + 0.25 * Math.sin(t * 3 + i));
       blobs.push([bx, by, br]);
       const cg = ctx.createRadialGradient(bx - br * 0.25, by - br * 0.25, br * 0.1, bx, by, br);
       cg.addColorStop(0, 'rgba(255,236,170,' + 0.5 * k + ')');
@@ -1314,7 +1326,8 @@ function drawPowerScene() {
     ctx.restore();
   }
   if (predT > 0 && state === 'play') {
-    // Neptuno: sus vientos (los más rápidos del sistema solar) recorren el anillo y forman un remolino donde estará cada asteroide
+    // Neptuno: sus vientos (los más rápidos del sistema solar) recorren el anillo y forman un
+    // remolino donde estará cada asteroide
     const ring = rings.get(level + 1);
     if (ring) {
       const R = rr(level + 1) * S,
@@ -1464,13 +1477,15 @@ function drawPowerScene() {
     }
   }
   if (eclipseT > 0) {
-    // Luna: pasa por delante del agujero negro y lo tapa; queda su corona de luz, y todo se vuelve lento y azulado
+    // Luna: pasa por delante del agujero negro y lo tapa; queda su corona de luz, y todo se vuelve
+    // lento y azulado
     const D = 2.5,
       u = 1 - eclipseT / D,
       k = Math.min(1, eclipseT / 0.35, (D - eclipseT) / 0.3),
       mr = sunW * 1.08,
       xq = (u - 0.5) * 2,
-      sq = Math.sign(xq) * Math.pow(Math.abs(xq), 1.6); // más lento cerca del centro, como un eclipse de verdad
+      // más lento cerca del centro, como un eclipse de verdad
+      sq = Math.sign(xq) * Math.pow(Math.abs(xq), 1.6);
     const mx = CX + sq * mr * 2.2,
       my = CY - sq * mr * 0.5,
       dist = Math.hypot(mx - CX, my - CY),
@@ -1639,7 +1654,8 @@ function drawPowerScene() {
 function drawRingPower(ring, R, alpha) {
   const Rs = R * S;
   if (ring.frozenT > 0) {
-    // Urano: la escarcha nace donde estás y crece por el anillo en cristales; al final se agrieta y se rompe
+    // Urano: la escarcha nace donde estás y crece por el anillo en cristales; al final se agrieta y
+    // se rompe
     const el = (ring.frz0 || 3) - ring.frozenT - ((ring.frz0 || 3) > 3.3 ? 0.18 : 0),
       gr = clamp(el / 0.55, 0, 1),
       span = Math.PI * (1 - Math.pow(1 - gr, 2)),
