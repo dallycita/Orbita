@@ -21,19 +21,27 @@ function medFrame(now, t0) {
   const t1 = performance.now();
   if (medPrev) {
     medInt.push(now - medPrev);
-    if (now - medPrev > 25) medJank.push(now);
+    if (now - medPrev > 25) {
+      medJank.push(now);
+    }
   }
   medPrev = now;
   medJs.push(t1 - t0);
   medUpd.push(medMid ? medMid - t0 : -1);
   medMid = 0;
-  while (medInt.length > 120) medInt.shift();
+  while (medInt.length > 120) {
+    medInt.shift();
+  }
   while (medJs.length > 120) {
     medJs.shift();
     medUpd.shift();
   }
-  while (medJank.length && now - medJank[0] > 10000) medJank.shift();
-  if (now - medShow < 500) return;
+  while (medJank.length && now - medJank[0] > 10000) {
+    medJank.shift();
+  }
+  if (now - medShow < 500) {
+    return;
+  }
   medShow = now;
   if (!medEl) {
     medEl = document.createElement('div');
