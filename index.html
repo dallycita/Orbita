@@ -19121,7 +19121,8 @@ const PBANDS = {
   jupiter: ['rgba(130,80,45,.45)', [-0.7, -0.42, -0.12, 0.1, 0.38, 0.62]],
   venus: ['rgba(200,160,90,.25)', [-0.5, 0.05, 0.45]],
 };
-// ---------- planetas en HD: textura procedural 3D horneada una vez + esfera iluminada en WebGL ----------
+// ---------- planetas en HD: textura procedural 3D horneada una vez + esfera iluminada en WebGL
+// ----------
 const PLGL = (() => {
   let gl = null,
     cv = null,
@@ -19146,7 +19147,8 @@ const PLGL = (() => {
     pluton: 9,
     sol: 10,
   };
-  // inclinación en pantalla (como ctx.rotate), inclinación hacia la cámara, atmósfera [r,g,b,fuerza], relieve, brillo especular
+  // inclinación en pantalla (como ctx.rotate), inclinación hacia la cámara, atmósfera
+  // [r,g,b,fuerza], relieve, brillo especular
   const LOOK = {
     tierra: { tilt: -0.41, tip: 0.22, atmo: [0.35, 0.62, 1.0, 1.0], bump: 0.4, spec: 1 },
     luna: { tilt: -0.05, tip: 0.08, atmo: [0, 0, 0, 0], bump: 1.0, spec: 0 },
@@ -19735,7 +19737,8 @@ function planetRing(id, cx, cy, R, half, locked) {
   ctx.arc(0, 0, R * r0, 0, Math.PI * 2, true);
   ctx.fill('evenodd');
   if (bst > 0) {
-    // Anillos protectores: el disco de hielo se abre y gira (los de adentro más rápido, como en el Saturno real)
+    // Anillos protectores: el disco de hielo se abre y gira (los de adentro más rápido, como en el
+    // Saturno real)
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = 0.16 * bst;
     ctx.strokeStyle = '#fff0cc';
@@ -19781,7 +19784,8 @@ function planetRing(id, cx, cy, R, half, locked) {
   ctx.restore();
 }
 
-// light: 'left' (pantalla de planetas, luz del Sol) o 'below' (en el juego, luz del disco del agujero negro)
+// light: 'left' (pantalla de planetas, luz del Sol) o 'below' (en el juego, luz del disco del
+// agujero negro)
 function drawBigPlanet(id, cx, cy, R, rot, locked, light) {
   if (locked || !(R > 0.5)) {
     return drawBigPlanet2D(id, cx, cy, R, rot, locked, light);
@@ -19998,7 +20002,8 @@ function drawPlayer(px, py, rad) {
     drawHot(px, py, r);
   }
 }
-// sobrecalentado: brilla al rojo vivo, la atmósfera chisporrotea y sale humo (se queda así el resto del intento)
+// sobrecalentado: brilla al rojo vivo, la atmósfera chisporrotea y sale humo (se queda así el resto
+// del intento)
 function drawHot(px, py, r) {
   const k = Math.min(1, hotT / 0.4),
     pl = 0.5 + 0.5 * Math.sin(t * 6);
@@ -20118,7 +20123,8 @@ function renderPlanetsScene(dt) {
   ctx.globalAlpha = 1;
   ctx.restore();
 }
-// pantalla de planetas en órbita: el elegido grande arriba y los demás sobre una órbita; al cambiar, todo gira contigo
+// pantalla de planetas en órbita: el elegido grande arriba y los demás sobre una órbita; al
+// cambiar, todo gira contigo
 function drawPlanetOrbit(dt, P) {
   const N = PLANETS_P.length;
   pPos += (pTarget - pPos) * Math.min(1, dt * 7.5);
@@ -20127,7 +20133,8 @@ function drawPlanetOrbit(dt, P) {
   if (Math.abs((pScan ? 1 : 0) - pSK) < 0.002) {
     pSK = pScan ? 1 : 0;
   }
-  pRot += dt * 6.5 * Math.sin(Math.PI * pSK); // al entrar y salir del escaneo el planeta rueda rápido
+  // al entrar y salir del escaneo el planeta rueda rápido
+  pRot += dt * 6.5 * Math.sin(Math.PI * pSK);
   const G = pGeom(),
     R0 = G.R0 * (1 - 0.3 * pSK),
     cx0 = G.cx0,
