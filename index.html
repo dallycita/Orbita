@@ -13575,12 +13575,16 @@ function pzVolHTML(k, ico, lb, v) {
   );
 }
 function pauseGame() {
-  if (paused || state !== 'play') return;
+  if (paused || state !== 'play') {
+    return;
+  }
   paused = true;
   gest = null;
   pending = false;
   try {
-    if (AC && AC.state === 'running') AC.suspend();
+    if (AC && AC.state === 'running') {
+      AC.suspend();
+    }
   } catch (e) {}
   buzz(12);
   pzSnd('open');
@@ -13590,7 +13594,11 @@ function pauseGame() {
     L = LEVELS[lvl] || LEVELS[0];
   const cr = !tutorial && COIN_RINGS[lvl] ? [...COIN_RINGS[lvl]] : [],
     gotS = new Set(lvStarsGot(lvl));
-  for (const [k, r] of rings) if (r.coin && r.coin.got) gotS.add(k);
+  for (const [k, r] of rings) {
+    if (r.coin && r.coin.got) {
+      gotS.add(k);
+    }
+  }
   const nSt = cr.filter(k => gotS.has(k)).length;
   pzPanelCls = elPanel.className;
   elPanel.className = 'wscr pzp';
@@ -13640,12 +13648,16 @@ function pauseGame() {
     pzVolHTML('mus', PZ_ICO.mus, 'Música', volMus) +
     pzVolHTML('sfx', PZ_ICO.sfx, 'SFX', volSfx) +
     '</div>';
-  if (document.body && document.body.classList) document.body.classList.add('paused');
+  if (document.body && document.body.classList) {
+    document.body.classList.add('paused');
+  }
 }
 function pzClose() {
   elPanel.className = pzPanelCls || 'hide';
   elPanel.innerHTML = '';
-  if (document.body && document.body.classList) document.body.classList.remove('paused');
+  if (document.body && document.body.classList) {
+    document.body.classList.remove('paused');
+  }
 }
 let pzBus = null,
   pzNoise = null,
@@ -13675,9 +13687,13 @@ function pzCtx() {
     const len = pzAC.sampleRate;
     pzNoise = pzAC.createBuffer(1, len, pzAC.sampleRate);
     const d = pzNoise.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    for (let i = 0; i < len; i++) {
+      d[i] = Math.random() * 2 - 1;
+    }
   }
-  if (pzAC.state === 'suspended') pzAC.resume();
+  if (pzAC.state === 'suspended') {
+    pzAC.resume();
+  }
   pzBus.gain.value = volGain(volSfx);
   return pzAC;
 }
@@ -13737,7 +13753,9 @@ function pzSub(t0, f0, f1, dur, gain) {
   o.stop(t0 + dur + 0.05);
 }
 function pzSnd(kind, v) {
-  if (muted) return;
+  if (muted) {
+    return;
+  }
   try {
     pzCtx();
     const n = pzAC.currentTime + 0.005;
@@ -13792,7 +13810,9 @@ function pzSnd(kind, v) {
       pzTone(s + 12, n, 0.18, 0.008);
     } else if (kind === 'hover') {
       const now = performance.now();
-      if (now - pzHoverT < 60) return;
+      if (now - pzHoverT < 60) {
+        return;
+      }
       pzHoverT = now;
       const nt = [0, 3, 7, 10, 12, 15];
       pzTone(nt[Math.floor(Math.random() * nt.length)] + 12, n, 0.9, 0.04);
@@ -13803,7 +13823,9 @@ function pzTick(i) {
   pzSnd('count', i);
 }
 function resumeGame() {
-  if (!paused || pzCount || !document.body.classList.contains('paused')) return;
+  if (!paused || pzCount || !document.body.classList.contains('paused')) {
+    return;
+  }
   pzClose();
   let el = document.getElementById('pzcount');
   if (!el) {
@@ -13833,7 +13855,9 @@ function resumeGame() {
     paused = false;
     last = performance.now();
     try {
-      if (AC && AC.state === 'suspended') AC.resume();
+      if (AC && AC.state === 'suspended') {
+        AC.resume();
+      }
     } catch (e) {}
   }, 620);
 }
@@ -13843,13 +13867,17 @@ function pzLeave() {
     clearInterval(pzCount);
     pzCount = null;
     const el = document.getElementById('pzcount');
-    if (el) el.innerHTML = '';
+    if (el) {
+      el.innerHTML = '';
+    }
   }
   pzClose();
   paused = false;
   last = performance.now();
   try {
-    if (AC && AC.state === 'suspended') AC.resume();
+    if (AC && AC.state === 'suspended') {
+      AC.resume();
+    }
   } catch (e) {}
 }
 function pzSetVol(k, v, row) {
@@ -13861,8 +13889,11 @@ function pzSetVol(k, v, row) {
       pzSnd('slide', v);
     }
   }
-  if (k === 'mus') volMus = v;
-  else volSfx = v;
+  if (k === 'mus') {
+    volMus = v;
+  } else {
+    volSfx = v;
+  }
   if (row) {
     const ln = row.querySelector('.line'),
       val = row.querySelector('.val');
@@ -13870,7 +13901,9 @@ function pzSetVol(k, v, row) {
       ln.style.setProperty('--v', v + '%');
       ln.setAttribute('aria-valuenow', String(v));
     }
-    if (val) val.textContent = String(v);
+    if (val) {
+      val.textContent = String(v);
+    }
     row.classList.toggle('zero', v <= 0);
   }
   applyVolumes();
@@ -13878,14 +13911,18 @@ function pzSetVol(k, v, row) {
 }
 const pzPrev = { mus: 100, sfx: 100 };
 function pausePress(e) {
-  if (pzCount) return;
+  if (pzCount) {
+    return;
+  }
   const tg = e && e.target && e.target.closest ? e.target : null;
   if (!tg) {
     return;
   }
   const b = tg.closest('[data-pz]'),
     row = tg.closest('.pz-vol');
-  if (e.cancelable) e.preventDefault();
+  if (e.cancelable) {
+    e.preventDefault();
+  }
   if (b) {
     const A = b.dataset.pz;
     if (A === 'go') {
@@ -13930,8 +13967,9 @@ window.addEventListener('pointermove', e => {
   if (
     !pzDrag ||
     (e.pointerId !== undefined && pzDrag.id !== undefined && e.pointerId !== pzDrag.id)
-  )
+  ) {
     return;
+  }
   pzSetVol(pzDrag.k, ((e.clientX - pzDrag.x0) / pzDrag.w) * 100, pzDrag.row);
 });
 const pzEnd = () => {
@@ -13946,7 +13984,9 @@ window.addEventListener('pointerup', pzEnd);
 window.addEventListener('pointercancel', pzEnd);
 // si sales de la app o te llaman, el juego se pausa solo
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden && state === 'play' && !paused) pauseGame();
+  if (document.hidden && state === 'play' && !paused) {
+    pauseGame();
+  }
 });
 // ---------- entrada ----------
 function press(e) {
