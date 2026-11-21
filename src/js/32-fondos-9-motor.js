@@ -6,8 +6,7 @@ const GLBG = (() => {
     buf = null,
     failed = false,
     flow = 0,
-    photoTex = {},
-    lastKey = '';
+    photoTex = {};
   function init() {
     if (gl || failed) {
       return !!gl;
