@@ -511,21 +511,6 @@ function misClaimSound(big) {
     );
   } catch (e) {}
 }
-const MIS_ICO = {
-  perf: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><circle cx="12" cy="12" r="3"/>',
-  streak: '<path d="M5 15l2-4 2 4M10.5 11l2-4 2 4M16 15l2-4 2 4"/><path d="M4 19h16"/>',
-  reach:
-    '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#bfe0ff"/>',
-  rings:
-    '<ellipse cx="12" cy="12" rx="9" ry="3.6"/><ellipse cx="12" cy="12" rx="5.5" ry="2.2"/><circle cx="12" cy="12" r="1.2" fill="#bfe0ff"/>',
-  star: '<path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
-  flag: '<path d="M6 21V4"/><path d="M6 4.5h11l-2.5 3.5L17 11.5H6"/>',
-  onda: '<circle cx="12" cy="12" r="2"/><path d="M7.5 7.5a6.4 6.4 0 0 0 0 9M16.5 7.5a6.4 6.4 0 0 1 0 9M4.6 4.6a10.5 10.5 0 0 0 0 14.8M19.4 4.6a10.5 10.5 0 0 1 0 14.8"/>',
-  power: '<path d="M6 12.5l6-6 6 6M6 18.5l6-6 6 6"/>',
-  one: '<path d="M12 19V5l-3.5 3"/><path d="M8.5 19h7"/>',
-  galaxy: '<path d="M12 12c0-3 3-4.5 5-3s1.5 6-3 7.5-9-1.5-9-6 5-8 9.5-7"/>',
-  q: '<path d="M9.2 9a2.9 2.9 0 1 1 4.2 2.6c-.9.5-1.4 1.1-1.4 2.1v.6"/><path d="M12 17.6v.1"/>',
-};
 const MIS_DICO = {
   perf10: 'perf',
   streak3: 'streak',
