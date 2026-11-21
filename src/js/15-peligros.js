@@ -803,7 +803,6 @@ function drawNova(ring, Rw, a, next) {
     x = CX + Math.cos(na) * Rw * S,
     y = CY + Math.sin(na) * Rw * S;
   const charge = Math.min(3, Math.floor(tau / TB)),
-    toBurst = bar - tau,
     e = novaEnv(tau);
   const grow = tau > 0.9 ? (tau - 0.9) / (bar - 0.9) : 0; // crece mientras se acerca el estallido
   const r0 = (4.6 + 3.5 * grow * grow + 7 * e) * S,
