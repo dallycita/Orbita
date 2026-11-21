@@ -1,5 +1,7 @@
-// ---------- tarjetas vivas: cada galaxia se dibuja en movimiento, en tiempo real (WebGL) ----------
-// Una sola escena a pantalla completa detrás de las tarjetas: al deslizar, cada galaxia se mueve con su tarjeta.
+// ---------- tarjetas vivas: cada galaxia se dibuja en movimiento, en tiempo real (WebGL)
+// ----------
+// Una sola escena a pantalla completa detrás de las tarjetas: al deslizar, cada galaxia se mueve
+// con su tarjeta.
 const LVGL = (() => {
   let gl = null,
     cv = null,
@@ -233,7 +235,8 @@ void main(){
 })();
 let lvCanvas = null,
   lvArts = [];
-// ---------- tarjetas: todo lo nítido se dibuja a resolución completa (estrellas, planetas, el Sol, los agujeros negros) ----------
+// ---------- tarjetas: todo lo nítido se dibuja a resolución completa (estrellas, planetas, el Sol,
+// los agujeros negros) ----------
 let lvStars = null,
   lvSets = null;
 function lvRand(seed) {
@@ -507,7 +510,8 @@ function lvCrisp(k, cx, cy, S, alpha) {
   ctx.restore();
   ctx.globalAlpha = 1;
 }
-// escala de cada galaxia dentro de su zona: Sistema solar, Magallanes, Andrómeda, Centaurus A, Remolino, Sombrero, M87, Sagitario A*
+// escala de cada galaxia dentro de su zona: Sistema solar, Magallanes, Andrómeda, Centaurus A,
+// Remolino, Sombrero, M87, Sagitario A*
 const LV_SCALE = [1.0, 0.9, 1.22, 0.95, 0.88, 1.12, 1.6, 1.02];
 function drawLevelsBG() {
   if (!elLv || !elLv.querySelector) {
@@ -533,7 +537,8 @@ function drawLevelsBG() {
   const art = lvArts[ka],
     ar = art && art.getBoundingClientRect ? art.getBoundingClientRect() : null;
   const sz = (ar ? Math.min(ar.width, ar.height) : Math.min(W, H) * 0.46) * 0.95;
-  // cada destino con el mismo peso visual: los objetos chicos (M87, Sombrero…) se agrandan, sin salirse de la pantalla
+  // cada destino con el mismo peso visual: los objetos chicos (M87, Sombrero…) se agrandan, sin
+  // salirse de la pantalla
   const scl = k => Math.min(sz * (LV_SCALE[k] || 1), W * 0.92, (ar ? ar.height : H) * 1.25);
   const zA = 1,
     zB = 1;
@@ -549,7 +554,8 @@ function drawLevelsBG() {
     ctx.drawImage(soft, 0, 0, W, H);
   }
   // estrellas nítidas, en dos profundidades
-  // paralaje: al deslizar, las estrellas lejanas se mueven poco y las cercanas más (profundidad, sin efectos bruscos)
+  // paralaje: al deslizar, las estrellas lejanas se mueven poco y las cercanas más (profundidad,
+  // sin efectos bruscos)
   for (const s of lvStars) {
     const x = (((s.x * W - t * (s.d < 0.5 ? 2 : 5) - pos * W * (0.05 + 0.22 * s.d)) % W) + W) % W,
       y = s.y * H;
