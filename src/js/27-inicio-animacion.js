@@ -1,7 +1,9 @@
 // ---------- entrada a la pantalla de inicio: un agujero negro enorme que se aleja ----------
 // música de misterio: un zumbido profundo que respira, notas de cristal flotando y un viento cósmico
 function homeAmbience(on) {
-  if (!AC) return;
+  if (!AC) {
+    return;
+  }
   try {
     const n = AC.currentTime;
     if (on && !amb) {
@@ -118,7 +120,9 @@ function hsLow(f0, f1, dur, gain) {
   o.stop(n + dur + 0.05);
 }
 function hsSound(kind) {
-  if (!AC || muted) return;
+  if (!AC || muted) {
+    return;
+  }
   try {
     const n = AC.currentTime;
     if (kind === 'rock') {
@@ -210,7 +214,9 @@ function glassNote(f, t0, dur, gain) {
 }
 // sonidos del logotipo al formarse, en la misma tonalidad de la música de misterio
 function logoSounds() {
-  if (!(logoT0 > 0) || !AC || muted) return;
+  if (!(logoT0 > 0) || !AC || muted) {
+    return;
+  }
   const lp = homeT - logoT0,
     n = AC.currentTime;
   try {
@@ -262,7 +268,9 @@ function updateHomeShow(dt) {
     hsEvents.chirp = 1;
     gwChirp();
   }
-  if (hsEvents.feed) hsRipple += dt;
+  if (hsEvents.feed) {
+    hsRipple += dt;
+  }
   if (homeT >= HOME_BIG && !hsEvents.bedOff) {
     hsEvents.bedOff = 1;
     showStop(1.5);
@@ -304,7 +312,9 @@ function renderHomeIntro() {
   ctx.save();
   ctx.fillStyle = '#05060c';
   ctx.fillRect(0, 0, W, H);
-  if (hsShake > 0) ctx.translate((Math.random() - 0.5) * hsShake, (Math.random() - 0.5) * hsShake);
+  if (hsShake > 0) {
+    ctx.translate((Math.random() - 0.5) * hsShake, (Math.random() - 0.5) * hsShake);
+  }
   const Rbig = Math.min(W, H) * 0.24 * (1 + 0.04 * clamp(T / HOME_BIG, 0, 1)),
     Rg = Math.max(rr(sunLevel), SUN) * S;
   const R = Rbig + (Rg - Rbig) * p,
@@ -320,7 +330,9 @@ function renderHomeIntro() {
     const dx = x - cx,
       dy = y - cy,
       d = Math.hypot(dx, dy) || 1;
-    if (d < R * 1.02) continue;
+    if (d < R * 1.02) {
+      continue;
+    }
     const dl = d + ((RE * RE) / d) * 0.45 * (1 - p);
     x = cx + (dx / d) * dl;
     y = cy + (dy / d) * dl;
@@ -333,7 +345,9 @@ function renderHomeIntro() {
       ctx.rotate(Math.atan2(dy, dx) + Math.PI / 2);
       ctx.fillRect(-s.s * (1 + tang * 3), -s.s * 0.4, s.s * 2 * (1 + tang * 3), s.s * 0.8);
       ctx.restore();
-    } else ctx.fillRect(x, y, s.s * 0.8, s.s * 0.8);
+    } else {
+      ctx.fillRect(x, y, s.s * 0.8, s.s * 0.8);
+    }
   }
   ctx.globalAlpha = 1;
   const k = SK + (0.96 - SK) * p,
@@ -382,7 +396,9 @@ function renderHomeIntro() {
   if (hsRipple > 0 && hsRipple < 2.2) {
     for (let i = 0; i < 4; i++) {
       const q = hsRipple - i * 0.18;
-      if (q <= 0) continue;
+      if (q <= 0) {
+        continue;
+      }
       const rr2 = R * (1.4 + q * 5),
         al = Math.max(0, 0.5 * (1 - q / 2.2)) * (1 - i * 0.2);
       ctx.globalAlpha = al;
@@ -408,7 +424,9 @@ function renderHomeIntro() {
     const r0 = Math.max(W, H) * 0.62;
     ROCKS.forEach(([tb, a0, d, dir]) => {
       const u = (T - tb) / d;
-      if (u <= 0 || u >= 1) return;
+      if (u <= 0 || u >= 1) {
+        return;
+      }
       const pts = [];
       for (let j = 0; j < 7; j++) {
         const uu = Math.max(0, u - j * 0.035 * (0.4 + u));
@@ -492,6 +510,7 @@ function renderHomeIntro() {
     ctx.globalAlpha = 1;
   }
   ctx.restore();
-  if (logoT0 > 0 && T >= logoT0)
+  if (logoT0 > 0 && T >= logoT0) {
     drawLogo(W / 2, Math.max(120, H * 0.24), Math.min(46, W * 0.1), T - logoT0);
+  }
 }
