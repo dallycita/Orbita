@@ -72,22 +72,94 @@ canvas {
   }
 }
 /* botones de navegación compartidos: flechas, volver y chips */
-.arrow svg.arc{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;}
-.arrow .arc path{fill:none;stroke-linecap:round;}
-.arrow .arc .base{stroke:rgba(236,230,216,.5);stroke-width:1.5;transition:stroke .25s;}
-.arrow .arc .hot{stroke:#ffa155;stroke-width:1.9;transform-origin:26px 26px;filter:drop-shadow(0 0 3px rgba(255,150,70,.75));animation:arcBreath 3.2s ease-in-out infinite;}
-.arrow.r.go .arc .hot{animation:arcSpinR .65s cubic-bezier(.3,.75,.3,1);}
-.arrow.l.go .arc .hot{animation:arcSpinL .65s cubic-bezier(.3,.75,.3,1);}
-@media (prefers-reduced-motion:reduce){ .arrow .arc .hot{animation:none !important;} }
-.back svg.arc{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;}
-.back .arc path{fill:none;stroke-linecap:round;}
-.back .arc .base{stroke:rgba(236,230,216,.5);stroke-width:1.5;transition:stroke .25s;}
-.back .arc .hot{stroke:#ffa155;stroke-width:1.9;transform-origin:26px 26px;filter:drop-shadow(0 0 3px rgba(255,150,70,.75));animation:arcBreath 3.2s ease-in-out infinite;}
-.back.go .arc .hot{animation:arcSpinL .65s cubic-bezier(.3,.75,.3,1);}
-@media (prefers-reduced-motion:reduce){ .back .arc .hot{animation:none !important;} }
-@keyframes arcBreath{50%{opacity:.55;}}
-@keyframes arcSpinR{from{transform:rotate(0);}to{transform:rotate(360deg);}}
-@keyframes arcSpinL{from{transform:rotate(0);}to{transform:rotate(-360deg);}}
+.arrow svg.arc {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.arrow .arc path {
+  fill: none;
+  stroke-linecap: round;
+}
+.arrow .arc .base {
+  stroke: rgba(236, 230, 216, 0.5);
+  stroke-width: 1.5;
+  transition: stroke 0.25s;
+}
+.arrow .arc .hot {
+  stroke: #ffa155;
+  stroke-width: 1.9;
+  transform-origin: 26px 26px;
+  filter: drop-shadow(0 0 3px rgba(255, 150, 70, 0.75));
+  animation: arcBreath 3.2s ease-in-out infinite;
+}
+.arrow.r.go .arc .hot {
+  animation: arcSpinR 0.65s cubic-bezier(0.3, 0.75, 0.3, 1);
+}
+.arrow.l.go .arc .hot {
+  animation: arcSpinL 0.65s cubic-bezier(0.3, 0.75, 0.3, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .arrow .arc .hot {
+    animation: none !important;
+  }
+}
+.back svg.arc {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.back .arc path {
+  fill: none;
+  stroke-linecap: round;
+}
+.back .arc .base {
+  stroke: rgba(236, 230, 216, 0.5);
+  stroke-width: 1.5;
+  transition: stroke 0.25s;
+}
+.back .arc .hot {
+  stroke: #ffa155;
+  stroke-width: 1.9;
+  transform-origin: 26px 26px;
+  filter: drop-shadow(0 0 3px rgba(255, 150, 70, 0.75));
+  animation: arcBreath 3.2s ease-in-out infinite;
+}
+.back.go .arc .hot {
+  animation: arcSpinL 0.65s cubic-bezier(0.3, 0.75, 0.3, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .back .arc .hot {
+    animation: none !important;
+  }
+}
+@keyframes arcBreath {
+  50% {
+    opacity: 0.55;
+  }
+}
+@keyframes arcSpinR {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes arcSpinL {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
 /* pantalla de inicio */
 @media (hover:hover) and (prefers-reduced-motion:no-preference){ #home .sm:hover,#home .opt:hover{animation:hop .35s ease-out forwards;} #home .bigplay:hover{animation:hopbig .4s ease-out forwards;box-shadow:0 0 0 10px rgba(255,90,31,.2),0 0 60px rgba(255,90,31,.55);} #home .sm:hover,#home .opt:hover{border-color:rgba(236,230,216,.5);} }
 #home .playrow{display:flex;align-items:center;gap:26px;}
