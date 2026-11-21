@@ -307,7 +307,6 @@ function start() {
 setup();
 
 const rr = k => R0 + (k - camLevel) * GAP;
-const PW = () => 1.1 + Math.min(level * 0.015, 1.0);
 
 // distancia libre entre la luna y el asteroide más cercano del anillo k
 function clearance(k, onlyApproaching) {
@@ -371,22 +370,11 @@ function upgradeToDouble() {
   buzz([15, 30, 25]);
 }
 // ---- la Tierra escapa: fuera del alcance del agujero negro ----
-const LV_END = [
-  'La Tierra dejó atrás al agujero negro.',
-  'Cruzaste las Nubes de Magallanes, las dos galaxias que danzan alrededor de la nuestra.',
-  'Escapaste hacia Andrómeda. Algún día, ella también vendrá por nosotros.',
-  'Atravesaste Centaurus A, nacida del choque de dos galaxias.',
-  'Escapaste del Remolino, aunque su vecina lo sigue deformando.',
-  'Dejaste atrás el Sombrero y sus cometas.',
-  'Sobreviviste al chorro de M87, el primer agujero negro fotografiado.',
-  'Volviste al corazón de la Vía Láctea y venciste a su agujero negro. El Sol vuelve a brillar.',
-];
 function win() {
   if (tutorial) {
     tutorialWin();
     return;
   }
-  const firstClear = false;
   const before = unlockedIds();
   misWin(lvl, curPlanet, sesTries);
   state = 'win';
@@ -936,7 +924,6 @@ function die(x, y, cause, who) {
   canRestart = false;
   culprit = who || null;
   culpritT = who ? 1.4 : 0;
-  const z = zoneOf(level);
   if (cause === 'sun') {
     const r0 = Math.hypot(x, y);
     swallow = { p: 0, a: Math.atan2(y, x), r: r0, r0, done: false };
