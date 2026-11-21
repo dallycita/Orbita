@@ -11208,7 +11208,9 @@ function novaShells(tt, camL) {
     for (let i = 0; i < s.n; i++) {
       const tb = s.b0 + i * s.P,
         age = tt - tb;
-      if (age < 0 || age > NOVA_LIFE * (s.big ? 1.6 : 1)) continue;
+      if (age < 0 || age > NOVA_LIFE * (s.big ? 1.6 : 1)) {
+        continue;
+      }
       out.push({ cx, cy, r: 4 + age * s.sp * (s.big ? 1.5 : 1), age, s, i });
     }
   }
@@ -11221,15 +11223,21 @@ function novaHit(px, py, tt, camL) {
     const dx = px - sh.cx,
       dy = py - sh.cy,
       d = Math.hypot(dx, dy);
-    if (Math.abs(d - sh.r) > hitR + (sh.s.big ? 4 : 2)) continue;
+    if (Math.abs(d - sh.r) > hitR + (sh.s.big ? 4 : 2)) {
+      continue;
+    }
     const a = Math.atan2(dy, dx) - sh.s.rot - sh.i * 0.9;
     let inGap = false;
     for (let g = 0; g < sh.s.gaps; g++) {
       const c = (g * Math.PI * 2) / sh.s.gaps + Math.PI / 2 + 0.35,
         dd = Math.atan2(Math.sin(a - c), Math.cos(a - c));
-      if (Math.abs(dd) < sh.s.gw / 2) inGap = true;
+      if (Math.abs(dd) < sh.s.gw / 2) {
+        inGap = true;
+      }
     }
-    if (!inGap) return true;
+    if (!inGap) {
+      return true;
+    }
   }
   return false;
 }
@@ -11250,7 +11258,9 @@ function hazardsReset() {
   sstars = [];
 }
 function hazardTip(key, title, sub, col) {
-  if (seenTypes[key]) return;
+  if (seenTypes[key]) {
+    return;
+  }
   seenTypes[key] = 1;
   try {
     localStorage.setItem('orbita_p1_vistos', JSON.stringify(seenTypes));
@@ -11269,7 +11279,9 @@ function hazardTip(key, title, sub, col) {
   });
 }
 function hazardsOnLand() {
-  if (tutorial) return;
+  if (tutorial) {
+    return;
+  }
   const k = level;
   if (COMET_AT[lvl] && COMET_AT[lvl].has(k)) {
     const sg = Math.random() < 0.5 ? -1 : 1,
@@ -11347,9 +11359,12 @@ function hazardsOnLand() {
       } catch (e) {}
     }
   }
-  if (SN_AT[lvl] && SN_AT[lvl][k] && !waves.some(w => !w.over))
+  if (SN_AT[lvl] && SN_AT[lvl][k] && !waves.some(w => !w.over)) {
     spawnWave(k + SN_AT[lvl][k], SN_AT[lvl][k]);
-  if (NOVA_AT[lvl] && NOVA_AT[lvl][k]) novaSpawn(k, NOVA_AT[lvl][k]);
+  }
+  if (NOVA_AT[lvl] && NOVA_AT[lvl][k]) {
+    novaSpawn(k, NOVA_AT[lvl][k]);
+  }
   if (FLARE_AT[lvl] && FLARE_AT[lvl].has(k)) {
     flareWarn = 0.8;
     hazardTip('llamarada', 'Llamarada', 'El agujero negro te ciega: sigue tu ritmo', '#ffe2b0');
@@ -11358,7 +11373,9 @@ function hazardsOnLand() {
 function keplerPos(s, tt) {
   const M = 2 * Math.PI * (tt / s.P) + s.M0;
   let E = M;
-  for (let i = 0; i < 5; i++) E -= (E - s.e * Math.sin(E) - M) / (1 - s.e * Math.cos(E));
+  for (let i = 0; i < 5; i++) {
+    E -= (E - s.e * Math.sin(E) - M) / (1 - s.e * Math.cos(E));
+  }
   const r = s.a * (1 - s.e * Math.cos(E)),
     nu = 2 * Math.atan2(Math.sqrt(1 + s.e) * Math.sin(E / 2), Math.sqrt(1 - s.e) * Math.cos(E / 2)),
     an = nu + s.w;
@@ -11369,13 +11386,17 @@ function spawnWave(L, reach) {
   const learn = !seenTypes.onda,
     ph = beatPhase();
   let wait = ph < 0 ? 0.9 : (1 - ph) * TB;
-  while (wait < 0.75) wait += TB; // sale justo en un golpe de la música
+  while (wait < 0.75) {
+    wait += TB;
+  } // sale justo en un golpe de la música
   const big = reach >= 3;
   if (big && ph >= 0) {
     const bar = 4 * TB,
       bt = beatTime() + wait;
     wait += (bar - (((bt % bar) + bar) % bar)) % bar;
-    if (wait < 1.2) wait += bar;
+    if (wait < 1.2) {
+      wait += bar;
+    }
   } // la gran onda: al inicio de un compás
   const secs =
     (reach === 1 ? 2.6 : reach === 2 ? 4.2 : 5.4) *
@@ -11437,7 +11458,9 @@ function waveRelease(w) {
   shake = Math.max(shake, reduceMotion ? 0 : w.big ? 14 : 6);
   flash = Math.max(flash, w.big ? 0.55 : 0.25);
   buzz(w.big ? [60, 30, 60, 30, 90] : [30, 20, 30]);
-  if (w.big) skyFlash = Math.max(skyFlash, 0.5);
+  if (w.big) {
+    skyFlash = Math.max(skyFlash, 0.5);
+  }
   if (AC && !muted) {
     try {
       const n = AC.currentTime,
@@ -11613,7 +11636,9 @@ function hazardsUpdate(d, px, py) {
     w.t += d;
     if (!w.released) {
       holeFlare = Math.max(holeFlare, 0.2 + 0.4 * Math.abs(Math.sin(w.t * 12)));
-      if (w.t >= w.wait) waveRelease(w);
+      if (w.t >= w.wait) {
+        waveRelease(w);
+      }
       continue;
     }
     const tt = w.t - w.wait;
@@ -11623,16 +11648,28 @@ function hazardsUpdate(d, px, py) {
       if (w.trailT > 0.12) {
         w.trailT = 0;
         w.trail.push({ k: w.wk, a: 1 });
-        if (w.trail.length > 14) w.trail.shift();
+        if (w.trail.length > 14) {
+          w.trail.shift();
+        }
       }
-      if (!w.safe && !w.hitDone && pLevel >= w.L - 0.02) waveSafe(w);
+      if (!w.safe && !w.hitDone && pLevel >= w.L - 0.02) {
+        waveSafe(w);
+      }
       if (!w.safe && !w.hitDone && w.wk >= pLevel - 0.04) {
         const r = waveCatch(w, px, py);
-        if (r) return r;
+        if (r) {
+          return r;
+        }
       }
-      if (tt >= w.T) waveBreak(w);
-    } else w.broken += d;
-    for (const tr of w.trail) tr.a -= d * 1.1;
+      if (tt >= w.T) {
+        waveBreak(w);
+      }
+    } else {
+      w.broken += d;
+    }
+    for (const tr of w.trail) {
+      tr.a -= d * 1.1;
+    }
     if (w.broken > 0.9) {
       w.over = true;
       if (w.learn) {
@@ -11645,9 +11682,11 @@ function hazardsUpdate(d, px, py) {
   }
   waves = waves.filter(w => !w.over);
   let px0 = 0;
-  for (const w of waves)
-    if (w.released && !w.broken && !w.safe && !w.hitDone)
+  for (const w of waves) {
+    if (w.released && !w.broken && !w.safe && !w.hitDone) {
       px0 = Math.max(px0, clamp(1 - (pLevel - w.wk) / 1.3, 0, 1));
+    }
+  }
   waveProx += (px0 - waveProx) * Math.min(1, d * 10);
   if (waveProx > 0.15 && state === 'play') {
     waveBeepT -= d;
@@ -11666,12 +11705,18 @@ function hazardsUpdate(d, px, py) {
       }
       buzz(8);
     }
-  } else waveBeepT = 0;
-  if (hot) hotT += d;
+  } else {
+    waveBeepT = 0;
+  }
+  if (hot) {
+    hotT += d;
+  }
   skyFlash = Math.max(0, skyFlash - d * 0.9);
   for (const c of comets) {
     c.t += d;
-    if (c.t < c.delay) continue;
+    if (c.t < c.delay) {
+      continue;
+    }
     const st = c.w * d;
     c.ang += c.sg * st;
     c.left -= st;
@@ -11679,7 +11724,9 @@ function hazardsUpdate(d, px, py) {
       const R = rr(c.k),
         x = Math.cos(c.ang) * R,
         y = Math.sin(c.ang) * R;
-      if (Math.hypot(px - x, py - y) < hitR + 9) return 'comet';
+      if (Math.hypot(px - x, py - y) < hitR + 9) {
+        return 'comet';
+      }
     }
   }
   comets = comets.filter(c => c.left > 0 && c.k >= level - 1);
@@ -11691,7 +11738,9 @@ function hazardsUpdate(d, px, py) {
       noise(0.35, 5000, 300, 0.35, 'lowpass');
       buzz(30);
     }
-    if (b.t >= b.warn && b.t < b.warn + b.fire && Math.abs(pLevel - b.k) < 0.45) return 'beam';
+    if (b.t >= b.warn && b.t < b.warn + b.fire && Math.abs(pLevel - b.k) < 0.45) {
+      return 'beam';
+    }
   }
   beams = beams.filter(b => b.t < b.warn + b.fire + 0.3);
   if (flareWarn > 0) {
@@ -11704,11 +11753,17 @@ function hazardsUpdate(d, px, py) {
   }
   flareT = Math.max(0, flareT - d);
   for (const s of sstars) {
-    if (level < s.from) continue;
+    if (level < s.from) {
+      continue;
+    }
     const [x, y] = keplerPos(s, t);
     s.trail.push([x, y]);
-    if (s.trail.length > 14) s.trail.shift();
-    if (jumping && Math.hypot(px - x, py - y) < hitR + 4.5) return 'sstar';
+    if (s.trail.length > 14) {
+      s.trail.shift();
+    }
+    if (jumping && Math.hypot(px - x, py - y) < hitR + 4.5) {
+      return 'sstar';
+    }
   }
   return null;
 }
@@ -11784,9 +11839,13 @@ function drawWave(w) {
   ctx.globalCompositeOperation = 'lighter';
   // restos de gas que siguen brillando detrás del frente
   for (const tr of w.trail) {
-    if (tr.a <= 0) continue;
+    if (tr.a <= 0) {
+      continue;
+    }
     const Rt = rr(tr.k) * S;
-    if (Rt < 4) continue;
+    if (Rt < 4) {
+      continue;
+    }
     ctx.globalAlpha = tr.a * 0.16;
     ctx.strokeStyle = '#ff4f8f';
     ctx.lineWidth = 5 * S;
@@ -12003,7 +12062,9 @@ function drawNova(ring, Rw, a, next) {
     ctx.strokeStyle = '#bfe0ff';
     ctx.lineWidth = 1.2 * S;
     for (const o of ring.obs) {
-      if (o.star) continue;
+      if (o.star) {
+        continue;
+      }
       const oa = obsAng(ring, o),
         p2 = novaPush(ring, oa, beatTime());
       ctx.beginPath();
@@ -12026,10 +12087,14 @@ function novaSound() {
     return;
   }
   const b = Math.floor(beatTime() / TB);
-  if (b === novaBeat) return;
+  if (b === novaBeat) {
+    return;
+  }
   const first = novaBeat < 0;
   novaBeat = b;
-  if (first) return;
+  if (first) {
+    return;
+  }
   const inBar = ((b % 4) + 4) % 4;
   if (inBar === 0) {
     shake = Math.max(shake, reduceMotion ? 0 : 4);
@@ -12078,13 +12143,17 @@ function drawNovaShells() {
       cx = CX + sh.cx * S,
       cy = CY + sh.cy * S,
       r = sh.r * S;
-    if (r < 2 || fade <= 0) continue;
+    if (r < 2 || fade <= 0) {
+      continue;
+    }
     const isGap = a => {
       const a2 = a - sh.s.rot - sh.i * 0.9;
       for (let g = 0; g < sh.s.gaps; g++) {
         const c = (g * Math.PI * 2) / sh.s.gaps + Math.PI / 2 + 0.35,
           dd = Math.atan2(Math.sin(a2 - c), Math.cos(a2 - c));
-        if (Math.abs(dd) < sh.s.gw / 2) return true;
+        if (Math.abs(dd) < sh.s.gw / 2) {
+          return true;
+        }
       }
       return false;
     };
@@ -12109,7 +12178,9 @@ function drawNovaShells() {
         if (!on) {
           ctx.moveTo(x, y);
           on = true;
-        } else ctx.lineTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
       }
       ctx.stroke();
     };
@@ -12121,8 +12192,12 @@ function drawNovaShells() {
       const th = (i / 22) * Math.PI * 2 + sh.i,
         x = cx + Math.cos(th) * wob(th),
         y = cy + Math.sin(th) * wob(th);
-      if (isGap(th)) continue; // nudos de oxígeno
-      if (i % 2) continue;
+      if (isGap(th)) {
+        continue;
+      } // nudos de oxígeno
+      if (i % 2) {
+        continue;
+      }
       const tw = 0.5 + 0.5 * Math.sin(t * 3 + i * 1.7),
         kg = ctx.createRadialGradient(x, y, 0, x, y, 7 * S);
       if (kg && kg.addColorStop) {
@@ -12172,11 +12247,17 @@ function drawNovaShells() {
   ctx.restore();
 }
 function drawHazards() {
-  for (const w of waves) drawWave(w);
-  if (novaSrc.length) drawNovaShells();
+  for (const w of waves) {
+    drawWave(w);
+  }
+  if (novaSrc.length) {
+    drawNovaShells();
+  }
   // órbitas y estrellas veloces
   for (const s of sstars) {
-    if (level < s.from) continue;
+    if (level < s.from) {
+      continue;
+    }
     ctx.globalAlpha = 0.12;
     ctx.strokeStyle = '#cfe2ff';
     ctx.lineWidth = 1;
@@ -12220,7 +12301,9 @@ function drawHazards() {
   // rayos de energía
   for (const b of beams) {
     const R = rr(b.k) * S;
-    if (R < 4) continue;
+    if (R < 4) {
+      continue;
+    }
     if (b.t < b.warn) {
       const fl = 0.5 + 0.5 * Math.sin(b.t * 22);
       ctx.globalAlpha = 0.18 + 0.3 * fl * (b.t / b.warn);
@@ -12244,7 +12327,9 @@ function drawHazards() {
   // cometas rasantes: el camino se ilumina y luego avanza por tu anillo
   for (const c of comets) {
     const R = rr(c.k) * S;
-    if (R < 6) continue;
+    if (R < 6) {
+      continue;
+    }
     const fade = Math.min(1, c.left / 0.6);
     if (c.k === level && !jumping) {
       const a0 = c.ang,
@@ -12333,7 +12418,9 @@ function drawHazards() {
   ctx.globalAlpha = 1;
 }
 function drawFlare() {
-  if (flareT <= 0) return;
+  if (flareT <= 0) {
+    return;
+  }
   ctx.globalAlpha = flareT > 0.45 ? 0.95 : (flareT / 0.45) * 0.95;
   ctx.fillStyle = '#fff6ec';
   ctx.fillRect(0, 0, W, H);
