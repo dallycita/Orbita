@@ -32,6 +32,20 @@ const sha = s => createHash('sha1').update(s).digest('hex').slice(0, 16);
 
 // Escenas cuyo dibujo varía solo entre dos corridas del mismo archivo en muchos píxeles pero muy poco (hasta ~10 niveles
 // de color): ahí se acepta como ruido cualquier cantidad de píxeles si ninguno cambia más de 12 niveles.
+// El navegador guarda el texto de las variables CSS (--algo) tal como está escrito: 'max(3vh,18px)' y
+// 'max(3vh, 18px)', o '.58' y '0.58', son el mismo valor escrito distinto. Las propiedades reales se comparan tal cual.
+const cssCanon = v => v.replace(/\s*([,()\/])\s*/g, '$1').replace(/(^|[^\w.])\.(\d)/g, '$10.$2').replace(/\s+/g, ' ').trim();
+const styleMap = s => new Map((s || '').split(';').filter(Boolean).map(x => [x.slice(0, x.indexOf(':')), x.slice(x.indexOf(':') + 1)]));
+function hasRealStyleDiff(a, b){   // true si hay una diferencia real
+  const pa = styleMap(a), pb = styleMap(b);
+  for (const p of new Set([...pa.keys(), ...pb.keys()])){
+    const va = pa.get(p), vb = pb.get(p);
+    if (va === vb) continue;
+    if (p.startsWith('--') && va !== undefined && vb !== undefined && cssCanon(va) === cssCanon(vb)) continue;
+    return true;
+  }
+  return false;
+}
 const RUIDO_AMPLIO = new Set(['poder_urano', 'sinwebgl_partida_5']);
 if (process.argv[2] === '--comparar'){
   const [A, B] = process.argv.slice(3), a = JSON.parse(readFileSync(join(A, 'huella.json'))), b = JSON.parse(readFileSync(join(B, 'huella.json')));
@@ -44,7 +58,11 @@ if (process.argv[2] === '--comparar'){
       if (d.n > 60 && !(RUIDO_AMPLIO.has(k) && d.max <= 12)) diffs.push('imagen (' + d.n + ' píxeles distintos, hasta ' + d.max + ')'); else ruido.push(k + ' (' + d.n + ' px, ' + d.max + ')'); }
     if (x.traza !== y.traza) diffs.push('partida');
     if (x.errores !== y.errores) diffs.push('errores');
-    const ek = new Set([...Object.keys(x.estilos), ...Object.keys(y.estilos)]), ed = [...ek].filter(e => x.estilos[e] !== y.estilos[e]);
+    let ed = [...new Set([...Object.keys(x.estilos), ...Object.keys(y.estilos)])].filter(e => x.estilos[e] !== y.estilos[e]);
+    if (ed.length){   // mirar el detalle: las variables CSS se comparan por su valor, no por cómo están escritas
+      const ea = JSON.parse(readFileSync(join(A, k + '.estilos.json'))), eb = JSON.parse(readFileSync(join(B, k + '.estilos.json')));
+      ed = ed.filter(e => hasRealStyleDiff(ea[e], eb[e]));
+    }
     if (ed.length) diffs.push('estilos (' + ed.length + ': ' + ed.slice(0, 4).join(' | ') + ')');
     if (diffs.length){ bad++; console.log('✗ ' + k + ': ' + diffs.join(', ')); }
   }
