@@ -17510,7 +17510,9 @@ const GRAV_SVG = n =>
   '<circle cx="15" cy="15" r="3.4" fill="#000" stroke="#ffa155" stroke-width="1.3"/></svg>';
 function renderLevels() {
   sigShown = -1;
-  if (!elLv) return;
+  if (!elLv) {
+    return;
+  }
   const pages = LEVELS.map((L, i) => {
     const v = Math.min(bestOf(i), GOAL),
       pct = Math.round((v / GOAL) * 100),
@@ -17610,7 +17612,9 @@ function renderLevels() {
   lvCanvas = elLv.querySelector ? elLv.querySelector('.lvbg') : null;
   lvArts = elLv.querySelectorAll ? [...elLv.querySelectorAll('.art')] : [];
   const track = elLv.querySelector ? elLv.querySelector('.track') : null;
-  if (!track || !track.addEventListener) return;
+  if (!track || !track.addEventListener) {
+    return;
+  }
   const al = elLv.querySelector('.arrow.l'),
     ar = elLv.querySelector('.arrow.r'),
     dots = elLv.querySelectorAll('.dots i');
@@ -17620,22 +17624,34 @@ function renderLevels() {
       Math.min(LEVELS.length - 1, Math.round(track.scrollLeft / Math.max(1, track.clientWidth))),
     );
     dots.forEach((d, i) => d.classList.toggle('on', i === lvIndex));
-    if (al) al.disabled = lvIndex === 0;
-    if (ar) ar.disabled = lvIndex === LEVELS.length - 1;
-    if (lvIndex !== sigShown) sigType(lvIndex);
+    if (al) {
+      al.disabled = lvIndex === 0;
+    }
+    if (ar) {
+      ar.disabled = lvIndex === LEVELS.length - 1;
+    }
+    if (lvIndex !== sigShown) {
+      sigType(lvIndex);
+    }
   };
   const go = i => {
     lvIndex = Math.max(0, Math.min(LEVELS.length - 1, i));
     track.scrollTo({ left: lvIndex * track.clientWidth, behavior: 'smooth' });
   };
   track.addEventListener('scroll', sync, { passive: true });
-  if (al) al.addEventListener('click', () => go(lvIndex - 1));
-  if (ar) ar.addEventListener('click', () => go(lvIndex + 1));
+  if (al) {
+    al.addEventListener('click', () => go(lvIndex - 1));
+  }
+  if (ar) {
+    ar.addEventListener('click', () => go(lvIndex + 1));
+  }
   elLv
     .querySelectorAll('.play')
     .forEach(b => b.addEventListener('click', () => startLevel(Number(b.dataset.play))));
   const bk = elLv.querySelector('.back');
-  if (bk) bk.addEventListener('click', () => openHome());
+  if (bk) {
+    bk.addEventListener('click', () => openHome());
+  }
   requestAnimationFrame(() => {
     track.style.scrollBehavior = 'auto';
     track.scrollLeft = lvIndex * track.clientWidth;
@@ -17649,11 +17665,17 @@ let sigShown = -1,
   sigTimer = null;
 const sigTxt = i => LV_DATO[i].replace(/(\d) (?=[\d%])/g, '$1\u00a0'); // que las cifras no se partan
 function sigType(i) {
-  if (!elLv || !elLv.querySelectorAll) return;
+  if (!elLv || !elLv.querySelectorAll) {
+    return;
+  }
   const sigs = elLv.querySelectorAll('.sig');
-  if (!sigs.length) return;
+  if (!sigs.length) {
+    return;
+  }
   sigShown = i;
-  if (sigTimer) clearTimeout(sigTimer);
+  if (sigTimer) {
+    clearTimeout(sigTimer);
+  }
   sigs.forEach((g, k) => {
     if (k !== i) {
       g.classList.remove('rx', 'done');
@@ -17664,7 +17686,9 @@ function sigType(i) {
     }
   });
   const g = sigs[i];
-  if (!g) return;
+  if (!g) {
+    return;
+  }
   const txt = g.dataset.txt,
     on = g.querySelector('.on'),
     off = g.querySelector('.off');
@@ -17676,7 +17700,9 @@ function sigType(i) {
   on.textContent = '';
   off.textContent = txt;
   const step = () => {
-    if (sigShown !== i) return;
+    if (sigShown !== i) {
+      return;
+    }
     n++;
     on.textContent = txt.slice(0, n);
     off.textContent = txt.slice(n);
@@ -17745,8 +17771,12 @@ function resetProgress() {
   wallet = 0;
   updateWallet(false);
   initAudio();
-  if (AC && AC.state === 'suspended') AC.resume();
-  if (elLv) elLv.classList.add('off');
+  if (AC && AC.state === 'suspended') {
+    AC.resume();
+  }
+  if (elLv) {
+    elLv.classList.add('off');
+  }
   storyReturn = null;
   tutAfterStory = false;
   startIntro();
@@ -17760,20 +17790,28 @@ function openLevels() {
   setup();
   state = 'levels';
   renderLevels();
-  if (elLv) elLv.classList.remove('off');
+  if (elLv) {
+    elLv.classList.remove('off');
+  }
   elPanel.classList.add('hide');
   elHud.style.opacity = 0;
 }
 function startLevel(i) {
   sesTries = 1;
-  if (!LEVELS[i] || !LEVELS[i].ready) return;
+  if (!LEVELS[i] || !LEVELS[i].ready) {
+    return;
+  }
   homeAmbience(false);
   try {
     showStop(0.3);
   } catch (e) {}
   initAudio();
-  if (AC && AC.state === 'suspended') AC.resume();
-  if (elLv) elLv.classList.add('off');
+  if (AC && AC.state === 'suspended') {
+    AC.resume();
+  }
+  if (elLv) {
+    elLv.classList.add('off');
+  }
   lvl = i;
   tutorial = false;
   pendingTut = false;
