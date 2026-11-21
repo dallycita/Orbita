@@ -8,13 +8,6 @@
 // Debajo, un tono que sube sin fin (escala de Shepard): la sensación de que algo se acerca y nunca
 // termina.
 // Todo con una reverberación de varios segundos, como un espacio inmenso y vacío.
-const HZ_PROG = [
-  [0, [0, 3, 7]],
-  [-4, [0, 4, 7]],
-  [1, [0, 4, 7]],
-  [7, [0, 3, 7]],
-]; // i – bVI – bII – v  (Sol# menor, oscura)
-const HZ_EARTH = [24, 15, 19, 15, 22, 15, 19, 15]; // la frase de la Tierra, sobre una nota fija
 let hzS = null;
 function hzEnsure() {
   if (hzS && hzS.ac === AC) {
