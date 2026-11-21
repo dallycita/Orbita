@@ -214,7 +214,9 @@ try {
   plutoOk = localStorage.getItem('orbita_p1_pluton') === '1';
   allPlanets = localStorage.getItem('orbita_p1_todos') === '1';
 } catch (e) {}
-if (!PLANETS_P.some(P => P.id === curPlanet)) curPlanet = 'tierra';
+if (!PLANETS_P.some(P => P.id === curPlanet)) {
+  curPlanet = 'tierra';
+}
 const planetOk = P => allPlanets || P.ok();
 const curP = () => PLANETS_P.find(P => P.id === curPlanet) || PLANETS_P[3];
 const pst = () => curP().st;
@@ -226,7 +228,9 @@ const unlockedIds = () => PLANETS_P.filter(planetOk).map(P => P.id);
 function planetThumb(id) {
   try {
     const r = PLGL.render(id, 120, 0.6, [-0.78, 0.42, 0.48], [1.12, 1.06, 0.98], 1);
-    if (r && r.cv.toDataURL) return '<img src="' + r.cv.toDataURL() + '" alt="">';
+    if (r && r.cv.toDataURL) {
+      return '<img src="' + r.cv.toDataURL() + '" alt="">';
+    }
   } catch (e) {}
   return PLANET_SVG[id]
     ? '<svg viewBox="0 0 100 100" aria-hidden="true">' + PLANET_SVG[id] + '</svg>'
@@ -240,7 +244,9 @@ function markNewPlanets() {
 function rescuedCards(before) {
   const now = unlockedIds(),
     nuevos = PLANETS_P.filter(P => now.includes(P.id) && !before.includes(P.id));
-  if (!nuevos.length) return '';
+  if (!nuevos.length) {
+    return '';
+  }
   return (
     '<div class="wres"><div class="wpl">' +
     nuevos
