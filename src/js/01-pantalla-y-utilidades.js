@@ -6,18 +6,7 @@ const elPbar = document.getElementById('pbar'),
   elPnum = document.getElementById('pnum');
 const elWrap = document.getElementById('scorewrap'),
   elArcFg = document.querySelector('#arc .fg');
-// tres formas de mostrar el récord, para comparar
-const MODES = [
-  ['faltan', 'Faltan N'],
-  ['arco', 'Arco'],
-  ['nada', 'Nada'],
-];
 let hudMode = 'faltan';
-const MUSICS = [
-  ['espacial', 'Espacial'],
-  ['synthwave', 'Synthwave'],
-  ['phonk', 'Phonk'],
-];
 let musicStyle = 'espacial';
 function chipsHTML() {
   return '';
