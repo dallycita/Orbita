@@ -11,7 +11,9 @@ let bend = { str: 0, a: -Math.PI / 2, L: 0, on: false, grow: 1, fixed: false },
   whRip = null;
 const bendRad = () => BEND_R * bend.str * (bend.grow || 1);
 function bendUpdate(d) {
-  if (bend.fixed) return; // durante la entrada y la salida la mueve el portal
+  if (bend.fixed) {
+    return;
+  } // durante la entrada y la salida la mueve el portal
   const z = BEND_AT[lvl],
     want = !tutorial && z && level >= z[0] && level <= z[1] && state === 'play' ? 1 : 0;
   if (want && !bend.on) {
@@ -20,7 +22,9 @@ function bendUpdate(d) {
     bend.a = -Math.PI / 2 + 0.9;
     hazardTip('whVisto', 'Agujero de gusano', 'Salta dentro: es un portal', WORM_COL);
   }
-  if (!want && bend.on && bend.str < 0.02) bend.on = false;
+  if (!want && bend.on && bend.str < 0.02) {
+    bend.on = false;
+  }
   bend.str += (want - bend.str) * Math.min(1, d * (want ? 1.2 : 2.2));
   const lock = want && level === WH_K - 1; // en el último anillo se pone justo en tu camino
   bend.L += ((want ? level + (lock ? 0.8 : 1.55) : level + 4) - bend.L) * Math.min(1, d * 2.5);
@@ -49,7 +53,9 @@ function lensP(x, y) {
       y = whRip.y + dy * k;
     }
   }
-  if (bend.str < 0.01 || viewInside) return [x, y];
+  if (bend.str < 0.01 || viewInside) {
+    return [x, y];
+  }
   const [wx, wy] = bendW(),
     dx = x - wx,
     dy = y - wy,
@@ -60,7 +66,9 @@ function lensP(x, y) {
 }
 function lensJ(x, y) {
   // cuánto se estira: a lo largo del borde (tangencial) y hacia el centro (radial)
-  if (bend.str < 0.01 || viewInside) return [1, 1, 0];
+  if (bend.str < 0.01 || viewInside) {
+    return [1, 1, 0];
+  }
   const [wx, wy] = bendW(),
     dx = x - wx,
     dy = y - wy,
@@ -70,7 +78,9 @@ function lensJ(x, y) {
   return [(r + q) / (2 * r), 0.5 * (1 + r / q), Math.atan2(dy, dx)];
 }
 function drawBendSphere() {
-  if (bend.str < 0.01 || viewInside) return;
+  if (bend.str < 0.01 || viewInside) {
+    return;
+  }
   const [wx, wy] = bendW(),
     x = CX + wx * S,
     y = CY + wy * S,
@@ -81,8 +91,9 @@ function drawBendSphere() {
   ctx.beginPath();
   ctx.arc(x, y, R, 0, Math.PI * 2);
   ctx.clip();
-  if (cv && cv.width > 2) ctx.drawImage(cv, 0, 0, W, H);
-  else {
+  if (cv && cv.width > 2) {
+    ctx.drawImage(cv, 0, 0, W, H);
+  } else {
     const g = ctx.createRadialGradient(x, y, 0, x, y, R);
     g.addColorStop(0, '#e9e4ff');
     g.addColorStop(0.6, '#5b46c9');
