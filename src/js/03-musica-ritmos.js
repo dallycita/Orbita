@@ -67,7 +67,8 @@ function d808(t0, semi, dur) {
   o.start(t0);
   o.stop(t0 + dur + 0.02);
 }
-// ---------- estilos de música (mismo tempo: 140, para que la Respiración siga sincronizada) ----------
+// ---------- estilos de música (mismo tempo: 140, para que la Respiración siga sincronizada)
+// ----------
 const lv = () => (state === 'play' ? level : 30); // en el menú se escucha completa
 // progresión en Sol# menor: i – VI – III – VII (Sol#m, Mi, Si, Fa#), dos compases cada acorde
 const PROG = [
@@ -246,7 +247,8 @@ function tensionSet(d) {
     tens.bp.frequency.setTargetAtTime(700 + 1600 * d, n, 0.2);
   } catch (e) {}
 }
-// alarma del agujero negro: cuanto más cerca, más rápido y más fuerte late (golpe grave + sirena + latido)
+// alarma del agujero negro: cuanto más cerca, más rápido y más fuerte late (golpe grave + sirena +
+// latido)
 let alarmT = 0,
   alarmWas = 0,
   dangerFlash = 0;
@@ -493,7 +495,8 @@ function impact(t0) {
   dKick(t0);
 }
 // ---------- música de Andrómeda: otra galaxia, otra escala ----------
-// Re# frigio (la 2ª menor le da un aire extraño y lejano), campanas metálicas, bajo ondulante y un ritmo sincopado 3-3-4
+// Re# frigio (la 2ª menor le da un aire extraño y lejano), campanas metálicas, bajo ondulante y un
+// ritmo sincopado 3-3-4
 const ROOT_A = 311.13;
 const PROG_A = [
   [0, [0, 3, 7]],
@@ -601,7 +604,8 @@ function stepAndromeda(s, t0) {
 }
 
 // ---------- música de las Nubes de Magallanes: luminosa y aireada ----------
-// Fa# lidio (la 4ª aumentada suena a asombro), notas de kalimba, un coro lejano y un bajo saltarín a contratiempo
+// Fa# lidio (la 4ª aumentada suena a asombro), notas de kalimba, un coro lejano y un bajo saltarín
+// a contratiempo
 const ROOT_M = 369.99;
 const PROG_M = [
   [0, [0, 4, 7]],
