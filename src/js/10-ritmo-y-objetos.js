@@ -23,7 +23,8 @@ function beatTime() {
     : t;
 }
 // ángulo y tamaño reales de cada asteroide según el tipo de anillo
-const obsAng = (ring, o) => o.a + (o.dir || 1) * (ring.phase - (ring.poff || 0)) + (ring.off || 0); // poff: lo que el anillo no giró mientras estuvo congelado
+// poff: lo que el anillo no giró mientras estuvo congelado
+const obsAng = (ring, o) => o.a + (o.dir || 1) * (ring.phase - (ring.poff || 0)) + (ring.off || 0);
 function obsRad(ring, o) {
   if (ring.type !== 'respiracion') {
     return o.r;
@@ -49,7 +50,8 @@ function updateWallet(pop) {
   if (!elWallet) {
     return;
   }
-  // total de estrellas únicas de todo el juego (igual que las tarjetas): ★ 2 / 48, con un anillo de progreso
+  // total de estrellas únicas de todo el juego (igual que las tarjetas): ★ 2 / 48, con un anillo de
+  // progreso
   let got = 0,
     all = 0;
   COIN_RINGS.forEach((set, i) => {
@@ -120,9 +122,12 @@ function drawCoin(x, y, sz, al) {
   ctx.stroke();
   ctx.restore();
 }
-// ---------- desde el nivel 3: nebulosas y púlsares (no son asteroides, y tocarlos cambia algo) ----------
-// nebulosas rosadas: nubes de hidrógeno donde nacen estrellas; su energía te impulsa dos anillos hacia arriba
-// púlsares azules: restos de estrellas que explotaron y giran lanzando dos rayos; su radiación te empuja un anillo hacia abajo
+// ---------- desde el nivel 3: nebulosas y púlsares (no son asteroides, y tocarlos cambia algo)
+// ----------
+// nebulosas rosadas: nubes de hidrógeno donde nacen estrellas; su energía te impulsa dos anillos
+// hacia arriba
+// púlsares azules: restos de estrellas que explotaron y giran lanzando dos rayos; su radiación te
+// empuja un anillo hacia abajo
 const OBJ_NEBULA = new Set([3, 6, 10, 14, 18, 25, 33]);
 const OBJ_PULSAR = new Set([22, 23, 26, 30, 34, 41, 42, 45]);
 let pushing = false,
@@ -379,7 +384,8 @@ const stretchAt = (ring, ang) =>
     : ring && ring.type === 'nova'
       ? 1 + novaPush(ring, ang, beatTime()) / Math.max(20, rr(ring.k))
       : 1;
-// Andrómeda · nova: la estrella se carga 3 golpes y estalla al empezar cada compás; su onda empuja la muralla hacia afuera y abre la órbita un instante
+// Andrómeda · nova: la estrella se carga 3 golpes y estalla al empezar cada compás; su onda empuja
+// la muralla hacia afuera y abre la órbita un instante
 const NOVA_BAR = () => 4 * TB;
 const novaTau = tt => {
   const b = NOVA_BAR();
