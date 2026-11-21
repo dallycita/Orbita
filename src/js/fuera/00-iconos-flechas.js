@@ -10,7 +10,9 @@ document.addEventListener(
   'click',
   e => {
     const b = e.target && e.target.closest && e.target.closest('.arrow, .back');
-    if (!b || !b.classList) return;
+    if (!b || !b.classList) {
+      return;
+    }
     b.classList.remove('go');
     void b.offsetWidth;
     b.classList.add('go');
@@ -21,7 +23,9 @@ document.addEventListener(
   'animationend',
   e => {
     const b = e.target && e.target.closest && e.target.closest('.arrow, .back');
-    if (b && b.classList) b.classList.remove('go');
+    if (b && b.classList) {
+      b.classList.remove('go');
+    }
   },
   true,
 );
