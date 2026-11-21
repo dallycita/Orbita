@@ -1,53 +1,5 @@
 // ---------- el viaje por el Sistema solar: los planetas pasan en el fondo, en su orden real
 // ----------
-// at: en qué parte del nivel (0–1) cruza el centro de la pantalla · x: lado (fracción del ancho) ·
-// r: tamaño (fracción del lado menor)
-const SOLAR_PATH = [
-  { id: 'mercurio', at: 0.07, x: 0.84, r: 0.055 },
-  { id: 'venus', at: 0.16, x: 0.15, r: 0.085 },
-  { id: 'tierra', at: 0.27, x: 0.86, r: 0.09, moon: true },
-  { id: 'marte', at: 0.37, x: 0.13, r: 0.065 },
-  { belt: true, at: 0.47 },
-  { id: 'jupiter', at: 0.59, x: 1.0, r: 0.3 },
-  { id: 'saturno', at: 0.71, x: 0.06, r: 0.17 },
-  { id: 'urano', at: 0.81, x: 0.88, r: 0.1 },
-  { id: 'neptuno', at: 0.9, x: 0.14, r: 0.095 },
-];
-let solarJ = 0,
-  beltRocks = null;
-function drawBgPlanet(id, x, y, R, alpha) {
-  if (!(R > 1)) {
-    return;
-  }
-  let sc = 1;
-  try {
-    const m = ctx.getTransform && ctx.getTransform();
-    sc = m ? Math.hypot(m.a, m.b) : 1;
-  } catch (e) {}
-  // luz: viene del disco del agujero negro, en el centro
-  const lx = CX - x,
-    ly = CY - y,
-    L = Math.hypot(lx, ly) || 1;
-  const res = PLGL.render(
-    id,
-    2 * R * sc * 0.45,
-    t * 0.12,
-    [(lx / L) * 0.9, (-ly / L) * 0.9, 0.35],
-    [1.35, 0.82, 0.58],
-    t,
-  ); // a menor resolución: queda suave, como fuera de foco
-  if (!res) {
-    return;
-  }
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.imageSmoothingEnabled = true;
-  planetRing(id, x, y, R, 'back', false);
-  const h = R * res.pad;
-  ctx.drawImage(res.cv, x - h, y - h, 2 * h, 2 * h);
-  planetRing(id, x, y, R, 'front', false);
-  ctx.restore();
-}
 function renderScene() {
   const z = zoneOf(level);
   ctx.save();
@@ -494,8 +446,7 @@ function renderScene() {
   }
   // marca de dónde vas a caer: justo encima de ti
   if (state === 'play' && !jumping) {
-    const Rn = rr(level + 1) * S,
-      Rc = rr(level) * S;
+    const Rn = rr(level + 1) * S;
     ctx.strokeStyle = BONE;
     ctx.globalAlpha = 0.85;
     ctx.lineWidth = 3;
