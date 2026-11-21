@@ -6793,10 +6793,13 @@ function organ(t0, freqs, dur, gain, bright) {
 }
 // ---------- "Horizonte de sucesos": la banda sonora del Sistema solar ----------
 // La idea: no es una historia de amor, es una persecución. La música tiene dos personajes:
-//  · el agujero negro: un zumbido enorme que "late" cada vez más rápido, y un motivo de dos notas que CAE medio tono,
-//    como la gravedad, y que se repite cada vez más seguido cuanto más cerca está (como el tiburón de Tiburón);
+// · el agujero negro: un zumbido enorme que "late" cada vez más rápido, y un motivo de dos notas
+// que CAE medio tono,
+// como la gravedad, y que se repite cada vez más seguido cuanto más cerca está (como el tiburón de
+// Tiburón);
 //  · la Tierra: una frase de cristal, frágil, que corre cada vez más rápido para escapar.
-// Debajo, un tono que sube sin fin (escala de Shepard): la sensación de que algo se acerca y nunca termina.
+// Debajo, un tono que sube sin fin (escala de Shepard): la sensación de que algo se acerca y nunca
+// termina.
 // Todo con una reverberación de varios segundos, como un espacio inmenso y vacío.
 const HZ_PROG = [
   [0, [0, 3, 7]],
@@ -6956,7 +6959,8 @@ function hzGlass(t0, f, gain, dur) {
     o.stop(t0 + dur + 0.05);
   }
 }
-// el tono que sube sin fin (escala de Shepard–Risset): siete voces separadas por octavas que suben juntas
+// el tono que sube sin fin (escala de Shepard–Risset): siete voces separadas por octavas que suben
+// juntas
 function hzShepard(t0, dur, gain, rate) {
   const S = hzEnsure(),
     p0 = S.shep,
@@ -6983,7 +6987,8 @@ function hzShepard(t0, dur, gain, rate) {
   }
   S.shep = (p0 + rate) % 7;
 }
-// ---- producción: bus propio con compresión (para que suene lleno y fuerte) y más instrumentos ----
+// ---- producción: bus propio con compresión (para que suene lleno y fuerte) y más instrumentos
+// ----
 function hzBus() {
   const S = hzEnsure();
   if (S.bus) {
@@ -7212,10 +7217,12 @@ function hzCrash(t0, gain) {
 function hzSnare(t0, gain) {
   noiseHit(t0, 0.09, 'bandpass', 1900, gain, hzBus());
 }
-const HZ_OST = [0, 0, 0, 12, 0, 0, 12, 0, 0, 0, 0, 12, 0, 7, 3, 0]; // cuerdas: 3-3-2, el pulso de la persecución
+// cuerdas: 3-3-2, el pulso de la persecución
+const HZ_OST = [0, 0, 0, 12, 0, 0, 12, 0, 0, 0, 0, 12, 0, 7, 3, 0];
 const HZ_ACC = new Set([0, 3, 6, 8, 11, 14]);
 // ---- la melodía que cambia: un mismo motivo (pegadizo) que se transforma por secciones ----
-// Escala de Sol# menor en grados (0 = Sol#). El motivo se "secuencia" sobre los acordes: misma forma, otra altura.
+// Escala de Sol# menor en grados (0 = Sol#). El motivo se "secuencia" sobre los acordes: misma
+// forma, otra altura.
 const HZ_SC = [0, 2, 3, 5, 7, 8, 10];
 const hzDeg = d => {
   const o = Math.floor(d / 7),
@@ -7254,7 +7261,8 @@ const HZ_HOOK_B = {
 };
 // la versión lenta (para el respiro): las mismas notas clave, largas
 const HZ_HOOK_C = { 0: 7, 8: 9, 16: 11, 24: 13 };
-// acordes: oscuros al principio; épicos (i – bVI – bIII – bVII) cuando suena el gancho; con bII en el respiro
+// acordes: oscuros al principio; épicos (i – bVI – bIII – bVII) cuando suena el gancho; con bII en
+// el respiro
 const HZ_CH = {
   dark: [
     [0, 0],
