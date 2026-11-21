@@ -16215,11 +16215,13 @@ function bhPos() {
   const u = easeIO(clamp((introT - T_ARRIVE) / (T_SUN_END - T_ARRIVE), 0, 1));
   return { x: 42 * (1 - u), y: -14 * (1 - u) };
 }
-const bhRadius = () => 8 + 12 * clamp((introT - T_ARRIVE) / (T_DISK_END - T_ARRIVE), 0, 1); // crece al alimentarse
+// crece al alimentarse
+const bhRadius = () => 8 + 12 * clamp((introT - T_ARRIVE) / (T_DISK_END - T_ARRIVE), 0, 1);
 const diskK = () => clamp((introT - 4.8) / (T_DISK_END - 4.8), 0, 1);
 const sunK = () => clamp((introT - T_ARRIVE) / (T_SUN_END - T_ARRIVE), 0, 1);
 
-// antes de jugar: solo dónde estás y "toca para escapar"; la ayuda con íconos aparece hasta que dominas el salto doble
+// antes de jugar: solo dónde estás y "toca para escapar"; la ayuda con íconos aparece hasta que
+// dominas el salto doble
 let doblesHechos = 0;
 try {
   doblesHechos = parseInt(localStorage.getItem('orbita_p1_dobles') || '0', 10) || 0;
@@ -16437,7 +16439,8 @@ function updateIntro(dt) {
         thump();
       }
     } else {
-      p.a = p.earth ? -Math.PI / 2 + EARTH_W * Math.min(0, introT - T_ZOOM) : p.a + w * dt; // la Tierra llega arriba justo en "Escapa"
+      // la Tierra llega arriba justo en "Escapa"
+      p.a = p.earth ? -Math.PI / 2 + EARTH_W * Math.min(0, introT - T_ZOOM) : p.a + w * dt;
       if (p.earth && introT > T_EARTH) {
         const k = easeIO(Math.min((introT - T_EARTH) / 6, 1));
         p.rr = p.r - (p.r - earthEndR()) * k;
