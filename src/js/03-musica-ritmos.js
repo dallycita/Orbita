@@ -31,8 +31,9 @@ function dKick(t0) {
   kickQueue.push(t0);
 }
 function dClap(t0) {
-  for (let i = 0; i < 3; i++)
+  for (let i = 0; i < 3; i++) {
     noiseHit(t0 + i * 0.011, i < 2 ? 0.03 : 0.17, 'bandpass', 1600, 0.55, musicBus);
+  }
 }
 function dHat(t0, open) {
   noiseHit(t0, open ? 0.17 : 0.035, 'highpass', 8000, open ? 0.16 : 0.2, musicBus);
@@ -78,7 +79,9 @@ const PROG = [
 const hz = semi => (ROOT / 2) * Math.pow(2, semi / 12); // Sol#3 como referencia
 let echoIn = null;
 function echoBus() {
-  if (echoIn) return echoIn;
+  if (echoIn) {
+    return echoIn;
+  }
   echoIn = AC.createGain();
   const dl = AC.createDelay(1),
     fb = AC.createGain(),
@@ -110,7 +113,7 @@ function pad(t0, freqs, dur, gain, cutoff) {
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur + 0.4);
   lp.connect(g);
   g.connect(musicBus);
-  for (const f of freqs)
+  for (const f of freqs) {
     for (const det of [-6, 6]) {
       const o = AC.createOscillator();
       o.type = 'sawtooth';
@@ -120,6 +123,7 @@ function pad(t0, freqs, dur, gain, cutoff) {
       o.start(t0);
       o.stop(t0 + dur + 0.5);
     }
+  }
 }
 function pluck(t0, f, gain, type, echo) {
   const o = AC.createOscillator(),
@@ -133,7 +137,9 @@ function pluck(t0, f, gain, type, echo) {
   o.connect(lp);
   lp.connect(g);
   g.connect(musicBus);
-  if (echo) g.connect(echoBus());
+  if (echo) {
+    g.connect(echoBus());
+  }
   o.start(t0);
   o.stop(t0 + 0.32);
 }
@@ -192,7 +198,9 @@ function dangerNow() {
 let tens = null,
   tensT = 0;
 function tensionOn() {
-  if (!AC || tens) return;
+  if (!AC || tens) {
+    return;
+  }
   try {
     const g = AC.createGain(),
       trem = AC.createGain(),
@@ -225,7 +233,9 @@ function tensionOn() {
   } catch (e) {}
 }
 function tensionSet(d) {
-  if (!tens) return;
+  if (!tens) {
+    return;
+  }
   try {
     const n = AC.currentTime,
       up = Math.pow(2, (3 * d) / 12);
@@ -247,7 +257,9 @@ function alarmTick(dt) {
     return;
   }
   const d = dangerNow();
-  if (d > 0.18 && alarmWas <= 0.18) alarmHit(AC.currentTime + 0.01, d, true); // aviso al entrar en peligro
+  if (d > 0.18 && alarmWas <= 0.18) {
+    alarmHit(AC.currentTime + 0.01, d, true);
+  } // aviso al entrar en peligro
   alarmWas = d;
   if (d <= 0.18) {
     alarmT = 0;
@@ -337,7 +349,9 @@ function alarmHit(t0, d, first) {
       src.stop(t0 + 0.5);
     }
     // vibración y un destello rojo leve en pantalla al ritmo de la alarma
-    if (!reduceMotion) shake = Math.max(shake, 1.5 + 4 * k);
+    if (!reduceMotion) {
+      shake = Math.max(shake, 1.5 + 4 * k);
+    }
     buzz(first ? [40, 40, 40] : 18);
     dangerFlash = 0.25 + 0.45 * k;
   } catch (e) {}
@@ -348,25 +362,43 @@ function stepEspacial(s, t0) {
     b = s % 16,
     L = lv();
   const dz = dangerNow();
-  if (b === 0 || b === 8) softKick(t0, 0.8);
-  if (b === 3 || b === 11) softKick(t0, 0.35); // latido doble
+  if (b === 0 || b === 8) {
+    softKick(t0, 0.8);
+  }
+  if (b === 3 || b === 11) {
+    softKick(t0, 0.35);
+  } // latido doble
   if (dz > 0.4) {
-    if (b === 4 || b === 12) softKick(t0, 0.7);
-    if (b === 7 || b === 15) softKick(t0, 0.3);
+    if (b === 4 || b === 12) {
+      softKick(t0, 0.7);
+    }
+    if (b === 7 || b === 15) {
+      softKick(t0, 0.3);
+    }
   } // el corazón se acelera
-  if (dz > 0.45 && (dz > 0.75 || b % 2 === 0))
-    noiseHit(t0, 0.025, 'highpass', 7500, 0.04 + 0.1 * dz, musicBus); // tic-tac
-  if (b % 4 === 0 && b !== 0 && b !== 8) noiseHit(t0, 0.05, 'highpass', 6000, 0.06, musicBus);
-  if (s % 32 === 0)
+  if (dz > 0.45 && (dz > 0.75 || b % 2 === 0)) {
+    noiseHit(t0, 0.025, 'highpass', 7500, 0.04 + 0.1 * dz, musicBus);
+  } // tic-tac
+  if (b % 4 === 0 && b !== 0 && b !== 8) {
+    noiseHit(t0, 0.05, 'highpass', 6000, 0.06, musicBus);
+  }
+  if (s % 32 === 0) {
     pad(t0, [hz(root - 12), ...tones.map(x => hz(root + x))], 32 * STEP, 0.045, 900);
-  if (L >= 12 && b % 16 === 0) bassNote(t0, hz(root - 24), 16 * STEP, 0.32, 'sine', 300);
+  }
+  if (L >= 12 && b % 16 === 0) {
+    bassNote(t0, hz(root - 24), 16 * STEP, 0.32, 'sine', 300);
+  }
   if (L >= 5 && b % 2 === 0) {
     const seq = [0, 1, 2, 1, 0, 2, 1, 2],
       tn = tones[seq[(b / 2) % 8] % tones.length];
     pluck(t0, hz(root + tn + 12), 0.07, 'triangle', true);
   }
-  if (L >= 25 && b === 0 && bar % 2 === 0) pluck(t0, hz(root + tones[2] + 24), 0.09, 'sine', true);
-  if (L >= 25 && b % 2 === 1) noiseHit(t0, 0.03, 'highpass', 9000, 0.04, musicBus);
+  if (L >= 25 && b === 0 && bar % 2 === 0) {
+    pluck(t0, hz(root + tones[2] + 24), 0.09, 'sine', true);
+  }
+  if (L >= 25 && b % 2 === 1) {
+    noiseHit(t0, 0.03, 'highpass', 9000, 0.04, musicBus);
+  }
 }
 // Synthwave: retro, con energía de persecución
 function stepSynthwave(s, t0) {
@@ -374,18 +406,28 @@ function stepSynthwave(s, t0) {
     [root, tones] = PROG[Math.floor(bar / 2) % 4],
     b = s % 16,
     L = lv();
-  if (b % 4 === 0) dKick(t0);
-  const dz = dangerNow();
-  if (dz > 0.45 && (dz > 0.75 || b % 2 === 0))
-    noiseHit(t0, 0.025, 'highpass', 7500, 0.04 + 0.1 * dz, musicBus); // tic-tac
-  if (b % 2 === 0)
-    bassNote(t0, hz(root - 12 + (b % 4 === 2 ? 12 : 0)), STEP * 1.8, 0.22, 'sawtooth', 500);
-  if (L >= 5) {
-    if (b === 4 || b === 12) snareSW(t0);
-    if (b % 4 === 2) dHat(t0, false);
+  if (b % 4 === 0) {
+    dKick(t0);
   }
-  if (L >= 5 && s % 128 >= 124) snareSW(t0); // redoble cada 8 compases
-  if (L >= 12 && s % 32 === 0)
+  const dz = dangerNow();
+  if (dz > 0.45 && (dz > 0.75 || b % 2 === 0)) {
+    noiseHit(t0, 0.025, 'highpass', 7500, 0.04 + 0.1 * dz, musicBus);
+  } // tic-tac
+  if (b % 2 === 0) {
+    bassNote(t0, hz(root - 12 + (b % 4 === 2 ? 12 : 0)), STEP * 1.8, 0.22, 'sawtooth', 500);
+  }
+  if (L >= 5) {
+    if (b === 4 || b === 12) {
+      snareSW(t0);
+    }
+    if (b % 4 === 2) {
+      dHat(t0, false);
+    }
+  }
+  if (L >= 5 && s % 128 >= 124) {
+    snareSW(t0);
+  } // redoble cada 8 compases
+  if (L >= 12 && s % 32 === 0) {
     pad(
       t0,
       tones.map(x => hz(root + x + 12)),
@@ -393,6 +435,7 @@ function stepSynthwave(s, t0) {
       0.035,
       1800,
     );
+  }
   if (L >= 25) {
     const up = [0, 1, 2, 3],
       tn = up[b % 4] === 3 ? 12 : tones[up[b % 4]];
@@ -403,13 +446,25 @@ function stepPhonk(s, t0) {
   s = s % 32;
   const b = s % 16,
     L = lv();
-  if (b === 0 || b === 6 || b === 10) dKick(t0);
-  if (b % 2 === 0) dHat(t0, false);
-  if (L >= 5 && (b === 4 || b === 12)) dClap(t0);
-  if (L >= 12 && BASS[s]) d808(t0, BASS[s][0], BASS[s][1]);
+  if (b === 0 || b === 6 || b === 10) {
+    dKick(t0);
+  }
+  if (b % 2 === 0) {
+    dHat(t0, false);
+  }
+  if (L >= 5 && (b === 4 || b === 12)) {
+    dClap(t0);
+  }
+  if (L >= 12 && BASS[s]) {
+    d808(t0, BASS[s][0], BASS[s][1]);
+  }
   if (L >= 25) {
-    if (b === 2 || b === 14) dHat(t0, true);
-    if (s === 30 || s === 31) dHat(t0 + STEP / 2, false);
+    if (b === 2 || b === 14) {
+      dHat(t0, true);
+    }
+    if (s === 30 || s === 31) {
+      dHat(t0 + STEP / 2, false);
+    }
   }
 }
 const SW_AT = 30; // anillo donde la música se vuelve Synthwave
@@ -505,28 +560,44 @@ function stepAndromeda(s, t0) {
     L = lv(),
     fast = andFast || (state !== 'play' && L >= 31);
   // el mismo carácter del final desde el principio, más suave, y creciendo
-  if (s % 32 === 0)
+  if (s % 32 === 0) {
     pad(t0, [hzA(root - 12), ...tones.map(x => hzA(root + x))], 32 * STEP, 0.03, 700);
+  }
   if (fast || b % 2 === 0) {
     // campanas corriendo en corcheas (al doble en el final)
     const idx = (b + bar * 3) % PHRY.length;
     fmBell(t0, hzA(root + PHRY[idx] + (fast ? 24 : 12)), fast ? 0.05 : 0.045, fast ? 0.45 : 0.55);
   }
-  if (b === 0 || b === 8) reese(t0, hzA(root - 24), 8 * STEP, 0.18); // bajo ondulante desde el inicio
-  if (b === 0 || b === 8) softKick(t0, 0.7); // pulso suave
-  if (b === 4 || b === 12) noiseHit(t0, 0.05, 'bandpass', 3500, 0.14, musicBus); // golpe seco
-  if (L >= 15 && b % 2 === 0) dHat(t0, false); // platillos
+  if (b === 0 || b === 8) {
+    reese(t0, hzA(root - 24), 8 * STEP, 0.18);
+  } // bajo ondulante desde el inicio
+  if (b === 0 || b === 8) {
+    softKick(t0, 0.7);
+  } // pulso suave
+  if (b === 4 || b === 12) {
+    noiseHit(t0, 0.05, 'bandpass', 3500, 0.14, musicBus);
+  } // golpe seco
+  if (L >= 15 && b % 2 === 0) {
+    dHat(t0, false);
+  } // platillos
   if (L >= 28) {
-    if (b % 4 === 0) dKick(t0);
-    if (b === 4 || b === 12) dClap(t0);
+    if (b % 4 === 0) {
+      dKick(t0);
+    }
+    if (b === 4 || b === 12) {
+      dClap(t0);
+    }
   } // bombo constante
   if (fast) {
     dHat(t0, false);
-    if (b === 6 || b === 14) dKick(t0);
+    if (b === 6 || b === 14) {
+      dKick(t0);
+    }
   } // recta final: todo al doble
   const dz = dangerNow();
-  if (dz > 0.45 && (dz > 0.75 || b % 2 === 0))
+  if (dz > 0.45 && (dz > 0.75 || b % 2 === 0)) {
     noiseHit(t0, 0.025, 'highpass', 7500, 0.04 + 0.1 * dz, musicBus);
+  }
 }
 
 // ---------- música de las Nubes de Magallanes: luminosa y aireada ----------
@@ -635,30 +706,51 @@ function stepMagallanes(s, t0) {
     b = s % 16,
     L = lv(),
     fast = andFast || (state !== 'play' && L >= 31);
-  if (s % 32 === 0) choir(t0, [hzM(root - 12), ...tones.map(x => hzM(root + x))], 32 * STEP, 0.05); // coro lejano
+  if (s % 32 === 0) {
+    choir(t0, [hzM(root - 12), ...tones.map(x => hzM(root + x))], 32 * STEP, 0.05);
+  } // coro lejano
   if (fast || b % 2 === 0) {
     // kalimba en corcheas (al doble en el final)
     const pat = [0, 2, 4, 7, 5, 4, 2, 1],
       idx = (pat[((b / (fast ? 1 : 2)) | 0) % 8] + bar) % LYD.length;
     kalimba(t0, hzM(root + LYD[idx] + (fast ? 24 : 12)), fast ? 0.07 : 0.08, fast ? 0.3 : 0.5);
   }
-  if (b % 4 === 2) bounceBass(t0, hzM(root - 12), 0.16); // bajo saltarín a contratiempo
-  if (b === 0 || b === 8) softKick(t0, 0.7);
-  if (b % 2 === 1) noiseHit(t0, 0.035, 'bandpass', 6500, 0.05, musicBus); // shaker
-  if (b === 4 || b === 12) noiseHit(t0, 0.05, 'bandpass', 2800, 0.14, musicBus);
-  if (L >= 15 && b % 2 === 0) dHat(t0, false);
+  if (b % 4 === 2) {
+    bounceBass(t0, hzM(root - 12), 0.16);
+  } // bajo saltarín a contratiempo
+  if (b === 0 || b === 8) {
+    softKick(t0, 0.7);
+  }
+  if (b % 2 === 1) {
+    noiseHit(t0, 0.035, 'bandpass', 6500, 0.05, musicBus);
+  } // shaker
+  if (b === 4 || b === 12) {
+    noiseHit(t0, 0.05, 'bandpass', 2800, 0.14, musicBus);
+  }
+  if (L >= 15 && b % 2 === 0) {
+    dHat(t0, false);
+  }
   if (L >= 28) {
-    if (b % 4 === 0) dKick(t0);
-    if (b === 4 || b === 12) dClap(t0);
+    if (b % 4 === 0) {
+      dKick(t0);
+    }
+    if (b === 4 || b === 12) {
+      dClap(t0);
+    }
   }
   if (fast) {
     dHat(t0, false);
-    if (b === 6 || b === 14) dKick(t0);
-    if (b === 2 || b === 10) bounceBass(t0, hzM(root), 0.12);
+    if (b === 6 || b === 14) {
+      dKick(t0);
+    }
+    if (b === 2 || b === 10) {
+      bounceBass(t0, hzM(root), 0.12);
+    }
   }
   const dz = dangerNow();
-  if (dz > 0.45 && (dz > 0.75 || b % 2 === 0))
+  if (dz > 0.45 && (dz > 0.75 || b % 2 === 0)) {
     noiseHit(t0, 0.025, 'highpass', 7500, 0.04 + 0.1 * dz, musicBus);
+  }
 }
 
 // ---------- música de los niveles 4 a 8: misma energía, identidad propia ----------
@@ -795,39 +887,73 @@ function stepGalaxy(s, t0, c) {
   const hz = sm => (c.root / 2) * Math.pow(2, sm / 12);
   if (s % 32 === 0) {
     const ch = [hz(root - 12), ...tones.map(x => hz(root + x))];
-    if (c.pad === 'choir') choir(t0, ch, 32 * STEP, 0.045);
-    else pad(t0, ch, 32 * STEP, 0.03, 700);
+    if (c.pad === 'choir') {
+      choir(t0, ch, 32 * STEP, 0.045);
+    } else {
+      pad(t0, ch, 32 * STEP, 0.03, 700);
+    }
   }
   if (fast || c.pat.includes(b)) {
     const idx = ((fast ? b : c.pat.indexOf(b)) + bar * 2) % c.scale.length,
       f = hz(root + c.scale[idx] + (fast ? 24 : 12));
-    if (c.lead === 'bell') fmBell(t0, f, fast ? 0.045 : 0.06, fast ? 0.4 : 0.8);
-    else if (c.lead === 'kal') kalimba(t0, f, fast ? 0.07 : 0.08, fast ? 0.3 : 0.5);
-    else pluckSaw(t0, f, fast ? 0.045 : 0.06, fast ? 0.18 : 0.3);
+    if (c.lead === 'bell') {
+      fmBell(t0, f, fast ? 0.045 : 0.06, fast ? 0.4 : 0.8);
+    } else if (c.lead === 'kal') {
+      kalimba(t0, f, fast ? 0.07 : 0.08, fast ? 0.3 : 0.5);
+    } else {
+      pluckSaw(t0, f, fast ? 0.045 : 0.06, fast ? 0.18 : 0.3);
+    }
   }
-  if (c.bass === 'reese' && (b === 0 || b === 8)) reese(t0, hz(root - 24), 8 * STEP, 0.18);
-  if (c.bass === 'bounce' && b % 4 === 2) bounceBass(t0, hz(root - 12), 0.16);
-  if (c.bass === 'sub' && (b === 0 || b === 6 || b === 10)) subPulse(t0, hz(root - 24), 0.3);
-  if (b === 0 || b === 8) softKick(t0, 0.7);
+  if (c.bass === 'reese' && (b === 0 || b === 8)) {
+    reese(t0, hz(root - 24), 8 * STEP, 0.18);
+  }
+  if (c.bass === 'bounce' && b % 4 === 2) {
+    bounceBass(t0, hz(root - 12), 0.16);
+  }
+  if (c.bass === 'sub' && (b === 0 || b === 6 || b === 10)) {
+    subPulse(t0, hz(root - 24), 0.3);
+  }
+  if (b === 0 || b === 8) {
+    softKick(t0, 0.7);
+  }
   if (c.perc === 'tribal') {
-    if (b === 4 || b === 12) tom(t0, 110, 0.3);
-    if (b === 14) tom(t0, 150, 0.22);
+    if (b === 4 || b === 12) {
+      tom(t0, 110, 0.3);
+    }
+    if (b === 14) {
+      tom(t0, 150, 0.22);
+    }
   } else if (c.perc === 'shaker') {
-    if (b % 2 === 1) noiseHit(t0, 0.035, 'bandpass', 6500, 0.05, musicBus);
-    if (b === 4 || b === 12) noiseHit(t0, 0.05, 'bandpass', 2800, 0.14, musicBus);
-  } else if (b === 4 || b === 12) dClap(t0);
-  if (L >= 15 && b % 2 === 0) dHat(t0, false);
+    if (b % 2 === 1) {
+      noiseHit(t0, 0.035, 'bandpass', 6500, 0.05, musicBus);
+    }
+    if (b === 4 || b === 12) {
+      noiseHit(t0, 0.05, 'bandpass', 2800, 0.14, musicBus);
+    }
+  } else if (b === 4 || b === 12) {
+    dClap(t0);
+  }
+  if (L >= 15 && b % 2 === 0) {
+    dHat(t0, false);
+  }
   if (L >= 28) {
-    if (b % 4 === 0) dKick(t0);
-    if ((b === 4 || b === 12) && c.perc !== 'club') dClap(t0);
+    if (b % 4 === 0) {
+      dKick(t0);
+    }
+    if ((b === 4 || b === 12) && c.perc !== 'club') {
+      dClap(t0);
+    }
   }
   if (fast) {
     dHat(t0, false);
-    if (b === 6 || b === 14) dKick(t0);
+    if (b === 6 || b === 14) {
+      dKick(t0);
+    }
   }
   const dz = dangerNow();
-  if (dz > 0.45 && (dz > 0.75 || b % 2 === 0))
+  if (dz > 0.45 && (dz > 0.75 || b % 2 === 0)) {
     noiseHit(t0, 0.025, 'highpass', 7500, 0.04 + 0.1 * dz, musicBus);
+  }
 }
 
 function organ(t0, freqs, dur, gain, bright) {
@@ -850,7 +976,7 @@ function organ(t0, freqs, dur, gain, bright) {
   g.connect(musicBus);
   g.connect(echoBus());
   // tubos del órgano: fundamental y armónicos (8', 4', 2 2/3', 2')
-  for (const f of freqs)
+  for (const f of freqs) {
     for (const [m, a] of [
       [1, 1],
       [2, 0.5],
@@ -868,6 +994,7 @@ function organ(t0, freqs, dur, gain, bright) {
       o.start(t0);
       o.stop(t0 + dur + 0.7);
     }
+  }
   trem.start(t0);
   trem.stop(t0 + dur + 0.7);
 }
