@@ -17845,7 +17845,9 @@ function hasNewPlanet() {
   }
 }
 function renderHome() {
-  if (!elHome) return;
+  if (!elHome) {
+    return;
+  }
   elHome.innerHTML =
     '<div class="playrow"><button type="button" class="plan' +
     (hasNewPlanet() ? ' new' : '') +
@@ -17871,14 +17873,18 @@ function renderHome() {
     '</b></button>' +
     '<button type="button" class="opt danger" data-h="reset"><span>Borrar progreso</span><b>Empezar de cero</b></button>' +
     '<button type="button" class="opt" data-h="close" style="justify-content:center"><span>Cerrar</span></button></div>';
-  if (!elHome.querySelectorAll) return;
+  if (!elHome.querySelectorAll) {
+    return;
+  }
   elHome
     .querySelectorAll('[data-h]')
     .forEach(b => b.addEventListener('click', () => homeAction(b.dataset.h, b)));
 }
 function homeAction(a, b) {
   initAudio();
-  if (AC && AC.state === 'suspended') AC.resume();
+  if (AC && AC.state === 'suspended') {
+    AC.resume();
+  }
   applyMute();
   const sheet = elHome.querySelector ? elHome.querySelector('.sheet') : null;
   if (a === 'play') {
@@ -17898,7 +17904,9 @@ function homeAction(a, b) {
     tutAfterStory = true;
     startIntro();
   } else if (a === 'cfg') {
-    if (sheet) sheet.classList.add('on');
+    if (sheet) {
+      sheet.classList.add('on');
+    }
   } else if (a === 'planets') {
     openPlanets();
   } else if (a === 'missions') {
@@ -17914,16 +17922,22 @@ function homeAction(a, b) {
     }
     medPrev = 0;
     const v = b.querySelector('b');
-    if (v) v.textContent = MEDIR ? 'Sí' : 'No';
+    if (v) {
+      v.textContent = MEDIR ? 'Sí' : 'No';
+    }
   } else if (a === 'allp') {
     allPlanets = !allPlanets;
     try {
       localStorage.setItem('orbita_p1_todos', allPlanets ? '1' : '0');
     } catch (e) {}
     const v = b.querySelector('b');
-    if (v) v.textContent = allPlanets ? 'Sí' : 'No';
+    if (v) {
+      v.textContent = allPlanets ? 'Sí' : 'No';
+    }
   } else if (a === 'close') {
-    if (sheet) sheet.classList.remove('on');
+    if (sheet) {
+      sheet.classList.remove('on');
+    }
   } else if (a === 'snd') {
     muted = !muted;
     try {
@@ -17931,7 +17945,9 @@ function homeAction(a, b) {
     } catch (e) {}
     applyMute();
     const v = b.querySelector('b');
-    if (v) v.textContent = muted ? 'Apagado' : 'Encendido';
+    if (v) {
+      v.textContent = muted ? 'Apagado' : 'Encendido';
+    }
   } else if (a === 'reset') {
     const v = b.querySelector('b');
     if (!b.dataset.sure) {
@@ -17947,12 +17963,18 @@ function homeAction(a, b) {
   }
 }
 function hideHome(keepAmb) {
-  if (elHome) elHome.classList.add('off');
-  if (!keepAmb) homeAmbience(false);
+  if (elHome) {
+    elHome.classList.add('off');
+  }
+  if (!keepAmb) {
+    homeAmbience(false);
+  }
   showStop(0.3);
 }
 function openHome(withIntro) {
-  if (elLv) elLv.classList.add('off');
+  if (elLv) {
+    elLv.classList.add('off');
+  }
   tutorial = false;
   pendingTut = false;
   introDrone(false);
@@ -17963,10 +17985,15 @@ function openHome(withIntro) {
   logoT0 = withIntro ? HOME_BIG + 0.45 : -99;
   hsEvents = {};
   hsFlare = hsBoost = hsShake = hsJet = hsRipple = 0;
-  if (withIntro) showStart();
+  if (withIntro) {
+    showStart();
+  }
   if (elHome) {
-    if (homeT >= HOME_IN) elHome.classList.remove('off');
-    else elHome.classList.add('off');
+    if (homeT >= HOME_IN) {
+      elHome.classList.remove('off');
+    } else {
+      elHome.classList.add('off');
+    }
   }
   elPanel.classList.add('hide');
   elHud.style.opacity = 0;
