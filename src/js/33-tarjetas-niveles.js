@@ -147,7 +147,9 @@ void main(){
   gl_FragColor = vec4(max(col, 0.), 1.);
 }`;
   function init() {
-    if (gl || failed) return !!gl;
+    if (gl || failed) {
+      return !!gl;
+    }
     try {
       cv = document.createElement('canvas');
       gl =
@@ -201,7 +203,9 @@ void main(){
     }
   }
   function soft(w, h, ka, kb, mix, ca, cb, scale) {
-    if (!init()) return null;
+    if (!init()) {
+      return null;
+    }
     const q = Math.min(1, 520 / Math.max(w, h)),
       cw = Math.max(2, Math.round(w * q)),
       ch = Math.max(2, Math.round(h * q));
@@ -237,10 +241,12 @@ function lvRand(seed) {
   return () => (s = (s * 16807) % 2147483647) / 2147483647;
 }
 function lvPrep() {
-  if (lvStars) return;
+  if (lvStars) {
+    return;
+  }
   const R = lvRand(9123);
   lvStars = [];
-  for (let i = 0; i < 520; i++)
+  for (let i = 0; i < 520; i++) {
     lvStars.push({
       x: R(),
       y: R(),
@@ -250,6 +256,7 @@ function lvPrep() {
       d: R() < 0.7 ? 0.3 : 1,
       c: R() < 0.5 ? '#ffffff' : R() < 0.5 ? '#cfe0ff' : '#ffe8cc',
     });
+  }
   const g = () => (R() + R() + R() - 1.5) / 1.5;
   lvSets = {
     1: Array.from({ length: 320 }, (_, i) =>
@@ -324,7 +331,9 @@ function lvSpike(x, y, r, a) {
 function lvKepler(a, e, w, P, M0) {
   const M = (2 * Math.PI * t) / P + M0;
   let E = M;
-  for (let i = 0; i < 6; i++) E -= (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+  for (let i = 0; i < 6; i++) {
+    E -= (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+  }
   const r = a * (1 - e * Math.cos(E)),
     nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
   return [Math.cos(nu + w) * r, Math.sin(nu + w) * r];
@@ -340,7 +349,9 @@ const LV_PL = [
 ];
 function lvCrisp(k, cx, cy, S, alpha) {
   lvA = alpha;
-  if (alpha < 0.01) return;
+  if (alpha < 0.01) {
+    return;
+  }
   ctx.save();
   if (k === 0) {
     // órbitas
@@ -499,9 +510,13 @@ function lvCrisp(k, cx, cy, S, alpha) {
 // escala de cada galaxia dentro de su zona: Sistema solar, Magallanes, Andrómeda, Centaurus A, Remolino, Sombrero, M87, Sagitario A*
 const LV_SCALE = [1.0, 0.9, 1.22, 0.95, 0.88, 1.12, 1.6, 1.02];
 function drawLevelsBG() {
-  if (!elLv || !elLv.querySelector) return;
+  if (!elLv || !elLv.querySelector) {
+    return;
+  }
   const track = elLv.querySelector('.track');
-  if (!track) return;
+  if (!track) {
+    return;
+  }
   lvPrep();
   const pos = track.scrollLeft / Math.max(1, track.clientWidth);
   const ka = Math.max(0, Math.min(LEVELS.length - 1, Math.floor(pos))),
@@ -509,7 +524,9 @@ function drawLevelsBG() {
     mix = Math.min(1, Math.max(0, pos - ka));
   const cen = i => {
     const a = lvArts[i];
-    if (!a || !a.getBoundingClientRect) return [W / 2 - (i - pos) * 0, H * 0.3];
+    if (!a || !a.getBoundingClientRect) {
+      return [W / 2 - (i - pos) * 0, H * 0.3];
+    }
     const r = a.getBoundingClientRect();
     return [r.left + r.width / 2, r.top + r.height / 2];
   };
@@ -540,8 +557,12 @@ function drawLevelsBG() {
     ctx.fillStyle = s.c;
     ctx.fillRect(x, y, s.s, s.s);
   }
-  if (mix < 0.999) lvCrisp(ka, A[0], A[1], scl(ka) * zA, 1 - mix);
-  if (mix > 0.001) lvCrisp(kb, B[0], B[1], scl(kb) * zB, mix);
+  if (mix < 0.999) {
+    lvCrisp(ka, A[0], A[1], scl(ka) * zA, 1 - mix);
+  }
+  if (mix > 0.001) {
+    lvCrisp(kb, B[0], B[1], scl(kb) * zB, mix);
+  }
   ctx.restore();
   elLv.classList.toggle('live', !!soft);
 }
