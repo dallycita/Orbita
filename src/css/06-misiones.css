@@ -1,202 +1,1349 @@
 /* misiones, logros y polvo estelar */
 /* ---------- Misiones ---------- */
-#missions{position:absolute;inset:0;z-index:6;overflow:hidden;color:var(--fg);}
-#missions::before{content:'';position:absolute;inset:0;background:rgba(5,6,12,.18);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);animation:misFade .35s ease-out both;}
-#missions .mpanel{position:absolute;left:0;right:0;bottom:0;top:calc(max(3vh,18px) + 62px);border-radius:28px 28px 0 0;background:rgba(6,8,16,.38);border-top:1px solid rgba(236,230,216,.18);-webkit-backdrop-filter:blur(9px) saturate(1.15);backdrop-filter:blur(9px) saturate(1.15);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;animation:misUp .45s cubic-bezier(.2,.8,.3,1) both;}
-#missions.out .mpanel{animation:misDown .3s ease-in both;}
-#missions.out::before{animation:misFade .3s ease-in reverse both;}
-#missions .back,#missions .mtop,#missions .mwal{animation:misFade .4s ease-out both;}
-#missions.off{display:none;}
-#missions .back{position:absolute;top:max(3vh,18px);left:18px;width:48px;height:48px;background:none;border:0;color:var(--fg);display:grid;place-items:center;cursor:pointer;z-index:2;}
-#missions .mtop{position:absolute;left:0;right:0;top:max(3vh,18px);height:48px;line-height:48px;text-align:center;font:400 13px 'Unbounded',system-ui,sans-serif;letter-spacing:.22em;color:rgba(236,230,216,.66);pointer-events:none;}
-#missions .mwal{position:absolute;right:18px;top:calc(max(3vh,18px) + 4px);display:flex;flex-direction:column;align-items:flex-end;gap:6px;z-index:2;}
-#missions .mwal .s{display:flex;align-items:center;gap:7px;color:#ffd36b;font:500 14px 'Unbounded',system-ui,sans-serif;letter-spacing:.04em;text-shadow:0 0 12px rgba(255,211,107,.35);}
-#missions .mwal .s b{font-weight:500;}
-#missions .mwal .s i{font-style:normal;font-size:11px;color:rgba(236,230,216,.45);text-shadow:none;}
-#missions .mwal .st{width:13px;height:13px;fill:#ffd36b;filter:drop-shadow(0 0 4px rgba(255,211,107,.6));}
-#missions .mwal .c{display:flex;align-items:center;gap:6px;color:#9ff0e4;font:500 12.5px 'Unbounded',system-ui,sans-serif;letter-spacing:.04em;text-shadow:0 0 12px rgba(63,199,184,.35);}
-#missions .mwal .c b{font-weight:500;}
-#missions .mwal .c.pop{animation:wpop .45s ease-out;}
-#missions .cr{width:13px;height:13px;flex:none;}
-#missions .mwrap{max-width:440px;margin:0 auto;padding:22px 28px 56px;}
-#missions .mtabs{display:flex;justify-content:center;gap:52px;border-bottom:1px solid rgba(236,230,216,.08);}
-#missions .mtabs button{position:relative;padding:0 0 12px;background:none;border:0;cursor:pointer;font:400 10.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.26em;text-transform:uppercase;color:rgba(236,230,216,.4);}
-#missions .mtabs button.on{color:#ece6d8;}
-#missions .mtabs button.on::after{content:'';position:absolute;left:15%;right:15%;bottom:-1px;height:2px;border-radius:2px;background:#ff8a3d;box-shadow:0 0 10px #ff8a3d;}
-#missions .mtabs i{display:inline-block;margin-left:7px;width:5px;height:5px;border-radius:50%;background:#ff8a3d;vertical-align:2px;}
-#missions .msub{margin-top:14px;text-align:center;font:400 10.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:rgba(236,230,216,.45);}
-#missions .mdeco{display:flex;align-items:center;gap:10px;font:400 10.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:#9ff0e4;}
-#missions .mdeco::before,#missions .mdeco::after{content:'';width:22px;height:1px;background:linear-gradient(90deg,rgba(159,240,228,0),rgba(159,240,228,.55));}
-#missions .mdeco::after{transform:scaleX(-1);}
-#missions .mamt{margin-top:14px;display:flex;align-items:center;gap:12px;font:600 44px/1 'Unbounded',system-ui,sans-serif;color:#ece6d8;}
-#missions .mamt .cr{width:30px;height:30px;filter:drop-shadow(0 0 10px rgba(63,199,184,.55));}
-#missions .mpips{margin-top:18px;display:flex;gap:6px;}
-#missions .mpips b{width:26px;height:3px;border-radius:3px;background:rgba(236,230,216,.14);}
-#missions .mpips b.on{background:#9ff0e4;box-shadow:0 0 8px rgba(63,199,184,.8);}
-#missions .mhb{margin-top:16px;}
-#missions .mmeta{margin-top:12px;font:400 11px 'Space Mono',ui-monospace,monospace;letter-spacing:.06em;color:rgba(236,230,216,.5);}
-#missions .mlist{border-top:1px solid rgba(236,230,216,.08);}
-#missions .mr{display:flex;align-items:center;gap:14px;padding:20px 0;border-bottom:1px solid rgba(236,230,216,.08);}
-#missions .mr .bd{flex:1;min-width:0;}
-#missions .mr h3{font:500 15px/1.3 'Unbounded',system-ui,sans-serif;color:#ece6d8;}
-#missions .mr p{margin-top:6px;font:400 11px/1.5 'Space Mono',ui-monospace,monospace;color:rgba(236,230,216,.55);}
-#missions .rw{font:500 14px 'Unbounded',system-ui,sans-serif;color:#9ff0e4;letter-spacing:.02em;flex:none;}
-#missions .rw.ok{color:#ece6d8;}
-#missions .rw.dim{color:rgba(236,230,216,.35);}
-#missions .mbar{margin-top:10px;width:120px;height:2px;border-radius:2px;background:rgba(236,230,216,.12);}
-#missions .mbar u{display:block;height:100%;border-radius:2px;background:#ff8a3d;box-shadow:0 0 6px #ff8a3d;}
-#missions .mr.got{opacity:.35;}
-#missions .claim{flex:none;display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border-radius:999px;border:1.5px solid #ff8a3d;cursor:pointer;
-  background:radial-gradient(120% 160% at 50% 135%,rgba(255,120,40,.45),rgba(255,120,40,.05) 55%,rgba(9,11,22,.95) 80%),#0a0c17;box-shadow:0 0 18px rgba(255,120,40,.28);
-  color:#fff4ea;font:500 10px 'Unbounded',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;}
-#missions .claim em{font-style:normal;color:#9ff0e4;letter-spacing:.02em;}
-#missions .mstreak .l{font:400 10.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:rgba(236,230,216,.55);}
-#missions .mstreak .l b{font-weight:400;color:#ece6d8;}
-#missions .dots{display:flex;align-items:center;gap:9px;}
-#missions .dots b{width:7px;height:7px;border-radius:50%;background:rgba(236,230,216,.16);}
-#missions .dots b.on{background:#ff8a3d;box-shadow:0 0 8px #ff8a3d;}
-#missions .dots span{margin-left:6px;font:500 11px 'Unbounded',system-ui,sans-serif;color:#9ff0e4;}
-#missions .mhint{font:400 10px/1.6 'Space Mono',ui-monospace,monospace;color:rgba(236,230,216,.35);text-align:center;max-width:30ch;}
-#missions .mfeat{display:flex;flex-direction:column;align-items:center;margin-top:10px;}
-#missions .mplanet{display:block;width:100%;height:190px;}
-#missions .fn{margin-top:4px;text-align:center;max-width:300px;font:600 21px/1.25 'Unbounded',system-ui,sans-serif;}
-#missions .fm{margin-top:14px;display:flex;align-items:center;gap:14px;font:400 10.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.16em;color:rgba(236,230,216,.55);}
-#missions .fm .mbar{margin-top:0;width:90px;}
-#missions .mfact{position:absolute;left:0;right:0;margin:0 auto;bottom:max(4vh,22px);width:min(340px,calc(100vw - 40px));padding:14px 18px;border-radius:16px;background:rgba(10,14,24,.92);border:1px solid rgba(159,240,228,.25);font:400 11px/1.6 'Space Mono',ui-monospace,monospace;color:rgba(236,230,216,.75);text-align:center;animation:plIn .5s ease-out both;transition:opacity .6s;z-index:3;}
-#missions .mfact b{display:block;margin-bottom:4px;font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:#9ff0e4;}
-#missions .mfact.out{opacity:0;}
-@media (max-width:380px){ #missions .mwrap{padding-left:20px;padding-right:20px;} #missions .mr h3{font-size:13.5px;} #missions .claim{padding:10px 12px;letter-spacing:.14em;} }
-#missions .mnew{margin-top:16px;text-align:center;font:400 10.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.12em;color:rgba(236,230,216,.45);}
-#missions .mnew .mtime{color:rgba(236,230,216,.75);}
-#missions .mlist{margin-top:18px;}
-#missions .mbonus{justify-content:space-between;}
-#missions .mbonus .mdeco{justify-content:flex-start;}
-#missions .mbonus .mdeco::before{display:none;}
-#missions .mbonus .mamt{margin-top:8px;gap:8px;font-size:22px;}
-#missions .mbonus .mamt .cr{width:18px;height:18px;}
-#missions .mbonus .mpips{margin-top:0;}
-#missions .mbonus.got{opacity:.4;}
-#missions .fd{margin-top:8px;font:400 11px 'Space Mono',ui-monospace,monospace;color:rgba(236,230,216,.55);text-align:center;}
-#missions .mgrab{width:38px;height:4px;border-radius:4px;background:rgba(236,230,216,.22);margin:10px auto 0;}
-#missions .mr.flash,#missions .mbonus.flash,#missions .mfeat.flash{animation:misFlash .9s ease-out;}
-#missions .mfly{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;z-index:9;pointer-events:none;filter:drop-shadow(0 0 6px rgba(63,199,184,.9));}
-#missions .mfly svg{width:100%;height:100%;display:block;}
-#misping{position:fixed;top:calc(max(3vh,18px) + 5px);right:max(20px, env(safe-area-inset-right));width:34px;height:34px;z-index:8;pointer-events:none;opacity:0;}
-#misping svg{width:100%;height:100%;overflow:visible;}
-#misping .lit{filter:drop-shadow(0 0 5px #ff8a3d);}
-#misping.go{animation:misPing 1.9s ease-out both;}
+#missions {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  overflow: hidden;
+  color: var(--fg);
+}
+#missions::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 6, 12, 0.18);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  animation: misFade 0.35s ease-out both;
+}
+#missions .mpanel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: calc(max(3vh, 18px) + 62px);
+  border-radius: 28px 28px 0 0;
+  background: rgba(6, 8, 16, 0.38);
+  border-top: 1px solid rgba(236, 230, 216, 0.18);
+  -webkit-backdrop-filter: blur(9px) saturate(1.15);
+  backdrop-filter: blur(9px) saturate(1.15);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  animation: misUp 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+#missions.out .mpanel {
+  animation: misDown 0.3s ease-in both;
+}
+#missions.out::before {
+  animation: misFade 0.3s ease-in reverse both;
+}
+#missions .back,
+#missions .mtop,
+#missions .mwal {
+  animation: misFade 0.4s ease-out both;
+}
+#missions.off {
+  display: none;
+}
+#missions .back {
+  position: absolute;
+  top: max(3vh, 18px);
+  left: 18px;
+  width: 48px;
+  height: 48px;
+  background: none;
+  border: 0;
+  color: var(--fg);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 2;
+}
+#missions .mtop {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: max(3vh, 18px);
+  height: 48px;
+  line-height: 48px;
+  text-align: center;
+  font:
+    400 13px 'Unbounded',
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.22em;
+  color: rgba(236, 230, 216, 0.66);
+  pointer-events: none;
+}
+#missions .mwal {
+  position: absolute;
+  right: 18px;
+  top: calc(max(3vh, 18px) + 4px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  z-index: 2;
+}
+#missions .mwal .s {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #ffd36b;
+  font:
+    500 14px 'Unbounded',
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 12px rgba(255, 211, 107, 0.35);
+}
+#missions .mwal .s b {
+  font-weight: 500;
+}
+#missions .mwal .s i {
+  font-style: normal;
+  font-size: 11px;
+  color: rgba(236, 230, 216, 0.45);
+  text-shadow: none;
+}
+#missions .mwal .st {
+  width: 13px;
+  height: 13px;
+  fill: #ffd36b;
+  filter: drop-shadow(0 0 4px rgba(255, 211, 107, 0.6));
+}
+#missions .mwal .c {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #9ff0e4;
+  font:
+    500 12.5px 'Unbounded',
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 12px rgba(63, 199, 184, 0.35);
+}
+#missions .mwal .c b {
+  font-weight: 500;
+}
+#missions .mwal .c.pop {
+  animation: wpop 0.45s ease-out;
+}
+#missions .cr {
+  width: 13px;
+  height: 13px;
+  flex: none;
+}
+#missions .mwrap {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 22px 28px 56px;
+}
+#missions .mtabs {
+  display: flex;
+  justify-content: center;
+  gap: 52px;
+  border-bottom: 1px solid rgba(236, 230, 216, 0.08);
+}
+#missions .mtabs button {
+  position: relative;
+  padding: 0 0 12px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font:
+    400 10.5px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(236, 230, 216, 0.4);
+}
+#missions .mtabs button.on {
+  color: #ece6d8;
+}
+#missions .mtabs button.on::after {
+  content: '';
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: #ff8a3d;
+  box-shadow: 0 0 10px #ff8a3d;
+}
+#missions .mtabs i {
+  display: inline-block;
+  margin-left: 7px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ff8a3d;
+  vertical-align: 2px;
+}
+#missions .msub {
+  margin-top: 14px;
+  text-align: center;
+  font:
+    400 10.5px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(236, 230, 216, 0.45);
+}
+#missions .mdeco {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font:
+    400 10.5px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #9ff0e4;
+}
+#missions .mdeco::before,
+#missions .mdeco::after {
+  content: '';
+  width: 22px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(159, 240, 228, 0), rgba(159, 240, 228, 0.55));
+}
+#missions .mdeco::after {
+  transform: scaleX(-1);
+}
+#missions .mamt {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font:
+    600 44px/1 'Unbounded',
+    system-ui,
+    sans-serif;
+  color: #ece6d8;
+}
+#missions .mamt .cr {
+  width: 30px;
+  height: 30px;
+  filter: drop-shadow(0 0 10px rgba(63, 199, 184, 0.55));
+}
+#missions .mpips {
+  margin-top: 18px;
+  display: flex;
+  gap: 6px;
+}
+#missions .mpips b {
+  width: 26px;
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(236, 230, 216, 0.14);
+}
+#missions .mpips b.on {
+  background: #9ff0e4;
+  box-shadow: 0 0 8px rgba(63, 199, 184, 0.8);
+}
+#missions .mhb {
+  margin-top: 16px;
+}
+#missions .mmeta {
+  margin-top: 12px;
+  font:
+    400 11px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.06em;
+  color: rgba(236, 230, 216, 0.5);
+}
+#missions .mlist {
+  border-top: 1px solid rgba(236, 230, 216, 0.08);
+}
+#missions .mr {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(236, 230, 216, 0.08);
+}
+#missions .mr .bd {
+  flex: 1;
+  min-width: 0;
+}
+#missions .mr h3 {
+  font:
+    500 15px/1.3 'Unbounded',
+    system-ui,
+    sans-serif;
+  color: #ece6d8;
+}
+#missions .mr p {
+  margin-top: 6px;
+  font:
+    400 11px/1.5 'Space Mono',
+    ui-monospace,
+    monospace;
+  color: rgba(236, 230, 216, 0.55);
+}
+#missions .rw {
+  font:
+    500 14px 'Unbounded',
+    system-ui,
+    sans-serif;
+  color: #9ff0e4;
+  letter-spacing: 0.02em;
+  flex: none;
+}
+#missions .rw.ok {
+  color: #ece6d8;
+}
+#missions .rw.dim {
+  color: rgba(236, 230, 216, 0.35);
+}
+#missions .mbar {
+  margin-top: 10px;
+  width: 120px;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(236, 230, 216, 0.12);
+}
+#missions .mbar u {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: #ff8a3d;
+  box-shadow: 0 0 6px #ff8a3d;
+}
+#missions .mr.got {
+  opacity: 0.35;
+}
+#missions .claim {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 16px;
+  border-radius: 999px;
+  border: 1.5px solid #ff8a3d;
+  cursor: pointer;
+  background:
+    radial-gradient(
+      120% 160% at 50% 135%,
+      rgba(255, 120, 40, 0.45),
+      rgba(255, 120, 40, 0.05) 55%,
+      rgba(9, 11, 22, 0.95) 80%
+    ),
+    #0a0c17;
+  box-shadow: 0 0 18px rgba(255, 120, 40, 0.28);
+  color: #fff4ea;
+  font:
+    500 10px 'Unbounded',
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+#missions .claim em {
+  font-style: normal;
+  color: #9ff0e4;
+  letter-spacing: 0.02em;
+}
+#missions .mstreak .l {
+  font:
+    400 10.5px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(236, 230, 216, 0.55);
+}
+#missions .mstreak .l b {
+  font-weight: 400;
+  color: #ece6d8;
+}
+#missions .dots {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+#missions .dots b {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(236, 230, 216, 0.16);
+}
+#missions .dots b.on {
+  background: #ff8a3d;
+  box-shadow: 0 0 8px #ff8a3d;
+}
+#missions .dots span {
+  margin-left: 6px;
+  font:
+    500 11px 'Unbounded',
+    system-ui,
+    sans-serif;
+  color: #9ff0e4;
+}
+#missions .mhint {
+  font:
+    400 10px/1.6 'Space Mono',
+    ui-monospace,
+    monospace;
+  color: rgba(236, 230, 216, 0.35);
+  text-align: center;
+  max-width: 30ch;
+}
+#missions .mfeat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+}
+#missions .mplanet {
+  display: block;
+  width: 100%;
+  height: 190px;
+}
+#missions .fn {
+  margin-top: 4px;
+  text-align: center;
+  max-width: 300px;
+  font:
+    600 21px/1.25 'Unbounded',
+    system-ui,
+    sans-serif;
+}
+#missions .fm {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font:
+    400 10.5px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.16em;
+  color: rgba(236, 230, 216, 0.55);
+}
+#missions .fm .mbar {
+  margin-top: 0;
+  width: 90px;
+}
+#missions .mfact {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  bottom: max(4vh, 22px);
+  width: min(340px, calc(100vw - 40px));
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: rgba(10, 14, 24, 0.92);
+  border: 1px solid rgba(159, 240, 228, 0.25);
+  font:
+    400 11px/1.6 'Space Mono',
+    ui-monospace,
+    monospace;
+  color: rgba(236, 230, 216, 0.75);
+  text-align: center;
+  animation: plIn 0.5s ease-out both;
+  transition: opacity 0.6s;
+  z-index: 3;
+}
+#missions .mfact b {
+  display: block;
+  margin-bottom: 4px;
+  font:
+    400 10px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #9ff0e4;
+}
+#missions .mfact.out {
+  opacity: 0;
+}
+@media (max-width: 380px) {
+  #missions .mwrap {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  #missions .mr h3 {
+    font-size: 13.5px;
+  }
+  #missions .claim {
+    padding: 10px 12px;
+    letter-spacing: 0.14em;
+  }
+}
+#missions .mnew {
+  margin-top: 16px;
+  text-align: center;
+  font:
+    400 10.5px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.12em;
+  color: rgba(236, 230, 216, 0.45);
+}
+#missions .mnew .mtime {
+  color: rgba(236, 230, 216, 0.75);
+}
+#missions .mlist {
+  margin-top: 18px;
+}
+#missions .mbonus {
+  justify-content: space-between;
+}
+#missions .mbonus .mdeco {
+  justify-content: flex-start;
+}
+#missions .mbonus .mdeco::before {
+  display: none;
+}
+#missions .mbonus .mamt {
+  margin-top: 8px;
+  gap: 8px;
+  font-size: 22px;
+}
+#missions .mbonus .mamt .cr {
+  width: 18px;
+  height: 18px;
+}
+#missions .mbonus .mpips {
+  margin-top: 0;
+}
+#missions .mbonus.got {
+  opacity: 0.4;
+}
+#missions .fd {
+  margin-top: 8px;
+  font:
+    400 11px 'Space Mono',
+    ui-monospace,
+    monospace;
+  color: rgba(236, 230, 216, 0.55);
+  text-align: center;
+}
+#missions .mgrab {
+  width: 38px;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(236, 230, 216, 0.22);
+  margin: 10px auto 0;
+}
+#missions .mr.flash,
+#missions .mbonus.flash,
+#missions .mfeat.flash {
+  animation: misFlash 0.9s ease-out;
+}
+#missions .mfly {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  z-index: 9;
+  pointer-events: none;
+  filter: drop-shadow(0 0 6px rgba(63, 199, 184, 0.9));
+}
+#missions .mfly svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+#misping {
+  position: fixed;
+  top: calc(max(3vh, 18px) + 5px);
+  right: max(20px, env(safe-area-inset-right));
+  width: 34px;
+  height: 34px;
+  z-index: 8;
+  pointer-events: none;
+  opacity: 0;
+}
+#misping svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+#misping .lit {
+  filter: drop-shadow(0 0 5px #ff8a3d);
+}
+#misping.go {
+  animation: misPing 1.9s ease-out both;
+}
 /* Misiones · tarjetas (vuelta al primer diseño, con el estilo del juego) */
-#missions .mhead{display:flex;justify-content:space-between;align-items:center;margin:22px 2px 12px;font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:rgba(236,230,216,.5);}
-#missions .mhead em{font-style:normal;color:#8fd0ff;}
-#missions .mcards{display:flex;flex-direction:column;gap:10px;}
-#missions .mc{position:relative;display:grid;grid-template-columns:46px 1fr auto;gap:14px;align-items:center;padding:14px 14px 14px 12px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border:1px solid rgba(236,230,216,.09);}
-#missions .mc .bd{min-width:0;}
-#missions .mc h3{font:500 13px/1.35 'Unbounded',system-ui,sans-serif;color:#ece6d8;}
-#missions .mc p{margin-top:4px;font:400 10px/1.5 'Space Mono',ui-monospace,monospace;color:rgba(236,230,216,.55);}
-#missions .mic{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,rgba(143,208,255,.16),rgba(143,208,255,.03));border:1px solid rgba(143,208,255,.18);overflow:hidden;}
-#missions .mic svg{width:22px;height:22px;fill:none;stroke:#bfe0ff;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
-#missions .mic img{object-fit:contain;}
-#missions .mc .mbar{margin-top:9px;width:auto;height:auto;background:none;display:flex;align-items:center;gap:9px;}
-#missions .mc .mbar i{flex:1;height:4px;border-radius:4px;background:rgba(236,230,216,.1);overflow:hidden;}
-#missions .mc .mbar u{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#ff5a1f,#ffa155);box-shadow:0 0 8px #ff8a3d;}
-#missions .mc .mbar small{font:400 9.5px 'Space Mono',ui-monospace,monospace;color:rgba(236,230,216,.6);}
-#missions .mc .rw{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:52px;font:500 13px 'Unbounded',system-ui,sans-serif;color:#9ff0e4;}
-#missions .mc .rw span{display:flex;align-items:center;gap:4px;}
-#missions .mc .rw small{font:400 8.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:rgba(236,230,216,.4);}
-#missions .mc.go{border-color:rgba(255,138,61,.55);background:radial-gradient(120% 140% at 50% 140%,rgba(255,120,40,.2),rgba(255,120,40,0) 60%),linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));box-shadow:0 0 22px rgba(255,120,40,.18);}
-#missions .mc.got{opacity:.42;}
-#missions .mc.got .rw{color:#ece6d8;}
-#missions .mc .claim{padding:10px 14px;letter-spacing:.16em;font-size:9.5px;}
-#missions .mpl{display:flex;justify-content:space-between;gap:2px;margin-top:9px;}
-#missions .mpl span{width:18px;height:18px;display:grid;place-items:center;filter:grayscale(1) brightness(.35);}
-#missions .mpl span.on{filter:none;}
-#missions .mpl img,#missions .mpl svg{width:18px;height:18px;object-fit:contain;}
-#missions .mbonus{margin-top:14px;display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:18px;border:1px dashed rgba(255,211,107,.38);background:none;}
-#missions .mbonus .pips{display:flex;gap:6px;}
-#missions .mbonus .pips b{width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(255,211,107,.55);}
-#missions .mbonus .pips b.on{background:#ffd36b;border-color:#ffd36b;box-shadow:0 0 8px #ffd36b;}
-#missions .mbonus p{flex:1;font:400 10px/1.5 'Space Mono',ui-monospace,monospace;color:rgba(236,230,216,.62);}
-#missions .mbonus p b{font-weight:400;color:#ece6d8;}
-#missions .mbonus .rw{display:flex;flex-direction:column;align-items:center;gap:3px;font:500 13px 'Unbounded',system-ui,sans-serif;color:#9ff0e4;}
-#missions .mbonus .rw span{display:flex;align-items:center;gap:4px;}
-#missions .mbonus .rw small{font:400 8.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:rgba(236,230,216,.4);}
-#missions .mbonus .claim{padding:10px 14px;letter-spacing:.16em;font-size:9.5px;}
-#missions .mstreak{display:flex;flex-direction:row;justify-content:space-between;align-items:center;font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:rgba(236,230,216,.5);}
-#missions .mstreak b{font-weight:400;color:#ece6d8;}
-#missions .mstreak .days{display:flex;gap:6px;}
-#missions .mstreak .days b{height:4px;border-radius:3px;background:rgba(236,230,216,.12);}
-#missions .mstreak .days b.on{background:#ff8a3d;box-shadow:0 0 6px #ff8a3d;}
-#missions .mseven{margin-top:18px;display:flex;justify-content:center;align-items:center;gap:6px;font:400 10px 'Space Mono',ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:rgba(236,230,216,.4);}
-#missions .mc.flash,#missions .mbonus.flash{animation:misFlash .9s ease-out;}
-#missions .mwrap{padding-top:18px;}
+#missions .mhead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 22px 2px 12px;
+  font:
+    400 10px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(236, 230, 216, 0.5);
+}
+#missions .mhead em {
+  font-style: normal;
+  color: #8fd0ff;
+}
+#missions .mcards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#missions .mc {
+  position: relative;
+  display: grid;
+  grid-template-columns: 46px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 14px 14px 12px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+  border: 1px solid rgba(236, 230, 216, 0.09);
+}
+#missions .mc .bd {
+  min-width: 0;
+}
+#missions .mc h3 {
+  font:
+    500 13px/1.35 'Unbounded',
+    system-ui,
+    sans-serif;
+  color: #ece6d8;
+}
+#missions .mc p {
+  margin-top: 4px;
+  font:
+    400 10px/1.5 'Space Mono',
+    ui-monospace,
+    monospace;
+  color: rgba(236, 230, 216, 0.55);
+}
+#missions .mic {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(143, 208, 255, 0.16),
+    rgba(143, 208, 255, 0.03)
+  );
+  border: 1px solid rgba(143, 208, 255, 0.18);
+  overflow: hidden;
+}
+#missions .mic svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: #bfe0ff;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#missions .mic img {
+  object-fit: contain;
+}
+#missions .mc .mbar {
+  margin-top: 9px;
+  width: auto;
+  height: auto;
+  background: none;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+#missions .mc .mbar i {
+  flex: 1;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(236, 230, 216, 0.1);
+  overflow: hidden;
+}
+#missions .mc .mbar u {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #ff5a1f, #ffa155);
+  box-shadow: 0 0 8px #ff8a3d;
+}
+#missions .mc .mbar small {
+  font:
+    400 9.5px 'Space Mono',
+    ui-monospace,
+    monospace;
+  color: rgba(236, 230, 216, 0.6);
+}
+#missions .mc .rw {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 52px;
+  font:
+    500 13px 'Unbounded',
+    system-ui,
+    sans-serif;
+  color: #9ff0e4;
+}
+#missions .mc .rw span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+#missions .mc .rw small {
+  font:
+    400 8.5px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(236, 230, 216, 0.4);
+}
+#missions .mc.go {
+  border-color: rgba(255, 138, 61, 0.55);
+  background:
+    radial-gradient(120% 140% at 50% 140%, rgba(255, 120, 40, 0.2), rgba(255, 120, 40, 0) 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+  box-shadow: 0 0 22px rgba(255, 120, 40, 0.18);
+}
+#missions .mc.got {
+  opacity: 0.42;
+}
+#missions .mc.got .rw {
+  color: #ece6d8;
+}
+#missions .mc .claim {
+  padding: 10px 14px;
+  letter-spacing: 0.16em;
+  font-size: 9.5px;
+}
+#missions .mpl {
+  display: flex;
+  justify-content: space-between;
+  gap: 2px;
+  margin-top: 9px;
+}
+#missions .mpl span {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  filter: grayscale(1) brightness(0.35);
+}
+#missions .mpl span.on {
+  filter: none;
+}
+#missions .mpl img,
+#missions .mpl svg {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+#missions .mbonus {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px dashed rgba(255, 211, 107, 0.38);
+  background: none;
+}
+#missions .mbonus .pips {
+  display: flex;
+  gap: 6px;
+}
+#missions .mbonus .pips b {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 211, 107, 0.55);
+}
+#missions .mbonus .pips b.on {
+  background: #ffd36b;
+  border-color: #ffd36b;
+  box-shadow: 0 0 8px #ffd36b;
+}
+#missions .mbonus p {
+  flex: 1;
+  font:
+    400 10px/1.5 'Space Mono',
+    ui-monospace,
+    monospace;
+  color: rgba(236, 230, 216, 0.62);
+}
+#missions .mbonus p b {
+  font-weight: 400;
+  color: #ece6d8;
+}
+#missions .mbonus .rw {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font:
+    500 13px 'Unbounded',
+    system-ui,
+    sans-serif;
+  color: #9ff0e4;
+}
+#missions .mbonus .rw span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+#missions .mbonus .rw small {
+  font:
+    400 8.5px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(236, 230, 216, 0.4);
+}
+#missions .mbonus .claim {
+  padding: 10px 14px;
+  letter-spacing: 0.16em;
+  font-size: 9.5px;
+}
+#missions .mstreak {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  font:
+    400 10px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(236, 230, 216, 0.5);
+}
+#missions .mstreak b {
+  font-weight: 400;
+  color: #ece6d8;
+}
+#missions .mstreak .days {
+  display: flex;
+  gap: 6px;
+}
+#missions .mstreak .days b {
+  height: 4px;
+  border-radius: 3px;
+  background: rgba(236, 230, 216, 0.12);
+}
+#missions .mstreak .days b.on {
+  background: #ff8a3d;
+  box-shadow: 0 0 6px #ff8a3d;
+}
+#missions .mseven {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  font:
+    400 10px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(236, 230, 216, 0.4);
+}
+#missions .mc.flash,
+#missions .mbonus.flash {
+  animation: misFlash 0.9s ease-out;
+}
+#missions .mwrap {
+  padding-top: 18px;
+}
 /* Misiones · rediseño: tarjeta de vidrio destacada (pequeña) + tarjetas */
-#missions .mhero{position:relative;margin-top:20px;display:grid;grid-template-columns:84px 1fr auto;align-items:center;gap:14px;padding:12px 16px 12px 10px;border-radius:20px;
-  background:linear-gradient(135deg,color-mix(in srgb,var(--hc) 9%,transparent),rgba(255,255,255,.02) 70%);border:1px solid color-mix(in srgb,var(--hc) 26%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.05);flex-direction:initial;}
-#missions .mhero .mplanet{width:84px;height:84px;display:block;}
-#missions .mhero .hb{min-width:0;}
-#missions .mhero .hk{display:flex;align-items:center;gap:10px;font:400 9.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--hc);}
-#missions .mhero .hk::after{content:'';width:22px;height:1px;background:linear-gradient(90deg,var(--hc),transparent);opacity:.6;}
-#missions .mhero .ha{margin-top:6px;display:flex;align-items:center;gap:8px;font:600 26px/1 'Unbounded',system-ui,sans-serif;color:#ece6d8;}
-#missions .mhero .ha .cr{width:17px;height:17px;}
-#missions .mhero .hn{margin-top:8px;font:400 9.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.06em;color:rgba(236,230,216,.45);}
-#missions .mhero .hn .mtime{color:rgba(236,230,216,.75);}
-#missions .mhero .ht{margin-top:6px;font:500 14px/1.3 'Unbounded',system-ui,sans-serif;color:#ece6d8;}
-#missions .mhero .mbar{margin-top:9px;display:flex;align-items:center;gap:9px;}
-#missions .mhero .mbar i{flex:1;height:4px;border-radius:4px;background:rgba(236,230,216,.1);overflow:hidden;}
-#missions .mhero .mbar u{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#ff5a1f,#ffa155);box-shadow:0 0 8px #ff8a3d;}
-#missions .mhero .mbar small{font:400 9.5px 'Space Mono',ui-monospace,monospace;color:rgba(236,230,216,.6);}
-#missions .mhero .hseg{display:flex;gap:5px;}
-#missions .mhero .hseg b{width:18px;height:3px;border-radius:3px;background:rgba(236,230,216,.14);}
-#missions .mhero .hseg b.on{background:#9ff0e4;box-shadow:0 0 8px rgba(63,199,184,.8);}
-#missions .mhero .rw{display:flex;flex-direction:column;align-items:center;gap:3px;font:500 13px 'Unbounded',system-ui,sans-serif;color:#9ff0e4;}
-#missions .mhero .rw span{display:flex;align-items:center;gap:4px;}
-#missions .mhero .rw small{font:400 8.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:rgba(236,230,216,.4);}
-#missions .mhero .claim{padding:10px 14px;letter-spacing:.16em;font-size:9.5px;}
-#missions .mhero.flash{animation:misFlash .9s ease-out;}
-#missions .mhead{margin-top:24px;}
-#missions .mic{--mc:#8fd0ff;background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--mc) 16%,transparent),color-mix(in srgb,var(--mc) 3%,transparent));border-color:color-mix(in srgb,var(--mc) 22%,transparent);}
-#missions .mic svg{stroke:color-mix(in srgb,var(--mc) 70%,#fff);}
-#missions .mstreak{margin-top:22px;padding:0 2px;gap:12px;}
-#missions .mstreak .days{flex:1;justify-content:center;}
-#missions .mstreak .days b{width:auto;flex:1;max-width:22px;}
-#missions .mstreak .sev{display:flex;align-items:center;gap:5px;font:500 11px 'Unbounded',system-ui,sans-serif;letter-spacing:.02em;color:#9ff0e4;text-transform:none;}
-@media (max-width:370px){ #missions .mhero{grid-template-columns:68px 1fr auto;} #missions .mhero .mplanet{width:68px;height:68px;} #missions .mhero .ha{font-size:22px;} }
-#missions .mic img{width:44px;height:44px;}
-#missions .mic{background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--mc) 10%,transparent),rgba(5,6,12,.35));}
+#missions .mhero {
+  position: relative;
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: 84px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px 12px 10px;
+  border-radius: 20px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--hc) 9%, transparent),
+    rgba(255, 255, 255, 0.02) 70%
+  );
+  border: 1px solid color-mix(in srgb, var(--hc) 26%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  flex-direction: initial;
+}
+#missions .mhero .mplanet {
+  width: 84px;
+  height: 84px;
+  display: block;
+}
+#missions .mhero .hb {
+  min-width: 0;
+}
+#missions .mhero .hk {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font:
+    400 9.5px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--hc);
+}
+#missions .mhero .hk::after {
+  content: '';
+  width: 22px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--hc), transparent);
+  opacity: 0.6;
+}
+#missions .mhero .ha {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font:
+    600 26px/1 'Unbounded',
+    system-ui,
+    sans-serif;
+  color: #ece6d8;
+}
+#missions .mhero .ha .cr {
+  width: 17px;
+  height: 17px;
+}
+#missions .mhero .hn {
+  margin-top: 8px;
+  font:
+    400 9.5px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.06em;
+  color: rgba(236, 230, 216, 0.45);
+}
+#missions .mhero .hn .mtime {
+  color: rgba(236, 230, 216, 0.75);
+}
+#missions .mhero .ht {
+  margin-top: 6px;
+  font:
+    500 14px/1.3 'Unbounded',
+    system-ui,
+    sans-serif;
+  color: #ece6d8;
+}
+#missions .mhero .mbar {
+  margin-top: 9px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+#missions .mhero .mbar i {
+  flex: 1;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(236, 230, 216, 0.1);
+  overflow: hidden;
+}
+#missions .mhero .mbar u {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #ff5a1f, #ffa155);
+  box-shadow: 0 0 8px #ff8a3d;
+}
+#missions .mhero .mbar small {
+  font:
+    400 9.5px 'Space Mono',
+    ui-monospace,
+    monospace;
+  color: rgba(236, 230, 216, 0.6);
+}
+#missions .mhero .hseg {
+  display: flex;
+  gap: 5px;
+}
+#missions .mhero .hseg b {
+  width: 18px;
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(236, 230, 216, 0.14);
+}
+#missions .mhero .hseg b.on {
+  background: #9ff0e4;
+  box-shadow: 0 0 8px rgba(63, 199, 184, 0.8);
+}
+#missions .mhero .rw {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font:
+    500 13px 'Unbounded',
+    system-ui,
+    sans-serif;
+  color: #9ff0e4;
+}
+#missions .mhero .rw span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+#missions .mhero .rw small {
+  font:
+    400 8.5px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(236, 230, 216, 0.4);
+}
+#missions .mhero .claim {
+  padding: 10px 14px;
+  letter-spacing: 0.16em;
+  font-size: 9.5px;
+}
+#missions .mhero.flash {
+  animation: misFlash 0.9s ease-out;
+}
+#missions .mhead {
+  margin-top: 24px;
+}
+#missions .mic {
+  --mc: #8fd0ff;
+  background: radial-gradient(
+    circle at 35% 30%,
+    color-mix(in srgb, var(--mc) 16%, transparent),
+    color-mix(in srgb, var(--mc) 3%, transparent)
+  );
+  border-color: color-mix(in srgb, var(--mc) 22%, transparent);
+}
+#missions .mic svg {
+  stroke: color-mix(in srgb, var(--mc) 70%, #fff);
+}
+#missions .mstreak {
+  margin-top: 22px;
+  padding: 0 2px;
+  gap: 12px;
+}
+#missions .mstreak .days {
+  flex: 1;
+  justify-content: center;
+}
+#missions .mstreak .days b {
+  width: auto;
+  flex: 1;
+  max-width: 22px;
+}
+#missions .mstreak .sev {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font:
+    500 11px 'Unbounded',
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.02em;
+  color: #9ff0e4;
+  text-transform: none;
+}
+@media (max-width: 370px) {
+  #missions .mhero {
+    grid-template-columns: 68px 1fr auto;
+  }
+  #missions .mhero .mplanet {
+    width: 68px;
+    height: 68px;
+  }
+  #missions .mhero .ha {
+    font-size: 22px;
+  }
+}
+#missions .mic img {
+  width: 44px;
+  height: 44px;
+}
+#missions .mic {
+  background: radial-gradient(
+    circle at 50% 45%,
+    color-mix(in srgb, var(--mc) 10%, transparent),
+    rgba(5, 6, 12, 0.35)
+  );
+}
 /* al cambiar de pestaña: el panel no se mueve, solo el contenido cambia con un fundido corto */
-#missions.still .mpanel,#missions.still::before,#missions.still .back,#missions.still .mtop,#missions.still .mwal{animation:none;}
-#missions .mwrap.swap > :not(.mtabs){animation:misSwap .32s cubic-bezier(.2,.8,.3,1) both;}
-#missions.out.still .mpanel{animation:misDown .3s ease-in both;}
-#missions.out.still::before{animation:misFade .3s ease-in reverse both;}
+#missions.still .mpanel,
+#missions.still::before,
+#missions.still .back,
+#missions.still .mtop,
+#missions.still .mwal {
+  animation: none;
+}
+#missions .mwrap.swap > :not(.mtabs) {
+  animation: misSwap 0.32s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+#missions.out.still .mpanel {
+  animation: misDown 0.3s ease-in both;
+}
+#missions.out.still::before {
+  animation: misFade 0.3s ease-in reverse both;
+}
 /* vista desplegada de un logro */
-#missions [data-open]{cursor:pointer;}
-#missions .mdet{position:absolute;inset:0;z-index:5;display:flex;align-items:flex-end;justify-content:center;}
-#missions .mdbg{position:absolute;inset:0;background:rgba(3,4,10,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);animation:misFade .25s ease-out both;}
-#missions .mdcard{position:relative;width:min(440px,100%);max-height:88%;overflow:auto;padding:4px 28px calc(28px + env(safe-area-inset-bottom));border-radius:28px 28px 0 0;
-  background:linear-gradient(180deg,color-mix(in srgb,var(--hc) 8%,rgba(8,10,20,.92)),rgba(6,8,16,.95) 45%);border-top:1px solid color-mix(in srgb,var(--hc) 35%,transparent);
-  display:flex;flex-direction:column;align-items:center;text-align:center;animation:misUp .4s cubic-bezier(.2,.8,.3,1) both;}
-#missions .mdet.out .mdcard{animation:misDown .24s ease-in both;}
-#missions .mdet.out .mdbg{animation:misFade .24s ease-in reverse both;}
-#missions .mdx{position:absolute;top:14px;right:16px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(236,230,216,.18);background:rgba(255,255,255,.04);color:rgba(236,230,216,.7);font:300 20px/1 'Unbounded',system-ui,sans-serif;cursor:pointer;}
-#missions .mbig{width:100%;height:210px;display:block;margin-top:6px;}
-#missions .mdt{margin-top:4px;font:600 24px/1.2 'Unbounded',system-ui,sans-serif;color:#ece6d8;max-width:300px;}
-#missions .mdd{margin-top:10px;font:400 11px/1.6 'Space Mono',ui-monospace,monospace;color:rgba(236,230,216,.6);}
-#missions .mdprog{margin-top:20px;display:flex;align-items:center;gap:12px;font:400 10.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.12em;color:rgba(236,230,216,.6);}
-#missions .mdprog i{width:120px;height:4px;border-radius:4px;background:rgba(236,230,216,.12);overflow:hidden;}
-#missions .mdprog u{display:block;height:100%;background:linear-gradient(90deg,#ff5a1f,#ffa155);box-shadow:0 0 8px #ff8a3d;}
-#missions .mdprog b{display:flex;align-items:center;gap:5px;font:500 14px 'Unbounded',system-ui,sans-serif;letter-spacing:.02em;color:#9ff0e4;}
-#missions .claim.big{margin-top:22px;padding:15px 34px;font-size:12px;letter-spacing:.2em;}
-#missions .claim.big em{margin-left:4px;}
-#missions .mdok{margin-top:20px;font:400 10.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:#9ff0e4;}
-#missions .mdf{margin-top:24px;width:100%;padding:16px 18px;border-radius:18px;border:1px solid color-mix(in srgb,var(--hc) 22%,transparent);background:color-mix(in srgb,var(--hc) 5%,transparent);text-align:left;}
-#missions .mdk{display:flex;align-items:center;gap:10px;font:400 9.5px 'Space Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--hc);}
-#missions .mdk::after{content:'';flex:1;max-width:30px;height:1px;background:linear-gradient(90deg,var(--hc),transparent);opacity:.6;}
-#missions .mdf p{margin-top:8px;font:400 11px/1.65 'Space Mono',ui-monospace,monospace;color:rgba(236,230,216,.75);}
-#missions .mdcard .mgrab{margin:10px auto 0;}
-@keyframes wpop{40%{transform:scale(1.25)}100%{transform:scale(1)}}
-@keyframes misUp{from{transform:translateY(100%)}to{transform:none}}
-@keyframes misDown{to{transform:translateY(100%)}}
-@keyframes misFade{from{opacity:0}}
-@keyframes misFlash{0%{background:rgba(159,240,228,.28);box-shadow:inset 0 0 0 1px rgba(159,240,228,.6);}100%{background:transparent;box-shadow:none;}}
-@keyframes misPing{0%{opacity:0;transform:translateY(-8px) scale(.7)}15%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0;transform:translateY(-6px)}}
-@keyframes misSwap{from{opacity:0;transform:translateX(var(--sd,0))}to{opacity:1;transform:none}}
+#missions [data-open] {
+  cursor: pointer;
+}
+#missions .mdet {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+#missions .mdbg {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 4, 10, 0.55);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  animation: misFade 0.25s ease-out both;
+}
+#missions .mdcard {
+  position: relative;
+  width: min(440px, 100%);
+  max-height: 88%;
+  overflow: auto;
+  padding: 4px 28px calc(28px + env(safe-area-inset-bottom));
+  border-radius: 28px 28px 0 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--hc) 8%, rgba(8, 10, 20, 0.92)),
+    rgba(6, 8, 16, 0.95) 45%
+  );
+  border-top: 1px solid color-mix(in srgb, var(--hc) 35%, transparent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: misUp 0.4s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+#missions .mdet.out .mdcard {
+  animation: misDown 0.24s ease-in both;
+}
+#missions .mdet.out .mdbg {
+  animation: misFade 0.24s ease-in reverse both;
+}
+#missions .mdx {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(236, 230, 216, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(236, 230, 216, 0.7);
+  font:
+    300 20px/1 'Unbounded',
+    system-ui,
+    sans-serif;
+  cursor: pointer;
+}
+#missions .mbig {
+  width: 100%;
+  height: 210px;
+  display: block;
+  margin-top: 6px;
+}
+#missions .mdt {
+  margin-top: 4px;
+  font:
+    600 24px/1.2 'Unbounded',
+    system-ui,
+    sans-serif;
+  color: #ece6d8;
+  max-width: 300px;
+}
+#missions .mdd {
+  margin-top: 10px;
+  font:
+    400 11px/1.6 'Space Mono',
+    ui-monospace,
+    monospace;
+  color: rgba(236, 230, 216, 0.6);
+}
+#missions .mdprog {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font:
+    400 10.5px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.12em;
+  color: rgba(236, 230, 216, 0.6);
+}
+#missions .mdprog i {
+  width: 120px;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(236, 230, 216, 0.12);
+  overflow: hidden;
+}
+#missions .mdprog u {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #ff5a1f, #ffa155);
+  box-shadow: 0 0 8px #ff8a3d;
+}
+#missions .mdprog b {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font:
+    500 14px 'Unbounded',
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.02em;
+  color: #9ff0e4;
+}
+#missions .claim.big {
+  margin-top: 22px;
+  padding: 15px 34px;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+}
+#missions .claim.big em {
+  margin-left: 4px;
+}
+#missions .mdok {
+  margin-top: 20px;
+  font:
+    400 10.5px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #9ff0e4;
+}
+#missions .mdf {
+  margin-top: 24px;
+  width: 100%;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--hc) 22%, transparent);
+  background: color-mix(in srgb, var(--hc) 5%, transparent);
+  text-align: left;
+}
+#missions .mdk {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font:
+    400 9.5px 'Space Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--hc);
+}
+#missions .mdk::after {
+  content: '';
+  flex: 1;
+  max-width: 30px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--hc), transparent);
+  opacity: 0.6;
+}
+#missions .mdf p {
+  margin-top: 8px;
+  font:
+    400 11px/1.65 'Space Mono',
+    ui-monospace,
+    monospace;
+  color: rgba(236, 230, 216, 0.75);
+}
+#missions .mdcard .mgrab {
+  margin: 10px auto 0;
+}
+@keyframes wpop {
+  40% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes misUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes misDown {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes misFade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes misFlash {
+  0% {
+    background: rgba(159, 240, 228, 0.28);
+    box-shadow: inset 0 0 0 1px rgba(159, 240, 228, 0.6);
+  }
+  100% {
+    background: transparent;
+    box-shadow: none;
+  }
+}
+@keyframes misPing {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.7);
+  }
+  15% {
+    opacity: 1;
+    transform: none;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@keyframes misSwap {
+  from {
+    opacity: 0;
+    transform: translateX(var(--sd, 0));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
