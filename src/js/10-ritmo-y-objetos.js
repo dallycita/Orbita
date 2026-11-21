@@ -25,7 +25,9 @@ function beatTime() {
 // ángulo y tamaño reales de cada asteroide según el tipo de anillo
 const obsAng = (ring, o) => o.a + (o.dir || 1) * (ring.phase - (ring.poff || 0)) + (ring.off || 0); // poff: lo que el anillo no giró mientras estuvo congelado
 function obsRad(ring, o) {
-  if (ring.type !== 'respiracion') return o.r;
+  if (ring.type !== 'respiracion') {
+    return o.r;
+  }
   const x = frac(beatTime() / (4 * TB)),
     sz = 0.5 - 0.5 * Math.cos(2 * Math.PI * x); // respira cada 4 golpes: pequeño justo en el golpe
   return o.r * (0.3 + 0.7 * sz);
@@ -44,16 +46,22 @@ try {
 } catch (e) {}
 const elWallet = document.getElementById('wallet');
 function updateWallet(pop) {
-  if (!elWallet) return;
+  if (!elWallet) {
+    return;
+  }
   // total de estrellas únicas de todo el juego (igual que las tarjetas): ★ 2 / 48, con un anillo de progreso
   let got = 0,
     all = 0;
   COIN_RINGS.forEach((set, i) => {
-    if (!set) return;
+    if (!set) {
+      return;
+    }
     all += set.size;
     const g = lvStarsGot(i);
     set.forEach(k => {
-      if (g.includes(k)) got++;
+      if (g.includes(k)) {
+        got++;
+      }
     });
   });
   elWallet.innerHTML =
@@ -73,7 +81,9 @@ function updateWallet(pop) {
 }
 updateWallet(false);
 function coinChime() {
-  if (!AC || muted) return;
+  if (!AC || muted) {
+    return;
+  }
   try {
     const n = AC.currentTime;
     [12, 16, 19, 24].forEach((sm, i) =>
@@ -120,7 +130,9 @@ let pushing = false,
   pushFrom = 0,
   starBoost = false;
 function placeInGap(ring, extra) {
-  if (!ring.obs.length) return Object.assign({ a: 0, got: false }, extra);
+  if (!ring.obs.length) {
+    return Object.assign({ a: 0, got: false }, extra);
+  }
   const angs = ring.obs
     .map(o => ((o.a % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2))
     .sort((x, y) => x - y);
@@ -155,8 +167,9 @@ function drawNebula(x, y, sz, al) {
   }
   ctx.globalAlpha = al;
   ctx.fillStyle = '#fff3f8';
-  for (let i = 0; i < 3; i++)
+  for (let i = 0; i < 3; i++) {
     ctx.fillRect(x + Math.cos(i * 2.1) * sz * 0.6, y + Math.sin(i * 2.1) * sz * 0.5, 1.4, 1.4);
+  }
   ctx.restore();
 }
 function drawPulsar(x, y, sz, al) {
@@ -196,7 +209,9 @@ function drawPulsar(x, y, sz, al) {
   ctx.restore();
 }
 function objChime(up) {
-  if (!AC || muted) return;
+  if (!AC || muted) {
+    return;
+  }
   try {
     const n = AC.currentTime,
       seq = up ? [7, 12, 16, 19] : [19, 15, 12, 7];
@@ -205,7 +220,9 @@ function objChime(up) {
 }
 function starLaunch() {
   const up = Math.min(2, curGoal() - level);
-  if (up <= 0) return;
+  if (up <= 0) {
+    return;
+  }
   jumping = true;
   jumpT = 0;
   jumpTarget = up;
@@ -214,7 +231,9 @@ function starLaunch() {
   pending = false;
 }
 function starPush() {
-  if (level <= 0) return;
+  if (level <= 0) {
+    return;
+  }
   pushFrom = level;
   level -= 1;
   pushing = true;
@@ -321,8 +340,14 @@ const COURSES_X = {
 const courseMaps = {};
 for (const i in COURSES_X) {
   const m = ['clasico'];
-  for (const [n, ty] of COURSES_X[i]) for (let j = 0; j < n; j++) m.push(ty);
-  while (m.length < 60) m.push('clasico');
+  for (const [n, ty] of COURSES_X[i]) {
+    for (let j = 0; j < n; j++) {
+      m.push(ty);
+    }
+  }
+  while (m.length < 60) {
+    m.push('clasico');
+  }
   courseMaps[i] = m;
 }
 const RING_MUL = [1, 1, 1.08, 1.1, 1.12, 1.25, 1.4, 1.55];
@@ -361,8 +386,12 @@ const novaTau = tt => {
   return ((tt % b) + b) % b;
 }; // tiempo desde el último estallido
 function novaEnv(tau) {
-  if (tau < 0.07) return tau / 0.07;
-  if (tau < 0.46) return 1;
+  if (tau < 0.07) {
+    return tau / 0.07;
+  }
+  if (tau < 0.46) {
+    return 1;
+  }
   if (tau < 0.86) {
     const u = (tau - 0.46) / 0.4;
     return 1 - u * u * (3 - 2 * u);
@@ -373,13 +402,17 @@ function novaPush(ring, ang, tt) {
   const tau = novaTau(tt),
     e = novaEnv(tau);
   if (e <= 0) {
-    if (tau < TB) return 0;
+    if (tau < TB) {
+      return 0;
+    }
     const c = Math.floor(tau / TB),
       q = tau - c * TB;
     return (1.5 + 1.2 * c) * Math.exp(-q * 9);
   } // en cada golpe de carga la muralla se hincha un poco: está por abrirse
   const na = ring.na + ring.phase,
     d = Math.abs(Math.atan2(Math.sin(ang - na), Math.cos(ang - na)));
-  if (d < 0.01) return 0;
+  if (d < 0.01) {
+    return 0;
+  }
   return e * (32 + 24 * Math.exp(-d * 1.1));
 } // la estrella se queda en su lugar
