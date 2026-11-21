@@ -1,6 +1,7 @@
 // Vía Láctea / Sistema solar (nivel 1)
 // fondo con fotografía: la foto real en capas, con la luz doblada por el agujero negro
-// Sistema solar: la Vía Láctea como en una foto de cielo profundo (muchísimas estrellas, polvo oscuro, nebulosas rojizas)
+// Sistema solar: la Vía Láctea como en una foto de cielo profundo (muchísimas estrellas, polvo
+// oscuro, nebulosas rojizas)
 // y, al salir del sistema solar, la galaxia vista desde fuera con sus brazos espirales
 const FS_MW =
   BG_COMMON +
