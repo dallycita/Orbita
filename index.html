@@ -14216,7 +14216,8 @@ const endGest = e => {
 window.addEventListener('pointerup', endGest);
 window.addEventListener('pointercancel', endGest);
 window.addEventListener('pointerdown', press, { passive: false });
-// tecla del poder: funciona antes de saltar y también en pleno salto; si no está cargado, avisa cuánto falta
+// tecla del poder: funciona antes de saltar y también en pleno salto; si no está cargado, avisa
+// cuánto falta
 function powerKey() {
   if (state !== 'play' || wh) {
     return;
