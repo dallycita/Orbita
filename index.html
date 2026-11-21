@@ -12427,7 +12427,9 @@ function drawFlare() {
   ctx.globalAlpha = 1;
 }
 function makeRing(k) {
-  if (k === 0) return { obs: [], w: 0, phase: 0, type: 'clasico' };
+  if (k === 0) {
+    return { obs: [], w: 0, phase: 0, type: 'clasico' };
+  }
   const type = ringType(k),
     dir = rng() < 0.5 ? -1 : 1,
     base = rng() * Math.PI * 2,
@@ -12462,16 +12464,21 @@ function makeRing(k) {
       g2 = pre ? gc + 0.78 : gc + Math.PI; // el último de dos huecos los junta: desde cualquiera llegas al hueco único que sigue
     for (let a = 0; a < Math.PI * 2 - 1e-6; a += stepA) {
       const ang = gc + a;
-      if (ad(ang, g1) < hg || (two && ad(ang, g2) < hg)) continue;
+      if (ad(ang, g1) < hg || (two && ad(ang, g2) < hg)) {
+        continue;
+      }
       obs.push({ a: ang, r: 8, seed: rng() * 100 });
     }
-    if (pre) ring.g2 = [g1, g2];
+    if (pre) {
+      ring.g2 = [g1, g2];
+    }
     ring.w = k >= 40 ? (rng() < 0.5 ? -1 : 1) * 0.14 : 0;
     return ring;
   }
   if (type === 'barrera') {
-    for (let a = 0; a < Math.PI * 2 - 1e-6; a += 0.2)
+    for (let a = 0; a < Math.PI * 2 - 1e-6; a += 0.2) {
       obs.push({ a: base + a, r: 9, seed: rng() * 100 });
+    }
     ring.w = dir * 0.25;
     return ring;
   }
@@ -12485,9 +12492,13 @@ function makeRing(k) {
       for (let g = 0; g < gaps; g++) {
         const c = (g * Math.PI * 2) / gaps,
           d = Math.atan2(Math.sin(a - c), Math.cos(a - c));
-        if (Math.abs(d) < hg) inGap = true;
+        if (Math.abs(d) < hg) {
+          inGap = true;
+        }
       }
-      if (!inGap) obs.push({ a: base + a, r: 9, seed: rng() * 100 });
+      if (!inGap) {
+        obs.push({ a: base + a, r: 9, seed: rng() * 100 });
+      }
     }
     ring.w = dir * Math.min(0.5 + k * 0.006, 0.8) * (!tutorial ? RING_MUL[lvl] : 1);
   } else if (type === 'respiracion') {
@@ -12499,14 +12510,17 @@ function makeRing(k) {
     ring.w = (dir * sig) / (4 * TB);
     ring.sync = true;
     const off = -Math.PI / 2 - sig / 2 - ring.w * JUMP_DUR;
-    for (let i = 0; i < n; i++) obs.push({ a: off + i * sig, r: 24, seed: rng() * 100 });
+    for (let i = 0; i < n; i++) {
+      obs.push({ a: off + i * sig, r: 24, seed: rng() * 100 });
+    }
   } else if (type === 'nova') {
     const stepA = 0.22;
     ring.k = k;
     ring.na = base + 0.11;
     obs.push({ a: ring.na, r: 9, seed: 0, star: true }); // la estrella también quema: no se atraviesa
-    for (let a = 0.22; a < Math.PI * 2 - 0.2; a += stepA)
+    for (let a = 0.22; a < Math.PI * 2 - 0.2; a += stepA) {
       obs.push({ a: base + a + 0.11, r: 9, seed: rng() * 100 });
+    }
     ring.w = dir * 0.22;
   } else if (type === 'contragiro') {
     // dos arcos que giran en sentidos opuestos
@@ -12520,7 +12534,9 @@ function makeRing(k) {
   } else if (type === 'escalera') {
     // todos los anillos del bloque giran igual y con el hueco alineado: se pueden encadenar
     let bs = k;
-    while (bs > 1 && ringType(bs - 1) === 'escalera') bs--;
+    while (bs > 1 && ringType(bs - 1) === 'escalera') {
+      bs--;
+    }
     const bdir = bs % 2 ? 1 : -1,
       hg = 0.45,
       stepA = 0.22;
@@ -12529,21 +12545,26 @@ function makeRing(k) {
       for (let g = 0; g < 3; g++) {
         const c = (g * Math.PI * 2) / 3,
           d = Math.atan2(Math.sin(a - c), Math.cos(a - c));
-        if (Math.abs(d) < hg) inGap = true;
+        if (Math.abs(d) < hg) {
+          inGap = true;
+        }
       }
-      if (!inGap) obs.push({ a: a + bs * 1.3, r: 9, seed: rng() * 100 });
+      if (!inGap) {
+        obs.push({ a: a + bs * 1.3, r: 9, seed: rng() * 100 });
+      }
     }
     ring.w = bdir * 0.8;
     ring.phase = ring.w * t;
   } else if (type === 'marea' || type === 'arrastre') {
     // marea: acelera y frena y se deforma en óvalo · arrastre: el espacio te lleva consigo
     const n = k < 20 ? 2 : 3;
-    for (let i = 0; i < n; i++)
+    for (let i = 0; i < n; i++) {
       obs.push({
         a: base + i * ((Math.PI * 2) / n) + (rng() - 0.5) * 0.4,
         r: 9.5,
         seed: rng() * 100,
       });
+    }
     ring.w =
       dir *
       Math.min(
@@ -12557,12 +12578,13 @@ function makeRing(k) {
   } else if (type === 'freno') {
     // gira y de pronto cambia de sentido
     const n = k < 30 ? 2 : 3;
-    for (let i = 0; i < n; i++)
+    for (let i = 0; i < n; i++) {
       obs.push({
         a: base + i * ((Math.PI * 2) / n) + (rng() - 0.5) * 0.4,
         r: 9.5,
         seed: rng() * 100,
       });
+    }
     ring.w = dir * Math.min(0.9 + k * 0.01, 1.6);
     ring.sgn = 1;
     ring.ft = 0;
@@ -12572,27 +12594,39 @@ function makeRing(k) {
     const size = () => (k < 20 ? 9 : 9 + rng() * 1.5);
     const n = (k < 12 ? 1 : k < 32 ? 2 : 3) + (lvl >= 5 && !tutorial ? 1 : 0);
     const sp = Math.min(0.55 + k * 0.01, 1.05) * (0.85 + rng() * 0.3);
-    for (let i = 0; i < n; i++)
+    for (let i = 0; i < n; i++) {
       obs.push({
         a: base + i * ((Math.PI * 2) / n) + (rng() - 0.5) * 0.5,
         r: size(),
         seed: rng() * 100,
       });
+    }
     ring.w = dir * sp * (!tutorial ? RING_MUL[lvl] : 1);
   }
   if (!tutorial && (type === 'clasico' || type === 'muralla' || type === 'respiracion')) {
     const nebS = lvl === 2 ? OBJ_NEBULA : NEB_AT[lvl],
       pulS = lvl === 2 ? OBJ_PULSAR : PUL_AT[lvl];
-    if (nebS && nebS.has(k)) ring.obj = placeInGap(ring, { kind: 'nebula' });
-    else if (pulS && pulS.has(k)) ring.obj = placeInGap(ring, { kind: 'pulsar' });
-    else if (COIN_RINGS[lvl] && COIN_RINGS[lvl].has(k)) ring.coin = placeInGap(ring, {});
+    if (nebS && nebS.has(k)) {
+      ring.obj = placeInGap(ring, { kind: 'nebula' });
+    } else if (pulS && pulS.has(k)) {
+      ring.obj = placeInGap(ring, { kind: 'pulsar' });
+    } else if (COIN_RINGS[lvl] && COIN_RINGS[lvl].has(k)) {
+      ring.coin = placeInGap(ring, {});
+    }
   }
   return ring;
 }
 function ensureRings() {
-  for (let k = Math.max(0, level - 3); k <= Math.min(level + 6, curGoal()); k++)
-    if (!rings.has(k)) rings.set(k, makeRing(k));
-  for (const k of [...rings.keys()]) if (k < level - 3) rings.delete(k);
+  for (let k = Math.max(0, level - 3); k <= Math.min(level + 6, curGoal()); k++) {
+    if (!rings.has(k)) {
+      rings.set(k, makeRing(k));
+    }
+  }
+  for (const k of [...rings.keys()]) {
+    if (k < level - 3) {
+      rings.delete(k);
+    }
+  }
 }
 function setup() {
   rngState = SEED;
@@ -12648,7 +12682,9 @@ function start() {
   skyFlash = 0;
   waveProx = 0;
   waveBeepT = 0;
-  if (elPanel && elPanel.classList) elPanel.classList.remove('wscr');
+  if (elPanel && elPanel.classList) {
+    elPanel.classList.remove('wscr');
+  }
   tutorial = false;
   pendingTut = false;
   setup();
@@ -12701,17 +12737,23 @@ const PW = () => 1.1 + Math.min(level * 0.015, 1.0);
 // distancia libre entre la luna y el asteroide más cercano del anillo k
 function clearance(k, onlyApproaching) {
   const ring = rings.get(k);
-  if (!ring) return 999;
+  if (!ring) {
+    return 999;
+  }
   const R = rr(k),
     px = Math.cos(pAng) * R,
     py = Math.sin(pAng) * R;
   let m = 999;
   for (const o of ring.obs) {
-    if (o.gone) continue;
+    if (o.gone) {
+      continue;
+    }
     const oa = obsAng(ring, o);
     if (onlyApproaching) {
       const diff = Math.atan2(Math.sin(oa - pAng), Math.cos(oa - pAng));
-      if (diff * (o.dir || 1) * ring.w * (ring.sgn || 1) >= 0) continue;
+      if (diff * (o.dir || 1) * ring.w * (ring.sgn || 1) >= 0) {
+        continue;
+      }
     }
     const Rs = R * stretchAt(ring, oa);
     m = Math.min(
@@ -12731,8 +12773,9 @@ function upgradeToDouble() {
     wh ||
     ['gusano', 'orbita'].includes(ringType(level + 1)) ||
     ['gusano', 'orbita'].includes(ringType(level + 2))
-  )
+  ) {
     return;
+  }
   if (!tutorial && curPlanet && curPlanet !== 'tierra') {
     usePower(true);
     return;
@@ -12777,7 +12820,9 @@ function win() {
   flash = 0.6;
   shake = reduceMotion ? 0 : 8;
   pulse = 1;
-  if (level > bestOf(lvl)) setBestOf(lvl, level);
+  if (level > bestOf(lvl)) {
+    setBestOf(lvl, level);
+  }
   saveRunStats();
   if (!usedDouble) {
     plutoOk = true;
@@ -12849,7 +12894,9 @@ function win() {
       '<button type="button" class="wico" data-act="levels" aria-label="Niveles">' +
       ICO_LV +
       '</button></div>';
-    if (rescued) markNewPlanets();
+    if (rescued) {
+      markNewPlanets();
+    }
     elPanel.classList.remove('hide');
     setTimeout(() => {
       canRestart = true;
@@ -12857,7 +12904,9 @@ function win() {
   }, 2400);
 }
 function winSound() {
-  if (!AC) return;
+  if (!AC) {
+    return;
+  }
   try {
     const n = AC.currentTime + 0.05;
     const src = AC.createBufferSource();
@@ -12877,7 +12926,7 @@ function winSound() {
     src.start(n);
     src.stop(n + 2);
     const chord = (t0, semis, dur, gain) => {
-      for (const sm of semis)
+      for (const sm of semis) {
         for (const det of [-6, 6]) {
           const o = AC.createOscillator(),
             gg = AC.createGain(),
@@ -12896,6 +12945,7 @@ function winSound() {
           o.start(t0);
           o.stop(t0 + dur + 0.1);
         }
+      }
     };
     chord(n + 1.6, [3, 7, 10, 15], 4.5, 0.03); // acorde luminoso (Si mayor)
     const bell = (t0, sm, gain) => {
@@ -12935,8 +12985,9 @@ function doubleJump() {
     wh ||
     ['gusano', 'orbita'].includes(ringType(level + 1)) ||
     ['gusano', 'orbita'].includes(ringType(level + 2))
-  )
+  ) {
     return;
+  }
   if (!tutorial && curPlanet && curPlanet !== 'tierra') {
     usePower(false);
     return;
@@ -12976,9 +13027,13 @@ function onLand(isDouble) {
     gain = 1 + streak;
     perfCount++;
     misEvent('perf');
-    if (streak >= 3) misEvent('streak3');
-  } else if (!isDouble) streak = 0;
-  if (isDouble && !starBoost)
+    if (streak >= 3) {
+      misEvent('streak3');
+    }
+  } else if (!isDouble) {
+    streak = 0;
+  }
+  if (isDouble && !starBoost) {
     texts.push({
       txt: lastJT === 3 ? 'Monte Olimpo +3' : 'Salto doble +2',
       x: 0,
@@ -12987,6 +13042,7 @@ function onLand(isDouble) {
       size: 16,
       col: z.s2,
     });
+  }
   if (lastJT === 3) {
     pfx.push({ k: 'crater', t: 0, a: pAng });
     const pr = rr(level),
@@ -13108,7 +13164,9 @@ function onLand(isDouble) {
     // sin texto: el anillo nuevo destella para avisar que algo cambia (se aprende jugando, como en Geometry Dash)
     {
       const nr = rings.get(level + 1);
-      if (nr) nr.flash = 1;
+      if (nr) {
+        nr.flash = 1;
+      }
     }
     buzz(12);
   }
@@ -13122,7 +13180,9 @@ function onLand(isDouble) {
   hazardsOnLand();
   {
     const nr2 = rings.get(level + 1);
-    if (nr2 && nr2.type === 'orbita') nr2.phase = 0;
+    if (nr2 && nr2.type === 'orbita') {
+      nr2.phase = 0;
+    }
   } // el hueco del siguiente empieza a girar desde que llegas
   const sr0 = rings.get(level);
   const near = it => {
@@ -13137,7 +13197,9 @@ function onLand(isDouble) {
     sr0.coin.got = true;
     wallet++;
     runCoins++;
-    if (!tutorial) misEvent('star');
+    if (!tutorial) {
+      misEvent('star');
+    }
     try {
       localStorage.setItem('orbita_estrellas', String(wallet));
     } catch (e) {}
@@ -13247,7 +13309,9 @@ function onLand(isDouble) {
     } catch (e) {}
     {
       const nr = rings.get(level + 1);
-      if (nr) nr.flash = 1;
+      if (nr) {
+        nr.flash = 1;
+      }
     }
     buzz(12);
   }
@@ -13260,7 +13324,9 @@ function onLand(isDouble) {
       } catch (e) {}
       {
         const nr = rings.get(level + 1);
-        if (nr) nr.flash = 1;
+        if (nr) {
+          nr.flash = 1;
+        }
       }
       buzz(12);
     }
@@ -13269,13 +13335,19 @@ function onLand(isDouble) {
     whStartOut();
     return;
   }
-  if (level >= curGoal()) win();
+  if (level >= curGoal()) {
+    win();
+  }
 }
 function eatRings() {
   while (lastEaten + 1 <= sunLevel) {
     lastEaten++;
-    if (lastEaten >= 1) burns.push({ k: lastEaten, life: 1 });
-    if (lvl === 2 && state === 'play' && !reduceMotion) shake = Math.max(shake, 3.5);
+    if (lastEaten >= 1) {
+      burns.push({ k: lastEaten, life: 1 });
+    }
+    if (lvl === 2 && state === 'play' && !reduceMotion) {
+      shake = Math.max(shake, 3.5);
+    }
   }
 }
 function die(x, y, cause, who) {
@@ -13330,15 +13402,21 @@ function die(x, y, cause, who) {
     best = score;
     saveBest();
   }
-  if (reached > bestOf(lvl)) setBestOf(lvl, reached);
+  if (reached > bestOf(lvl)) {
+    setBestOf(lvl, reached);
+  }
   saveRunStats();
   const rescued = rescuedCards(before);
   const rec = reached > prevRing;
-  if (rescued) markNewPlanets();
+  if (rescued) {
+    markNewPlanets();
+  }
   // como en Geometry Dash: sin pantalla, vuelves a intentarlo al instante
   setTimeout(
     () => {
-      if (state !== 'dead') return;
+      if (state !== 'dead') {
+        return;
+      }
       start();
       sesTries++;
       showTry(rec ? reached : 0);
