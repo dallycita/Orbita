@@ -16856,7 +16856,8 @@ function bhDiskK(cx, cy, R, k, f0, f1, from, to, alpha) {
   }
 }
 
-// agujero negro en alta calidad: el mismo diseño (mismos colores, misma forma, mismo giro), dibujado píxel a píxel en la GPU
+// agujero negro en alta calidad: el mismo diseño (mismos colores, misma forma, mismo giro),
+// dibujado píxel a píxel en la GPU
 const BHGL = (() => {
   let cv = null,
     gl = null,
@@ -17097,7 +17098,8 @@ function bhCore(cx, cy, R, alpha) {
   ctx.beginPath();
   ctx.arc(cx, cy, R, 0, Math.PI * 2);
   ctx.fill();
-  // la luz curvada alrededor de la esfera: un solo anillo continuo, más grueso arriba y más fino abajo
+  // la luz curvada alrededor de la esfera: un solo anillo continuo, más grueso arriba y más fino
+  // abajo
   const dq = R > 30 ? 0.04 : 0.1,
     N = 120,
     ns = R > 30 ? 48 : 28;
@@ -17162,7 +17164,8 @@ function splashEarth(ex, ey, r) {
   ctx.fill();
   ctx.restore();
 }
-// el sonido de la marca: un rumor que crece, las letras como notas, la Tierra que cae y un golpe final
+// el sonido de la marca: un rumor que crece, las letras como notas, la Tierra que cae y un golpe
+// final
 function splashSounds() {
   if (!AC) {
     return;
@@ -17209,7 +17212,8 @@ function splashSounds() {
     [0, 3, 5, 7, 10].forEach((s, i) =>
       osc('triangle', ROOT * Math.pow(2, s / 12), 0, n + 4 + i * 0.22, 0.7, 0.12, 0.005),
     ); // una nota por letra
-    osc('sine', ROOT * 2 * Math.pow(2, 7 / 12), 0, n + 5.3, 1.4, 0.1, 0.004); // la Tierra cae en el acento
+    // la Tierra cae en el acento
+    osc('sine', ROOT * 2 * Math.pow(2, 7 / 12), 0, n + 5.3, 1.4, 0.1, 0.004);
     osc('sine', 72, 38, n + 5.5, 1.6, 0.9, 0.005); // golpe
     noiseHit(n + 5.5, 1.6, 'highpass', 3000, 0.35, splashBus);
     for (const s of [0, 3, 7, 12]) {
