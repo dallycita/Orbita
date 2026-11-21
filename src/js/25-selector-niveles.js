@@ -198,23 +198,6 @@ function lvStarsGot(i) {
     return [];
   }
 }
-const STAR_SVG = on =>
-  '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="' +
-  (on ? '#ffd36b' : 'none') +
-  '" stroke="' +
-  (on ? '#ffe7a8' : 'rgba(236,230,216,.35)') +
-  '" stroke-width="1.4" stroke-linejoin="round"/></svg>';
-// íconos de lo nuevo en cada nivel
-const NEW_ICON = [
-  '<path d="M3 12a9 9 0 0 1 18 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-dasharray="3 2.2"/><circle cx="12" cy="18" r="2.6" fill="currentColor"/>',
-  '<path d="M4 9a8 8 0 0 1 9-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M20 15a8 8 0 0 1-9 5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M12 2.5l2 1.6-2.4 1.1M12 21.5l-2-1.6 2.4-1.1" fill="none" stroke="currentColor" stroke-width="1.8"/>',
-  '<circle cx="8" cy="10" r="5" fill="#ff7fb0" opacity=".8"/><circle cx="17" cy="15" r="2" fill="#bfe0ff"/><path d="M13 19l8-8M13 11l8 8" stroke="#bfe0ff" stroke-width="1.4" opacity=".8"/>',
-  '<path d="M4 8h12l-3-3M20 16H8l3 3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
-  '<ellipse cx="12" cy="12" rx="9" ry="5.5" fill="none" stroke="currentColor" stroke-width="2.2" transform="rotate(-20 12 12)"/><circle cx="12" cy="12" r="2" fill="currentColor"/>',
-  '<circle cx="17" cy="7" r="3" fill="#eaf6ff"/><path d="M15 9L4 20" stroke="#9fd0ff" stroke-width="3" stroke-linecap="round" opacity=".7"/><path d="M15.5 10.5L7 21" stroke="#ffe7b0" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>',
-  '<circle cx="12" cy="12" r="9" fill="none" stroke="#9fd4ff" stroke-width="2" stroke-dasharray="3 2"/><path d="M12 3v18" stroke="#eef7ff" stroke-width="2.6"/>',
-  '<circle cx="12" cy="12" r="4" fill="#000" stroke="#ff8a3d" stroke-width="2"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4M4.5 4.5l2.8 2.8M16.7 16.7l2.8 2.8M4.5 19.5l2.8-2.8M16.7 7.3l2.8-2.8" stroke="#ffe2b0" stroke-width="1.6" stroke-linecap="round"/>',
-];
 // dificultad como gravedad: un mini agujero negro con 4 anillos; los encendidos dicen qué tan
 // fuerte jala
 const GRAV_TIER = { Fácil: 1, Medio: 2, Difícil: 3, 'Muy difícil': 4 };
@@ -243,8 +226,7 @@ function renderLevels() {
       pct = Math.round((v / GOAL) * 100),
       done = v >= GOAL,
       got = lvStarsGot(i).length,
-      all6 = got >= 6,
-      tries = attemptsOf(i);
+      all6 = got >= 6;
     const can = L.ready && (i === 0 || levelsUnlocked());
     // estrellas: pastilla junto a la dificultad (solo cuenta las de los anillos reales del nivel)
     const gotR = lvStarsGot(i),
