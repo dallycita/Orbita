@@ -3,7 +3,7 @@
 // │ lo usan: 16-partida, 22-viaje-sistema-solar, 23-intro, 29-planetas-hd, 36-bucle-principal
 // │ usa 01-pantalla-y-utilidades: BONE, clamp, ctx, CX, CY, DPR, frac, H, PR, S, W
 // │ usa 02-audio: AC, ROOT
-// │ usa 06-record-y-estado: charge
+// │ usa 06-record-y-estado: camLevel, charge, jumping, level, pLevel, state
 // │ usa 07-planetas: chargeMax, sizeK
 // │ usa 08-partida-estado: chargeFlash, hintT, particles, pipFlash, readyT, t, tutorial
 // │ usa 13-agujero-de-gusano: drawInside, hideEarth, viewInside, wh, WH_IN, WH_OUT, whShock
@@ -13,6 +13,7 @@
 // │ usa 26-pantalla-inicio: muted
 // │ usa 28-sonidos-interfaz: uiOut, uiTone
 // │ usa 29-planetas-hd: drawBigPlanet, PLGL
+// │ cambia 06-record-y-estado: camLevel
 // │ cambia 13-agujero-de-gusano: hideEarth, viewInside
 // └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- dibujo ----------
@@ -232,7 +233,25 @@ function powerReadySound(){
     g.gain.setValueAtTime(.0001, n); g.gain.exponentialRampToValueAtTime(.08, n + .05); g.gain.exponentialRampToValueAtTime(.0001, n + .4); o.connect(g); g.connect(uiOut()); o.start(n); o.stop(n + .45); }catch(e){}
 }
 // el cuadro completo: elige qué dibujar (dentro o fuera del agujero de gusano) y la onda al salir
+// ---- la cámara que se ve: sigue el salto con suavidad ----
+// La lógica (choques, puntos, agujero negro) usa camLevel, que se queda quieta durante el salto y arranca de golpe al
+// aterrizar: eso se veía como un tirón. Para dibujar se usa una cámara "de resorte" que empieza a subir junto con el salto,
+// acelera y frena sin saltos y llega al mismo lugar en el mismo tiempo. Quieta, es idéntica a camLevel.
+let camView = 0, camVel = 0, camT = 0;
+function camViewStep(){
+  const dt = t - camT; camT = t;
+  const live = (state === 'play' || state === 'dead') && !wh && dt >= 0 && dt < .1 && Math.abs(camView - camLevel) < 1.5;
+  if (!live){ camView = camLevel; camVel = 0; return; }
+  const W0 = 9, goal = jumping ? pLevel : level;
+  camVel += (W0*W0*(goal - camView) - 2*W0*camVel)*dt; camView += camVel*dt;
+  if (!jumping && Math.abs(level - camLevel) < .002 && Math.abs(camView - camLevel) < .002){ camView = camLevel; camVel = 0; }
+}
 function render(){
+  camViewStep();
+  const camL = camLevel; camLevel = camView;
+  try{ renderFrame(); } finally { camLevel = camL; }
+}
+function renderFrame(){
   hideEarth = false; viewInside = false;
   if (!wh){ renderScene(); if (whShock) drawShock(); return; }
   if (wh.ph === 'orb'){ viewInside = true; renderScene(); drawInside(1); viewInside = false; return; }
