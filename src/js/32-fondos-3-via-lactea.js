@@ -2,7 +2,9 @@
 // fondo con fotografía: la foto real en capas, con la luz doblada por el agujero negro
 // Sistema solar: la Vía Láctea como en una foto de cielo profundo (muchísimas estrellas, polvo oscuro, nebulosas rojizas)
 // y, al salir del sistema solar, la galaxia vista desde fuera con sus brazos espirales
-const FS_MW = BG_COMMON + `
+const FS_MW =
+  BG_COMMON +
+  `
 uniform float uScale;
 float fbm7(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 7; i++){ s += a*vn(p); p = m*p; a *= .5; } return s; }
 float rid(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 5; i++){ s += a*(1. - abs(vn(p)*2. - 1.)); p = m*p; a *= .5; } return s; }
