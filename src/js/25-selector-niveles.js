@@ -215,7 +215,8 @@ const NEW_ICON = [
   '<circle cx="12" cy="12" r="9" fill="none" stroke="#9fd4ff" stroke-width="2" stroke-dasharray="3 2"/><path d="M12 3v18" stroke="#eef7ff" stroke-width="2.6"/>',
   '<circle cx="12" cy="12" r="4" fill="#000" stroke="#ff8a3d" stroke-width="2"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4M4.5 4.5l2.8 2.8M16.7 16.7l2.8 2.8M4.5 19.5l2.8-2.8M16.7 7.3l2.8-2.8" stroke="#ffe2b0" stroke-width="1.6" stroke-linecap="round"/>',
 ];
-// dificultad como gravedad: un mini agujero negro con 4 anillos; los encendidos dicen qué tan fuerte jala
+// dificultad como gravedad: un mini agujero negro con 4 anillos; los encendidos dicen qué tan
+// fuerte jala
 const GRAV_TIER = { Fácil: 1, Medio: 2, Difícil: 3, 'Muy difícil': 4 };
 const GRAV_SVG = n =>
   '<svg viewBox="0 0 30 30" aria-hidden="true">' +
@@ -297,7 +298,8 @@ function renderLevels() {
       '<div class="dist">' +
       L.dist +
       '</div>' +
-      // el progreso como un viaje: del agujero negro (izquierda) a la salida (derecha), con tu planeta en el punto al que llegaste
+      // el progreso como un viaje: del agujero negro (izquierda) a la salida (derecha), con tu
+      // planeta en el punto al que llegaste
       '<div class="trip" aria-label="' +
       (done ? 'Completado' : pct + ' % recorrido') +
       '"><span class="bh"></span><span class="line"><i></i><b class="me"></b></span><span class="exit"></span></div>' +
@@ -387,7 +389,8 @@ function renderLevels() {
 // dato real como transmisión: se escribe letra por letra al llegar a cada galaxia
 let sigShown = -1,
   sigTimer = null;
-const sigTxt = i => LV_DATO[i].replace(/(\d) (?=[\d%])/g, '$1\u00a0'); // que las cifras no se partan
+// que las cifras no se partan
+const sigTxt = i => LV_DATO[i].replace(/(\d) (?=[\d%])/g, '$1\u00a0');
 function sigType(i) {
   if (!elLv || !elLv.querySelectorAll) {
     return;
