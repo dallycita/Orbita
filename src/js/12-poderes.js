@@ -92,8 +92,7 @@ function usePower(mid) {
   usedDouble = true;
   noteDouble();
   buzz([15, 30, 25]);
-  const nr = rings.get(level + 1),
-    Rn = rr(level + 1);
+  const nr = rings.get(level + 1);
   if (id === 'marte') {
     // Monte Olimpo: salto triple
     const up = Math.min(3, curGoal() - level);
