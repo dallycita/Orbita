@@ -3,7 +3,9 @@ let uiBus = null,
   lastHover = null,
   uiLastT = 0;
 function uiOut() {
-  if (uiBus) return uiBus;
+  if (uiBus) {
+    return uiBus;
+  }
   const inG = AC.createGain(),
     dl = AC.createDelay(1),
     fb = AC.createGain(),
@@ -39,10 +41,14 @@ function uiTone(f, t0, dur, gain, type) {
 }
 // al pasar el puntero: una nota de cristal suave, distinta cada vez
 function uiHover() {
-  if (!AC || muted || AC.state !== 'running') return;
+  if (!AC || muted || AC.state !== 'running') {
+    return;
+  }
   try {
     const n = AC.currentTime;
-    if (n - uiLastT < 0.06) return;
+    if (n - uiLastT < 0.06) {
+      return;
+    }
     uiLastT = n;
     const notes = [0, 3, 7, 10, 12, 15],
       semi = notes[Math.floor(Math.random() * notes.length)] + 12;
@@ -52,7 +58,9 @@ function uiHover() {
 }
 // al tocar: una campana grave; al tocar Jugar: el agujero negro "traga" el toque
 function uiClick(kind) {
-  if (!AC || muted) return;
+  if (!AC || muted) {
+    return;
+  }
   try {
     const n = AC.currentTime;
     if (kind === 'play') {
@@ -90,26 +98,39 @@ function uiClick(kind) {
   } catch (e) {}
 }
 window.addEventListener('pointerover', e => {
-  if (e.pointerType && e.pointerType !== 'mouse') return;
+  if (e.pointerType && e.pointerType !== 'mouse') {
+    return;
+  }
   const b = e.target && e.target.closest ? e.target.closest('button') : null;
   if (b && !b.disabled && b !== lastHover) {
     lastHover = b;
-    if (paused) pzSnd('hover');
-    else uiHover();
+    if (paused) {
+      pzSnd('hover');
+    } else {
+      uiHover();
+    }
   }
-  if (!b) lastHover = null;
+  if (!b) {
+    lastHover = null;
+  }
 });
 window.addEventListener(
   'click',
   e => {
     const b = e.target && e.target.closest ? e.target.closest('button') : null;
-    if (!b || b.disabled) return;
-    if (b.id === 'quit' || paused || (b.closest && b.closest('.pzp'))) return; // la pausa tiene sus propios sonidos
+    if (!b || b.disabled) {
+      return;
+    }
+    if (b.id === 'quit' || paused || (b.closest && b.closest('.pzp'))) {
+      return;
+    } // la pausa tiene sus propios sonidos
     if (b.classList.contains('glass') || b.classList.contains('arrow')) {
       uiGlass(b.classList.contains('l') ? -1 : 1);
       return;
     }
-    if (b.classList.contains('scanbtn')) return;
+    if (b.classList.contains('scanbtn')) {
+      return;
+    }
     uiClick(b.classList.contains('bigplay') || b.classList.contains('play') ? 'play' : 'soft');
   },
   true,
@@ -128,7 +149,9 @@ function showOut() {
 }
 // un "inhalar" que nunca para: oleadas de aire que bajan de tono y se cortan, como un desagüe cósmico
 function showStart() {
-  if (!AC) return;
+  if (!AC) {
+    return;
+  }
   try {
     const n = AC.currentTime;
     showStop(0.05);
@@ -174,7 +197,9 @@ function showStart() {
   } catch (e) {}
 }
 function showStop(fade) {
-  if (!AC) return;
+  if (!AC) {
+    return;
+  }
   try {
     const n = AC.currentTime,
       f = fade || 0.6;
@@ -198,7 +223,9 @@ function showStop(fade) {
 }
 // cada roca: un silbido que sube mientras acelera hacia el centro y se corta al cruzar el horizonte
 function rockIn(dur, pan) {
-  if (!AC || muted) return;
+  if (!AC || muted) {
+    return;
+  }
   try {
     const n = AC.currentTime,
       out = showOut();
@@ -241,7 +268,9 @@ function rockIn(dur, pan) {
 }
 // justo antes de tragarse la estrella: una gran inhalación que crece y se corta en seco
 function bigSuck(dur) {
-  if (!AC || muted) return;
+  if (!AC || muted) {
+    return;
+  }
   try {
     const n = AC.currentTime,
       out = showOut();
@@ -264,7 +293,9 @@ function bigSuck(dur) {
         lp.frequency.value = lpf;
         o.connect(lp);
         lp.connect(g);
-      } else o.connect(g);
+      } else {
+        o.connect(g);
+      }
       g.connect(out);
       o.start(n);
       o.stop(n + dur + 0.1);
@@ -331,7 +362,9 @@ function perseusVoice(dest, n) {
 }
 // "Chirrido" inspirado en las ondas gravitacionales que detectó LIGO en 2015: sube de tono, crece y se apaga de golpe
 function gwChirp() {
-  if (!AC || muted) return;
+  if (!AC || muted) {
+    return;
+  }
   try {
     const n = AC.currentTime,
       out = showOut(),
