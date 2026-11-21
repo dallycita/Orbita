@@ -21,7 +21,8 @@ function makeRing(k) {
     return ring;
   } // donde apareces dentro del gusano
   if (type === 'orbita') {
-    // dentro del gusano: anillos quietos con uno o dos huecos; cada hueco queda a un lado del anterior (izquierda o derecha)
+    // dentro del gusano: anillos quietos con uno o dos huecos; cada hueco queda a un lado del
+    // anterior (izquierda o derecha)
     const prev = gapC[k - 1] !== undefined ? gapC[k - 1] : -Math.PI / 2,
       two = k < 40,
       sg = rng() < 0.5 ? -1 : 1;
@@ -33,7 +34,8 @@ function makeRing(k) {
       ad = (x, y) => Math.abs(Math.atan2(Math.sin(x - y), Math.cos(x - y)));
     const pre = k === 39,
       g1 = pre ? gc - 0.78 : gc,
-      g2 = pre ? gc + 0.78 : gc + Math.PI; // el último de dos huecos los junta: desde cualquiera llegas al hueco único que sigue
+      // el último de dos huecos los junta: desde cualquiera llegas al hueco único que sigue
+      g2 = pre ? gc + 0.78 : gc + Math.PI;
     for (let a = 0; a < Math.PI * 2 - 1e-6; a += stepA) {
       const ang = gc + a;
       if (ad(ang, g1) < hg || (two && ad(ang, g2) < hg)) {
@@ -89,7 +91,8 @@ function makeRing(k) {
     const stepA = 0.22;
     ring.k = k;
     ring.na = base + 0.11;
-    obs.push({ a: ring.na, r: 9, seed: 0, star: true }); // la estrella también quema: no se atraviesa
+    // la estrella también quema: no se atraviesa
+    obs.push({ a: ring.na, r: 9, seed: 0, star: true });
     for (let a = 0.22; a < Math.PI * 2 - 0.2; a += stepA) {
       obs.push({ a: base + a + 0.11, r: 9, seed: rng() * 100 });
     }
@@ -733,7 +736,8 @@ function onLand(isDouble) {
     try {
       localStorage.setItem('orbita_p1_vistos', JSON.stringify(seenTypes));
     } catch (e) {}
-    // sin texto: el anillo nuevo destella para avisar que algo cambia (se aprende jugando, como en Geometry Dash)
+    // sin texto: el anillo nuevo destella para avisar que algo cambia (se aprende jugando, como en
+    // Geometry Dash)
     {
       const nr = rings.get(level + 1);
       if (nr) {
@@ -996,7 +1000,8 @@ function die(x, y, cause, who) {
     cause === 'sun' ? 2400 : 850,
   );
 }
-// "INTENTO N" aparece grande y tenue en el espacio y se desvanece; si fue récord, lo celebra en dorado
+// "INTENTO N" aparece grande y tenue en el espacio y se desvanece; si fue récord, lo celebra en
+// dorado
 let sesTries = 1; // intentos de esta sesión en el nivel: vuelve a 1 cada vez que entras al nivel
 function showTry(recRing) {
   let el = document.getElementById('tryn');
