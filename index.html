@@ -7665,7 +7665,7 @@ const GLBG = (() => {
   // dibuja el fondo del nivel; devuelve false si no se pudo (y el juego usa el fondo anterior)
   function draw(kind, opts){
     if (!init()) return false;
-    const p = kind === 'photo' ? prog('photo', FS_PHOTO) : kind === 'mw' ? prog('mw', FS_MW) : kind === 'lmc' ? prog('lmc', FS_LMC) : kind === 'and2' ? prog('and2', FS_AND2) : kind === 'gx' ? prog('gx', FS_GX) : prog('and', FS_AND); if (!p) return false;
+    const p = kind === 'photo' ? prog('photo', FS_PHOTO) : kind === 'mw' ? prog('mw', FS_MW) : kind === 'lmc' ? prog('lmc', FS_LMC) : kind === 'and2' ? prog('and2', FS_AND2) : kind === 'gx' ? prog('gx' + (opts.kind || 0), FS_GX.replace('uniform float uKind;', 'const float uKind = ' + (opts.kind || 0) + '.;')) : prog('and', FS_AND); if (!p) return false;
     let rec = null; if (kind === 'photo'){ rec = photo(opts.name, opts.src); if (!rec.ready) return false; }
     const sc = (kind === 'mw' || kind === 'lmc' || kind === 'and2' || kind === 'gx') ? Math.min(window.devicePixelRatio || 1, 1.6, 2400/Math.max(W, H)) : Math.min(1, 900/Math.max(W, H)), w = Math.max(2, Math.round(W*sc)), h = Math.max(2, Math.round(H*sc));
     if (cv.width !== w || cv.height !== h){ cv.width = w; cv.height = h; }
