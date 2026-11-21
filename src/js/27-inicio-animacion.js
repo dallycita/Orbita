@@ -1,5 +1,6 @@
 // ---------- entrada a la pantalla de inicio: un agujero negro enorme que se aleja ----------
-// música de misterio: un zumbido profundo que respira, notas de cristal flotando y un viento cósmico
+// música de misterio: un zumbido profundo que respira, notas de cristal flotando y un viento
+// cósmico
 function homeAmbience(on) {
   if (!AC) {
     return;
@@ -82,7 +83,8 @@ function homeAmbience(on) {
     }
   } catch (e) {}
 }
-// ---------- la demostración: el agujero negro dobla la luz, se come rocas y destroza una estrella ----------
+// ---------- la demostración: el agujero negro dobla la luz, se come rocas y destroza una estrella
+// ----------
 const HOME_BIG = 6.4,
   HOME_IN = 8.0;
 let logoT0 = -99;
@@ -448,7 +450,8 @@ function renderHomeIntro() {
       ctx.arc(pts[0][0], pts[0][1], 3.5 * (1 - u * 0.6), 0, Math.PI * 2);
       ctx.fill();
     });
-    // la estrella que es destrozada: se estira en un río de fuego que se enrolla alrededor del disco
+    // la estrella que es destrozada: se estira en un río de fuego que se enrolla alrededor del
+    // disco
     const u = (T - TDE.t0) / TDE.dur;
     if (u > 0 && u < 1) {
       const tail = Math.min(0.6, u * 0.9),
