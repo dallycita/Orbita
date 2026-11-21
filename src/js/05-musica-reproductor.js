@@ -31,18 +31,30 @@ function scheduleStep(s, t0) {
       switchMsg = '¡Ya casi!';
     }
   }
-  if (musicStyle === 'cosmos') stepCosmos(s, t0);
-  else if (musicStyle.startsWith('gal')) stepGalaxy(s, t0, GAL_CFG[+musicStyle.slice(3)]);
-  else if (musicStyle === 'magallanes') stepMagallanes(s, t0);
-  else if (musicStyle === 'andromeda') stepAndromeda(s, t0);
-  else if (musicStyle === 'synthwave') stepSynthwave(s, t0);
-  else if (musicStyle === 'phonk') stepPhonk(s, t0);
-  else stepEspacial(s, t0);
+  if (musicStyle === 'cosmos') {
+    stepCosmos(s, t0);
+  } else if (musicStyle.startsWith('gal')) {
+    stepGalaxy(s, t0, GAL_CFG[+musicStyle.slice(3)]);
+  } else if (musicStyle === 'magallanes') {
+    stepMagallanes(s, t0);
+  } else if (musicStyle === 'andromeda') {
+    stepAndromeda(s, t0);
+  } else if (musicStyle === 'synthwave') {
+    stepSynthwave(s, t0);
+  } else if (musicStyle === 'phonk') {
+    stepPhonk(s, t0);
+  } else {
+    stepEspacial(s, t0);
+  }
 }
 function tick() {
-  if (!AC || !musicOn) return;
+  if (!AC || !musicOn) {
+    return;
+  }
   try {
-    if (nextT < AC.currentTime - 0.2) nextT = AC.currentTime + 0.05;
+    if (nextT < AC.currentTime - 0.2) {
+      nextT = AC.currentTime + 0.05;
+    }
     while (nextT < AC.currentTime + 0.12) {
       scheduleStep(step, nextT);
       nextT += STEP;
@@ -51,7 +63,9 @@ function tick() {
   } catch (e) {}
 }
 function startMusic() {
-  if (!AC) return;
+  if (!AC) {
+    return;
+  }
   try {
     musicStyle =
       !tutorial && state !== 'home' && state !== 'levels'
@@ -75,16 +89,22 @@ function startMusic() {
     musicBus.gain.cancelScheduledValues(n);
     musicBus.gain.setValueAtTime(0.0001, n);
     musicBus.gain.exponentialRampToValueAtTime(0.55, n + 0.25);
-    if (!schedTimer) schedTimer = setInterval(tick, 25);
+    if (!schedTimer) {
+      schedTimer = setInterval(tick, 25);
+    }
     galAmbience(musicStyle === 'andromeda');
-    if (hzS) hzS.crashed = false;
+    if (hzS) {
+      hzS.crashed = false;
+    }
     tensionOn();
     tick();
   } catch (e) {}
 }
 let galAmb = null;
 function galAmbience(on) {
-  if (!AC) return;
+  if (!AC) {
+    return;
+  }
   try {
     const n = AC.currentTime;
     if (galAmb) {
@@ -99,7 +119,9 @@ function galAmbience(on) {
         } catch (e) {}
       });
     }
-    if (!on) return;
+    if (!on) {
+      return;
+    }
     const g = AC.createGain();
     g.gain.setValueAtTime(0.0001, n);
     g.gain.exponentialRampToValueAtTime(0.22, n + 3);
@@ -142,7 +164,9 @@ function stopMusic(quick) {
   try {
     hzDroneStop(quick);
   } catch (e) {}
-  if (!AC) return;
+  if (!AC) {
+    return;
+  }
   try {
     musicOn = false;
     const n = AC.currentTime;
