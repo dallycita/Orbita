@@ -265,7 +265,7 @@ function setup() {
   } catch (e) {}
   ensureRings();
 }
-/** Empieza (o reinicia) una partida: limpia peligros y poderes, prepara la pantalla y la música. */
+/** Empieza o reinicia una partida: limpia peligros y poderes, prepara la pantalla y la música. */
 function start() {
   hot = 0;
   hotT = 0;
@@ -952,7 +952,7 @@ function onLand(isDouble) {
     win();
   }
 }
-/** Marca como quemados los anillos que ya alcanzó el agujero negro (en el nivel 2, con sacudida). */
+/** Marca como quemados los anillos que ya alcanzó el agujero negro (en el nivel 2, sacude). */
 function eatRings() {
   while (lastEaten + 1 <= sunLevel) {
     lastEaten++;
