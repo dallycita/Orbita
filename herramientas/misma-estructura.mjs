@@ -24,6 +24,12 @@ function canon(node){
     const k = node.key.type === 'Identifier' ? node.key.name : String(node.key.value);
     return canon({...node, key: {type: 'Key', name: k}});
   }
+  // `if (a) b;` es lo mismo que `if (a) { b; }` (igual en bucles), salvo si adentro se declara algo
+  for (const k of ['consequent', 'alternate', 'body']){
+    const b = node[k];
+    if (/^(If|For|ForIn|ForOf|While|DoWhile)Statement$/.test(node.type) && b && b.type === 'BlockStatement' && b.body.length === 1 &&
+        !/Declaration$/.test(b.body[0].type)) return canon({...node, [k]: b.body[0]});
+  }
   const keys = Object.keys(node).filter(k => !SKIP.has(k)).sort();
   return '{' + keys.map(k => k + ':' + canon(node[k])).join(',') + '}';
 }
