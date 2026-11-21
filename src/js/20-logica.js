@@ -157,26 +157,6 @@ function update(dt) {
     GLBG.advance(d, 0.35 + (jumping ? 1.1 : 0) + (andFast ? 0.35 : 0), Math.min(1, level / GOAL));
     const bt = andFast ? 3 : level >= 28 ? 2 : level >= 15 ? 1 : 0;
     GLBG.setBand(bt, d);
-    if (false && lvl === 2 && bt > 0 && !seenTypes['luz' + bt]) {
-      seenTypes['luz' + bt] = 1;
-      try {
-        localStorage.setItem('orbita_p1_vistos', JSON.stringify(seenTypes));
-      } catch (e) {}
-      texts.push({
-        txt: [
-          '',
-          'Ultravioleta: brillan las estrellas jóvenes',
-          'Infrarrojo: ahora ves el polvo',
-          'Todas las luces a la vez',
-        ][bt],
-        x: 0,
-        y: -R0 - 130,
-        life: 3.5,
-        size: 11,
-        col: BONE,
-        center: true,
-      });
-    }
     if (wh && wh.ph === 'orb') {
       // dentro del gusano: giras tú sobre el anillo, y la corriente te lanza en el golpe
       pAng = Math.atan2(Math.sin(pAng + wh.dir * ORB_W * d), Math.cos(pAng + wh.dir * ORB_W * d));
