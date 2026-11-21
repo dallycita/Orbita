@@ -1,5 +1,13 @@
-// ---------- el viaje por el Sistema solar: los planetas pasan en el fondo, en su orden real
-// ----------
+/**
+ * Dibuja un cuadro de la partida: cielo, agujero negro, anillos, asteroides, jugador, partículas y
+ * textos, en ese orden (lo de abajo se pinta primero). En el Sistema solar los planetas pasan en el
+ * fondo en su orden real.
+ */
+
+/**
+ * Dibuja la escena completa de la partida en el lienzo principal, con temblor y zoom de cámara.
+ * Lo llama 21-dibujo en cada cuadro de juego.
+ */
 function renderScene() {
   const z = zoneOf(level);
   ctx.save();
@@ -205,7 +213,7 @@ function renderScene() {
       }
     };
     if (!tutorial && k >= level) {
-      // con los cielos nuevos: contorno oscuro detrás y el anillo en blanco más firme
+      // contorno oscuro detrás y el anillo en blanco firme, para que se lea sobre cielos claros
       const ga = ctx.globalAlpha,
         lw = ctx.lineWidth,
         ss = ctx.strokeStyle;
@@ -418,8 +426,7 @@ function renderScene() {
       ctx.globalAlpha = 1;
     }
   }
-  // tu récord marcado en el recorrido: lo ves acercarse
-  // tu récord (donde caíste la última vez): azul, como la Tierra
+  // tu récord (donde caíste la última vez) marcado en el recorrido, en azul como la Tierra
   if (state === 'play' && runRecord > level && runRecord < GOAL) {
     const R = rr(runRecord),
       vis = clamp((250 - R) / 40, 0, 1);
