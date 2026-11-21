@@ -16,7 +16,6 @@ let wh = null,
   gapC = {},
   viewInside = false,
   hideEarth = false;
-const easeC3 = x => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 function whPull(dur) {
   // tirón grave que sube, con el aire que se arrastra hacia la boca
   if (!AC || muted) {
