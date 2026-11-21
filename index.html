@@ -9,24 +9,68 @@
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* base: colores, página y lienzo */
-:root{
-  --bg:#0d1220; --fg:#ece6d8; --muted:#8b8f9e; --sun:#ff5a1f;
-  box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
+:root {
+  --bg: #0d1220;
+  --fg: #ece6d8;
+  --muted: #8b8f9e;
+  --sun: #ff5a1f;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#0d1220; --fg:#ece6d8; } }
-:root[data-theme="dark"]{ --bg:#0d1220; --fg:#ece6d8; }
-html{height:100%;background:var(--bg);scroll-padding-top:env(safe-area-inset-top,0px);}
-body{
-  margin:0;height:100%;background:var(--bg);color:var(--fg);overflow:hidden;
-  font-family:'Unbounded',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
-  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0d1220;
+    --fg: #ece6d8;
+  }
 }
-#wrap{position:relative;width:100%;height:100%;}
-canvas{display:block;width:100%;height:100%;touch-action:none;}
-@keyframes misRot{to{transform:rotate(360deg)}}
-@keyframes misCore{50%{opacity:.7}}
+:root[data-theme='dark'] {
+  --bg: #0d1220;
+  --fg: #ece6d8;
+}
+html {
+  height: 100%;
+  background: var(--bg);
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  overflow: hidden;
+  font-family:
+    'Unbounded',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+#wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+@keyframes misRot {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes misCore {
+  50% {
+    opacity: 0.7;
+  }
+}
 /* botones de navegación compartidos: flechas, volver y chips */
 .arrow svg.arc{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;}
 .arrow .arc path{fill:none;stroke-linecap:round;}
