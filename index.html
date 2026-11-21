@@ -5490,18 +5490,7 @@ const elPbar = document.getElementById('pbar'),
   elPnum = document.getElementById('pnum');
 const elWrap = document.getElementById('scorewrap'),
   elArcFg = document.querySelector('#arc .fg');
-// tres formas de mostrar el récord, para comparar
-const MODES = [
-  ['faltan', 'Faltan N'],
-  ['arco', 'Arco'],
-  ['nada', 'Nada'],
-];
 let hudMode = 'faltan';
-const MUSICS = [
-  ['espacial', 'Espacial'],
-  ['synthwave', 'Synthwave'],
-  ['phonk', 'Phonk'],
-];
 let musicStyle = 'espacial';
 function chipsHTML() {
   return '';
@@ -6801,13 +6790,6 @@ function organ(t0, freqs, dur, gain, bright) {
 // Debajo, un tono que sube sin fin (escala de Shepard): la sensación de que algo se acerca y nunca
 // termina.
 // Todo con una reverberación de varios segundos, como un espacio inmenso y vacío.
-const HZ_PROG = [
-  [0, [0, 3, 7]],
-  [-4, [0, 4, 7]],
-  [1, [0, 4, 7]],
-  [7, [0, 3, 7]],
-]; // i – bVI – bII – v  (Sol# menor, oscura)
-const HZ_EARTH = [24, 15, 19, 15, 22, 15, 19, 15]; // la frase de la Tierra, sobre una nota fija
 let hzS = null;
 function hzEnsure() {
   if (hzS && hzS.ac === AC) {
@@ -8182,7 +8164,6 @@ try {
 } catch (e) {
   attempts = 0;
 }
-const veterano = attempts > 0;
 // ---- tutorial: los primeros 10 anillos de la huida, una cosa a la vez ----
 const TUT_GOAL = 10;
 const TUT_TYPES = [
@@ -8392,9 +8373,7 @@ function bassBreath() {
     ? 0.5 - 0.5 * Math.cos(2 * Math.PI * frac(beatTime() / (2 * TB)))
     : 0;
 }
-let jumpOnBeat = false,
-  lastBeatIdx = -1;
-const ON_BEAT = 0.055;
+let lastBeatIdx = -1;
 function beatTime() {
   return AC && musicStart >= 0
     ? AC.currentTime - musicStart - (AC.outputLatency || AC.baseLatency || 0)
@@ -8932,8 +8911,7 @@ function usePower(mid) {
   usedDouble = true;
   noteDouble();
   buzz([15, 30, 25]);
-  const nr = rings.get(level + 1),
-    Rn = rr(level + 1);
+  const nr = rings.get(level + 1);
   if (id === 'marte') {
     // Monte Olimpo: salto triple
     const up = Math.min(3, curGoal() - level);
@@ -10724,7 +10702,6 @@ let wh = null,
   gapC = {},
   viewInside = false,
   hideEarth = false;
-const easeC3 = x => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 function whPull(dur) {
   // tirón grave que sube, con el aire que se arrastra hacia la boca
   if (!AC || muted) {
@@ -12016,7 +11993,6 @@ function drawNova(ring, Rw, a, next) {
     x = CX + Math.cos(na) * Rw * S,
     y = CY + Math.sin(na) * Rw * S;
   const charge = Math.min(3, Math.floor(tau / TB)),
-    toBurst = bar - tau,
     e = novaEnv(tau);
   const grow = tau > 0.9 ? (tau - 0.9) / (bar - 0.9) : 0; // crece mientras se acerca el estallido
   const r0 = (4.6 + 3.5 * grow * grow + 7 * e) * S,
@@ -12798,7 +12774,6 @@ function start() {
 setup();
 
 const rr = k => R0 + (k - camLevel) * GAP;
-const PW = () => 1.1 + Math.min(level * 0.015, 1.0);
 
 // distancia libre entre la luna y el asteroide más cercano del anillo k
 function clearance(k, onlyApproaching) {
@@ -12862,22 +12837,11 @@ function upgradeToDouble() {
   buzz([15, 30, 25]);
 }
 // ---- la Tierra escapa: fuera del alcance del agujero negro ----
-const LV_END = [
-  'La Tierra dejó atrás al agujero negro.',
-  'Cruzaste las Nubes de Magallanes, las dos galaxias que danzan alrededor de la nuestra.',
-  'Escapaste hacia Andrómeda. Algún día, ella también vendrá por nosotros.',
-  'Atravesaste Centaurus A, nacida del choque de dos galaxias.',
-  'Escapaste del Remolino, aunque su vecina lo sigue deformando.',
-  'Dejaste atrás el Sombrero y sus cometas.',
-  'Sobreviviste al chorro de M87, el primer agujero negro fotografiado.',
-  'Volviste al corazón de la Vía Láctea y venciste a su agujero negro. El Sol vuelve a brillar.',
-];
 function win() {
   if (tutorial) {
     tutorialWin();
     return;
   }
-  const firstClear = false;
   const before = unlockedIds();
   misWin(lvl, curPlanet, sesTries);
   state = 'win';
@@ -13427,7 +13391,6 @@ function die(x, y, cause, who) {
   canRestart = false;
   culprit = who || null;
   culpritT = who ? 1.4 : 0;
-  const z = zoneOf(level);
   if (cause === 'sun') {
     const r0 = Math.hypot(x, y);
     swallow = { p: 0, a: Math.atan2(y, x), r: r0, r0, done: false };
@@ -14445,26 +14408,6 @@ function update(dt) {
     GLBG.advance(d, 0.35 + (jumping ? 1.1 : 0) + (andFast ? 0.35 : 0), Math.min(1, level / GOAL));
     const bt = andFast ? 3 : level >= 28 ? 2 : level >= 15 ? 1 : 0;
     GLBG.setBand(bt, d);
-    if (false && lvl === 2 && bt > 0 && !seenTypes['luz' + bt]) {
-      seenTypes['luz' + bt] = 1;
-      try {
-        localStorage.setItem('orbita_p1_vistos', JSON.stringify(seenTypes));
-      } catch (e) {}
-      texts.push({
-        txt: [
-          '',
-          'Ultravioleta: brillan las estrellas jóvenes',
-          'Infrarrojo: ahora ves el polvo',
-          'Todas las luces a la vez',
-        ][bt],
-        x: 0,
-        y: -R0 - 130,
-        life: 3.5,
-        size: 11,
-        col: BONE,
-        center: true,
-      });
-    }
     if (wh && wh.ph === 'orb') {
       // dentro del gusano: giras tú sobre el anillo, y la corriente te lanza en el golpe
       pAng = Math.atan2(Math.sin(pAng + wh.dir * ORB_W * d), Math.cos(pAng + wh.dir * ORB_W * d));
@@ -15432,54 +15375,6 @@ function drawShock() {
 }
 // ---------- el viaje por el Sistema solar: los planetas pasan en el fondo, en su orden real
 // ----------
-// at: en qué parte del nivel (0–1) cruza el centro de la pantalla · x: lado (fracción del ancho) ·
-// r: tamaño (fracción del lado menor)
-const SOLAR_PATH = [
-  { id: 'mercurio', at: 0.07, x: 0.84, r: 0.055 },
-  { id: 'venus', at: 0.16, x: 0.15, r: 0.085 },
-  { id: 'tierra', at: 0.27, x: 0.86, r: 0.09, moon: true },
-  { id: 'marte', at: 0.37, x: 0.13, r: 0.065 },
-  { belt: true, at: 0.47 },
-  { id: 'jupiter', at: 0.59, x: 1.0, r: 0.3 },
-  { id: 'saturno', at: 0.71, x: 0.06, r: 0.17 },
-  { id: 'urano', at: 0.81, x: 0.88, r: 0.1 },
-  { id: 'neptuno', at: 0.9, x: 0.14, r: 0.095 },
-];
-let solarJ = 0,
-  beltRocks = null;
-function drawBgPlanet(id, x, y, R, alpha) {
-  if (!(R > 1)) {
-    return;
-  }
-  let sc = 1;
-  try {
-    const m = ctx.getTransform && ctx.getTransform();
-    sc = m ? Math.hypot(m.a, m.b) : 1;
-  } catch (e) {}
-  // luz: viene del disco del agujero negro, en el centro
-  const lx = CX - x,
-    ly = CY - y,
-    L = Math.hypot(lx, ly) || 1;
-  const res = PLGL.render(
-    id,
-    2 * R * sc * 0.45,
-    t * 0.12,
-    [(lx / L) * 0.9, (-ly / L) * 0.9, 0.35],
-    [1.35, 0.82, 0.58],
-    t,
-  ); // a menor resolución: queda suave, como fuera de foco
-  if (!res) {
-    return;
-  }
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.imageSmoothingEnabled = true;
-  planetRing(id, x, y, R, 'back', false);
-  const h = R * res.pad;
-  ctx.drawImage(res.cv, x - h, y - h, 2 * h, 2 * h);
-  planetRing(id, x, y, R, 'front', false);
-  ctx.restore();
-}
 function renderScene() {
   const z = zoneOf(level);
   ctx.save();
@@ -15926,8 +15821,7 @@ function renderScene() {
   }
   // marca de dónde vas a caer: justo encima de ti
   if (state === 'play' && !jumping) {
-    const Rn = rr(level + 1) * S,
-      Rc = rr(level) * S;
+    const Rn = rr(level + 1) * S;
     ctx.strokeStyle = BONE;
     ctx.globalAlpha = 0.85;
     ctx.lineWidth = 3;
@@ -16236,10 +16130,6 @@ function noteDouble() {
     localStorage.setItem('orbita_p1_dobles', String(doblesHechos));
   } catch (e) {}
 }
-const HINT_TAP =
-  '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4.2" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".55"/><path d="M12 7v10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7" r="1.8" fill="currentColor"/></svg>';
-const HINT_UP =
-  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6.5 10.5 12 5l5.5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const MENU_HTML = () => {
   const L = LEVELS[lvl] || LEVELS[0];
   return (
@@ -17575,23 +17465,6 @@ function lvStarsGot(i) {
     return [];
   }
 }
-const STAR_SVG = on =>
-  '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="' +
-  (on ? '#ffd36b' : 'none') +
-  '" stroke="' +
-  (on ? '#ffe7a8' : 'rgba(236,230,216,.35)') +
-  '" stroke-width="1.4" stroke-linejoin="round"/></svg>';
-// íconos de lo nuevo en cada nivel
-const NEW_ICON = [
-  '<path d="M3 12a9 9 0 0 1 18 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-dasharray="3 2.2"/><circle cx="12" cy="18" r="2.6" fill="currentColor"/>',
-  '<path d="M4 9a8 8 0 0 1 9-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M20 15a8 8 0 0 1-9 5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M12 2.5l2 1.6-2.4 1.1M12 21.5l-2-1.6 2.4-1.1" fill="none" stroke="currentColor" stroke-width="1.8"/>',
-  '<circle cx="8" cy="10" r="5" fill="#ff7fb0" opacity=".8"/><circle cx="17" cy="15" r="2" fill="#bfe0ff"/><path d="M13 19l8-8M13 11l8 8" stroke="#bfe0ff" stroke-width="1.4" opacity=".8"/>',
-  '<path d="M4 8h12l-3-3M20 16H8l3 3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
-  '<ellipse cx="12" cy="12" rx="9" ry="5.5" fill="none" stroke="currentColor" stroke-width="2.2" transform="rotate(-20 12 12)"/><circle cx="12" cy="12" r="2" fill="currentColor"/>',
-  '<circle cx="17" cy="7" r="3" fill="#eaf6ff"/><path d="M15 9L4 20" stroke="#9fd0ff" stroke-width="3" stroke-linecap="round" opacity=".7"/><path d="M15.5 10.5L7 21" stroke="#ffe7b0" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>',
-  '<circle cx="12" cy="12" r="9" fill="none" stroke="#9fd4ff" stroke-width="2" stroke-dasharray="3 2"/><path d="M12 3v18" stroke="#eef7ff" stroke-width="2.6"/>',
-  '<circle cx="12" cy="12" r="4" fill="#000" stroke="#ff8a3d" stroke-width="2"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4M4.5 4.5l2.8 2.8M16.7 16.7l2.8 2.8M4.5 19.5l2.8-2.8M16.7 7.3l2.8-2.8" stroke="#ffe2b0" stroke-width="1.6" stroke-linecap="round"/>',
-];
 // dificultad como gravedad: un mini agujero negro con 4 anillos; los encendidos dicen qué tan
 // fuerte jala
 const GRAV_TIER = { Fácil: 1, Medio: 2, Difícil: 3, 'Muy difícil': 4 };
@@ -17620,8 +17493,7 @@ function renderLevels() {
       pct = Math.round((v / GOAL) * 100),
       done = v >= GOAL,
       got = lvStarsGot(i).length,
-      all6 = got >= 6,
-      tries = attemptsOf(i);
+      all6 = got >= 6;
     const can = L.ready && (i === 0 || levelsUnlocked());
     // estrellas: pastilla junto a la dificultad (solo cuenta las de los anillos reales del nivel)
     const gotR = lvStarsGot(i),
@@ -20197,8 +20069,7 @@ function drawPlanetOrbit(dt, P) {
   pSlots = [];
   for (const it of list) {
     const Q = PLANETS_P[it.i],
-      ok = planetOk(Q),
-      hidden = Q.secret && !ok;
+      ok = planetOk(Q);
     const fade = (1 - Math.max(0, (it.ao - 2.1) / 0.6)) * (it.ao > 0.5 ? 1 - 0.8 * pSK : 1),
       dim = 0.5 + 0.5 * Math.max(0, 1 - it.ao);
     const rr0 = it.r * (Q.id === 'pluton' ? 0.82 : 1);
@@ -22875,8 +22746,7 @@ const GLBG = (() => {
     buf = null,
     failed = false,
     flow = 0,
-    photoTex = {},
-    lastKey = '';
+    photoTex = {};
   function init() {
     if (gl || failed) {
       return !!gl;
@@ -24202,21 +24072,6 @@ function misClaimSound(big) {
     );
   } catch (e) {}
 }
-const MIS_ICO = {
-  perf: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><circle cx="12" cy="12" r="3"/>',
-  streak: '<path d="M5 15l2-4 2 4M10.5 11l2-4 2 4M16 15l2-4 2 4"/><path d="M4 19h16"/>',
-  reach:
-    '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#bfe0ff"/>',
-  rings:
-    '<ellipse cx="12" cy="12" rx="9" ry="3.6"/><ellipse cx="12" cy="12" rx="5.5" ry="2.2"/><circle cx="12" cy="12" r="1.2" fill="#bfe0ff"/>',
-  star: '<path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
-  flag: '<path d="M6 21V4"/><path d="M6 4.5h11l-2.5 3.5L17 11.5H6"/>',
-  onda: '<circle cx="12" cy="12" r="2"/><path d="M7.5 7.5a6.4 6.4 0 0 0 0 9M16.5 7.5a6.4 6.4 0 0 1 0 9M4.6 4.6a10.5 10.5 0 0 0 0 14.8M19.4 4.6a10.5 10.5 0 0 1 0 14.8"/>',
-  power: '<path d="M6 12.5l6-6 6 6M6 18.5l6-6 6 6"/>',
-  one: '<path d="M12 19V5l-3.5 3"/><path d="M8.5 19h7"/>',
-  galaxy: '<path d="M12 12c0-3 3-4.5 5-3s1.5 6-3 7.5-9-1.5-9-6 5-8 9.5-7"/>',
-  q: '<path d="M9.2 9a2.9 2.9 0 1 1 4.2 2.6c-.9.5-1.4 1.1-1.4 2.1v.6"/><path d="M12 17.6v.1"/>',
-};
 const MIS_DICO = {
   perf10: 'perf',
   streak3: 'streak',
