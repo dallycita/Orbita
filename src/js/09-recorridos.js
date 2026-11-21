@@ -75,15 +75,33 @@ const COURSE3 = [
   [3, 'escalera'],
 ]; // nivel 3: 49 anillos + la salida
 const courseMap3 = ['clasico'];
-for (const [n, ty] of COURSE3) for (let i = 0; i < n; i++) courseMap3.push(ty);
-while (courseMap3.length < 60) courseMap3.push('clasico');
+for (const [n, ty] of COURSE3) {
+  for (let i = 0; i < n; i++) {
+    courseMap3.push(ty);
+  }
+}
+while (courseMap3.length < 60) {
+  courseMap3.push('clasico');
+}
 const courseMap2 = ['clasico'];
-for (const [n, ty] of COURSE2) for (let i = 0; i < n; i++) courseMap2.push(ty);
-while (courseMap2.length < 60) courseMap2.push('clasico');
+for (const [n, ty] of COURSE2) {
+  for (let i = 0; i < n; i++) {
+    courseMap2.push(ty);
+  }
+}
+while (courseMap2.length < 60) {
+  courseMap2.push('clasico');
+}
 const courseMap = ['clasico'];
 (function buildCourse() {
-  for (const [n, ty] of COURSE) for (let i = 0; i < n; i++) courseMap.push(ty);
-  while (courseMap.length < 60) courseMap.push('clasico');
+  for (const [n, ty] of COURSE) {
+    for (let i = 0; i < n; i++) {
+      courseMap.push(ty);
+    }
+  }
+  while (courseMap.length < 60) {
+    courseMap.push('clasico');
+  }
 })();
 const ringType = k =>
   tutorial
