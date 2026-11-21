@@ -86,6 +86,7 @@ void main(){
   col = col/(1. + col*.5);
   gl_FragColor = vec4(col, 1.);
 }`;
-// Centaurus A, Remolino, Sombrero, M87 y Sagitario A*: escenas reales con los tonos medidos en fotos de Hubble, ESO, Webb y el EHT
+// Centaurus A, Remolino, Sombrero, M87 y Sagitario A*: escenas reales con los tonos medidos en
+// fotos de Hubble, ESO, Webb y el EHT
 const FS_GX =
   BG_COMMON + GX_BASE + GX_CENTAURUS + GX_REMOLINO + GX_SOMBRERO + GX_M87 + GX_SAGITARIO + GX_FINAL;
