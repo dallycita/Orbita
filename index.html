@@ -17342,7 +17342,12 @@ function remolinoSource() {
 // ---------- tarjetas vivas: cada galaxia se dibuja en movimiento, en tiempo real (WebGL) ----------
 // Una sola escena a pantalla completa detrás de las tarjetas: al deslizar, cada galaxia se mueve con su tarjeta.
 const LVGL = (() => {
-  let gl = null, cv = null, prog = null, U = {}, failed = false, buf = null;
+  let gl = null,
+    cv = null,
+    prog = null,
+    U = {},
+    failed = false,
+    buf = null;
   const FS = `
 precision highp float;
 uniform vec2 uRes; uniform float uT, uKA, uKB, uMix; uniform vec2 uCA, uCB; uniform float uS;
@@ -17482,147 +17487,405 @@ void main(){
   vec2 uv = q/uRes; col *= .5 + .5*smoothstep(1.2, .35, length((uv - .5)*vec2(1.1, .9)));
   gl_FragColor = vec4(max(col, 0.), 1.);
 }`;
-  function init(){
+  function init() {
     if (gl || failed) return !!gl;
-    try{
-      cv = document.createElement('canvas'); gl = cv.getContext && (cv.getContext('webgl', {preserveDrawingBuffer: true, antialias: false}));
-      if (!gl || !gl.createShader){ gl = null; failed = true; return false; }
-      const sh = (ty, src) => { const s = gl.createShader(ty); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)){ console.warn(gl.getShaderInfoLog(s)); return null; } return s; };
-      const v = sh(gl.VERTEX_SHADER, 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }'), f = sh(gl.FRAGMENT_SHADER, FS);
-      if (!v || !f){ gl = null; failed = true; return false; }
-      prog = gl.createProgram(); gl.attachShader(prog, v); gl.attachShader(prog, f); gl.bindAttribLocation(prog, 0, 'p'); gl.linkProgram(prog);
-      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)){ gl = null; failed = true; return false; }
-      ['uRes', 'uT', 'uKA', 'uKB', 'uMix', 'uCA', 'uCB', 'uS'].forEach(k => U[k] = gl.getUniformLocation(prog, k));
-      buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    try {
+      cv = document.createElement('canvas');
+      gl =
+        cv.getContext && cv.getContext('webgl', { preserveDrawingBuffer: true, antialias: false });
+      if (!gl || !gl.createShader) {
+        gl = null;
+        failed = true;
+        return false;
+      }
+      const sh = (ty, src) => {
+        const s = gl.createShader(ty);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+          console.warn(gl.getShaderInfoLog(s));
+          return null;
+        }
+        return s;
+      };
+      const v = sh(
+          gl.VERTEX_SHADER,
+          'attribute vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }',
+        ),
+        f = sh(gl.FRAGMENT_SHADER, FS);
+      if (!v || !f) {
+        gl = null;
+        failed = true;
+        return false;
+      }
+      prog = gl.createProgram();
+      gl.attachShader(prog, v);
+      gl.attachShader(prog, f);
+      gl.bindAttribLocation(prog, 0, 'p');
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+        gl = null;
+        failed = true;
+        return false;
+      }
+      ['uRes', 'uT', 'uKA', 'uKB', 'uMix', 'uCA', 'uCB', 'uS'].forEach(
+        k => (U[k] = gl.getUniformLocation(prog, k)),
+      );
+      buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
       return true;
-    }catch(e){ gl = null; failed = true; return false; }
+    } catch (e) {
+      gl = null;
+      failed = true;
+      return false;
+    }
   }
-  function soft(w, h, ka, kb, mix, ca, cb, scale){
+  function soft(w, h, ka, kb, mix, ca, cb, scale) {
     if (!init()) return null;
-    const q = Math.min(1, 520/Math.max(w, h)), cw = Math.max(2, Math.round(w*q)), ch = Math.max(2, Math.round(h*q));
-    if (cv.width !== cw || cv.height !== ch){ cv.width = cw; cv.height = ch; }
-    gl.viewport(0, 0, cw, ch); gl.useProgram(prog); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-    gl.uniform2f(U.uRes, cw, ch); gl.uniform1f(U.uT, t); gl.uniform1f(U.uKA, ka); gl.uniform1f(U.uKB, kb); gl.uniform1f(U.uMix, mix);
-    gl.uniform2f(U.uCA, ca[0]*q, ca[1]*q); gl.uniform2f(U.uCB, cb[0]*q, cb[1]*q); gl.uniform1f(U.uS, scale*q);
+    const q = Math.min(1, 520 / Math.max(w, h)),
+      cw = Math.max(2, Math.round(w * q)),
+      ch = Math.max(2, Math.round(h * q));
+    if (cv.width !== cw || cv.height !== ch) {
+      cv.width = cw;
+      cv.height = ch;
+    }
+    gl.viewport(0, 0, cw, ch);
+    gl.useProgram(prog);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform2f(U.uRes, cw, ch);
+    gl.uniform1f(U.uT, t);
+    gl.uniform1f(U.uKA, ka);
+    gl.uniform1f(U.uKB, kb);
+    gl.uniform1f(U.uMix, mix);
+    gl.uniform2f(U.uCA, ca[0] * q, ca[1] * q);
+    gl.uniform2f(U.uCB, cb[0] * q, cb[1] * q);
+    gl.uniform1f(U.uS, scale * q);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     return cv;
   }
-  return {soft, ok: () => init()};
+  return { soft, ok: () => init() };
 })();
-let lvCanvas = null, lvArts = [];
+let lvCanvas = null,
+  lvArts = [];
 // ---------- tarjetas: todo lo nítido se dibuja a resolución completa (estrellas, planetas, el Sol, los agujeros negros) ----------
-let lvStars = null, lvSets = null;
-function lvRand(seed){ let s = seed; return () => (s = (s*16807) % 2147483647)/2147483647; }
-function lvPrep(){
+let lvStars = null,
+  lvSets = null;
+function lvRand(seed) {
+  let s = seed;
+  return () => (s = (s * 16807) % 2147483647) / 2147483647;
+}
+function lvPrep() {
   if (lvStars) return;
-  const R = lvRand(9123); lvStars = [];
-  for (let i=0;i<520;i++) lvStars.push({x: R(), y: R(), s: R() < .92 ? .5 + R()*.8 : 1.2 + R()*1.1, tw: R()*6.28, sp: .5 + R()*2, d: R() < .7 ? .3 : 1, c: R() < .5 ? '#ffffff' : R() < .5 ? '#cfe0ff' : '#ffe8cc'});
-  const g = () => (R() + R() + R() - 1.5)/1.5;
+  const R = lvRand(9123);
+  lvStars = [];
+  for (let i = 0; i < 520; i++)
+    lvStars.push({
+      x: R(),
+      y: R(),
+      s: R() < 0.92 ? 0.5 + R() * 0.8 : 1.2 + R() * 1.1,
+      tw: R() * 6.28,
+      sp: 0.5 + R() * 2,
+      d: R() < 0.7 ? 0.3 : 1,
+      c: R() < 0.5 ? '#ffffff' : R() < 0.5 ? '#cfe0ff' : '#ffe8cc',
+    });
+  const g = () => (R() + R() + R() - 1.5) / 1.5;
   lvSets = {
-    1: Array.from({length: 320}, (_, i) => i < 220 ? {x: -.08 + g()*.55, y: .03 + g()*.22, b: R()} : i < 290 ? {x: .85 + g()*.18, y: .62 + g()*.1, b: R()*.7} : {x: .28 + g()*.05, y: -.16 + g()*.05, b: 1}),
-    5: Array.from({length: 150}, () => { const a = R()*6.28, r = Math.abs(g())*1.1 + .1; return {x: Math.cos(a)*r, y: Math.sin(a)*r*.8, b: R()}; }),
-    6: Array.from({length: 260}, () => { const a = R()*6.28, r = Math.abs(g())*.9 + .02; return {x: Math.cos(a)*r, y: Math.sin(a)*r, b: R()}; }),
-    2: Array.from({length: 120}, () => { const a = R()*6.28, r = Math.sqrt(R())*.75; const x = Math.cos(a)*r, y = Math.sin(a)*r*.3, c = Math.cos(-.62), s = Math.sin(-.62); return {x: x*c - y*s, y: x*s + y*c, b: R()}; }),
+    1: Array.from({ length: 320 }, (_, i) =>
+      i < 220
+        ? { x: -0.08 + g() * 0.55, y: 0.03 + g() * 0.22, b: R() }
+        : i < 290
+          ? { x: 0.85 + g() * 0.18, y: 0.62 + g() * 0.1, b: R() * 0.7 }
+          : { x: 0.28 + g() * 0.05, y: -0.16 + g() * 0.05, b: 1 },
+    ),
+    5: Array.from({ length: 150 }, () => {
+      const a = R() * 6.28,
+        r = Math.abs(g()) * 1.1 + 0.1;
+      return { x: Math.cos(a) * r, y: Math.sin(a) * r * 0.8, b: R() };
+    }),
+    6: Array.from({ length: 260 }, () => {
+      const a = R() * 6.28,
+        r = Math.abs(g()) * 0.9 + 0.02;
+      return { x: Math.cos(a) * r, y: Math.sin(a) * r, b: R() };
+    }),
+    2: Array.from({ length: 120 }, () => {
+      const a = R() * 6.28,
+        r = Math.sqrt(R()) * 0.75;
+      const x = Math.cos(a) * r,
+        y = Math.sin(a) * r * 0.3,
+        c = Math.cos(-0.62),
+        s = Math.sin(-0.62);
+      return { x: x * c - y * s, y: x * s + y * c, b: R() };
+    }),
   };
 }
-function lvGlow(x, y, r, col, a){ const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.globalAlpha = a; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); }
-function lvPoints(list, cx, cy, S, col, size){
-  for (const p of list){ const tw = .6 + .4*Math.sin(t*2 + p.b*40); ctx.globalAlpha = (.35 + .65*p.b)*tw*lvA; ctx.fillStyle = col; const s = size*(.6 + p.b); ctx.fillRect(cx + p.x*S - s/2, cy + p.y*S - s/2, s, s); }
+function lvGlow(x, y, r, col, a) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, col);
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.globalAlpha = a;
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
 }
-function lvSpike(x, y, r, a){   // estrella brillante con destellos que se desvanecen (como en las fotos de los telescopios)
-  ctx.globalAlpha = a*lvA; ctx.lineWidth = 1;
-  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]){ const g = ctx.createLinearGradient(x, y, x + dx*r*1.6, y + dy*r*1.6); g.addColorStop(0, 'rgba(235,242,255,.95)'); g.addColorStop(1, 'rgba(235,242,255,0)'); ctx.strokeStyle = g; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx*r*1.6, y + dy*r*1.6); ctx.stroke(); }
-  lvGlow(x, y, r*.7, 'rgba(200,220,255,.55)', a*lvA); lvGlow(x, y, r*.22, 'rgba(255,255,255,1)', a*lvA); }
-function lvKepler(a, e, w, P, M0){ const M = 2*Math.PI*t/P + M0; let E = M; for (let i=0;i<6;i++) E -= (E - e*Math.sin(E) - M)/(1 - e*Math.cos(E));
-  const r = a*(1 - e*Math.cos(E)), nu = 2*Math.atan2(Math.sqrt(1 + e)*Math.sin(E/2), Math.sqrt(1 - e)*Math.cos(E/2)); return [Math.cos(nu + w)*r, Math.sin(nu + w)*r]; }
+function lvPoints(list, cx, cy, S, col, size) {
+  for (const p of list) {
+    const tw = 0.6 + 0.4 * Math.sin(t * 2 + p.b * 40);
+    ctx.globalAlpha = (0.35 + 0.65 * p.b) * tw * lvA;
+    ctx.fillStyle = col;
+    const s = size * (0.6 + p.b);
+    ctx.fillRect(cx + p.x * S - s / 2, cy + p.y * S - s / 2, s, s);
+  }
+}
+function lvSpike(x, y, r, a) {
+  // estrella brillante con destellos que se desvanecen (como en las fotos de los telescopios)
+  ctx.globalAlpha = a * lvA;
+  ctx.lineWidth = 1;
+  for (const [dx, dy] of [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ]) {
+    const g = ctx.createLinearGradient(x, y, x + dx * r * 1.6, y + dy * r * 1.6);
+    g.addColorStop(0, 'rgba(235,242,255,.95)');
+    g.addColorStop(1, 'rgba(235,242,255,0)');
+    ctx.strokeStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + dx * r * 1.6, y + dy * r * 1.6);
+    ctx.stroke();
+  }
+  lvGlow(x, y, r * 0.7, 'rgba(200,220,255,.55)', a * lvA);
+  lvGlow(x, y, r * 0.22, 'rgba(255,255,255,1)', a * lvA);
+}
+function lvKepler(a, e, w, P, M0) {
+  const M = (2 * Math.PI * t) / P + M0;
+  let E = M;
+  for (let i = 0; i < 6; i++) E -= (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+  const r = a * (1 - e * Math.cos(E)),
+    nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
+  return [Math.cos(nu + w) * r, Math.sin(nu + w) * r];
+}
 let lvA = 1;
-const LV_PL = [['mercurio', .022], ['venus', .036], ['tierra', .04], ['marte', .03], ['jupiter', .085], ['saturno', .07]];
-function lvCrisp(k, cx, cy, S, alpha){
-  lvA = alpha; if (alpha < .01) return;
+const LV_PL = [
+  ['mercurio', 0.022],
+  ['venus', 0.036],
+  ['tierra', 0.04],
+  ['marte', 0.03],
+  ['jupiter', 0.085],
+  ['saturno', 0.07],
+];
+function lvCrisp(k, cx, cy, S, alpha) {
+  lvA = alpha;
+  if (alpha < 0.01) return;
   ctx.save();
-  if (k === 0){
+  if (k === 0) {
     // órbitas
-    ctx.globalAlpha = .16*alpha; ctx.strokeStyle = '#b8c4e6'; ctx.lineWidth = 1;
-    for (let i=0;i<6;i++){ const a = (.3 + i*.17)*S; ctx.beginPath(); ctx.ellipse(cx, cy, a, a*.36, 0, 0, Math.PI*2); ctx.stroke(); }
-    const pls = LV_PL.map(([id, r], i) => { const a = .3 + i*.17, ang = t*(.9/Math.pow(a/.3, 1.5))*.35 + i*1.9; return {id, r: r*S, x: cx + Math.cos(ang)*a*S, y: cy + Math.sin(ang)*a*.36*S, front: Math.sin(ang) > 0}; });
-    const drawPl = p => { const dx = cx - p.x, dy = cy - p.y, L = Math.hypot(dx, dy) || 1; ctx.globalAlpha = alpha; drawBigPlanet(p.id, p.x, p.y, Math.max(2, p.r), t*.6, false, {x: dx/L, y: dy/L}); };
+    ctx.globalAlpha = 0.16 * alpha;
+    ctx.strokeStyle = '#b8c4e6';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 6; i++) {
+      const a = (0.3 + i * 0.17) * S;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, a, a * 0.36, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    const pls = LV_PL.map(([id, r], i) => {
+      const a = 0.3 + i * 0.17,
+        ang = t * (0.9 / Math.pow(a / 0.3, 1.5)) * 0.35 + i * 1.9;
+      return {
+        id,
+        r: r * S,
+        x: cx + Math.cos(ang) * a * S,
+        y: cy + Math.sin(ang) * a * 0.36 * S,
+        front: Math.sin(ang) > 0,
+      };
+    });
+    const drawPl = p => {
+      const dx = cx - p.x,
+        dy = cy - p.y,
+        L = Math.hypot(dx, dy) || 1;
+      ctx.globalAlpha = alpha;
+      drawBigPlanet(p.id, p.x, p.y, Math.max(2, p.r), t * 0.6, false, { x: dx / L, y: dy / L });
+    };
     pls.filter(p => !p.front).forEach(drawPl);
     // el Sol: disco nítido con borde más oscuro y manchas que hierven
-    const Rs = .15*S, sg = ctx.createRadialGradient(cx - Rs*.15, cy - Rs*.15, Rs*.05, cx, cy, Rs);
-    sg.addColorStop(0, '#fffdf2'); sg.addColorStop(.45, '#ffeab0'); sg.addColorStop(.8, '#ffc061'); sg.addColorStop(1, '#f08a2c');
-    ctx.globalAlpha = alpha; ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(cx, cy, Rs, 0, Math.PI*2); ctx.fill();
-    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, Rs, 0, Math.PI*2); ctx.clip();
-    for (let i=0;i<26;i++){ const a = i*2.39996 + t*.05*(i % 3 - 1), rr = Math.sqrt((i + .5)/26)*Rs*.95, x = cx + Math.cos(a)*rr, y = cy + Math.sin(a)*rr, p = .5 + .5*Math.sin(t*1.5 + i*1.7);
-      lvGlow(x, y, Rs*(.08 + .06*p), i % 2 ? 'rgba(255,255,240,.4)' : 'rgba(240,150,50,.18)', alpha*.45); }
+    const Rs = 0.15 * S,
+      sg = ctx.createRadialGradient(cx - Rs * 0.15, cy - Rs * 0.15, Rs * 0.05, cx, cy, Rs);
+    sg.addColorStop(0, '#fffdf2');
+    sg.addColorStop(0.45, '#ffeab0');
+    sg.addColorStop(0.8, '#ffc061');
+    sg.addColorStop(1, '#f08a2c');
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = sg;
+    ctx.beginPath();
+    ctx.arc(cx, cy, Rs, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, Rs, 0, Math.PI * 2);
+    ctx.clip();
+    for (let i = 0; i < 26; i++) {
+      const a = i * 2.39996 + t * 0.05 * ((i % 3) - 1),
+        rr = Math.sqrt((i + 0.5) / 26) * Rs * 0.95,
+        x = cx + Math.cos(a) * rr,
+        y = cy + Math.sin(a) * rr,
+        p = 0.5 + 0.5 * Math.sin(t * 1.5 + i * 1.7);
+      lvGlow(
+        x,
+        y,
+        Rs * (0.08 + 0.06 * p),
+        i % 2 ? 'rgba(255,255,240,.4)' : 'rgba(240,150,50,.18)',
+        alpha * 0.45,
+      );
+    }
     ctx.restore();
     pls.filter(p => p.front).forEach(drawPl);
-  } else if (k === 1){
+  } else if (k === 1) {
     lvPoints(lvSets[1], cx, cy, S, '#e8f0ff', 1.4);
-    for (let i=0;i<9;i++){ const a = i*.7 + t*.1, r = (i % 3)*.012*S; lvSpike(cx + .28*S + Math.cos(a)*r, cy - .16*S + Math.sin(a)*r, 5 + (i === 0 ? 5 : 0), .9); }
-  } else if (k === 2){
-    lvPoints(lvSets[2], cx, cy, S, '#dfe6ff', 1.2); lvGlow(cx + .13*S, cy + .1*S, .02*S, 'rgba(255,240,215,.95)', alpha);
-    lvGlow(cx, cy, .025*S, 'rgba(255,250,235,1)', alpha);
-  } else if (k === 3){
-    lvGlow(cx, cy, .03*S, 'rgba(255,245,225,.9)', alpha); lvSpike(cx - .55*S, cy - .4*S, 9, .8); lvSpike(cx + .62*S, cy + .3*S, 7, .7);
-  } else if (k === 4){
-    lvGlow(cx - .1*S, cy + .05*S, .03*S, 'rgba(255,248,230,1)', alpha); lvGlow(cx + .58*S, cy - .52*S, .022*S, 'rgba(255,236,200,1)', alpha); lvSpike(cx - .6*S, cy + .5*S, 8, .7);
-  } else if (k === 5){
+    for (let i = 0; i < 9; i++) {
+      const a = i * 0.7 + t * 0.1,
+        r = (i % 3) * 0.012 * S;
+      lvSpike(
+        cx + 0.28 * S + Math.cos(a) * r,
+        cy - 0.16 * S + Math.sin(a) * r,
+        5 + (i === 0 ? 5 : 0),
+        0.9,
+      );
+    }
+  } else if (k === 2) {
+    lvPoints(lvSets[2], cx, cy, S, '#dfe6ff', 1.2);
+    lvGlow(cx + 0.13 * S, cy + 0.1 * S, 0.02 * S, 'rgba(255,240,215,.95)', alpha);
+    lvGlow(cx, cy, 0.025 * S, 'rgba(255,250,235,1)', alpha);
+  } else if (k === 3) {
+    lvGlow(cx, cy, 0.03 * S, 'rgba(255,245,225,.9)', alpha);
+    lvSpike(cx - 0.55 * S, cy - 0.4 * S, 9, 0.8);
+    lvSpike(cx + 0.62 * S, cy + 0.3 * S, 7, 0.7);
+  } else if (k === 4) {
+    lvGlow(cx - 0.1 * S, cy + 0.05 * S, 0.03 * S, 'rgba(255,248,230,1)', alpha);
+    lvGlow(cx + 0.58 * S, cy - 0.52 * S, 0.022 * S, 'rgba(255,236,200,1)', alpha);
+    lvSpike(cx - 0.6 * S, cy + 0.5 * S, 8, 0.7);
+  } else if (k === 5) {
     lvPoints(lvSets[5], cx, cy, S, '#fff0d8', 1.3);
-  } else if (k === 6){
+  } else if (k === 6) {
     lvPoints(lvSets[6], cx, cy, S, '#ffe9cc', 1.2);
     // el anillo de la primera foto de un agujero negro (más brillante abajo)
-    const r = .065*S;
-    for (let i=0;i<48;i++){ const a0 = i/48*Math.PI*2, a1 = a0 + Math.PI*2/48 + .01, br = .45 + .55*(.5 + .5*Math.sin(a0)) + .1*Math.sin(t*1.3 + a0*2);
-      ctx.globalAlpha = alpha*Math.min(1, br); ctx.strokeStyle = 'rgb(255,' + Math.round(110 + 90*br) + ',' + Math.round(40 + 60*br) + ')'; ctx.lineWidth = r*.32; ctx.beginPath(); ctx.arc(cx, cy, r, a0, a1); ctx.stroke(); }
-    lvGlow(cx, cy, r*2.2, 'rgba(255,120,40,.35)', alpha); ctx.globalAlpha = alpha; ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(cx, cy, r*.78, 0, Math.PI*2); ctx.fill();
-  } else if (k === 7){
+    const r = 0.065 * S;
+    for (let i = 0; i < 48; i++) {
+      const a0 = (i / 48) * Math.PI * 2,
+        a1 = a0 + (Math.PI * 2) / 48 + 0.01,
+        br = 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(a0)) + 0.1 * Math.sin(t * 1.3 + a0 * 2);
+      ctx.globalAlpha = alpha * Math.min(1, br);
+      ctx.strokeStyle =
+        'rgb(255,' + Math.round(110 + 90 * br) + ',' + Math.round(40 + 60 * br) + ')';
+      ctx.lineWidth = r * 0.32;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, a0, a1);
+      ctx.stroke();
+    }
+    lvGlow(cx, cy, r * 2.2, 'rgba(255,120,40,.35)', alpha);
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(cx, cy, r * 0.78, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (k === 7) {
     // Sagitario A*: el mismo agujero negro de la introducción, con las estrellas S que lo orbitan
-    const R = .19*S;
-    const orb = [[.6, .88, .4, 16, 0], [.72, .42, 2.1, 23, 2], [.84, .55, 3.8, 30, 4], [.96, .3, 5.2, 37, 1]];
-    ctx.globalAlpha = .13*alpha; ctx.strokeStyle = '#aebfff'; ctx.lineWidth = 1;
-    for (const [a, e, w] of orb){ ctx.beginPath(); for (let i=0;i<=80;i++){ const E = i/80*Math.PI*2, rr = a*(1 - e*Math.cos(E)), nu = 2*Math.atan2(Math.sqrt(1 + e)*Math.sin(E/2), Math.sqrt(1 - e)*Math.cos(E/2)); const x = cx + Math.cos(nu + w)*rr*S, y = cy + Math.sin(nu + w)*rr*S*.55; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke(); }
-    const sp = orb.map(([a, e, w, P, M0]) => { const [x, y] = lvKepler(a, e, w, P, M0); return [cx + x*S, cy + y*S*.55, y]; });
+    const R = 0.19 * S;
+    const orb = [
+      [0.6, 0.88, 0.4, 16, 0],
+      [0.72, 0.42, 2.1, 23, 2],
+      [0.84, 0.55, 3.8, 30, 4],
+      [0.96, 0.3, 5.2, 37, 1],
+    ];
+    ctx.globalAlpha = 0.13 * alpha;
+    ctx.strokeStyle = '#aebfff';
+    ctx.lineWidth = 1;
+    for (const [a, e, w] of orb) {
+      ctx.beginPath();
+      for (let i = 0; i <= 80; i++) {
+        const E = (i / 80) * Math.PI * 2,
+          rr = a * (1 - e * Math.cos(E)),
+          nu =
+            2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
+        const x = cx + Math.cos(nu + w) * rr * S,
+          y = cy + Math.sin(nu + w) * rr * S * 0.55;
+        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      }
+      ctx.stroke();
+    }
+    const sp = orb.map(([a, e, w, P, M0]) => {
+      const [x, y] = lvKepler(a, e, w, P, M0);
+      return [cx + x * S, cy + y * S * 0.55, y];
+    });
     sp.filter(s => s[2] < 0).forEach(s => lvSpike(s[0], s[1], 8, 1));
     ctx.globalAlpha = alpha;
-    const g = ctx.createRadialGradient(cx, cy, R, cx, cy, R*4.2); g.addColorStop(0, 'rgba(255,100,28,.24)'); g.addColorStop(1, 'rgba(255,100,28,0)'); ctx.fillStyle = g; ctx.fillRect(cx - R*4.2, cy - R*4.2, R*8.4, R*8.4);
-    bhDiskK(cx, cy, R, SK, BR0, BR1, Math.PI - .03, Math.PI*2 + .03, alpha);
+    const g = ctx.createRadialGradient(cx, cy, R, cx, cy, R * 4.2);
+    g.addColorStop(0, 'rgba(255,100,28,.24)');
+    g.addColorStop(1, 'rgba(255,100,28,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(cx - R * 4.2, cy - R * 4.2, R * 8.4, R * 8.4);
+    bhDiskK(cx, cy, R, SK, BR0, BR1, Math.PI - 0.03, Math.PI * 2 + 0.03, alpha);
     bhCore(cx, cy, R, alpha);
     bhDiskK(cx, cy, R, SK, BR0, BR1, 0, Math.PI, alpha);
     sp.filter(s => s[2] >= 0).forEach(s => lvSpike(s[0], s[1], 8, 1));
   }
-  ctx.restore(); ctx.globalAlpha = 1;
+  ctx.restore();
+  ctx.globalAlpha = 1;
 }
 // escala de cada galaxia dentro de su zona: Sistema solar, Magallanes, Andrómeda, Centaurus A, Remolino, Sombrero, M87, Sagitario A*
-const LV_SCALE = [1.0, .9, 1.22, .95, .88, 1.12, 1.6, 1.02];
-function drawLevelsBG(){
+const LV_SCALE = [1.0, 0.9, 1.22, 0.95, 0.88, 1.12, 1.6, 1.02];
+function drawLevelsBG() {
   if (!elLv || !elLv.querySelector) return;
-  const track = elLv.querySelector('.track'); if (!track) return;
+  const track = elLv.querySelector('.track');
+  if (!track) return;
   lvPrep();
-  const pos = track.scrollLeft/Math.max(1, track.clientWidth);
-  const ka = Math.max(0, Math.min(LEVELS.length - 1, Math.floor(pos))), kb = Math.min(LEVELS.length - 1, ka + 1), mix = Math.min(1, Math.max(0, pos - ka));
-  const cen = i => { const a = lvArts[i]; if (!a || !a.getBoundingClientRect) return [W/2 - (i - pos)*0, H*.3]; const r = a.getBoundingClientRect(); return [r.left + r.width/2, r.top + r.height/2]; };
-  const art = lvArts[ka], ar = art && art.getBoundingClientRect ? art.getBoundingClientRect() : null;
-  const sz = (ar ? Math.min(ar.width, ar.height) : Math.min(W, H)*.46)*.95;
+  const pos = track.scrollLeft / Math.max(1, track.clientWidth);
+  const ka = Math.max(0, Math.min(LEVELS.length - 1, Math.floor(pos))),
+    kb = Math.min(LEVELS.length - 1, ka + 1),
+    mix = Math.min(1, Math.max(0, pos - ka));
+  const cen = i => {
+    const a = lvArts[i];
+    if (!a || !a.getBoundingClientRect) return [W / 2 - (i - pos) * 0, H * 0.3];
+    const r = a.getBoundingClientRect();
+    return [r.left + r.width / 2, r.top + r.height / 2];
+  };
+  const art = lvArts[ka],
+    ar = art && art.getBoundingClientRect ? art.getBoundingClientRect() : null;
+  const sz = (ar ? Math.min(ar.width, ar.height) : Math.min(W, H) * 0.46) * 0.95;
   // cada destino con el mismo peso visual: los objetos chicos (M87, Sombrero…) se agrandan, sin salirse de la pantalla
-  const scl = k => Math.min(sz*(LV_SCALE[k] || 1), W*.92, (ar ? ar.height : H)*1.25);
-  const zA = 1, zB = 1;
-  const A = cen(ka), B = cen(kb);
-  ctx.save(); ctx.globalAlpha = 1; ctx.fillStyle = '#05060c'; ctx.fillRect(0, 0, W, H);
-  const soft = LVGL.soft(W, H, ka, kb, mix, A, B, scl(ka)*zA*(1 - mix) + scl(kb)*zB*mix);
-  if (soft){ ctx.imageSmoothingEnabled = true; ctx.drawImage(soft, 0, 0, W, H); }
+  const scl = k => Math.min(sz * (LV_SCALE[k] || 1), W * 0.92, (ar ? ar.height : H) * 1.25);
+  const zA = 1,
+    zB = 1;
+  const A = cen(ka),
+    B = cen(kb);
+  ctx.save();
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#05060c';
+  ctx.fillRect(0, 0, W, H);
+  const soft = LVGL.soft(W, H, ka, kb, mix, A, B, scl(ka) * zA * (1 - mix) + scl(kb) * zB * mix);
+  if (soft) {
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(soft, 0, 0, W, H);
+  }
   // estrellas nítidas, en dos profundidades
   // paralaje: al deslizar, las estrellas lejanas se mueven poco y las cercanas más (profundidad, sin efectos bruscos)
-  for (const s of lvStars){
-    const x = ((s.x*W - t*(s.d < .5 ? 2 : 5) - pos*W*(.05 + .22*s.d)) % W + W) % W, y = s.y*H;
-    ctx.globalAlpha = (.25 + .5*s.d)*(.65 + .35*Math.sin(t*s.sp + s.tw)); ctx.fillStyle = s.c; ctx.fillRect(x, y, s.s, s.s);
+  for (const s of lvStars) {
+    const x = (((s.x * W - t * (s.d < 0.5 ? 2 : 5) - pos * W * (0.05 + 0.22 * s.d)) % W) + W) % W,
+      y = s.y * H;
+    ctx.globalAlpha = (0.25 + 0.5 * s.d) * (0.65 + 0.35 * Math.sin(t * s.sp + s.tw));
+    ctx.fillStyle = s.c;
+    ctx.fillRect(x, y, s.s, s.s);
   }
-  if (mix < .999) lvCrisp(ka, A[0], A[1], scl(ka)*zA, 1 - mix);
-  if (mix > .001) lvCrisp(kb, B[0], B[1], scl(kb)*zB, mix);
+  if (mix < 0.999) lvCrisp(ka, A[0], A[1], scl(ka) * zA, 1 - mix);
+  if (mix > 0.001) lvCrisp(kb, B[0], B[1], scl(kb) * zB, mix);
   ctx.restore();
   elLv.classList.toggle('live', !!soft);
 }
-
-
 // ---------- misiones y polvo estelar ----------
 // estrellas = habilidad (desbloquean) · polvo estelar = constancia (compra). Diarias: tres al día, cambian a medianoche.
 // el ícono de Misiones en el inicio: una constelación de tres estrellas (una por misión del día) dentro de un arco de progreso;
