@@ -91,7 +91,7 @@ Todo lo que existe hoy en el juego es **FIJO**:
 
 ---
 
-## Fases (en este orden: de menos riesgo a más)
+## Fases (en este orden: de menos riesgo a más; las fases 9 a 17 necesitan la 8)
 
 ### Fase 0 · Quitar las cabeceras de dependencias
 
@@ -199,9 +199,104 @@ En la fase 8 los módulos de verdad (`import`/`export`) reemplazan esto de forma
 - Cambia los archivos de `src/js` a módulos con `import`/`export`. Cada archivo declara lo que usa en sus `import`, que es la forma normal de hacer lo que hacían las cabeceras.
 - `build.mjs` los une en el mismo `index.html` de un solo archivo, con un empaquetador como esbuild.
 - **El estado compartido** que hoy cambian varios archivos (`state`, `level`, `t`, `paused`…) va en un objeto (`game.state`, `game.level`…), porque un módulo no puede reasignar una variable de otro.
-- **Hazlo un archivo a la vez**, con la huella después de cada uno. Si se complica, se detiene aquí: las fases 0 a 7 ya dejan el código limpio.
+- **Hazlo un archivo a la vez**, con la huella después de cada uno. Si se complica, se detiene aquí: las fases 0 a 7 ya dejan el código limpio, y de las siguientes se pueden hacer las que no dependen de módulos (10, 11, 14, 15, 16, 17).
 
-### Fase 9 · Cierre
+### Fase 9 · Carpetas por tema
+
+Cuando el código ya sean módulos, quita los números de los nombres de archivo y ordénalos por tema:
+
+```
+src/
+  core/       bucle principal, pantalla y medidas, estado del juego
+  game/       anillos, saltos, peligros, poderes, gusano, tutorial
+  render/     dibujo de la partida, asteroides, planetas, efectos
+  shaders/    un .glsl por galaxia y un archivo común
+  audio/      motor de sonido, música, efectos, sonidos de interfaz
+  screens/    inicio, niveles, planetas, misiones, pausa, panel
+  data/       niveles, planetas, misiones, peligros, textos
+  css/        un archivo por pantalla (igual que hoy)
+```
+
+Cada archivo tiene un solo tema. Si un archivo pasa de unas 400 líneas, probablemente se puede partir.
+
+### Fase 10 · Datos separados de la lógica
+
+- Los recorridos de cada nivel (`COURSE`, `COURSE2`, `COURSE3` y los demás), los datos de los planetas, las misiones y los horarios de peligros pasan a `src/data/`, como objetos de datos sin lógica.
+- **Todos los textos que ve el jugador** van en un solo archivo, `src/data/textos.js`: botones, tips del tutorial, nombres de anillos, misiones y mensajes. El código los usa por su clave. Así se puede traducir el juego algún día.
+- Los valores no cambian (son FIJOS); solo cambian de lugar.
+
+### Fase 11 · Sin HTML armado con texto
+
+Las pantallas que hoy se arman pegando texto (`'<div class="mlv">Nivel ' + … + '</div>'` con `innerHTML`) pasan a una de estas dos formas:
+
+- **Plantillas** `<template>` en `src/index.html`, que el código copia y llena.
+- **Funciones pequeñas** que crean cada pieza con `document.createElement`.
+
+El HTML final de cada pantalla debe ser idéntico. La huella compara los estilos calculados de cada elemento.
+
+### Fase 12 · Funciones gigantes partidas
+
+- **Anillos:** `makeRing` deja de ser un `if / else if` por tipo. Se convierte en una tabla con una función por tipo de anillo (`clasico`, `muralla`, `respiracion`, `escalera`, `marea`, `freno`, `nova`, `arrastre`, `orbita`…).
+  - **Cuidado:** cada tipo debe llamar a `rng()` las mismas veces y en el mismo orden que hoy.
+- **Poderes:** cada planeta tiene un objeto con `activate`, `update` y `draw`, en vez de condiciones repartidas por `update` y `render`.
+- **Pantallas:** se hace una máquina de estados. Cada pantalla (presentación, intro, inicio, niveles, planetas, partida, pausa) es un objeto con `enter`, `update`, `render` y `exit`. `frame()` solo llama a la pantalla actual, en vez de la cadena de `if (state === …)`.
+- **`update` y `render`** se parten en funciones con nombre, como `updateRings`, `updatePlayer`, `updateHazards`, `drawRings`, `drawPlayer` y `drawHud`. **El orden en que se llaman no cambia.**
+
+### Fase 13 · Estado agrupado
+
+Las variables sueltas de la partida (`level`, `combo`, `score`, `charge`, `shieldT`, `ghostT`, `jumping`…) se agrupan en objetos con sentido:
+
+- `run`: la partida actual;
+- `player`;
+- `camera`;
+- `settings`;
+- `audioState`.
+
+Lo que se reinicia al empezar una partida queda en `run`, y `setup()` crea un `run` nuevo con los mismos valores iniciales de hoy.
+
+### Fase 14 · Sin código repetido
+
+Ayudantes para lo que hoy se repite:
+
+- **`storage.get(clave, valorPorDefecto)` y `storage.set(clave, valor)`**, con el `try/catch` adentro, en vez de repetirlo en decenas de lugares. Las claves siguen siendo exactamente las mismas (FIJO).
+- **Intentos por nivel:** las cuatro ramas de `start()` (`attempts`, `attempts2`, `attempts3`, `attX`) se cambian por un ayudante que guarda en la misma clave de siempre.
+- **`dom.js`**, con todas las referencias a elementos de la página (`getElementById`) en un solo lugar.
+- **Funciones GLSL repetidas entre shaders** (ruido, hash, fbm…) en un archivo común que el armado agrega a cada shader. Solo si el código es idéntico en todos; si una versión es distinta, se queda separada.
+- **Patrones de dibujo repetidos**, como degradados radiales del mismo estilo, en funciones con nombre.
+
+### Fase 15 · Tipos y revisión automática
+
+- Activa `// @ts-check` en cada archivo, con los tipos en JSDoc (`jsconfig.json` ya existe), para que VS Code marque errores mientras se escribe.
+- Configura ESLint con reglas claras:
+  - `prefer-const`;
+  - `no-var`;
+  - `eqeqeq`;
+  - `no-unused-vars`;
+  - un límite de complejidad por función.
+
+  Arregla lo que marque sin cambiar el comportamiento.
+
+### Fase 16 · Pruebas pequeñas
+
+Agrega pruebas con `node:test` para las funciones de cálculo puro, por ejemplo:
+
+- el tamaño de los asteroides (`obsRad`);
+- la seguridad de un salto;
+- la carga de los poderes (`chargeMax`);
+- la generación de anillos con una semilla fija.
+
+Se corren con `npm test`. La huella sigue siendo la prueba principal de que el juego no cambió.
+
+### Fase 17 · Documentación y orden del repositorio
+
+- **`docs/arquitectura.md`:** cómo funciona el juego por dentro, con un diagrama del bucle (toque → `update` → `render`), las pantallas y cómo se comunican los módulos.
+- **Guías cortas:** `docs/agregar-un-nivel.md` y `docs/agregar-un-planeta.md`.
+- **`CONTRIBUTING.md`:** cómo trabajar, las reglas de estilo y cómo comprobar con la huella.
+- **`CHANGELOG.md`:** qué trae cada versión, y etiquetas de versión en git (`v1.0`…).
+- **`package.json`:** nombre, versión y descripción. Archivo `LICENSE` (preguntar a Dally cuál).
+- **Las carpetas `diseno/` y `versiones-anteriores/`** salen del código; preguntar a Dally si van a otra carpeta o a otro repositorio. Las ideas de `orbita_ideas_pendientes.md` pueden pasar a *Issues* de GitHub.
+
+### Fase 18 · Cierre
 
 - Actualiza `README.md`: estructura, cómo correr, cómo probar y las reglas de estilo.
 - GitHub Actions revisa también `npm run format:check` y ESLint.
