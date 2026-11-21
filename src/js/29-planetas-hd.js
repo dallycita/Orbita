@@ -1173,8 +1173,7 @@ function drawPlanetOrbit(dt, P) {
   pSlots = [];
   for (const it of list) {
     const Q = PLANETS_P[it.i],
-      ok = planetOk(Q),
-      hidden = Q.secret && !ok;
+      ok = planetOk(Q);
     const fade = (1 - Math.max(0, (it.ao - 2.1) / 0.6)) * (it.ao > 0.5 ? 1 - 0.8 * pSK : 1),
       dim = 0.5 + 0.5 * Math.max(0, 1 - it.ao);
     const rr0 = it.r * (Q.id === 'pluton' ? 0.82 : 1);
