@@ -15,7 +15,9 @@ let wh = null,
 const easeC3 = x => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 function whPull(dur) {
   // tirón grave que sube, con el aire que se arrastra hacia la boca
-  if (!AC || muted) return;
+  if (!AC || muted) {
+    return;
+  }
   try {
     const n = AC.currentTime,
       o = AC.createOscillator(),
@@ -47,7 +49,9 @@ function whPull(dur) {
 }
 function whBoom() {
   // golpe con eco al salir
-  if (!AC || muted) return;
+  if (!AC || muted) {
+    return;
+  }
   try {
     const n = AC.currentTime;
     dKick(n);
@@ -116,7 +120,9 @@ function whInDone() {
   wh.gapB = 4;
   wh.nextB = bi + 3 + (bi % 2);
   try {
-    if (AC) impact(AC.currentTime);
+    if (AC) {
+      impact(AC.currentTime);
+    }
   } catch (e) {}
   buzz(30);
   thump();
@@ -192,7 +198,9 @@ function whOutDone() {
   }
 }
 function whTap() {
-  if (!wh || wh.ph !== 'orb') return;
+  if (!wh || wh.ph !== 'orb') {
+    return;
+  }
   wh.dir *= -1;
   wh.flipT = 1;
   noise(0.06, 2500, 7000, 0.07, 'highpass');
@@ -223,18 +231,24 @@ function whTrans(dt) {
         s: 1.4,
       });
     }
-    if (p >= 1) whInDone();
+    if (p >= 1) {
+      whInDone();
+    }
   } else {
     const p = clamp(wh.t / WH_OUT, 0, 1),
       e = 1 - Math.pow(1 - p, 3);
     bend.grow = 1 + (WH_G - 1) * Math.pow(1 - e, 2.2);
     bend.str = 1 - clamp((p - 0.7) / 0.3, 0, 1); // la boca se encoge detrás de ti y se apaga
-    if (p >= 1) whOutDone();
+    if (p >= 1) {
+      whOutDone();
+    }
   }
 }
 // el anillo de luz del portal, con los colores separados como en una lente real
 function chromaRing(x, y, R, al, w) {
-  if (R < 1 || al <= 0.01) return;
+  if (R < 1 || al <= 0.01) {
+    return;
+  }
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   ctx.globalAlpha = al * 0.25;
@@ -260,7 +274,9 @@ function chromaRing(x, y, R, al, w) {
 }
 // cómo se ve todo estando dentro: el mismo cielo y los mismos anillos, vistos a través de la garganta del gusano
 function drawInside(al) {
-  if (al <= 0.01) return;
+  if (al <= 0.01) {
+    return;
+  }
   const bt = beatTime(),
     bk = beatKick(),
     D = Math.hypot(W, H) * 0.5,
@@ -306,7 +322,9 @@ function drawInside(al) {
   }
   ctx.restore();
   chromaRing(CX, CY, r0 * 0.9, al * 0.55, 1.6);
-  if (!wh || wh.ph !== 'orb' || state !== 'play') return;
+  if (!wh || wh.ph !== 'orb' || state !== 'play') {
+    return;
+  }
   // hacia dónde giras: tres flechitas delante de la Tierra, sobre tu anillo
   const R = rr(pLevel) * S,
     fl = wh.flipT || 0;
