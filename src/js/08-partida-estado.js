@@ -7,7 +7,6 @@ try {
 } catch (e) {
   attempts = 0;
 }
-const veterano = attempts > 0;
 // ---- tutorial: los primeros 10 anillos de la huida, una cosa a la vez ----
 const TUT_GOAL = 10;
 const TUT_TYPES = [
