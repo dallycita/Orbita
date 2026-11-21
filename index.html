@@ -22745,7 +22745,9 @@ const GLBG = (() => {
     photoTex = {},
     lastKey = '';
   function init() {
-    if (gl || failed) return !!gl;
+    if (gl || failed) {
+      return !!gl;
+    }
     try {
       if (!document.createElement) {
         failed = true;
@@ -22773,7 +22775,9 @@ const GLBG = (() => {
     }
   }
   function prog(name, fs) {
-    if (progs[name] !== undefined) return progs[name];
+    if (progs[name] !== undefined) {
+      return progs[name];
+    }
     const sh = (type, src) => {
       const s = gl.createShader(type);
       gl.shaderSource(s, src);
@@ -22820,7 +22824,9 @@ const GLBG = (() => {
   }
   // carga una fotografía (url o data:) como textura
   function photo(name, src) {
-    if (photoTex[name]) return photoTex[name];
+    if (photoTex[name]) {
+      return photoTex[name];
+    }
     const rec = (photoTex[name] = { ready: false, w: 1, h: 1, tex: null });
     if (src && src.getContext) {
       try {
@@ -22840,7 +22846,9 @@ const GLBG = (() => {
     try {
       const img = new Image();
       img.onload = () => {
-        if (!gl) return;
+        if (!gl) {
+          return;
+        }
         rec.tex = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, rec.tex);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
@@ -22858,7 +22866,9 @@ const GLBG = (() => {
   }
   // dibuja el fondo del nivel; devuelve false si no se pudo (y el juego usa el fondo anterior)
   function draw(kind, opts) {
-    if (!init()) return false;
+    if (!init()) {
+      return false;
+    }
     const p =
       kind === 'photo'
         ? prog('photo', FS_PHOTO)
@@ -22871,11 +22881,15 @@ const GLBG = (() => {
               : kind === 'gx'
                 ? prog('gx', FS_GX)
                 : prog('and', FS_AND);
-    if (!p) return false;
+    if (!p) {
+      return false;
+    }
     let rec = null;
     if (kind === 'photo') {
       rec = photo(opts.name, opts.src);
-      if (!rec.ready) return false;
+      if (!rec.ready) {
+        return false;
+      }
     }
     const sc =
         kind === 'mw' || kind === 'lmc' || kind === 'and2' || kind === 'gx'
@@ -22898,17 +22912,30 @@ const GLBG = (() => {
     gl.uniform1f(p.U.uT, t);
     gl.uniform1f(p.U.uFlow, flow);
     gl.uniform1f(p.U.uBeat, opts.beat || 0);
-    if (p.U.uJour) gl.uniform1f(p.U.uJour, jour);
-    if (p.U.uSpd) gl.uniform1f(p.U.uSpd, spd);
-    if (p.U.uBand) gl.uniform1f(p.U.uBand, bandE);
+    if (p.U.uJour) {
+      gl.uniform1f(p.U.uJour, jour);
+    }
+    if (p.U.uSpd) {
+      gl.uniform1f(p.U.uSpd, spd);
+    }
+    if (p.U.uBand) {
+      gl.uniform1f(p.U.uBand, bandE);
+    }
     gl.uniform3f(p.U.uBH, CX * sc, CY * sc, Rg * 1.9 * sc);
     if (p.U.uWH) {
       const wh = opts.wh;
-      if (wh) gl.uniform4f(p.U.uWH, wh[0] * sc, (H - wh[1]) * sc, wh[2] * sc, wh[3]);
-      else gl.uniform4f(p.U.uWH, 0, 0, 1, 0);
+      if (wh) {
+        gl.uniform4f(p.U.uWH, wh[0] * sc, (H - wh[1]) * sc, wh[2] * sc, wh[3]);
+      } else {
+        gl.uniform4f(p.U.uWH, 0, 0, 1, 0);
+      }
     }
-    if (p.U.uScale) gl.uniform1f(p.U.uScale, Math.max(W, H) * sc * 0.9);
-    if (p.U.uKind) gl.uniform1f(p.U.uKind, opts.kind || 0);
+    if (p.U.uScale) {
+      gl.uniform1f(p.U.uScale, Math.max(W, H) * sc * 0.9);
+    }
+    if (p.U.uKind) {
+      gl.uniform1f(p.U.uKind, opts.kind || 0);
+    }
     if (rec) {
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, rec.tex);
@@ -22931,7 +22958,9 @@ const GLBG = (() => {
   function advance(d, speed, target) {
     flow += d * speed;
     spd += (Math.min(speed, 3) / 3 - spd) * Math.min(1, d * 4);
-    if (target !== undefined) jour += (target - jour) * Math.min(1, d * 1.5);
+    if (target !== undefined) {
+      jour += (target - jour) * Math.min(1, d * 1.5);
+    }
   }
   // cambia de luz al ritmo de la canción: 15 entran los platillos, 28 el bombo, y el beat acelerado
   function setBand(target, d) {
