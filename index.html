@@ -8819,7 +8819,9 @@ let ghostT = 0,
   burnT = 0,
   ringBoostNow = 0;
 function strainNow() {
-  if (tutorial || state !== 'play') return 0;
+  if (tutorial || state !== 'play') {
+    return 0;
+  }
   const frag = clamp(-pst().res / 50, 0, 1),
     near = clamp((1.5 - (pLevel - sunLevel - catchMargin())) / 1.1, 0, 1);
   return near * (0.25 + 0.75 * frag);
@@ -8877,7 +8879,7 @@ function powerShout(col) {
 function usePower(mid) {
   const id = curPlanet;
   if (id === 'pluton') {
-    if (!texts.some(x => x.key === 'pow'))
+    if (!texts.some(x => x.key === 'pow')) {
       texts.push({
         txt: shieldLeft > 0 ? 'Caronte está listo: te salvará una vez' : 'Caronte ya te salvó',
         x: 0,
@@ -8888,6 +8890,7 @@ function usePower(mid) {
         center: true,
         key: 'pow',
       });
+    }
     return;
   }
   charge = 0;
@@ -8947,7 +8950,9 @@ function usePower(mid) {
         ])
         .sort((a, b) => a[0] - b[0])
         .slice(0, 2);
-      for (const [, o] of near) o.melt = t;
+      for (const [, o] of near) {
+        o.melt = t;
+      }
       nr.heatT = 1;
     }
     pfx.push({ k: 'calor', t: 0 });
@@ -8994,10 +8999,11 @@ function usePower(mid) {
     pfx.push({ k: 'viento', t: 0 });
     noise(0.6, 2500, 600, 0.2, 'bandpass');
     try {
-      if (AC)
+      if (AC) {
         [0, 7, 12].forEach((sm, i) =>
           uiTone(ROOT * 2 * Math.pow(2, sm / 12), AC.currentTime + i * 0.07, 0.9, 0.035),
         );
+      }
     } catch (e) {}
     powerShout('#9cc0ff');
   } else if (id === 'sol') {
@@ -9038,7 +9044,9 @@ function vaporize(ring, o, x, y) {
 }
 // Caronte (Plutón): si algo te iba a destruir, tu luna se interpone una vez
 function caronteSaves(x, y, tx, ty) {
-  if (tutorial || curPlanet !== 'pluton' || shieldLeft <= 0 || charge < chargeMax()) return false;
+  if (tutorial || curPlanet !== 'pluton' || shieldLeft <= 0 || charge < chargeMax()) {
+    return false;
+  }
   const ta = tx !== undefined ? Math.atan2(ty - y, tx - x) : Math.atan2(-y, -x);
   pfx.push({ k: 'caronte', t: 0, x, y, a: ta, ca: caronteAng() });
   shieldLeft = 0;
@@ -9094,10 +9102,11 @@ function ringSpark(x, y) {
     });
   }
   try {
-    if (AC && !muted)
+    if (AC && !muted) {
       [19, 24].forEach((sm, i) =>
         uiTone(ROOT * 2 * Math.pow(2, sm / 12), AC.currentTime + i * 0.04, 0.4, 0.03),
       );
+    }
   } catch (e) {}
 }
 function powerUpdate(dt, d) {
@@ -9106,15 +9115,25 @@ function powerUpdate(dt, d) {
   burnT = Math.max(0, burnT - dt);
   eclipseT = Math.max(0, eclipseT - dt);
   predT = Math.max(0, predT - dt);
-  if (eclipseT > 0 && slowTimer > 0) timeScale = 0.42;
+  if (eclipseT > 0 && slowTimer > 0) {
+    timeScale = 0.42;
+  }
   for (const r of rings.values()) {
-    if (r.revT) r.revT = Math.max(0, r.revT - dt * 1.2);
-    if (r.windT) r.windT = Math.max(0, r.windT - dt * 1.5);
-    if (r.heatT) r.heatT = Math.max(0, r.heatT - dt * 0.9);
-    for (const o of r.obs)
+    if (r.revT) {
+      r.revT = Math.max(0, r.revT - dt * 1.2);
+    }
+    if (r.windT) {
+      r.windT = Math.max(0, r.windT - dt * 1.5);
+    }
+    if (r.heatT) {
+      r.heatT = Math.max(0, r.heatT - dt * 0.9);
+    }
+    for (const o of r.obs) {
       if (o.melt && !o.gone && t - o.melt > (o.burn ? 0.16 : 0.7)) {
         o.gone = true;
-        if (o.burn) continue;
+        if (o.burn) {
+          continue;
+        }
         const R = rr(r.k !== undefined ? r.k : level + 1),
           oa = obsAng(r, o);
         for (let i = 0; i < 30; i++) {
@@ -9130,13 +9149,16 @@ function powerUpdate(dt, d) {
             s: 1.5 + Math.random() * 3,
           });
         }
-      } // gotas de roca fundida: caen hacia el agujero negro
+      }
+    } // gotas de roca fundida: caen hacia el agujero negro
     if (r.spin) {
       r.spin.t += dt / 0.4;
       const u = Math.min(1, r.spin.t),
         e = 1 - Math.pow(1 - u, 3);
       r.off = r.spin.from + (r.spin.to - r.spin.from) * e;
-      if (u >= 1) r.spin = null;
+      if (u >= 1) {
+        r.spin = null;
+      }
     }
   }
   for (const f of pfx) {
@@ -9156,7 +9178,9 @@ function powerUpdate(dt, d) {
       sunLevel = Math.max(-1.6, sunLevel - q);
       lastEaten = Math.min(lastEaten, Math.floor(sunLevel));
     }
-    if (f.k === 'arder' && burnT > 0) f.t = Math.min(f.t, 0.5);
+    if (f.k === 'arder' && burnT > 0) {
+      f.t = Math.min(f.t, 0.5);
+    }
   }
   pfx = pfx.filter(f => f.t < (f.k === 'arder' ? 1.2 : f.k === 'viento' ? 3.2 : 1.6));
   bhWob = Math.max(0, bhWob - dt * 1.1);
@@ -9227,7 +9251,9 @@ function heatHaze(px, py, r, col, k) {
 // Júpiter: auroras en sus dos polos (las más potentes del sistema solar, que Hubble ve en ultravioleta)
 function drawAurora(px, py, r, tt) {
   const k = Math.min(1, tt / 0.12) * Math.min(1, (1.4 - tt) / 0.5);
-  if (k <= 0) return;
+  if (k <= 0) {
+    return;
+  }
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   ctx.lineCap = 'round';
@@ -9280,7 +9306,9 @@ function drawAurora(px, py, r, tt) {
 // Sol: corona, protuberancias y viento solar mientras arde
 function drawSolarFire(px, py, r) {
   let k = Math.min(1, (BURN_DUR - burnT) / 0.2, 0.3 + burnT / 0.6);
-  if (burnT < 0.45) k *= 0.72 + 0.28 * Math.sin(t * 28); // parpadea cuando se va a apagar
+  if (burnT < 0.45) {
+    k *= 0.72 + 0.28 * Math.sin(t * 28);
+  } // parpadea cuando se va a apagar
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   ctx.lineCap = 'round';
@@ -9395,7 +9423,9 @@ function drawSodiumTail(px, py, r0) {
     ctx.fill();
   }
   ctx.lineWidth = 1;
-  if (ctx.setLineDash) ctx.setLineDash([r * 0.6, r * 0.9]); // átomos de sodio que corren por la cola
+  if (ctx.setLineDash) {
+    ctx.setLineDash([r * 0.6, r * 0.9]);
+  } // átomos de sodio que corren por la cola
   for (let i = 0; i < 4; i++) {
     const sp = (i - 1.5) * r * 0.3;
     ctx.lineDashOffset = -t * r * 14 - i * r * 0.5;
@@ -9408,7 +9438,9 @@ function drawSodiumTail(px, py, r0) {
     }
     ctx.stroke();
   }
-  if (ctx.setLineDash) ctx.setLineDash([]);
+  if (ctx.setLineDash) {
+    ctx.setLineDash([]);
+  }
   ctx.restore();
   heatHaze(px, py, r0, '#fff0d0', 0.9);
   ctx.save();
@@ -9489,7 +9521,9 @@ function caronteOn() {
 }
 function drawCaronteBack(px, py) {
   // la mitad de la órbita que pasa detrás de Plutón
-  if (!caronteOn()) return;
+  if (!caronteOn()) {
+    return;
+  }
   const r = PR * S * 1.15 * sizeK(),
     [cx, cy, z] = caronteXY(px, py, r);
   ctx.save();
@@ -9500,7 +9534,9 @@ function drawCaronteBack(px, py) {
   ctx.ellipse(px, py, r * 2.4, r * 0.7, 0.25, 0, Math.PI * 2);
   ctx.stroke();
   ctx.restore();
-  if (z < 0) drawCaronte(cx, cy, r * 0.62, 1);
+  if (z < 0) {
+    drawCaronte(cx, cy, r * 0.62, 1);
+  }
 }
 function drawPowerFx(px, py, rad) {
   const r = rad * sizeK();
@@ -9670,7 +9706,9 @@ function drawPowerFx(px, py, rad) {
       }
     }
   }
-  if (burnT > 0) drawSolarFire(px, py, r);
+  if (burnT > 0) {
+    drawSolarFire(px, py, r);
+  }
   if (shieldT > 0) {
     // Saturno: los anillos (dibujados con el planeta) dejan un brillo frío de hielo
     const al = Math.min(1, shieldT / 0.35, (1.5 - shieldT) / 0.2);
@@ -9685,7 +9723,9 @@ function drawPowerFx(px, py, rad) {
     ctx.fill();
     ctx.restore();
   }
-  if (periLeft > 0) drawSodiumTail(px, py, r);
+  if (periLeft > 0) {
+    drawSodiumTail(px, py, r);
+  }
   if (ghostT > 0 && curPlanet !== 'pluton') {
     // Mercurio: brillo de "intocable"
     ctx.save();
@@ -9700,7 +9740,9 @@ function drawPowerFx(px, py, rad) {
   }
   if (caronteOn()) {
     const [cx, cy, z] = caronteXY(px, py, r);
-    if (z >= 0) drawCaronte(cx, cy, r * 0.62, 1);
+    if (z >= 0) {
+      drawCaronte(cx, cy, r * 0.62, 1);
+    }
   }
 }
 // efectos en el escenario (anillos, agujero negro, pantalla)
@@ -9815,7 +9857,9 @@ function drawPowerScene() {
     } else if (f.k === 'destello') {
       // Mercurio: una línea de luz con los colores separados y copias del planeta en el camino del salto instantáneo
       const u = f.t / 0.55;
-      if (u >= 1) continue;
+      if (u >= 1) {
+        continue;
+      }
       const r0 = rr(f.l0) * S,
         r1 = rr(level) * S,
         ca = Math.cos(f.a),
@@ -9995,7 +10039,9 @@ function drawPowerScene() {
     }
   }
   for (const f of pfx) {
-    if (f.k !== 'calor' || f.t > 1.4) continue; // Venus: sus nubes de ácido, que giran muy rápido y tienen relámpagos dentro, suben hacia el anillo de arriba
+    if (f.k !== 'calor' || f.t > 1.4) {
+      continue;
+    } // Venus: sus nubes de ácido, que giran muy rápido y tienen relámpagos dentro, suben hacia el anillo de arriba
     const u = f.t / 1.4,
       pr = rr(pLevel) * S,
       R1 = rr(level + 1) * S,
@@ -10095,7 +10141,9 @@ function drawPowerScene() {
         const a = hsh(i, 1) * Math.PI * 2 + t * (2.4 + 1.6 * hsh(i, 2)) * sg,
           len = 0.16 + 0.3 * hsh(i, 3),
           rq = R + (hsh(i, 4) - 0.5) * 18 * S;
-        if (!vis(a)) continue;
+        if (!vis(a)) {
+          continue;
+        }
         for (let j = 0; j < 4; j++) {
           ctx.globalAlpha = k * (0.1 + 0.17 * j);
           ctx.strokeStyle = i % 3 ? '#8fb8ff' : '#e2ecff';
@@ -10123,7 +10171,9 @@ function drawPowerScene() {
         }
       } // el frente de la ráfaga
       for (const o of ring.obs) {
-        if (o.star || o.gone || o.melt) continue;
+        if (o.star || o.gone || o.melt) {
+          continue;
+        }
         const ph =
             (ring.frozenT > 0
               ? ring.phase + ring.w * (ring.sgn || 1) * Math.max(0, dt2 - ring.frozenT)
@@ -10137,12 +10187,17 @@ function drawPowerScene() {
         if (
           Math.abs(Math.atan2(Math.sin(oa - pAng), Math.cos(oa - pAng))) * rr(level + 1) <
           PR * sizeK() + obsRad(ring, o) * 0.66
-        )
+        ) {
           hit = true;
-        if (!vis(oa)) continue;
+        }
+        if (!vis(oa)) {
+          continue;
+        }
         const oa0 = obsAng(ring, o),
           dA = Math.atan2(Math.sin(oa - oa0), Math.cos(oa - oa0));
-        if (ctx.setLineDash) ctx.setLineDash([3, 6]);
+        if (ctx.setLineDash) {
+          ctx.setLineDash([3, 6]);
+        }
         ctx.lineDashOffset = -t * 40;
         ctx.globalAlpha = 0.4 * k;
         ctx.strokeStyle = '#9cc0ff';
@@ -10150,7 +10205,9 @@ function drawPowerScene() {
         ctx.beginPath();
         ctx.arc(CX, CY, R, Math.min(oa0, oa0 + dA), Math.max(oa0, oa0 + dA));
         ctx.stroke();
-        if (ctx.setLineDash) ctx.setLineDash([]); // la corriente que lo lleva
+        if (ctx.setLineDash) {
+          ctx.setLineDash([]);
+        } // la corriente que lo lleva
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(oa + Math.PI / 2);
@@ -10340,10 +10397,14 @@ function drawPowerScene() {
       const bd = smst(0.03, 0.08, dn) * (1 - smst(0.16, 0.27, dn)) * k,
         dd = smst(0.11, 0.2, dn) * (1 - smst(0.36, 0.58, dn)) * k;
       for (let j = 0; j < 6; j++) {
-        if (bd <= 0.01) break;
+        if (bd <= 0.01) {
+          break;
+        }
         const a = a0 + (j - 2.5) * 0.1,
           fl = 0.6 + 0.4 * Math.sin(t * 40 + j * 2.3);
-        if (hsh(j, 11) < 0.25) continue; // las perlas de Baily: luz que pasa entre las montañas de la Luna
+        if (hsh(j, 11) < 0.25) {
+          continue;
+        } // las perlas de Baily: luz que pasa entre las montañas de la Luna
         const x = CX + Math.cos(a) * mr * 0.99,
           y = CY + Math.sin(a) * mr * 0.99,
           g = ctx.createRadialGradient(x, y, 0, x, y, 7 * S);
@@ -10415,7 +10476,7 @@ function drawRingPower(ring, R, alpha) {
         ctx.arc(CX, CY, Rs + d * S * 0.6, c - span, c + span);
         ctx.stroke();
       }
-      if (gr < 1)
+      if (gr < 1) {
         for (const sd of [-1, 1]) {
           const a = c + sd * span,
             x = CX + Math.cos(a) * Rs,
@@ -10428,12 +10489,15 @@ function drawRingPower(ring, R, alpha) {
           ctx.beginPath();
           ctx.arc(x, y, 14, 0, Math.PI * 2);
           ctx.fill();
-        } // el borde de la escarcha que avanza
+        }
+      } // el borde de la escarcha que avanza
       ctx.lineWidth = 1.1;
       for (let i = 0; i < 70; i++) {
         const da = (hsh(i, 1) * 2 - 1) * Math.PI,
           la = clamp((span - Math.abs(da)) / 0.35, 0, 1);
-        if (la <= 0) continue; // cristales: una aguja con ramas a 60°, como la escarcha real
+        if (la <= 0) {
+          continue;
+        } // cristales: una aguja con ramas a 60°, como la escarcha real
         const a = c + da,
           x = CX + Math.cos(a) * Rs,
           y = CY + Math.sin(a) * Rs,
@@ -10460,7 +10524,9 @@ function drawRingPower(ring, R, alpha) {
             by = y + (ey - y) * q,
             bl = len * (0.2 + 0.25 * hsh(i, 9)) * (1.1 - q);
           for (const s2 of [-1, 1]) {
-            if (hsh(i, s2 + q) < 0.2) continue;
+            if (hsh(i, s2 + q) < 0.2) {
+              continue;
+            }
             const ba = Math.atan2(ey - y, ex - x) + (s2 * Math.PI) / 3;
             ctx.moveTo(bx, by);
             ctx.lineTo(bx + Math.cos(ba) * bl, by + Math.sin(ba) * bl);
@@ -10469,9 +10535,13 @@ function drawRingPower(ring, R, alpha) {
         ctx.stroke();
       }
       for (const o of ring.obs) {
-        if (o.star || o.gone) continue;
+        if (o.star || o.gone) {
+          continue;
+        }
         const oa = obsAng(ring, o);
-        if (Math.abs(Math.atan2(Math.sin(oa - c), Math.cos(oa - c))) > span) continue; // los asteroides quedan con una costra de hielo
+        if (Math.abs(Math.atan2(Math.sin(oa - c), Math.cos(oa - c))) > span) {
+          continue;
+        } // los asteroides quedan con una costra de hielo
         const x = CX + Math.cos(oa) * Rs,
           y = CY + Math.sin(oa) * Rs,
           rad = obsRad(ring, o) * S * 1.12;
@@ -10537,7 +10607,9 @@ function drawRingPower(ring, R, alpha) {
           s: 0.9 + Math.random() * 1.6,
         });
       }
-      if (alpha > 0.6) noise(0.25, 9000, 4000, 0.14, 'highpass');
+      if (alpha > 0.6) {
+        noise(0.25, 9000, 4000, 0.14, 'highpass');
+      }
     }
   }
   if (ring.revT > 0) {
