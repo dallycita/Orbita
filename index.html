@@ -23601,10 +23601,10 @@ function misMoons() {
       'Z';
   let h =
     '<circle cx="50" cy="50" r="45" fill="none" stroke="#ece6d8" stroke-opacity=".2" stroke-width="5"/>';
-  if (done === 3)
+  if (done === 3) {
     h +=
       '<circle class="lit" cx="50" cy="50" r="45" fill="none" stroke="#ff8a3d" stroke-width="6"/>';
-  else if (done > 0) {
+  } else if (done > 0) {
     const a = -Math.PI / 2 + (Math.PI * 2 * done) / 3;
     h +=
       '<path class="lit" d="M50 5 A45 45 0 ' +
@@ -23755,7 +23755,9 @@ var MIS = null,
   misSwitch = 0;
 function misToday(off) {
   const d = new Date();
-  if (off) d.setDate(d.getDate() + off);
+  if (off) {
+    d.setDate(d.getDate() + off);
+  }
   return (
     d.getFullYear() +
     '-' +
@@ -23802,11 +23804,15 @@ function misSave() {
 }
 function misRoll() {
   const day = misToday();
-  if (MIS.day === day && MIS.daily.length === 3) return;
+  if (MIS.day === day && MIS.daily.length === 3) {
+    return;
+  }
   MIS.day = day;
   MIS.bonus = false;
   let h = 7;
-  for (const ch of day) h = (h * 31 + ch.charCodeAt(0)) | 0;
+  for (const ch of day) {
+    h = (h * 31 + ch.charCodeAt(0)) | 0;
+  }
   MIS.daily = [0, 1, 2].map(g => {
     const L = MIS_DAILY.filter(m => m.g === g);
     return { id: L[Math.abs(h >> (g * 4)) % L.length].id, p: 0, c: false };
@@ -23815,32 +23821,54 @@ function misRoll() {
 }
 const misDef = id => MIS_DAILY.find(m => m.id === id);
 function misEvent(ev, v) {
-  if (tutorial) return;
+  if (tutorial) {
+    return;
+  }
   misLoad();
-  if (ev === 'perf') MIS.st.perf = (MIS.st.perf || 0) + 1;
-  if (ev === 'onda') MIS.st.onda = (MIS.st.onda || 0) + 1;
+  if (ev === 'perf') {
+    MIS.st.perf = (MIS.st.perf || 0) + 1;
+  }
+  if (ev === 'onda') {
+    MIS.st.onda = (MIS.st.onda || 0) + 1;
+  }
   let newly = false;
   for (const m of MIS.daily) {
     const D = misDef(m.id);
-    if (!D || D.ev !== ev || m.c) continue;
+    if (!D || D.ev !== ev || m.c) {
+      continue;
+    }
     const was = m.p >= D.n;
     m.p = Math.min(D.n, D.max ? Math.max(m.p, v || 0) : m.p + 1);
-    if (!was && m.p >= D.n) newly = true;
+    if (!was && m.p >= D.n) {
+      newly = true;
+    }
   }
   misSave();
-  if (newly) misPing();
+  if (newly) {
+    misPing();
+  }
 }
 function misWin(lv, planet, tries) {
-  if (tutorial) return;
+  if (tutorial) {
+    return;
+  }
   misLoad();
   const add = (arr, x) => {
-    if (!arr.includes(x)) arr.push(x);
+    if (!arr.includes(x)) {
+      arr.push(x);
+    }
   };
   add(MIS.lvWon, lv);
   add(MIS.planetsWon, planet || 'tierra');
-  if ((planet || 'tierra') === 'tierra') add(MIS.tierraLv, lv);
-  if (lv === 2 && tries === 1) MIS.andro1 = true;
-  if (lv === 7) MIS.sol = true;
+  if ((planet || 'tierra') === 'tierra') {
+    add(MIS.tierraLv, lv);
+  }
+  if (lv === 2 && tries === 1) {
+    MIS.andro1 = true;
+  }
+  if (lv === 7) {
+    MIS.sol = true;
+  }
   misEvent('win');
 }
 function misPing() {
@@ -23867,11 +23895,15 @@ function misStarsBest() {
   let best = 0,
     bi = -1;
   COIN_RINGS.forEach((set, i) => {
-    if (!set) return;
+    if (!set) {
+      return;
+    }
     const g = lvStarsGot(i);
     let c = 0;
     set.forEach(k => {
-      if (g.includes(k)) c++;
+      if (g.includes(k)) {
+        c++;
+      }
     });
     if (c > best) {
       best = c;
@@ -23918,8 +23950,12 @@ function achProg(a) {
 }
 function misReady() {
   misLoad();
-  if (MIS.daily.some(m => !m.c && m.p >= (misDef(m.id) || { n: 1 }).n)) return true;
-  if (!MIS.bonus && MIS.daily.every(m => m.c)) return true;
+  if (MIS.daily.some(m => !m.c && m.p >= (misDef(m.id) || { n: 1 }).n)) {
+    return true;
+  }
+  if (!MIS.bonus && MIS.daily.every(m => m.c)) {
+    return true;
+  }
   return MIS_ACH.some(a => {
     const [c, n] = achProg(a);
     return c >= n && !MIS.ach[a.id];
@@ -23955,10 +23991,14 @@ function openMissions() {
     elMis.classList.remove('still');
     clearTimeout(openMissions.st);
     openMissions.st = setTimeout(() => {
-      if (misOpen) elMis.classList.add('still');
+      if (misOpen) {
+        elMis.classList.add('still');
+      }
     }, 520);
   }
-  if (elHome) elHome.classList.add('off');
+  if (elHome) {
+    elHome.classList.add('off');
+  }
   if (elMis) {
     elMis.classList.remove('off', 'out');
   }
@@ -23966,7 +24006,9 @@ function openMissions() {
   clearInterval(misTimer);
   misTimer = setInterval(() => {
     const e = elMis && elMis.querySelector && elMis.querySelector('.mtime');
-    if (e) e.textContent = misLeft();
+    if (e) {
+      e.textContent = misLeft();
+    }
     if (MIS.day !== misToday()) {
       misRoll();
       renderMissions();
@@ -23974,7 +24016,9 @@ function openMissions() {
   }, 1000);
 }
 function misWhoosh(up) {
-  if (!AC || muted) return;
+  if (!AC || muted) {
+    return;
+  }
   try {
     noise(0.4, up ? 500 : 2600, up ? 2600 : 500, 0.1, 'bandpass');
     uiTone(
@@ -23986,19 +24030,29 @@ function misWhoosh(up) {
   } catch (e) {}
 }
 function closeMissions() {
-  if (!misOpen) return;
+  if (!misOpen) {
+    return;
+  }
   clearInterval(misTimer);
   misOpen = false;
   misWhoosh(false);
-  if (elMis) elMis.classList.add('out');
+  if (elMis) {
+    elMis.classList.add('out');
+  }
   setTimeout(() => {
-    if (!misOpen && elMis) elMis.classList.add('off');
+    if (!misOpen && elMis) {
+      elMis.classList.add('off');
+    }
   }, 320);
   renderHome();
-  if (elHome) elHome.classList.remove('off');
+  if (elHome) {
+    elHome.classList.remove('off');
+  }
 }
 function misClaimSound(big) {
-  if (!AC || muted) return;
+  if (!AC || muted) {
+    return;
+  }
   try {
     const n = AC.currentTime;
     (big ? [12, 16, 19, 24, 28] : [19, 24, 28]).forEach((sm, i) =>
@@ -24043,12 +24097,16 @@ var misThumbs = {},
   misMinis = {};
 // miniaturas con el mismo lenguaje que los dibujos grandes del juego (brillos, colores de cada galaxia)
 function misMini(kind) {
-  if (misMinis[kind]) return misMinis[kind];
+  if (misMinis[kind]) {
+    return misMinis[kind];
+  }
   const S2 = 88,
     c = document.createElement('canvas');
   c.width = c.height = S2;
   const g = c.getContext && c.getContext('2d');
-  if (!g) return '';
+  if (!g) {
+    return '';
+  }
   const cx = S2 / 2,
     cy = S2 / 2;
   const glow = (x, y, r, col, a) => {
@@ -24095,7 +24153,7 @@ function misMini(kind) {
     g.translate(cx, cy);
     g.scale(1, 0.6);
     g.rotate(-0.4);
-    for (let arm = 0; arm < 2; arm++)
+    for (let arm = 0; arm < 2; arm++) {
       for (let i = 0; i < 44; i++) {
         const k = i / 44,
           an = arm * Math.PI + k * 4.2,
@@ -24106,6 +24164,7 @@ function misMini(kind) {
         g.arc(Math.cos(an) * q, Math.sin(an) * q, 1.4 + (1 - k) * 1.6, 0, Math.PI * 2);
         g.fill();
       }
+    }
     g.restore();
     g.globalAlpha = 1;
     glow(cx, cy, 9, core, 0.95);
@@ -24251,8 +24310,11 @@ function misMini(kind) {
 function misThumb(id) {
   if (!misThumbs[id]) {
     const h = planetThumb(id);
-    if (h.indexOf('<img') === 0) misThumbs[id] = h;
-    else return h;
+    if (h.indexOf('<img') === 0) {
+      misThumbs[id] = h;
+    } else {
+      return h;
+    }
   }
   return misThumbs[id];
 }
@@ -24285,9 +24347,13 @@ function misFeatured() {
   let best = 0,
     bs = -1;
   MIS_ACH.forEach((a, i) => {
-    if (MIS.ach[a.id]) return;
+    if (MIS.ach[a.id]) {
+      return;
+    }
     const [c, n] = achProg(a);
-    if (a.secret && c < n) return;
+    if (a.secret && c < n) {
+      return;
+    }
     const sc = c >= n ? 9 : c / n;
     if (sc > bs) {
       bs = sc;
@@ -24297,16 +24363,22 @@ function misFeatured() {
   return best;
 }
 function renderMissions() {
-  if (!elMis) return;
+  if (!elMis) {
+    return;
+  }
   misLoad();
   let got = 0,
     all = 0;
   COIN_RINGS.forEach((set, i) => {
-    if (!set) return;
+    if (!set) {
+      return;
+    }
     all += set.size;
     const g = lvStarsGot(i);
     set.forEach(k => {
-      if (g.includes(k)) got++;
+      if (g.includes(k)) {
+        got++;
+      }
     });
   });
   const CRY = '<svg class="cr" viewBox="0 0 24 24" aria-hidden="true">' + misCrystal() + '</svg>';
@@ -24383,7 +24455,9 @@ function renderMissions() {
       .sort((x, y) => (x[0].c ? 1 : 0) - (y[0].c ? 1 : 0))
       .forEach(([m, i]) => {
         const D = misDef(m.id);
-        if (!D) return;
+        if (!D) {
+          return;
+        }
         const done = m.p >= D.n;
         body += card(
           'd' + i,
@@ -24477,7 +24551,7 @@ function renderMissions() {
     const skill = MIS_ACH.map((a, j) => j)
       .filter(j => j > 1 && j !== fi)
       .sort((x, y) => done1(x) - done1(y));
-    if (plan.length)
+    if (plan.length) {
       body +=
         '<div class="mhead"><span>Planetas</span><span>' +
         achDone +
@@ -24488,6 +24562,7 @@ function renderMissions() {
           .map(([j, pid]) => achCard(MIS_ACH[j], j, icon(null, pid), j === 1 ? row : ''))
           .join('') +
         '</div>';
+    }
     body +=
       '<div class="mhead"><span>Habilidad</span><span>' +
       (plan.length ? '' : achDone + ' de ' + MIS_ACH.length) +
@@ -24541,12 +24616,18 @@ function renderMissions() {
     (MIS.showFact
       ? '<div class="mfact"><b>Polvo estelar</b>Los granos de polvo que dejan las estrellas al morir son cristales diminutos, algunos más antiguos que el Sol.</div>'
       : '');
-  if (!elMis.querySelectorAll) return;
+  if (!elMis.querySelectorAll) {
+    return;
+  }
   const bk = elMis.querySelector('.back');
-  if (bk) bk.addEventListener('click', closeMissions);
+  if (bk) {
+    bk.addEventListener('click', closeMissions);
+  }
   elMis.querySelectorAll('.mtabs button').forEach(b =>
     b.addEventListener('click', () => {
-      if (misTab === b.dataset.t) return;
+      if (misTab === b.dataset.t) {
+        return;
+      }
       const dir = b.dataset.t === 'logros' ? 1 : -1;
       misTab = b.dataset.t;
       uiGlass(dir);
@@ -24566,7 +24647,9 @@ function renderMissions() {
   misSwipe();
   elMis.querySelectorAll('[data-open]').forEach(el =>
     el.addEventListener('click', e => {
-      if (e.target.closest && e.target.closest('.claim')) return;
+      if (e.target.closest && e.target.closest('.claim')) {
+        return;
+      }
       misDetail = +el.dataset.open;
       uiGlass(1);
       renderMissions();
@@ -24576,7 +24659,9 @@ function renderMissions() {
   if (dt) {
     const close = () => {
       const d2 = elMis.querySelector('.mdet');
-      if (d2) d2.classList.add('out');
+      if (d2) {
+        d2.classList.add('out');
+      }
       setTimeout(() => {
         misDetail = null;
         renderMissions();
@@ -24584,30 +24669,43 @@ function renderMissions() {
       uiGlass(-1);
     };
     const bg = dt.querySelector('.mdbg');
-    if (bg) bg.addEventListener('click', close);
+    if (bg) {
+      bg.addEventListener('click', close);
+    }
     const xb = dt.querySelector('.mdx');
-    if (xb) xb.addEventListener('click', close);
+    if (xb) {
+      xb.addEventListener('click', close);
+    }
     const cd = dt.querySelector('.mdcard');
     let y0 = null,
       dy = 0;
     if (cd) {
       cd.addEventListener('pointerdown', e => {
-        if (e.target.closest && e.target.closest('button')) return;
+        if (e.target.closest && e.target.closest('button')) {
+          return;
+        }
         y0 = e.clientY;
         dy = 0;
       });
       cd.addEventListener('pointermove', e => {
-        if (y0 === null) return;
+        if (y0 === null) {
+          return;
+        }
         dy = Math.max(0, e.clientY - y0);
         cd.style.transition = 'none';
         cd.style.transform = 'translateY(' + dy + 'px)';
       });
       const up = () => {
-        if (y0 === null) return;
+        if (y0 === null) {
+          return;
+        }
         y0 = null;
         cd.style.transition = 'transform .2s ease-out';
-        if (dy > 90) close();
-        else cd.style.transform = '';
+        if (dy > 90) {
+          close();
+        } else {
+          cd.style.transform = '';
+        }
       };
       cd.addEventListener('pointerup', up);
       cd.addEventListener('pointercancel', up);
@@ -24619,22 +24717,30 @@ function renderMissions() {
       let amt = 0,
         big = false;
       if (k === 'bonus') {
-        if (MIS.bonus) return;
+        if (MIS.bonus) {
+          return;
+        }
         MIS.bonus = true;
         amt = 100;
         big = true;
         MIS.streak = MIS.lastBonus === misToday(-1) && MIS.streak < 7 ? MIS.streak + 1 : 1;
         MIS.lastBonus = misToday();
-        if (MIS.streak === 7) amt += 250;
+        if (MIS.streak === 7) {
+          amt += 250;
+        }
       } else if (k[0] === 'd') {
         const m = MIS.daily[+k.slice(1)],
           D = m && misDef(m.id);
-        if (!m || m.c || m.p < D.n) return;
+        if (!m || m.c || m.p < D.n) {
+          return;
+        }
         m.c = true;
         amt = D.rw;
       } else {
         const a = MIS_ACH[+k.slice(1)];
-        if (!a || MIS.ach[a.id]) return;
+        if (!a || MIS.ach[a.id]) {
+          return;
+        }
         MIS.ach[a.id] = 1;
         amt = a.rw;
         big = true;
@@ -24646,7 +24752,9 @@ function renderMissions() {
           if (MIS) {
             MIS.showFact = false;
             const f = elMis.querySelector && elMis.querySelector('.mfact');
-            if (f) f.classList.add('out');
+            if (f) {
+              f.classList.add('out');
+            }
           }
         }, 6500);
       }
@@ -24658,14 +24766,18 @@ function renderMissions() {
       misCount.v = old;
       renderMissions();
       const r = elMis.querySelector('[data-r="' + k + '"]');
-      if (r) r.classList.add('flash');
+      if (r) {
+        r.classList.add('flash');
+      }
       misBurst(from, amt, big);
     }),
   );
 }
 function misDetailHTML(CRY) {
   const a = MIS_ACH[misDetail];
-  if (!a) return '';
+  if (!a) {
+    return '';
+  }
   const [c, n, d] = achProg(a),
     done = c >= n,
     cl = MIS.ach[a.id],
@@ -24739,7 +24851,7 @@ function misBurst(from, amt, big) {
     elMis.appendChild(e);
     const dl = i * 45,
       dur = 620 + Math.random() * 160;
-    if (e.animate)
+    if (e.animate) {
       e.animate(
         [
           { transform: 'translate(0,0) scale(.4)', opacity: 0 },
@@ -24755,6 +24867,7 @@ function misBurst(from, amt, big) {
         ],
         { duration: dur, delay: dl, easing: 'cubic-bezier(.5,0,.6,1)', fill: 'forwards' },
       );
+    }
     setTimeout(() => e.remove(), dur + dl + 40);
   }
   const start = misCount.v,
@@ -24768,7 +24881,9 @@ function misBurst(from, amt, big) {
       v = Math.round(start + (end - start) * k),
       st = Math.floor(k * steps);
     const el = elMis.querySelector && elMis.querySelector('.mpv');
-    if (el) el.textContent = v;
+    if (el) {
+      el.textContent = v;
+    }
     if (st !== lastStep && k > 0) {
       lastStep = st;
       if (AC && !muted) {
@@ -24782,8 +24897,9 @@ function misBurst(from, amt, big) {
         } catch (e) {}
       }
     }
-    if (k < 1) misCount.raf = requestAnimationFrame(tick);
-    else {
+    if (k < 1) {
+      misCount.raf = requestAnimationFrame(tick);
+    } else {
       misCount.v = null;
       const w = elMis.querySelector && elMis.querySelector('.mwal .c');
       if (w) {
@@ -24807,16 +24923,22 @@ function misBurst(from, amt, big) {
 // cerrar deslizando el panel hacia abajo
 function misSwipe() {
   const pn = elMis.querySelector && elMis.querySelector('.mpanel');
-  if (!pn || !pn.addEventListener) return;
+  if (!pn || !pn.addEventListener) {
+    return;
+  }
   let y0 = null,
     dy = 0;
   pn.addEventListener('pointerdown', e => {
-    if (pn.scrollTop > 2 || (e.target.closest && e.target.closest('button'))) return;
+    if (pn.scrollTop > 2 || (e.target.closest && e.target.closest('button'))) {
+      return;
+    }
     y0 = e.clientY;
     dy = 0;
   });
   pn.addEventListener('pointermove', e => {
-    if (y0 === null) return;
+    if (y0 === null) {
+      return;
+    }
     dy = Math.max(0, e.clientY - y0);
     if (dy > 4) {
       pn.style.transition = 'none';
@@ -24824,26 +24946,36 @@ function misSwipe() {
     }
   });
   const end = () => {
-    if (y0 === null) return;
+    if (y0 === null) {
+      return;
+    }
     y0 = null;
     pn.style.transition = 'transform .25s ease-out';
     if (dy > 110) {
       closeMissions();
-    } else pn.style.transform = '';
+    } else {
+      pn.style.transform = '';
+    }
   };
   pn.addEventListener('pointerup', end);
   pn.addEventListener('pointercancel', end);
 }
 function misPlanetDraw() {
-  if (!misOpen || !elMis || !elMis.querySelectorAll) return;
+  if (!misOpen || !elMis || !elMis.querySelectorAll) {
+    return;
+  }
   elMis.querySelectorAll('.mplanet').forEach(misCanvasDraw);
 }
 function misCanvasDraw(c) {
-  if (!c || !c.getContext) return;
+  if (!c || !c.getContext) {
+    return;
+  }
   const dpr = Math.min(2, window.devicePixelRatio || 1),
     w = c.clientWidth,
     h = c.clientHeight;
-  if (!w || !h) return;
+  if (!w || !h) {
+    return;
+  }
   if (c.width !== Math.round(w * dpr)) {
     c.width = Math.round(w * dpr);
     c.height = Math.round(h * dpr);
@@ -24907,7 +25039,9 @@ function misCanvasDraw(c) {
     const moon = (i, front) => {
       const an = t * 0.5 + i * 2.094,
         s2 = Math.sin(an);
-      if (s2 > 0 !== front) return;
+      if (s2 > 0 !== front) {
+        return;
+      }
       const x = cx + Math.cos(an) * ox,
         y = cy + s2 * oy,
         lit = i < n;
@@ -24929,7 +25063,9 @@ function misCanvasDraw(c) {
     g.beginPath();
     g.ellipse(cx, cy, ox, oy, 0, Math.PI, Math.PI * 2);
     g.stroke();
-    for (let i = 0; i < 3; i++) moon(i, false);
+    for (let i = 0; i < 3; i++) {
+      moon(i, false);
+    }
     let res = null;
     try {
       res = PLGL.render(id, 2 * Rp * dpr, t * 0.35, [-0.55, 0.45, 0.35], [1.1, 1.04, 0.96], t);
@@ -24942,14 +25078,18 @@ function misCanvasDraw(c) {
     g.beginPath();
     g.ellipse(cx, cy, ox, oy, 0, 0, Math.PI);
     g.stroke();
-    for (let i = 0; i < 3; i++) moon(i, true);
+    for (let i = 0; i < 3; i++) {
+      moon(i, true);
+    }
     return;
   }
   if (kind === 'tierra8' || kind === 'cada' || kind === 'sol') {
     let id = kind === 'sol' ? 'sol' : 'tierra';
     if (kind === 'cada') {
       const nx = PLANETS_P.find(P => !MIS.planetsWon.includes(P.id) && !P.secret);
-      if (nx) id = nx.id;
+      if (nx) {
+        id = nx.id;
+      }
     }
     let res = null;
     try {
@@ -24972,7 +25112,7 @@ function misCanvasDraw(c) {
     g.translate(cx, cy);
     g.scale(1, 0.55);
     g.rotate(t * 0.15);
-    for (let arm = 0; arm < 2; arm++)
+    for (let arm = 0; arm < 2; arm++) {
       for (let i = 0; i < 70; i++) {
         const k = i / 70,
           an = arm * Math.PI + k * 4.2,
@@ -24983,6 +25123,7 @@ function misCanvasDraw(c) {
         g.arc(Math.cos(an) * rr2, Math.sin(an) * rr2, 1.6 + (1 - k) * 1.8, 0, Math.PI * 2);
         g.fill();
       }
+    }
     g.restore();
     glow(cx, cy, R * 0.35, 'rgba(255,248,230,A)', 0.95);
   } else if (kind === 'seis') {
