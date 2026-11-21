@@ -1,6 +1,7 @@
 // ---------- dentro de Andrómeda: toda la pantalla es la galaxia (colores reales) ----------
 // núcleo amarillo-blanco de estrellas viejas, brazos espirales azules de estrellas jóvenes,
-// franjas de polvo café, nebulosas rosadas de hidrógeno donde nacen estrellas, y sus satélites M32 y M110
+// franjas de polvo café, nebulosas rosadas de hidrógeno donde nacen estrellas, y sus satélites M32
+// y M110
 let andCanvas = null,
   andKey = '';
 function buildAndromeda() {
@@ -172,8 +173,10 @@ function drawAndromeda() {
 }
 
 // ---------- dentro de la Gran Nube de Magallanes (como la muestran los telescopios) ----------
-// barra central de estrellas viejas anaranjadas, nubes irregulares de estrellas azuladas, la nebulosa de la Tarántula (rosada, con su cúmulo R136),
-// polvo oscuro, la Pequeña Nube a lo lejos con un puente tenue de estrellas, y los tres anillos de la supernova 1987A
+// barra central de estrellas viejas anaranjadas, nubes irregulares de estrellas azuladas, la
+// nebulosa de la Tarántula (rosada, con su cúmulo R136),
+// polvo oscuro, la Pequeña Nube a lo lejos con un puente tenue de estrellas, y los tres anillos de
+// la supernova 1987A
 let magCanvas = null,
   magKey = '';
 function buildMagallanes() {
@@ -382,7 +385,8 @@ function blob(g, x, y, r, c0, c1) {
   g.fillRect(x - r, y - r, r * 2, r * 2);
 }
 const BG_BUILD = {
-  // Centaurus A: elíptica gigante y cálida, cruzada por una franja de polvo torcida con estrellas jóvenes; chorros y lóbulos perpendiculares
+  // Centaurus A: elíptica gigante y cálida, cruzada por una franja de polvo torcida con estrellas
+  // jóvenes; chorros y lóbulos perpendiculares
   3: (g, W, H, D, R) => {
     g.fillStyle = '#07060a';
     g.fillRect(0, 0, W, H);
@@ -449,7 +453,8 @@ const BG_BUILD = {
     }
     g.restore();
   },
-  // Remolino (M51): espiral vista de frente con dos brazos perfectos, regiones rosadas, polvo, y su vecina NGC 5195 al final de un brazo
+  // Remolino (M51): espiral vista de frente con dos brazos perfectos, regiones rosadas, polvo, y su
+  // vecina NGC 5195 al final de un brazo
   4: (g, W, H, D, R) => {
     g.fillStyle = '#050712';
     g.fillRect(0, 0, W, H);
@@ -499,7 +504,8 @@ const BG_BUILD = {
     g.lineTo(nx + D * 0.04, ny + D * 0.02);
     g.stroke();
   },
-  // Sombrero (M104): vista casi de lado, con un núcleo enorme y brillante, su franja oscura de polvo y cientos de cúmulos globulares
+  // Sombrero (M104): vista casi de lado, con un núcleo enorme y brillante, su franja oscura de
+  // polvo y cientos de cúmulos globulares
   5: (g, W, H, D, R) => {
     g.fillStyle = '#05050a';
     g.fillRect(0, 0, W, H);
@@ -537,7 +543,8 @@ const BG_BUILD = {
     g.ellipse(cx, cy + D * 0.012, D * 0.52, D * 0.026, 0, 0, Math.PI * 2);
     g.stroke();
   },
-  // M87: elíptica gigante y suave, rodeada de miles de cúmulos globulares, con su chorro azul con nudos; en el centro, el anillo de la primera fotografía
+  // M87: elíptica gigante y suave, rodeada de miles de cúmulos globulares, con su chorro azul con
+  // nudos; en el centro, el anillo de la primera fotografía
   6: (g, W, H, D, R) => {
     g.fillStyle = '#07050a';
     g.fillRect(0, 0, W, H);
@@ -592,7 +599,8 @@ const BG_BUILD = {
     g.arc(cx, cy, 4.5, 0, Math.PI * 2);
     g.fill();
   },
-  // Sagitario A*: el centro de nuestra galaxia, lleno de estrellas enrojecidas por el polvo, nubes oscuras, el gas en espiral alrededor del agujero negro
+  // Sagitario A*: el centro de nuestra galaxia, lleno de estrellas enrojecidas por el polvo, nubes
+  // oscuras, el gas en espiral alrededor del agujero negro
   7: (g, W, H, D, R) => {
     g.fillStyle = '#0a0607';
     g.fillRect(0, 0, W, H);
