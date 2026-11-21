@@ -1,7 +1,10 @@
 // ---------- misiones y polvo estelar ----------
-// estrellas = habilidad (desbloquean) · polvo estelar = constancia (compra). Diarias: tres al día, cambian a medianoche.
-// el ícono de Misiones en el inicio: una constelación de tres estrellas (una por misión del día) dentro de un arco de progreso;
-// cada misión cumplida enciende una estrella y llena un tercio del arco; con las tres, la constelación se une y el círculo se cierra
+// estrellas = habilidad (desbloquean) · polvo estelar = constancia (compra). Diarias: tres al día,
+// cambian a medianoche.
+// el ícono de Misiones en el inicio: una constelación de tres estrellas (una por misión del día)
+// dentro de un arco de progreso;
+// cada misión cumplida enciende una estrella y llena un tercio del arco; con las tres, la
+// constelación se une y el círculo se cierra
 function misMoons() {
   misLoad();
   const done = Math.min(
@@ -543,7 +546,8 @@ const MIS_AICO = {
 };
 var misThumbs = {},
   misMinis = {};
-// miniaturas con el mismo lenguaje que los dibujos grandes del juego (brillos, colores de cada galaxia)
+// miniaturas con el mismo lenguaje que los dibujos grandes del juego (brillos, colores de cada
+// galaxia)
 function misMini(kind) {
   if (misMinis[kind]) {
     return misMinis[kind];
@@ -1270,7 +1274,8 @@ function misDetailHTML(CRY) {
     '</div></div>'
   );
 }
-// el cobro: la fila destella, salen cristales volando al contador y el número sube de uno en uno con una escala de cristal
+// el cobro: la fila destella, salen cristales volando al contador y el número sube de uno en uno
+// con una escala de cristal
 var misCount = { v: null, raf: 0 };
 function misBurst(from, amt, big) {
   const to = elMis.querySelector && elMis.querySelector('.mwal .c');
