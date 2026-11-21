@@ -13,7 +13,7 @@ Si algo que vas a hacer, o que te piden, cambiaría algo FIJO, **detente y di "E
 
 ## Limpieza del código
 
-Hay un plan en `docs/plan-limpieza.md`, con fases, reglas y trampas. Si estás limpiando, ordenando o renombrando código, síguelo paso a paso. Comprueba con la huella después de cada paso: **el juego debe quedar exactamente igual**.
+Las instrucciones completas están en `docs/plan-limpieza.md`: la única regla, lo FIJO, las trampas, la guía de estilo y las 21 fases. Si estás limpiando, ordenando o renombrando código, síguelo paso a paso. Comprueba con la huella después de cada paso: **el juego debe quedar exactamente igual**.
 
 ## Reglas de trabajo
 
