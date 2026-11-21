@@ -30,6 +30,9 @@ function pngDiff(fa, fb){ const a = readPng(fa), b = readPng(fb); if (a.w !== b.
   for (let i = 0; i < a.w*a.h; i++){ let m = 0; for (let c = 0; c < 3; c++) m = Math.max(m, Math.abs(a.px[i*a.bpp + c] - b.px[i*b.bpp + c])); if (m > 0){ n++; if (m > max) max = m; } } return {n, max}; }
 const sha = s => createHash('sha1').update(s).digest('hex').slice(0, 16);
 
+// Escenas cuyo dibujo varía solo entre dos corridas del mismo archivo en muchos píxeles pero muy poco (hasta ~10 niveles
+// de color): ahí se acepta como ruido cualquier cantidad de píxeles si ninguno cambia más de 12 niveles.
+const RUIDO_AMPLIO = new Set(['poder_urano', 'sinwebgl_partida_5']);
 if (process.argv[2] === '--comparar'){
   const [A, B] = process.argv.slice(3), a = JSON.parse(readFileSync(join(A, 'huella.json'))), b = JSON.parse(readFileSync(join(B, 'huella.json')));
   let bad = 0; const ruido = [];
@@ -38,7 +41,7 @@ if (process.argv[2] === '--comparar'){
     if (!x || !y){ console.log('✗ ' + k + ': falta en ' + (x ? B : A)); bad++; continue; }
     const diffs = [];
     if (x.png !== y.png){ const d = pngDiff(join(A, k + '.png'), join(B, k + '.png'));
-      if (d.n > 60) diffs.push('imagen (' + d.n + ' píxeles distintos, hasta ' + d.max + ')'); else ruido.push(k + ' (' + d.n + ' px, ' + d.max + ')'); }
+      if (d.n > 60 && !(RUIDO_AMPLIO.has(k) && d.max <= 12)) diffs.push('imagen (' + d.n + ' píxeles distintos, hasta ' + d.max + ')'); else ruido.push(k + ' (' + d.n + ' px, ' + d.max + ')'); }
     if (x.traza !== y.traza) diffs.push('partida');
     if (x.errores !== y.errores) diffs.push('errores');
     const ek = new Set([...Object.keys(x.estilos), ...Object.keys(y.estilos)]), ed = [...ek].filter(e => x.estilos[e] !== y.estilos[e]);
@@ -92,7 +95,7 @@ const PLAY = (n, extra = '') => `(() => { const DT = 1/60; let nx = null, h = 0,
   } return [h, samp]; })()`;
 
 const SCENES = [];
-const add = (name, steps) => SCENES.push({name, steps});
+const add = (name, steps, opts = {}) => SCENES.push({name, steps, opts});
 // pantallas
 add('splash_0', [['ev', 'startSplash()'], ['ev', FRAMES(40)]]);
 add('splash_1', [['ev', 'startSplash()'], ['ev', FRAMES(260)]]);
@@ -125,16 +128,62 @@ add('pausa_cuenta', [['ev', "lvl = 0; tutorial = false; curPlanet = 'tierra'; st
 add('victoria', [['ev', "lvl = 0; tutorial = false; curPlanet = 'tierra'; start()"], ['play', 200], ['ev', 'win()'], ['ev', FRAMES(200)]]);
 add('derrota', [['ev', "lvl = 1; tutorial = false; curPlanet = 'tierra'; start()"], ['play', 120], ['ev', "die(0, -R0, 'hit')"], ['ev', FRAMES(80)]]);
 
+// --- cobertura extra (Fase 0 de la limpieza) ---
+// Ajustes: cada opción
+add('ajustes_opciones', [['ev', 'openHome()'], ['ev', FRAMES(30)], ['ev', "homeAction('cfg', null)"], ['ev', FRAMES(10)],
+  ['ev', "for (const h of ['snd', 'allp', 'medir']){ const b = elHome.querySelector('[data-h=\"' + h + '\"]'); if (b) b.click(); }"], ['ev', FRAMES(20)]]);
+add('ajustes_borrar_seguro', [['ev', 'openHome()'], ['ev', FRAMES(30)], ['ev', "homeAction('cfg', null)"], ['ev', FRAMES(10)],
+  ['ev', "{ const b = elHome.querySelector('[data-h=\"reset\"]'); if (b) b.click(); }"], ['ev', FRAMES(20)]]);
+add('ajustes_borrado', [['ev', "lvl = 0; tutorial = false; curPlanet = 'tierra'; start()"], ['play', 300], ['ev', 'openHome()'], ['ev', FRAMES(30)], ['ev', "homeAction('cfg', null)"],
+  ['ev', "{ const b = elHome.querySelector('[data-h=\"reset\"]'); if (b){ b.click(); b.click(); } }"], ['ev', FRAMES(60)]]);
+// misiones: una completa lista para cobrar, el cobro (polvo estelar y el dato real), el bono del día y un logro
+const MIS_DONE = "misLoad(); MIS.daily.forEach((m, i) => { if (i < __n) m.p = misDef(m.id).n; }); misSave();";
+add('mision_lista', [['ev', MIS_DONE.replace('__n', '1')], ['ev', 'openMissions()'], ['ev', FRAMES(40)]]);
+add('mision_cobrada', [['ev', MIS_DONE.replace('__n', '1')], ['ev', 'openMissions()'], ['ev', FRAMES(40)], ['ev', "{ const b = elMis.querySelector('.claim'); if (b) b.click(); }"], ['ev', FRAMES(60)]]);
+add('mision_bono', [['ev', MIS_DONE.replace('__n', '3')], ['ev', 'openMissions()'], ['ev', FRAMES(20)],
+  ['ev', "for (let i = 0; i < 3; i++){ const b = elMis.querySelector('.claim[data-k=\"d' + i + '\"]'); if (b) b.click(); }"], ['ev', FRAMES(20)],
+  ['ev', "{ const b = elMis.querySelector('.claim[data-k=\"bonus\"]'); if (b) b.click(); }"], ['ev', FRAMES(60)]]);
+add('logro_detalle', [['ev', "misLoad(); MIS.st.perf = 100; misSave()"], ['ev', 'openMissions()'], ['ev', FRAMES(10)], ['ev', "{ const b = document.querySelector('#missions [data-t=\"logros\"]'); if (b) b.click(); }"], ['ev', FRAMES(20)],
+  ['ev', "{ const c = elMis.querySelector('[data-open=\"' + MIS_ACH.findIndex(a => a.id === 'perf100') + '\"]'); if (c) c.click(); }"], ['ev', FRAMES(40)]]);
+add('logro_cobrado', [['ev', "misLoad(); MIS.st.perf = 100; misSave()"], ['ev', 'openMissions()'], ['ev', FRAMES(10)], ['ev', "{ const b = document.querySelector('#missions [data-t=\"logros\"]'); if (b) b.click(); }"], ['ev', FRAMES(20)],
+  ['ev', "{ const c = elMis.querySelector('[data-open=\"' + MIS_ACH.findIndex(a => a.id === 'perf100') + '\"]'); if (c) c.click(); }"], ['ev', FRAMES(20)], ['ev', "{ const b = elMis.querySelector('.mdet .claim'); if (b) b.click(); }"], ['ev', FRAMES(60)]]);
+// el tutorial completo (con el salto doble en la barrera) y su pantalla final
+const TUT_DJ = "if (tutorial && state === 'play' && !jumping && level === 8 && charge >= chargeMax()) doubleJump();";
+add('tutorial_mitad', [['ev', 'startTutorial()'], ['play', 400, TUT_DJ]]);
+add('tutorial_final', [['ev', 'startTutorial()'], ['play', 2400, TUT_DJ], ['ev', FRAMES(200)]]);
+// la pausa: el juego ya reanudado después de la cuenta
+add('pausa_reanudada', [['ev', "lvl = 0; tutorial = false; curPlanet = 'tierra'; start()"], ['play', 300], ['ev', 'pauseGame()'], ['ev', FRAMES(10)], ['ev', 'resumeGame()'], ['play', 240]]);
+// partidas largas en cada galaxia
+for (let i = 0; i < 8; i++) add('partida_' + i + '_c', [['ev', `lvl = ${i}; tutorial = false; curPlanet = 'tierra'; seenTypes = {}; start()`], ['play', 4200]]);
+// cada poder justo después de activarse
+for (const p of ['tierra', 'luna', 'mercurio', 'venus', 'marte', 'jupiter', 'saturno', 'urano', 'neptuno', 'pluton', 'sol'])
+  add('poder_' + p + '_ya', [['ev', `lvl = 0; tutorial = false; curPlanet = '${p}'; seenTypes = {}; start()`], ['play', 345, "if (f === 300 && state === 'play'){ charge = chargeMax(); } if (f === 330 && state === 'play') powerKey();"]]);
+// movimiento reducido (prefers-reduced-motion)
+add('reducido_presentacion', [['ev', 'openHome(true)'], ['ev', FRAMES(200)]], {reduced: true});
+add('reducido_intro', [['ev', 'startIntro()'], ['ev', FRAMES(420)]], {reduced: true});
+add('reducido_partida', [['ev', "lvl = 0; tutorial = false; curPlanet = 'tierra'; seenTypes = {}; start()"], ['play', 1700]], {reduced: true});
+add('reducido_pausa_cuenta', [['ev', "lvl = 0; tutorial = false; curPlanet = 'tierra'; start()"], ['play', 300], ['ev', 'pauseGame()'], ['ev', FRAMES(10)], ['ev', 'resumeGame()'], ['ev', FRAMES(20)]], {reduced: true});
+add('reducido_marte', [['ev', "lvl = 0; tutorial = false; curPlanet = 'marte'; seenTypes = {}; start()"], ['play', 400, "if (f === 300 && state === 'play'){ charge = chargeMax(); } if (f === 330 && state === 'play') powerKey();"]], {reduced: true});
+// sin WebGL: el dibujo de respaldo en 2D
+add('sinwebgl_presentacion', [['ev', 'openHome(true)'], ['ev', FRAMES(200)]], {noGL: true});
+add('sinwebgl_inicio', [['ev', 'openHome()'], ['ev', FRAMES(60)]], {noGL: true});
+add('sinwebgl_niveles', [['ev', 'openLevels()'], ['ev', FRAMES(90)]], {noGL: true});
+add('sinwebgl_planetas', [['ev', 'openPlanets()'], ['ev', FRAMES(60)]], {noGL: true});
+add('sinwebgl_splash', [['ev', 'startSplash()'], ['ev', FRAMES(260)]], {noGL: true});
+for (let i = 0; i < 8; i++) add('sinwebgl_partida_' + i, [['ev', `lvl = ${i}; tutorial = false; curPlanet = 'tierra'; seenTypes = {}; start()`], ['play', 700]], {noGL: true});
+
 const { chromium } = require('playwright');
 const b = await chromium.launch({args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--font-render-hinting=none'].concat((process.env.FLAGS || '').split(' ').filter(Boolean))});
 const result = {};
 const only = process.env.SOLO ? new RegExp(process.env.SOLO) : null;
 for (const sc of SCENES){
   if (only && !only.test(sc.name)) continue;
-  const pg = await b.newPage({viewport: {width: 390, height: 844}, deviceScaleFactor: 1});
+  const opts = sc.opts || {};
+  const pg = await b.newPage({viewport: {width: 390, height: 844}, deviceScaleFactor: 1, reducedMotion: opts.reduced ? 'reduce' : 'no-preference'});
   const errs = [];
   pg.on('pageerror', e => errs.push(e.message)); pg.on('console', m => { if (m.type() === 'error' && !m.text().includes('Failed to load resource')) errs.push(m.text()); });
   await pg.route(/fonts\.(googleapis|gstatic)\.com/, r => r.abort());
+  if (opts.noGL) await pg.addInitScript(() => { const g = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function(type, ...a){ return /webgl/i.test(type) ? null : g.call(this, type, ...a); }; });
   await pg.addInitScript(INIT);
   await pg.goto('file://' + TMP);
   await pg.evaluate(s => window.__ev(s), BOT);
