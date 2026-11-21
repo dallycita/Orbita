@@ -74,7 +74,9 @@ try {
   doblesHechos = parseInt(localStorage.getItem('orbita_p1_dobles') || '0', 10) || 0;
 } catch (e) {}
 function noteDouble() {
-  if (tutorial) return;
+  if (tutorial) {
+    return;
+  }
   misEvent('power');
   doblesHechos++;
   try {
@@ -121,8 +123,11 @@ function endIntro(skipped) {
   if (storyReturn && !tutAfterStory) {
     const r = storyReturn;
     storyReturn = null;
-    if (r === 'levels') openLevels();
-    else openHome();
+    if (r === 'levels') {
+      openLevels();
+    } else {
+      openHome();
+    }
     return;
   }
   storyReturn = null;
@@ -134,7 +139,9 @@ function endIntro(skipped) {
   elPanel.classList.remove('hide');
 }
 function introDrone(on) {
-  if (!AC) return;
+  if (!AC) {
+    return;
+  }
   try {
     const n = AC.currentTime;
     if (on) {
@@ -169,7 +176,9 @@ function introDrone(on) {
   } catch (e) {}
 }
 function eatSound() {
-  if (!AC) return;
+  if (!AC) {
+    return;
+  }
   try {
     const t0 = AC.currentTime,
       o = AC.createOscillator(),
@@ -189,7 +198,9 @@ function eatSound() {
 }
 
 function updateIntro(dt) {
-  if (state === 'intro') introT += dt;
+  if (state === 'intro') {
+    introT += dt;
+  }
   t += dt;
   flash = Math.max(0, flash - dt * 2.2);
   holeFlare = Math.max(0, holeFlare - dt * 1.4);
@@ -241,7 +252,9 @@ function updateIntro(dt) {
     }
   }
   for (const p of ip) {
-    if (p.done) continue;
+    if (p.done) {
+      continue;
+    }
     const w = 0.9 * Math.pow(60 / p.r, 1.5);
     if (p.eatAt != null && introT >= p.eatAt) {
       if (!p.sounded) {
@@ -294,7 +307,9 @@ function updateIntro(dt) {
     q.life -= dt * (l < holeR ? 4 : 0.6);
   }
   iparts = iparts.filter(q => q.life > 0);
-  if (state === 'intro' && introT > INTRO_END) endIntro(false);
+  if (state === 'intro' && introT > INTRO_END) {
+    endIntro(false);
+  }
 }
 
 const INTRO_ID = {
@@ -367,7 +382,9 @@ function drawPlanet(p, x, y, rad, ph) {
   ctx.globalAlpha = 1;
 }
 function caption(txt, t0, t1, size, y) {
-  if (introT < t0 || introT > t1) return;
+  if (introT < t0 || introT > t1) {
+    return;
+  }
   const a = Math.min(1, (introT - t0) / 0.4, (t1 - introT) / 0.4),
     lines = txt.split('\n');
   ctx.globalAlpha = a;
@@ -379,7 +396,9 @@ function caption(txt, t0, t1, size, y) {
   for (const l of lines) {
     const m = ctx.measureText ? ctx.measureText(l) : null,
       w = (m && m.width) || 0;
-    if (w > W - 40) fs = Math.min(fs, (size * (W - 40)) / w);
+    if (w > W - 40) {
+      fs = Math.min(fs, (size * (W - 40)) / w);
+    }
   }
   ctx.font = '500 ' + fs + 'px Unbounded, system-ui, sans-serif';
   lines.forEach((l, i) => ctx.fillText(l, CX, y + (i - (lines.length - 1) / 2) * fs * 1.4));
@@ -393,7 +412,9 @@ function renderIntro() {
   ctx.save();
   ctx.fillStyle = z.bg;
   ctx.fillRect(0, 0, W, H);
-  if (shake > 0) ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
+  if (shake > 0) {
+    ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
+  }
   const sr = Math.max(W, H) * 0.62;
   for (const s of stars) {
     const zw = introZoomK(),
@@ -419,7 +440,9 @@ function renderIntro() {
   ctx.strokeStyle = BONE;
   ctx.lineWidth = 1;
   for (const p of ip) {
-    if (p.done) continue;
+    if (p.done) {
+      continue;
+    }
     if (p.earth) {
       ctx.globalAlpha = 0.18 + (0.82 - 0.18) * introZoomK();
       ctx.lineWidth = 1 + introZoomK();
@@ -518,7 +541,9 @@ function renderIntro() {
     ctx.globalAlpha = 1;
   }
   for (const p of ip) {
-    if (p.done) continue;
+    if (p.done) {
+      continue;
+    }
     let pa = p.a,
       pr = p.rr * SI,
       ps = Math.max(2, p.s * SI);
