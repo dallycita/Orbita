@@ -5,15 +5,23 @@ let andCanvas = null,
   andKey = '';
 function buildAndromeda() {
   const key = Math.round(W) + 'x' + Math.round(H);
-  if (andCanvas && andKey === key) return andCanvas;
-  if (!document.createElement) return null;
+  if (andCanvas && andKey === key) {
+    return andCanvas;
+  }
+  if (!document.createElement) {
+    return null;
+  }
   const c = document.createElement('canvas');
-  if (!c || !c.getContext) return null;
+  if (!c || !c.getContext) {
+    return null;
+  }
   const d = Math.min(window.devicePixelRatio || 1, 2);
   c.width = Math.round(W * d);
   c.height = Math.round(H * d);
   const g = c.getContext('2d');
-  if (!g || !g.setTransform) return null;
+  if (!g || !g.setTransform) {
+    return null;
+  }
   g.setTransform(d, 0, 0, d, 0, 0);
   let sd = 4242;
   const R2 = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
@@ -48,7 +56,9 @@ function buildAndromeda() {
     for (let i = 0; i < 1100; i++) {
       const th = (i / 1100) * 6.2 + arm * Math.PI,
         r = D * 0.05 * Math.exp(0.26 * th);
-      if (r > D * 1.7) break;
+      if (r > D * 1.7) {
+        break;
+      }
       const jx = (R2() - 0.5) * r * 0.22,
         jy = (R2() - 0.5) * r * 0.22,
         x = Math.cos(th) * r + jx,
@@ -168,15 +178,23 @@ let magCanvas = null,
   magKey = '';
 function buildMagallanes() {
   const key = Math.round(W) + 'x' + Math.round(H);
-  if (magCanvas && magKey === key) return magCanvas;
-  if (!document.createElement) return null;
+  if (magCanvas && magKey === key) {
+    return magCanvas;
+  }
+  if (!document.createElement) {
+    return null;
+  }
   const c = document.createElement('canvas');
-  if (!c || !c.getContext) return null;
+  if (!c || !c.getContext) {
+    return null;
+  }
   const d = Math.min(window.devicePixelRatio || 1, 2);
   c.width = Math.round(W * d);
   c.height = Math.round(H * d);
   const g = c.getContext('2d');
-  if (!g || !g.setTransform) return null;
+  if (!g || !g.setTransform) {
+    return null;
+  }
   g.setTransform(d, 0, 0, d, 0, 0);
   let sd = 1987;
   const R2 = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
@@ -422,9 +440,9 @@ const BG_BUILD = {
     for (let i = 0; i < 60; i++) {
       const [x, y] = bz(R()),
         off = (R() - 0.5) * D * 0.07;
-      if (i % 3 === 0)
+      if (i % 3 === 0) {
         blob(g, x, y + off, 5 + R() * 8, 'rgba(255,120,175,.5)', 'rgba(255,90,160,0)');
-      else {
+      } else {
         g.fillStyle = 'rgba(170,200,255,.7)';
         g.fillRect(x, y + off, 1.5, 1.5);
       }
@@ -445,14 +463,18 @@ const BG_BUILD = {
       for (let i = 0; i < 900; i++) {
         const th = (i / 900) * 6.6 + arm * Math.PI,
           r = D * 0.035 * Math.exp(0.3 * th);
-        if (r > D * 0.95) break;
+        if (r > D * 0.95) {
+          break;
+        }
         const x = cx + Math.cos(th) * r + (R() - 0.5) * r * 0.16,
           y = cy + Math.sin(th) * r + (R() - 0.5) * r * 0.16;
         g.fillStyle = ['rgba(150,180,255,', 'rgba(190,210,255,'][i % 2] + (0.2 + R() * 0.45) + ')';
         g.beginPath();
         g.arc(x, y, 0.6 + R() * 2, 0, Math.PI * 2);
         g.fill();
-        if (i % 20 === 0) blob(g, x, y, 6 + R() * 12, 'rgba(255,115,170,.5)', 'rgba(255,90,160,0)');
+        if (i % 20 === 0) {
+          blob(g, x, y, 6 + R() * 12, 'rgba(255,115,170,.5)', 'rgba(255,90,160,0)');
+        }
         dust.push([cx + Math.cos(th - 0.12) * r * 0.95, cy + Math.sin(th - 0.12) * r * 0.95]);
         if (arm === 0) {
           tipX = x;
