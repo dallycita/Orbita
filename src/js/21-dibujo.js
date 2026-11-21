@@ -1,11 +1,16 @@
 // ---------- dibujo ----------
-// asteroides con volumen: roca sombreada iluminada por el disco del agujero negro (borde naranja hacia el centro) y con cráteres.
-// Se dibujan una vez en pequeñas imágenes (8 formas × 12 giros × tamaño) y luego solo se copian: rápido incluso en celulares.
+// asteroides con volumen: roca sombreada iluminada por el disco del agujero negro (borde naranja
+// hacia el centro) y con cráteres.
+// Se dibujan una vez en pequeñas imágenes (8 formas × 12 giros × tamaño) y luego solo se copian:
+// rápido incluso en celulares.
 
 // ---- asteroides en 3D (GPU), con la misma luz que los planetas ----
-// Cada roca es un cuerpo irregular de verdad: un elipsoide deformado con ruido, con cráteres hundidos y su borde levantado.
-// Se calcula con trazado de rayos, iluminada por el disco del agujero negro (la misma luz cálida que los planetas),
-// y se guarda en pequeñas imágenes (8 formas × 12 giros en 3D × tamaño) para que en el juego solo se copien.
+// Cada roca es un cuerpo irregular de verdad: un elipsoide deformado con ruido, con cráteres
+// hundidos y su borde levantado.
+// Se calcula con trazado de rayos, iluminada por el disco del agujero negro (la misma luz cálida
+// que los planetas),
+// y se guarda en pequeñas imágenes (8 formas × 12 giros en 3D × tamaño) para que en el juego solo
+// se copien.
 const ASTGL = (() => {
   let cv = null,
     gl = null,
@@ -107,7 +112,8 @@ const ASTGL = (() => {
     }
     return ok;
   }
-  // dibuja una roca (forma, giro) en una imagen de sz×sz píxeles, a doble resolución y luego reducida (bordes suaves)
+  // dibuja una roca (forma, giro) en una imagen de sz×sz píxeles, a doble resolución y luego
+  // reducida (bordes suaves)
   function bake(shape, frame, sz) {
     if (!init()) {
       return null;
@@ -139,7 +145,8 @@ const ASTGL = (() => {
     if (!g) {
       return null;
     }
-    // sombra suave detrás, para que la roca siempre se despegue del cielo (como el halo de los planetas)
+    // sombra suave detrás, para que la roca siempre se despegue del cielo (como el halo de los
+    // planetas)
     const hg = g.createRadialGradient(sz / 2, sz / 2, sz * 0.26, sz / 2, sz / 2, sz * 0.44);
     hg.addColorStop(0, 'rgba(3,4,10,.22)');
     hg.addColorStop(1, 'rgba(3,4,10,0)');
@@ -231,7 +238,8 @@ function astSprite(shape, frame, rp) {
     g.arc(x, y, s2, 0, 6.283);
     g.fill();
   }
-  // cráteres de tamaños distintos: sombra dentro del lado de la luz, borde iluminado del lado contrario
+  // cráteres de tamaños distintos: sombra dentro del lado de la luz, borde iluminado del lado
+  // contrario
   const nc = 3 + Math.floor(rnd(7) * 3);
   for (let j = 0; j < nc; j++) {
     const a = rot + rnd(30 + j) * 6.283,
@@ -273,8 +281,10 @@ function astSprite(shape, frame, rp) {
   g.stroke();
   return (AST_SPR[key] = c);
 }
-// rocas por adelantado: las que la partida va a usar se fabrican en los menús y en "Toca para escapar", poco a poco
-// (unas pocas por cuadro), para no fabricarlas en pleno juego, donde cada una era un tirón. Son exactamente las mismas.
+// rocas por adelantado: las que la partida va a usar se fabrican en los menús y en "Toca para
+// escapar", poco a poco
+// (unas pocas por cuadro), para no fabricarlas en pleno juego, donde cada una era un tirón. Son
+// exactamente las mismas.
 let astPre = null,
   astPreK = '';
 function astPrebake() {
@@ -284,8 +294,10 @@ function astPrebake() {
     astPre = null;
   }
   if (!astPre) {
-    // tamaño en pantalla: los asteroides comunes miden 9 a 10.5 y aparecen desde el 40 %; primero esos.
-    // Después los de "Respiración" (24, se encogen hasta el 30 %), que llegan más tarde; al derretirse crecen hasta 115 %
+    // tamaño en pantalla: los asteroides comunes miden 9 a 10.5 y aparecen desde el 40 %; primero
+    // esos.
+    // Después los de "Respiración" (24, se encogen hasta el 30 %), que llegan más tarde; al
+    // derretirse crecen hasta 115 %
     const bk = r => AST_B.find(v => v >= r) || AST_B[AST_B.length - 1],
       full0 = bk(9 * S * DPR),
       full1 = bk(10.5 * S * DPR),
@@ -406,7 +418,8 @@ function drawEarth(px, py, rad) {
   ctx.arc(px, py, rad + 0.6, 0, Math.PI * 2);
   ctx.stroke();
 }
-// poder listo: aura que late detrás del planeta (se nota de reojo sin quitar la vista del anillo de arriba)
+// poder listo: aura que late detrás del planeta (se nota de reojo sin quitar la vista del anillo de
+// arriba)
 function drawPowerAura(px, py) {
   if (charge < chargeMax()) {
     return;
@@ -443,7 +456,8 @@ function drawCharge(px, py, z) {
     seg = (Math.PI * 2) / cm;
   ctx.lineCap = 'round';
   if (cm > 6) {
-    // muchos Perfectos (Plutón): un solo arco que se va llenando, en vez de muchas rayitas apretadas
+    // muchos Perfectos (Plutón): un solo arco que se va llenando, en vez de muchas rayitas
+    // apretadas
     const fl = Math.max(...pipFlash),
       a0 = -Math.PI / 2,
       a1 = a0 + Math.PI * 2 * Math.min(1, charge / cm);
@@ -502,7 +516,8 @@ function drawCharge(px, py, z) {
       s: 1 + Math.random() * 1.6,
     });
   }
-  // salto doble listo: mientras lo aprendes (menos de 3 usados), una flecha que sube sobre el planeta con "desliza"
+  // salto doble listo: mientras lo aprendes (menos de 3 usados), una flecha que sube sobre el
+  // planeta con "desliza"
   const learn = !tutorial && doblesHechos < 3;
   if (ready && (learn || hintT > 0) && !wh && !whShock && !bend.on) {
     const a0 = learn ? 1 : Math.min(1, hintT),
@@ -566,9 +581,12 @@ function powerReadySound() {
 }
 // el cuadro completo: elige qué dibujar (dentro o fuera del agujero de gusano) y la onda al salir
 // ---- la cámara que se ve: sigue el salto con suavidad ----
-// La lógica (choques, puntos, agujero negro) usa camLevel, que se queda quieta durante el salto y arranca de golpe al
-// aterrizar: eso se veía como un tirón. Para dibujar se usa una cámara "de resorte" que empieza a subir junto con el salto,
-// acelera y frena sin saltos y llega al mismo lugar en el mismo tiempo. Quieta, es idéntica a camLevel.
+// La lógica (choques, puntos, agujero negro) usa camLevel, que se queda quieta durante el salto y
+// arranca de golpe al
+// aterrizar: eso se veía como un tirón. Para dibujar se usa una cámara "de resorte" que empieza a
+// subir junto con el salto,
+// acelera y frena sin saltos y llega al mismo lugar en el mismo tiempo. Quieta, es idéntica a
+// camLevel.
 let camView = 0,
   camVel = 0,
   camT = 0;
