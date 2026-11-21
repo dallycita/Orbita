@@ -14716,7 +14716,9 @@ const ASTGL = (() => {
     gl_FragColor = vec4(col, 1.);
   }`;
   function init() {
-    if (ok !== null) return ok;
+    if (ok !== null) {
+      return ok;
+    }
     ok = false;
     try {
       cv = document.createElement('canvas');
@@ -14725,7 +14727,9 @@ const ASTGL = (() => {
         preserveDrawingBuffer: true,
         antialias: false,
       });
-      if (!gl) return false;
+      if (!gl) {
+        return false;
+      }
       const sh = (ty, src) => {
         const o = gl.createShader(ty);
         gl.shaderSource(o, src);
@@ -14741,13 +14745,17 @@ const ASTGL = (() => {
           'attribute vec2 aP; void main(){ gl_Position = vec4(aP, 0., 1.); }',
         ),
         f = sh(gl.FRAGMENT_SHADER, FS);
-      if (!v || !f) return false;
+      if (!v || !f) {
+        return false;
+      }
       pr = gl.createProgram();
       gl.attachShader(pr, v);
       gl.attachShader(pr, f);
       gl.bindAttribLocation(pr, 0, 'aP');
       gl.linkProgram(pr);
-      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return false;
+      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) {
+        return false;
+      }
       const b = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, b);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
@@ -14762,7 +14770,9 @@ const ASTGL = (() => {
   }
   // dibuja una roca (forma, giro) en una imagen de sz×sz píxeles, a doble resolución y luego reducida (bordes suaves)
   function bake(shape, frame, sz) {
-    if (!init()) return null;
+    if (!init()) {
+      return null;
+    }
     const big = sz * 2;
     if (cv.width !== big || cv.height !== big) {
       cv.width = big;
@@ -14787,7 +14797,9 @@ const ASTGL = (() => {
     const out = document.createElement('canvas');
     out.width = out.height = sz;
     const g = out.getContext('2d');
-    if (!g) return null;
+    if (!g) {
+      return null;
+    }
     // sombra suave detrás, para que la roca siempre se despegue del cielo (como el halo de los planetas)
     const hg = g.createRadialGradient(sz / 2, sz / 2, sz * 0.26, sz / 2, sz / 2, sz * 0.44);
     hg.addColorStop(0, 'rgba(3,4,10,.22)');
@@ -14805,16 +14817,22 @@ const AST_SPR = {},
   AST_B = [8, 12, 16, 22, 30, 40, 54, 72]; // tamaños fijos: la memoria no crece
 function astSprite(shape, frame, rp) {
   const key = shape + '_' + frame + '_' + rp;
-  if (AST_SPR[key]) return AST_SPR[key];
+  if (AST_SPR[key]) {
+    return AST_SPR[key];
+  }
   {
     const g3 = ASTGL.bake(shape, frame, Math.ceil(rp * 2.9) + 2);
-    if (g3) return (AST_SPR[key] = g3);
+    if (g3) {
+      return (AST_SPR[key] = g3);
+    }
   } // con GPU: roca en 3D; sin GPU, el dibujo de abajo
   const sz = Math.ceil(rp * 2.9) + 2,
     c = document.createElement('canvas');
   c.width = c.height = sz;
   const g = c.getContext('2d');
-  if (!g) return null;
+  if (!g) {
+    return null;
+  }
   const cx = sz / 2,
     cy = sz / 2,
     rot = (frame / 12) * Math.PI * 2,
@@ -14938,15 +14956,25 @@ function astPrebake() {
       AST_B.filter(v => v > full1 && v <= top),
     );
     astPre = [];
-    for (const rp of sizes)
-      for (let f = 0; f < 12; f++) for (let s = 0; s < 8; s++) astPre.push([s, f, rp]);
+    for (const rp of sizes) {
+      for (let f = 0; f < 12; f++) {
+        for (let s = 0; s < 8; s++) {
+          astPre.push([s, f, rp]);
+        }
+      }
+    }
   }
-  if (!astPre.length || !ASTGL.ok()) return;
+  if (!astPre.length || !ASTGL.ok()) {
+    return;
+  }
   const t0 = performance.now();
   for (let n = 0; n < 4 && astPre.length && performance.now() - t0 < 3; n++) {
     const [s, f, rp] = astPre.shift();
-    if (!AST_SPR[s + '_' + f + '_' + rp]) astSprite(s, f, rp);
-    else n--;
+    if (!AST_SPR[s + '_' + f + '_' + rp]) {
+      astSprite(s, f, rp);
+    } else {
+      n--;
+    }
   }
 }
 function drawAst(x, y, r, seed, rot, col, alpha) {
@@ -15041,7 +15069,9 @@ function drawEarth(px, py, rad) {
 }
 // poder listo: aura que late detrás del planeta (se nota de reojo sin quitar la vista del anillo de arriba)
 function drawPowerAura(px, py) {
-  if (charge < chargeMax()) return;
+  if (charge < chargeMax()) {
+    return;
+  }
   const rad = PR * S * 1.15 * sizeK(),
     beat = 0.5 + 0.5 * Math.sin(readyT * 6),
     R = rad * (2.1 + 0.35 * beat);
@@ -15105,7 +15135,7 @@ function drawCharge(px, py, z) {
         ctx.fill();
       }
     }
-  } else
+  } else {
     for (let i = 0; i < cm; i++) {
       const a0 = -Math.PI / 2 + i * seg + gap / 2,
         a1 = a0 + seg - gap,
@@ -15117,6 +15147,7 @@ function drawCharge(px, py, z) {
       ctx.arc(px, py, R + pipFlash[i] * 2, a0, a1);
       ctx.stroke();
     }
+  }
   if (ready && Math.random() < 0.5) {
     // estela de chispas doradas que salen del planeta
     const a = Math.random() * Math.PI * 2,
@@ -15159,16 +15190,22 @@ function drawCharge(px, py, z) {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
       ctx.font = '500 11px Unbounded, system-ui, sans-serif';
-      if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '2px';
+      if (ctx.letterSpacing !== undefined) {
+        ctx.letterSpacing = '2px';
+      }
       ctx.fillText('DESLIZA', px, y0 - 30);
-      if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '0px';
+      if (ctx.letterSpacing !== undefined) {
+        ctx.letterSpacing = '0px';
+      }
     }
   }
   ctx.globalAlpha = 1;
 }
 // sonido propio del poder listo: un arpegio brillante que sube y un destello
 function powerReadySound() {
-  if (!AC || muted) return;
+  if (!AC || muted) {
+    return;
+  }
   try {
     const n = AC.currentTime;
     [0, 7, 12, 16, 19, 24].forEach((sm, i) =>
@@ -15234,7 +15271,9 @@ function renderFrame() {
   viewInside = false;
   if (!wh) {
     renderScene();
-    if (whShock) drawShock();
+    if (whShock) {
+      drawShock();
+    }
     return;
   }
   if (wh.ph === 'orb') {
@@ -15284,7 +15323,9 @@ function renderFrame() {
 }
 function drawShock() {
   const s = whShock;
-  if (!s) return;
+  if (!s) {
+    return;
+  }
   const u = clamp(s.t / 1.1, 0, 1),
     R = 300 * s.t * S;
   ctx.save();
