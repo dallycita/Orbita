@@ -1,9 +1,13 @@
 // ---- dentro del agujero de gusano: modo ÓRBITA (anillos 30–41) ----
 // La corriente del gusano te lanza sola al siguiente anillo cada dos golpes de la música.
-// Tú ya no saltas: tocas para cambiar el sentido en que la Tierra gira sobre su anillo y te colocas bajo el hueco.
-// Entrada y salida: un portal corto (menos de un segundo), como en Geometry Dash, pero hecho con la lente real:
-// el mundo de afuera se estira y se abre en un círculo de luz con los colores separados (aberración cromática).
-const whGap = () => (level + 1 < 34 ? 4 : 3); // los primeros cuatro, cada cuatro golpes (para aprender); luego cada tres
+// Tú ya no saltas: tocas para cambiar el sentido en que la Tierra gira sobre su anillo y te colocas
+// bajo el hueco.
+// Entrada y salida: un portal corto (menos de un segundo), como en Geometry Dash, pero hecho con la
+// lente real:
+// el mundo de afuera se estira y se abre en un círculo de luz con los colores separados (aberración
+// cromática).
+// los primeros cuatro, cada cuatro golpes (para aprender); luego cada tres
+const whGap = () => (level + 1 < 34 ? 4 : 3);
 const ORB_W = 1.75,
   WH_IN = 0.78,
   WH_OUT = 0.7;
@@ -214,9 +218,11 @@ function whTrans(dt) {
     const p = clamp(wh.t / WH_IN, 0, 1),
       q = clamp(p / 0.5, 0, 1),
       qe = q * q;
-    bend.grow = 1 + (WH_G - 1) * Math.pow(p, 2.6); // la boca crece hacia ti hasta cubrir la pantalla
+    // la boca crece hacia ti hasta cubrir la pantalla
+    bend.grow = 1 + (WH_G - 1) * Math.pow(p, 2.6);
     const x = wh.ex + (wh.wx - wh.ex) * qe,
-      y = wh.ey + (wh.wy - wh.ey) * qe; // la Tierra cae hacia su centro (y la lente la estira en arco)
+      // la Tierra cae hacia su centro (y la lente la estira en arco)
+      y = wh.ey + (wh.wy - wh.ey) * qe;
     pAng = Math.atan2(y, x);
     pLevel = (Math.hypot(x, y) - R0) / GAP + camLevel;
     if (Math.random() < 0.6) {
@@ -272,7 +278,8 @@ function chromaRing(x, y, R, al, w) {
   });
   ctx.restore();
 }
-// cómo se ve todo estando dentro: el mismo cielo y los mismos anillos, vistos a través de la garganta del gusano
+// cómo se ve todo estando dentro: el mismo cielo y los mismos anillos, vistos a través de la
+// garganta del gusano
 function drawInside(al) {
   if (al <= 0.01) {
     return;
@@ -349,7 +356,8 @@ function drawInside(al) {
     ctx.lineTo(x - tx * h - nx * h, y - ty * h - ny * h);
     ctx.stroke();
   }
-  // cuánto falta para que la corriente te lance: un arco alrededor de la Tierra que se llena con la música
+  // cuánto falta para que la corriente te lance: un arco alrededor de la Tierra que se llena con la
+  // música
   const gB = wh.gapB || 2,
     ph = clamp((bt / TB - (wh.nextB - gB)) / gB, 0, 1),
     ex = CX + Math.cos(pAng) * R,
