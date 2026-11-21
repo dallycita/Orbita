@@ -31,7 +31,9 @@ function tutRespawn(x, y) {
     swallow = null;
     culprit = null;
     culpritT = 0;
-    if (level >= 8) charge = 3;
+    if (level >= 8) {
+      charge = 3;
+    }
   }, 700);
 }
 function tutorialWin() {
@@ -65,7 +67,9 @@ function tutorialWin() {
 }
 function startTutorial() {
   homeAmbience(false);
-  if (elLv) elLv.classList.add('off');
+  if (elLv) {
+    elLv.classList.add('off');
+  }
   tutorial = true;
   setup();
   state = 'play';
