@@ -5,7 +5,9 @@ function press(e) {
     return;
   }
   if (e && e.target && e.target.closest && e.target.closest('#quit')) {
-    if (e.cancelable) e.preventDefault();
+    if (e.cancelable) {
+      e.preventDefault();
+    }
     if (state === 'play') {
       pauseGame();
     } else if (state === 'dead') {
@@ -19,18 +21,28 @@ function press(e) {
     homeT = HOME_IN + 0.6;
     logoT0 = homeT - 3;
     showStop(0.3);
-    if (elHome) elHome.classList.remove('off');
+    if (elHome) {
+      elHome.classList.remove('off');
+    }
     return;
   }
-  if (state === 'levels' || state === 'home' || state === 'planets' || state === 'missions') return;
+  if (state === 'levels' || state === 'home' || state === 'planets' || state === 'missions') {
+    return;
+  }
   const act = e && e.target && e.target.closest ? e.target.closest('[data-act]') : null;
   if (act && (state === 'dead' || state === 'win')) {
-    if (e.cancelable) e.preventDefault();
-    if (elPanel.classList) elPanel.classList.remove('wscr');
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+    if (elPanel.classList) {
+      elPanel.classList.remove('wscr');
+    }
     const A = act.dataset.act;
-    if (A === 'levels') openLevels();
-    else if (A === 'lvl1') startLevel(0);
-    else if (A === 'next' && LEVELS[lvl + 1]) {
+    if (A === 'levels') {
+      openLevels();
+    } else if (A === 'lvl1') {
+      startLevel(0);
+    } else if (A === 'next' && LEVELS[lvl + 1]) {
       lvIndex = lvl + 1;
       startLevel(lvl + 1);
     } else if (A === 'again' && canRestart) {
@@ -42,9 +54,13 @@ function press(e) {
   }
   const chip = e && e.target && e.target.closest ? e.target.closest('.chip') : null;
   if (chip && state !== 'play') {
-    if (e.cancelable) e.preventDefault();
+    if (e.cancelable) {
+      e.preventDefault();
+    }
     initAudio();
-    if (AC && AC.state === 'suspended') AC.resume();
+    if (AC && AC.state === 'suspended') {
+      AC.resume();
+    }
     if (chip.dataset.music) {
       musicStyle = chip.dataset.music;
       refreshChips();
@@ -61,15 +77,21 @@ function press(e) {
     }
     return;
   }
-  if (e && e.cancelable) e.preventDefault();
+  if (e && e.cancelable) {
+    e.preventDefault();
+  }
   initAudio();
-  if (AC && AC.state === 'suspended') AC.resume();
+  if (AC && AC.state === 'suspended') {
+    AC.resume();
+  }
   if (state === 'pretitle') {
     openHome(true);
     return;
   }
   if (state === 'splash') {
-    if (splashT > 0.8) skipSplash();
+    if (splashT > 0.8) {
+      skipSplash();
+    }
     return;
   }
   if (state === 'intro') {
@@ -86,10 +108,16 @@ function press(e) {
     }
     return;
   }
-  if (state === 'win' && tutorial) return;
-  if (state === 'win') return;
+  if (state === 'win' && tutorial) {
+    return;
+  }
+  if (state === 'win') {
+    return;
+  }
   if (state === 'dead') {
-    if (canRestart) start();
+    if (canRestart) {
+      start();
+    }
     return;
   }
   if (state === 'play' && wh) {
@@ -108,10 +136,14 @@ function press(e) {
   }
 }
 window.addEventListener('pointermove', e => {
-  if (!gest || e.pointerId !== gest.id) return;
+  if (!gest || e.pointerId !== gest.id) {
+    return;
+  }
   if (gest.y - e.clientY > 22) {
     gest = null;
-    if (pending) upgradeToDouble();
+    if (pending) {
+      upgradeToDouble();
+    }
     pending = false;
   }
 });
@@ -126,10 +158,12 @@ window.addEventListener('pointercancel', endGest);
 window.addEventListener('pointerdown', press, { passive: false });
 // tecla del poder: funciona antes de saltar y también en pleno salto; si no está cargado, avisa cuánto falta
 function powerKey() {
-  if (state !== 'play' || wh) return;
+  if (state !== 'play' || wh) {
+    return;
+  }
   if (charge < chargeMax()) {
     const f = chargeMax() - charge;
-    if (!texts.some(x => x.key === 'faltan'))
+    if (!texts.some(x => x.key === 'faltan')) {
       texts.push({
         txt: 'Te ' + (f === 1 ? 'falta 1 Perfecto' : 'faltan ' + f + ' Perfectos'),
         x: 0,
@@ -140,16 +174,24 @@ function powerKey() {
         center: true,
         key: 'faltan',
       });
+    }
     return;
   }
-  if (jumping) upgradeToDouble();
-  else doubleJump();
+  if (jumping) {
+    upgradeToDouble();
+  } else {
+    doubleJump();
+  }
 }
 window.addEventListener('keydown', e => {
   if (e.code === 'Escape' || e.code === 'KeyP') {
     if (paused) {
-      if (!pzCount) resumeGame();
-    } else if (state === 'play') pauseGame();
+      if (!pzCount) {
+        resumeGame();
+      }
+    } else if (state === 'play') {
+      pauseGame();
+    }
     return;
   }
   if (paused) {
@@ -161,7 +203,9 @@ window.addEventListener('keydown', e => {
   }
   if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'Enter') {
     e.preventDefault();
-    if (!e.repeat) press();
+    if (!e.repeat) {
+      press();
+    }
   } else if (state === 'planets' && (e.code === 'ArrowRight' || e.code === 'ArrowLeft')) {
     uiGlass(e.code === 'ArrowRight' ? 1 : -1);
     planetStep(e.code === 'ArrowRight' ? 1 : -1);
@@ -170,7 +214,9 @@ window.addEventListener('keydown', e => {
       elLv &&
       elLv.querySelector &&
       elLv.querySelector(e.code === 'ArrowRight' ? '.arrow.r' : '.arrow.l');
-    if (b && b.click) b.click();
+    if (b && b.click) {
+      b.click();
+    }
   } else if (
     (e.code === 'KeyD' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') &&
     !e.repeat
