@@ -18773,7 +18773,8 @@ function showOut() {
   }
   return showBus;
 }
-// un "inhalar" que nunca para: oleadas de aire que bajan de tono y se cortan, como un desagüe cósmico
+// un "inhalar" que nunca para: oleadas de aire que bajan de tono y se cortan, como un desagüe
+// cósmico
 function showStart() {
   if (!AC) {
     return;
@@ -18863,7 +18864,8 @@ function rockIn(dur, pan) {
       pn.connect(out);
       dest = pn;
     }
-    // la roca cae y su "voz" se vuelve cada vez más aguda (corrimiento al azul), hasta cortarse en el horizonte
+    // la roca cae y su "voz" se vuelve cada vez más aguda (corrimiento al azul), hasta cortarse en
+    // el horizonte
     for (const [f0, f1, gn, ty] of [
       [55, 330, 0.2, 'sine'],
       [82, 495, 0.07, 'sine'],
@@ -18930,7 +18932,8 @@ function bigSuck(dur) {
 }
 
 // ---------- sonidos científicos ----------
-// "Voz" inspirada en la sonificación de la NASA del agujero negro de Perseo (2022): un gemido grave que cambia lentamente de tono
+// "Voz" inspirada en la sonificación de la NASA del agujero negro de Perseo (2022): un gemido grave
+// que cambia lentamente de tono
 function perseusVoice(dest, n) {
   const nodes = [];
   const formA = AC.createBiquadFilter(),
@@ -18986,7 +18989,8 @@ function perseusVoice(dest, n) {
   }
   return nodes;
 }
-// "Chirrido" inspirado en las ondas gravitacionales que detectó LIGO en 2015: sube de tono, crece y se apaga de golpe
+// "Chirrido" inspirado en las ondas gravitacionales que detectó LIGO en 2015: sube de tono, crece y
+// se apaga de golpe
 function gwChirp() {
   if (!AC || muted) {
     return;
