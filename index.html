@@ -15430,8 +15430,10 @@ function drawShock() {
   }
   ctx.restore();
 }
-// ---------- el viaje por el Sistema solar: los planetas pasan en el fondo, en su orden real ----------
-// at: en qué parte del nivel (0–1) cruza el centro de la pantalla · x: lado (fracción del ancho) · r: tamaño (fracción del lado menor)
+// ---------- el viaje por el Sistema solar: los planetas pasan en el fondo, en su orden real
+// ----------
+// at: en qué parte del nivel (0–1) cruza el centro de la pantalla · x: lado (fracción del ancho) ·
+// r: tamaño (fracción del lado menor)
 const SOLAR_PATH = [
   { id: 'mercurio', at: 0.07, x: 0.84, r: 0.055 },
   { id: 'venus', at: 0.16, x: 0.15, r: 0.085 },
@@ -15580,7 +15582,8 @@ function renderScene() {
 
   // agujero negro: crece desde el centro y se traga los anillos
   const sunW = Math.max(rr(sunLevel), SUN),
-    sunR = (sunW + pulse * 2) * S * (1 + 0.07 * Math.sin(t * 38) * bhWob); // bhWob: el empujón de Júpiter lo hace temblar
+    // bhWob: el empujón de Júpiter lo hace temblar
+    sunR = (sunW + pulse * 2) * S * (1 + 0.07 * Math.sin(t * 38) * bhWob);
   const g = ctx.createRadialGradient(CX, CY, sunR * 0.9, CX, CY, sunR * 2.5);
   g.addColorStop(0, 'rgba(255,90,31,.32)');
   g.addColorStop(0.35, 'rgba(255,90,31,.08)');
@@ -15765,7 +15768,8 @@ function renderScene() {
             ctx.restore();
             continue;
           }
-          // Venus: la roca pasa de rojo oscuro a naranja y a blanco, y se escurre hacia el agujero negro
+          // Venus: la roca pasa de rojo oscuro a naranja y a blanco, y se escurre hacia el agujero
+          // negro
           const ba = Math.atan2(CY - y, CX - x),
             hc =
               u < 0.45
