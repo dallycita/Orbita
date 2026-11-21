@@ -20542,18 +20542,20 @@ let scanOn = false,
   scanApplyAt = 0;
 // cómo se siente cada característica en el juego: una palabra y su efecto (los números reales van debajo)
 function statWords(k, v) {
-  if (k === 'size')
+  if (k === 'size') {
     return v <= -10
       ? ['Pequeño', 'pasa fácil por los huecos']
       : v >= 10
         ? ['Grande', 'más difícil de esquivar']
         : ['Normal', 'como la Tierra'];
-  if (k === 'vel')
+  }
+  if (k === 'vel') {
     return v <= -10
       ? ['Lento', 'salta flotando']
       : v >= 5
         ? ['Rápido', 'salta al instante']
         : ['Normal', 'como la Tierra'];
+  }
   return v <= -30
     ? ['Frágil', 'el agujero negro lo alcanza antes']
     : v <= -8
@@ -20596,7 +20598,9 @@ const STAT_ROWS = [
 ];
 // las barras crecen desde el centro (la Tierra) cuando el planeta termina de encogerse
 function applyScanBars() {
-  if (!elPl || !elPl.querySelectorAll || !elPl.querySelector) return;
+  if (!elPl || !elPl.querySelectorAll || !elPl.querySelector) {
+    return;
+  }
   elPl.querySelectorAll('.sbar i').forEach(i => {
     const v = Math.max(-50, Math.min(50, Number(i.dataset.v)));
     i.style.width = Math.abs(v) + '%';
@@ -20606,10 +20610,14 @@ function applyScanBars() {
     i.style.opacity = '1';
   });
   const pw = elPl.querySelector('.spower');
-  if (pw) setTimeout(() => pw.classList.add('on'), 650);
+  if (pw) {
+    setTimeout(() => pw.classList.add('on'), 650);
+  }
 }
 function uiScan() {
-  if (!AC || muted) return;
+  if (!AC || muted) {
+    return;
+  }
   try {
     const n = AC.currentTime,
       out = uiOut();
@@ -20633,7 +20641,9 @@ function uiScan() {
 function setScan(on) {
   scanOn = on;
   scanLineT = 0;
-  if (elPl) elPl.classList.toggle('scanning', on);
+  if (elPl) {
+    elPl.classList.toggle('scanning', on);
+  }
   if (on) {
     uiScan();
     scanApplyAt = performance.now() + 650;
