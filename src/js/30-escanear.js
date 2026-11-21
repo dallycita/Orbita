@@ -4,7 +4,8 @@ let scanOn = false,
   pRot = 0,
   scanLineT = 0,
   scanApplyAt = 0;
-// cómo se siente cada característica en el juego: una palabra y su efecto (los números reales van debajo)
+// cómo se siente cada característica en el juego: una palabra y su efecto (los números reales van
+// debajo)
 function statWords(k, v) {
   if (k === 'size') {
     return v <= -10
