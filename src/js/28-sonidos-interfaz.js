@@ -1,12 +1,3 @@
-// ┌─ 28-sonidos-interfaz.js
-// │ da:     bigSuck, gwChirp, rockIn, showOut, showStart, showStop, uiOut, uiTone
-// │ lo usan: 10-ritmo-y-objetos, 12-poderes, 15-peligros, 19-controles, 21-dibujo, 25-selector-niveles,
-// │        26-pantalla-inicio, 27-inicio-animacion, 29-planetas-hd, 30-escanear, 34-misiones
-// │ usa 02-audio: AC, master, noiseHit, ROOT
-// │ usa 18-pausa: paused, pzSnd
-// │ usa 26-pantalla-inicio: muted
-// │ usa 29-planetas-hd: uiGlass
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- sonidos de la interfaz: cristal y eco, en la tonalidad del juego ----------
 let uiBus = null, lastHover = null, uiLastT = 0;
 function uiOut(){

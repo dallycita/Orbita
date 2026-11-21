@@ -1,8 +1,3 @@
-// ┌─ 32-fondos-3-via-lactea.js
-// │ da:     FS_MW
-// │ lo usan: 32-fondos-9-motor
-// │ usa 32-fondos-1-comun: BG_COMMON
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // Vía Láctea / Sistema solar (nivel 1)
 // fondo con fotografía: la foto real en capas, con la luz doblada por el agujero negro
 // Sistema solar: la Vía Láctea como en una foto de cielo profundo (muchísimas estrellas, polvo oscuro, nebulosas rojizas)

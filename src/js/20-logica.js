@@ -1,37 +1,3 @@
-// ┌─ 20-logica.js
-// │ da:     update
-// │ lo usan: 36-bucle-principal
-// │ usa 01-pantalla-y-utilidades: BONE, buzz, CX, CY, PR, R0, reduceMotion, S, SUN, zoneOf
-// │ usa 02-audio: AC, noise, thump
-// │ usa 03-musica-ritmos: alarmTick, andFast, dangerFlash, dangerNow, kickQueue, musicOn, musicStart, switchAt,
-// │        switchMsg, TB, tensionSet, tensT
-// │ usa 06-record-y-estado: appear, astFade, camLevel, charge, crossed, GOAL, jumping, jumpT, jumpTarget, level, lvl,
-// │        pAng, pLevel, rings, state
-// │ usa 07-planetas: catchMargin, chargeMax, jumpDur, sizeK
-// │ usa 08-partida-estado: burns, chargeFlash, culpritT, deadT, debris, flash, hintT, holeFlare, landPop, particles,
-// │        pending, pendingT, pipFlash, pulse, readyT, shake, slowTimer, sunLevel, swallow, t, texts, timeScale,
-// │        trail, tutorial, winT
-// │ usa 09-recorridos: seenTypes
-// │ usa 10-ritmo-y-objetos: beatTime, HOLE_MUL, lastBeatIdx, obsAng, obsRad, pushFrom, pushing, pushT, stretchAt
-// │ usa 11-peligros-datos: novaSrc
-// │ usa 12-poderes: burnT, caronteSaves, ghostT, lastJT, powerUpdate, ringSpark, shieldT, vaporize
-// │ usa 13-agujero-de-gusano: ORB_W, wh, whEnter, whGap, whShock, whTrans
-// │ usa 14-lente-gravitacional: bend, BEND_R, bendUpdate, bendW, lensP, WH_EXIT, WH_K, whRip
-// │ usa 15-peligros: hazardsUpdate, NOVA_LIFE, novaBurst, novaHit, novaSound
-// │ usa 16-partida: die, eatRings, jump, onLand, rr
-// │ usa 23-intro: introFade
-// │ usa 32-fondos-9-motor: GLBG
-// │ cambia 03-musica-ritmos: dangerFlash, switchAt, tensT
-// │ cambia 06-record-y-estado: appear, astFade, camLevel, crossed, jumping, jumpT, jumpTarget, level, pAng, pLevel
-// │ cambia 08-partida-estado: burns, chargeFlash, culpritT, deadT, flash, hintT, holeFlare, landPop, particles,
-// │        pending, pendingT, pulse, readyT, shake, slowTimer, sunLevel, t, texts, timeScale, winT
-// │ cambia 10-ritmo-y-objetos: lastBeatIdx, pushing, pushT
-// │ cambia 11-peligros-datos: novaSrc
-// │ cambia 12-poderes: lastJT
-// │ cambia 13-agujero-de-gusano: whShock
-// │ cambia 14-lente-gravitacional: whRip
-// │ cambia 23-intro: introFade
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- lógica ----------
 function update(dt){
   // tiempo real: cámara lenta, sacudida, destello

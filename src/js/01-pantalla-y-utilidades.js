@@ -1,15 +1,3 @@
-// ┌─ 01-pantalla-y-utilidades.js
-// │ da:     BONE, buzz, chipsHTML, clamp, ctx, cvs, CX, CY, DPR, elArcFg, elBest, elHud, elPanel, elPbar, elPnum,
-// │        elScore, elWrap, frac, GAP, H, hudMode, musicStyle, PR, R0, reduceMotion, refreshChips, rgba, S, stars,
-// │        SUN, W, zoneOf, ZONES
-// │ lo usan: 03-musica-ritmos, 05-musica-reproductor, 06-record-y-estado, 10-ritmo-y-objetos, 12-poderes,
-// │        13-agujero-de-gusano, 14-lente-gravitacional, 15-peligros, 16-partida, 17-tutorial, 18-pausa, 19-controles,
-// │        20-logica, 21-dibujo, 22-viaje-sistema-solar, 23-intro, 24-presentacion, 25-selector-niveles,
-// │        26-pantalla-inicio, 27-inicio-animacion, 29-planetas-hd, 31-fondos-2d, 32-fondos-9-motor,
-// │        33-tarjetas-niveles, 34-misiones, 36-bucle-principal
-// │ usa 06-record-y-estado: lvl
-// │ usa 08-partida-estado: tutorial
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 const cvs = document.getElementById('c'), ctx = cvs.getContext('2d');
 const elScore = document.getElementById('score'), elBest = document.getElementById('best');
 const elPbar = document.getElementById('pbar'), elPnum = document.getElementById('pnum');

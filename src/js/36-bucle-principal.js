@@ -1,25 +1,3 @@
-// ┌─ 36-bucle-principal.js
-// │ da:     last
-// │ lo usan: 18-pausa
-// │ usa 01-pantalla-y-utilidades: ctx
-// │ usa 06-record-y-estado: state
-// │ usa 08-partida-estado: deadT, t
-// │ usa 10-ritmo-y-objetos: elWallet
-// │ usa 18-pausa: paused
-// │ usa 20-logica: update
-// │ usa 21-dibujo: astPrebake, render
-// │ usa 23-intro: renderIntro, updateIntro
-// │ usa 24-presentacion: renderSplash, updateSplash
-// │ usa 26-pantalla-inicio: elHome
-// │ usa 27-inicio-animacion: HOME_IN, homeT, logoSounds, renderHomeIntro, updateHomeShow
-// │ usa 29-planetas-hd: renderPlanetsScene
-// │ usa 33-tarjetas-niveles: drawLevelsBG
-// │ usa 34-misiones: misOpen, misPlanetDraw
-// │ usa 35-medidor: medFrame, MEDIR, medMid
-// │ cambia 08-partida-estado: t
-// │ cambia 27-inicio-animacion: homeT
-// │ cambia 35-medidor: medMid
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 let last = performance.now();
 function frame(now){
   const m0 = MEDIR ? performance.now() : 0;

@@ -1,25 +1,3 @@
-// ┌─ 12-poderes.js
-// │ da:     bhWob, burnT, caronteSaves, drawCaronteBack, drawPowerFx, drawPowerScene, drawRingPower, eclipseT, ghostT,
-// │        hsh, lastJT, periLeft, pfx, powerUpdate, predT, ringBoostNow, ringSpark, shieldT, strainK, strainNow,
-// │        usePower, vaporize
-// │ lo usan: 16-partida, 20-logica, 22-viaje-sistema-solar, 29-planetas-hd
-// │ usa 01-pantalla-y-utilidades: buzz, clamp, ctx, CX, CY, frac, H, PR, R0, reduceMotion, rgba, S, SUN, W
-// │ usa 02-audio: AC, cowbell, noise, ROOT, SCALE, sub
-// │ usa 06-record-y-estado: charge, crossed, jumping, jumpT, jumpTarget, level, pAng, pLevel, rings, state
-// │ usa 07-planetas: catchMargin, chargeMax, curP, curPlanet, jumpDur, pst, shieldLeft, sizeK, usedDouble
-// │ usa 08-partida-estado: curGoal, flash, holeFlare, lastEaten, particles, pending, pulse, shake, showHint,
-// │        slowTimer, sunLevel, t, texts, timeScale, tutorial
-// │ usa 10-ritmo-y-objetos: beatTime, obsAng, obsRad
-// │ usa 16-partida: rr
-// │ usa 23-intro: noteDouble
-// │ usa 26-pantalla-inicio: muted
-// │ usa 28-sonidos-interfaz: uiTone
-// │ usa 29-planetas-hd: drawPlayer, PLGL
-// │ cambia 06-record-y-estado: charge, crossed, jumping, jumpT, jumpTarget
-// │ cambia 07-planetas: shieldLeft, usedDouble
-// │ cambia 08-partida-estado: flash, holeFlare, lastEaten, pending, pulse, shake, showHint, slowTimer, sunLevel,
-// │        texts, timeScale
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---- los poderes de cada planeta (se cargan con Perfectos y se usan deslizando hacia arriba, o con la tecla D) ----
 // Cada uno nace de un dato real del planeta y tiene su propio efecto visual.
 let ghostT = 0, shieldT = 0, eclipseT = 0, pfx = [], lastJT = 1, periLeft = 0, predT = 0, strainK = 0, burnT = 0, ringBoostNow = 0;

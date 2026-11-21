@@ -1,11 +1,3 @@
-// ┌─ 30-escanear.js
-// │ da:     applyScanBars, pRot, scanApplyAt, scanK, scanLineT, scanOn, setScan, STAT_ROWS, statWords
-// │ lo usan: 29-planetas-hd
-// │ usa 02-audio: AC, ROOT
-// │ usa 26-pantalla-inicio: muted
-// │ usa 28-sonidos-interfaz: uiOut, uiTone
-// │ usa 29-planetas-hd: elPl
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- Escanear: el planeta gira, se encoge y aparecen sus datos reales ----------
 let scanOn = false, scanK = 0, pRot = 0, scanLineT = 0, scanApplyAt = 0;
 // cómo se siente cada característica en el juego: una palabra y su efecto (los números reales van debajo)

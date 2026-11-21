@@ -1,22 +1,3 @@
-// ┌─ 10-ritmo-y-objetos.js
-// │ da:     bassBreath, beatKick, beatPhase, beatTime, COIN_RINGS, coinChime, courseMaps, drawCoin, drawNebula,
-// │        drawPulsar, elWallet, HOLE_MUL, lastBeatIdx, NEB_AT, NOVA_BAR, novaEnv, novaPush, novaTau, OBJ_NEBULA,
-// │        OBJ_PULSAR, objChime, obsAng, obsRad, placeInGap, PUL_AT, pushFrom, pushing, pushT, RING_MUL, runCoins,
-// │        starBoost, starLaunch, starPush, stretchAt, updateWallet, wallet
-// │ lo usan: 09-recorridos, 12-poderes, 13-agujero-de-gusano, 15-peligros, 16-partida, 18-pausa, 19-controles,
-// │        20-logica, 22-viaje-sistema-solar, 25-selector-niveles, 34-misiones, 36-bucle-principal
-// │ usa 01-pantalla-y-utilidades: ctx, frac, reduceMotion
-// │ usa 02-audio: AC, ROOT
-// │ usa 03-musica-ritmos: musicOn, musicStart, TB
-// │ usa 06-record-y-estado: appear, astFade, crossed, jumping, jumpT, jumpTarget, level
-// │ usa 08-partida-estado: curGoal, pending, t
-// │ usa 16-partida: rr
-// │ usa 25-selector-niveles: lvStarsGot
-// │ usa 26-pantalla-inicio: muted
-// │ usa 28-sonidos-interfaz: uiTone
-// │ cambia 06-record-y-estado: appear, astFade, crossed, jumping, jumpT, jumpTarget, level
-// │ cambia 08-partida-estado: pending
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- sincronía con la música ----------
 // fase dentro de cada golpe (0 = justo en el golpe); -1 si no hay música
 function beatPhase(){ return (AC && musicOn && musicStart >= 0) ? frac(beatTime()/TB) : -1; }

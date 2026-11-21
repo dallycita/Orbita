@@ -1,15 +1,3 @@
-// ┌─ 08-partida-estado.js
-// │ da:     attempts, burns, canRestart, chargeFlash, culprit, culpritT, curGoal, deadT, debris, flash, gest,
-// │        hintsShown, hintT, holeFlare, JUMP_DUR, jumpClear, landPop, lastEaten, particles, pending, pendingT,
-// │        perfCount, PERFECT, pipFlash, pulse, readyHintDone, readyT, shake, showHint, slowTimer, streak, sunLevel,
-// │        swallow, t, texts, timeScale, trail, TUT_TIPS, TUT_TYPES, tutorial, tutorialDone, winT
-// │ lo usan: 01-pantalla-y-utilidades, 03-musica-ritmos, 05-musica-reproductor, 06-record-y-estado, 07-planetas,
-// │        09-recorridos, 10-ritmo-y-objetos, 12-poderes, 13-agujero-de-gusano, 14-lente-gravitacional, 15-peligros,
-// │        16-partida, 17-tutorial, 18-pausa, 19-controles, 20-logica, 21-dibujo, 22-viaje-sistema-solar, 23-intro,
-// │        24-presentacion, 25-selector-niveles, 26-pantalla-inicio, 27-inicio-animacion, 29-planetas-hd,
-// │        31-fondos-2d, 32-fondos-9-motor, 33-tarjetas-niveles, 34-misiones, 35-medidor, 36-bucle-principal
-// │ usa 06-record-y-estado: GOAL
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- estado de la partida: contadores, tutorial, efectos en pantalla ----------
 let winT = 0, perfCount = 0, attempts = 0;
 try{ attempts = parseInt(localStorage.getItem('orbita_p1_intentos')||'0',10) || 0; }catch(e){ attempts = 0; }

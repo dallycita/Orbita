@@ -1,27 +1,3 @@
-// ┌─ 29-planetas-hd.js
-// │ da:     drawBigPlanet, drawPlayer, elPl, openPlanets, planetRing, planetStep, PLGL, renderPlanetsScene, uiGlass
-// │ lo usan: 07-planetas, 12-poderes, 19-controles, 21-dibujo, 22-viaje-sistema-solar, 23-intro, 26-pantalla-inicio,
-// │        27-inicio-animacion, 28-sonidos-interfaz, 30-escanear, 33-tarjetas-niveles, 34-misiones,
-// │        36-bucle-principal
-// │ usa 00-iconos-flechas: ARC_L, CHEV_L
-// │ usa 01-pantalla-y-utilidades: BONE, ctx, cvs, CX, CY, H, rgba, S, stars, W
-// │ usa 02-audio: AC, ROOT
-// │ usa 06-record-y-estado: state
-// │ usa 07-planetas: curPlanet, planetOk, PLANETS_P, sizeK
-// │ usa 08-partida-estado: particles, t, tutorial
-// │ usa 11-peligros-datos: hot, hotT
-// │ usa 12-poderes: drawCaronteBack, hsh, ringBoostNow, shieldT
-// │ usa 15-peligros: waveProx
-// │ usa 21-dibujo: drawEarth
-// │ usa 26-pantalla-inicio: elHome, muted
-// │ usa 28-sonidos-interfaz: uiOut, uiTone
-// │ usa 30-escanear: applyScanBars, pRot, scanApplyAt, scanK, scanLineT, scanOn, setScan, STAT_ROWS, statWords
-// │ cambia 06-record-y-estado: state
-// │ cambia 07-planetas: curPlanet
-// │ cambia 08-partida-estado: t
-// │ cambia 12-poderes: ringBoostNow
-// │ cambia 30-escanear: pRot, scanApplyAt, scanK, scanLineT, scanOn
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- pantalla de planetas: el planeta girando en el espacio ----------
 const elPl = document.getElementById('planets');
 let pIndex = 0, pSwap = 0, pDir = 1, pTarget = 0, pPos = 0, pDrag = 0, pSlots = [], pScan = false, pScanT = 0, pSK = 0, pUse = 0;

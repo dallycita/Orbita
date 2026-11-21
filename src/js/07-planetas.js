@@ -1,13 +1,3 @@
-// ┌─ 07-planetas.js
-// │ da:     allPlanets, catchMargin, chargeMax, curP, curPlanet, jumpDur, markNewPlanets, maxPerf, PLANET_SVG,
-// │        planetOk, PLANETS_P, planetThumb, plutoOk, pst, rescuedCards, saveRunStats, shieldLeft, sizeK, unlockedIds,
-// │        usedDouble
-// │ lo usan: 12-poderes, 13-agujero-de-gusano, 15-peligros, 16-partida, 17-tutorial, 19-controles, 20-logica,
-// │        21-dibujo, 22-viaje-sistema-solar, 25-selector-niveles, 26-pantalla-inicio, 29-planetas-hd, 34-misiones
-// │ usa 06-record-y-estado: bestOf, bestRing, GOAL
-// │ usa 08-partida-estado: JUMP_DUR, perfCount
-// │ usa 29-planetas-hd: PLGL
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- planetas para rescatar y jugar ----------
 // ---------- planetas: estadísticas sacadas de datos reales ----------
 // size: diámetro real (escala logarítmica)  ·  vel: velocidad orbital real  ·  res: densidad real (resistencia a la fuerza de marea)  ·  charge: rotación real

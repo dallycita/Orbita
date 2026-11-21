@@ -1,14 +1,3 @@
-// ┌─ 32-fondos-56-final.js
-// │ da:     FS_GX
-// │ lo usan: 32-fondos-9-motor
-// │ usa 32-fondos-1-comun: BG_COMMON
-// │ usa 32-fondos-50-lejanas: GX_BASE
-// │ usa 32-fondos-51-centaurus: GX_CENTAURUS
-// │ usa 32-fondos-52-remolino: GX_REMOLINO
-// │ usa 32-fondos-53-sombrero: GX_SOMBRERO
-// │ usa 32-fondos-54-m87: GX_M87
-// │ usa 32-fondos-55-sagitario: GX_SAGITARIO
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // Galaxias lejanas: la Vía Láctea vista desde fuera, la capa final y main(); aquí se arma FS_GX
 const GX_FINAL = `// la Vía Láctea vista desde fuera: el regreso a casa
 vec3 homeGalaxy(vec2 q){

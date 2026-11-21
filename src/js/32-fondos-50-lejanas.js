@@ -1,8 +1,3 @@
-// ┌─ 32-fondos-50-lejanas.js
-// │ da:     GX_BASE
-// │ lo usan: 32-fondos-56-final
-// │ usa:    (nada de otros archivos)
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // Galaxias lejanas (niveles 4 a 8): lo que comparten sus fondos (estrellas, cúmulos, meteoros, destellos)
 const GX_BASE = `
 uniform float uScale; uniform float uKind;

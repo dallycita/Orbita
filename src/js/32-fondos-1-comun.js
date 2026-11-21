@@ -1,9 +1,3 @@
-// ┌─ 32-fondos-1-comun.js
-// │ da:     BG_COMMON, BG_VS
-// │ lo usan: 32-fondos-2-andromeda, 32-fondos-3-via-lactea, 32-fondos-4-magallanes, 32-fondos-56-final,
-// │        32-fondos-6-foto, 32-fondos-9-motor
-// │ usa:    (nada de otros archivos)
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // Fondos en WebGL: lo que comparten todos los shaders de fondo
 // ---------- fondos en WebGL: capas, movimiento, gas y la luz doblada por el agujero negro ----------
 // Se dibuja con la tarjeta gráfica a media resolución (el gas es suave) y se copia al lienzo del juego.

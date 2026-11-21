@@ -16,7 +16,7 @@ Necesitas [Node.js](https://nodejs.org) 18 o más nuevo. La primera vez corre `n
 npm run dev      # abre http://localhost:5173 y recarga solo cada vez que guardas
 npm run build    # arma index.html a partir de src/
 npm run check    # comprueba que index.html está al día y que cada archivo declara lo que usa
-npm run deps     # vuelve a escribir las cabeceras de dependencias (después de un cambio a propósito)
+npm run deps     # escribe docs/dependencias.md: qué usa y qué cambia cada archivo de los demás
 ```
 
 **La regla más importante: se edita `src/`, nunca `index.html`.** `index.html` se genera solo; si lo editas a mano, el próximo `build` borra el cambio. Antes de subir un cambio, corre `npm run build` (con `npm run dev` abierto se hace solo). GitHub también lo revisa en cada subida.
@@ -84,9 +84,7 @@ Un archivo por pantalla: `01-base` (colores y página), `02-navegacion` (flechas
 
 ### Cada archivo declara qué usa de los demás
 
-Cada archivo empieza con una cabecera que dice **qué da** (lo que otros archivos pueden usar; todo lo demás es privado), **qué usa** de cada otro archivo y **qué cambia** de otros archivos (estado compartido, lo más delicado). `docs/dependencias.md` tiene el mapa completo.
-
-Las cabeceras se generan con `npm run deps`, y `npm run check` (que también corre en GitHub) falla si el código usa algo de otro archivo que no está declarado. Así, cuando tocas algo que "da" un archivo, su cabecera te dice exactamente qué archivos lo usan; y lo que no está en "da" lo puedes cambiar sin miedo a romper otro archivo.
+`docs/dependencias.md` (lo escribe `npm run deps`) muestra, por archivo, **qué usa** de cada otro archivo y **qué variables de otros archivos cambia** (lo más delicado: es estado compartido). `npm run lint` avisa si un archivo usa o cambia algo de otro que no estaba declarado.
 
 Todos los archivos de `js/` comparten el mismo espacio de nombres: una función de un archivo puede usar las variables de otro. El número al principio fija el orden en que se unen, y ese orden importa: un archivo puede usar al cargar lo que se definió en un archivo anterior, no en uno posterior. Si agregas un archivo nuevo, ponle el número del lugar donde va.
 

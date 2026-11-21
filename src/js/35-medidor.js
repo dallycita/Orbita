@@ -1,8 +1,3 @@
-// ┌─ 35-medidor.js
-// │ da:     medEl, medFrame, MEDIR, medMid, medPrev
-// │ lo usan: 26-pantalla-inicio, 36-bucle-principal
-// │ usa 08-partida-estado: particles
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- medidor de rendimiento (pruebas) ----------
 // Se enciende en Ajustes ("Medidor de rendimiento") o agregando ?medir al enlace. Apagado no hace nada.
 // Muestra, de los últimos 2 segundos: cuadros por segundo, ms entre cuadros (mediana y peor 5 %), cuánto de cada cuadro

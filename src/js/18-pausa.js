@@ -1,22 +1,3 @@
-// ┌─ 18-pausa.js
-// │ da:     paused, pauseGame, pausePress, pzCount, pzSnd, resumeGame
-// │ lo usan: 19-controles, 28-sonidos-interfaz, 36-bucle-principal
-// │ usa 01-pantalla-y-utilidades: buzz, elPanel, reduceMotion
-// │ usa 02-audio: AC, applyVolumes, ROOT, saveVolumes, volGain, volMus, volSfx
-// │ usa 05-musica-reproductor: stopMusic
-// │ usa 06-record-y-estado: bestOf, level, lvl, rings, state
-// │ usa 08-partida-estado: curGoal, gest, pending, tutorial
-// │ usa 10-ritmo-y-objetos: COIN_RINGS
-// │ usa 16-partida: sesTries, showTry, start
-// │ usa 25-selector-niveles: LEVELS, lvStarsGot, openLevels
-// │ usa 26-pantalla-inicio: muted
-// │ usa 36-bucle-principal: last
-// │ cambia 02-audio: volMus, volSfx
-// │ cambia 06-record-y-estado: state
-// │ cambia 08-partida-estado: gest, pending
-// │ cambia 16-partida: sesTries
-// │ cambia 36-bucle-principal: last
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- pausa ----------
 // Todo se congela de verdad: el juego deja de avanzar y el sonido se suspende (la música sigue justo donde quedó, al ritmo).
 // Se ve como la pantalla de "Escapaste": la misma letra, los mismos tres botones. Al seguir, una cuenta 3·2·1 para no volver de golpe.

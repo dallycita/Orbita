@@ -1,15 +1,3 @@
-// ┌─ 24-presentacion.js
-// │ da:     bhCore, bhDiskK, BR0, BR1, brandHole, drawLogo, renderSplash, sfl, SK, skipSplash, splashT, updateSplash
-// │ lo usan: 19-controles, 22-viaje-sistema-solar, 23-intro, 27-inicio-animacion, 33-tarjetas-niveles,
-// │        36-bucle-principal
-// │ usa 01-pantalla-y-utilidades: BONE, buzz, clamp, ctx, CX, CY, elHud, elPanel, H, stars, W
-// │ usa 02-audio: AC, master, NOISE, noiseHit, ROOT
-// │ usa 06-record-y-estado: state
-// │ usa 08-partida-estado: flash, t
-// │ usa 25-selector-niveles: afterSplash
-// │ cambia 06-record-y-estado: state
-// │ cambia 08-partida-estado: flash, t
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- presentación de marca: el agujero negro y el logotipo de Órbita (10 s) ----------
 const SPLASH_END = 10, SK = Math.sin(37*Math.PI/180), BR0 = 1.35, BR1 = 2.05;
 const BST = [[0,[50,10,4]],[.35,[150,38,8]],[.6,[255,100,28]],[.82,[255,196,96]],[1,[255,246,222]]];

@@ -1,8 +1,3 @@
-// ┌─ 32-fondos-53-sombrero.js
-// │ da:     GX_SOMBRERO
-// │ lo usan: 32-fondos-56-final
-// │ usa:    (nada de otros archivos)
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // El Sombrero, M104 (nivel 6): bulbo, anillo de polvo y cúmulos globulares
 const GX_SOMBRERO = `// ===================== SOMBRERO M104 =====================
 // Hubble: bulbo plateado con un toque lavanda #d1ccdc, halo gris #8c8687, anillo de polvo café oscuro #2a1e18 con borde

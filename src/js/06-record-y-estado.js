@@ -1,15 +1,3 @@
-// ┌─ 06-record-y-estado.js
-// │ da:     appear, astFade, attempts2, attempts3, attemptsOf, attX, best, bestOf, bestRing, camLevel, charge, combo,
-// │        crossed, GOAL, jumping, jumpT, jumpTarget, lastLand, level, lvl, newRec, pAng, pLevel, rings, runRecord,
-// │        saveBest, score, setBestOf, state, updateRingHUD
-// │ lo usan: 01-pantalla-y-utilidades, 03-musica-ritmos, 04-musica-horizonte, 05-musica-reproductor, 07-planetas,
-// │        08-partida-estado, 09-recorridos, 10-ritmo-y-objetos, 12-poderes, 13-agujero-de-gusano,
-// │        14-lente-gravitacional, 15-peligros, 16-partida, 17-tutorial, 18-pausa, 19-controles, 20-logica, 21-dibujo,
-// │        22-viaje-sistema-solar, 23-intro, 24-presentacion, 25-selector-niveles, 26-pantalla-inicio, 29-planetas-hd,
-// │        36-bucle-principal
-// │ usa 01-pantalla-y-utilidades: elArcFg, elBest, elPbar, elPnum, elScore, elWrap, hudMode
-// │ usa 08-partida-estado: attempts, curGoal, tutorial
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- récord ----------
 let best = 0;
 try{ best = parseInt(localStorage.getItem('orbita_best_v2')||'0',10) || 0; }catch(e){ best = 0; }

@@ -1,17 +1,3 @@
-// ┌─ 34-misiones.js
-// │ da:     misEvent, misMoons, misOpen, misPlanetDraw, misReady, misWin, openMissions
-// │ lo usan: 13-agujero-de-gusano, 15-peligros, 16-partida, 23-intro, 26-pantalla-inicio, 36-bucle-principal
-// │ usa 00-iconos-flechas: ARC_L, CHEV_L
-// │ usa 01-pantalla-y-utilidades: buzz
-// │ usa 02-audio: AC, noise, ROOT
-// │ usa 07-planetas: curPlanet, PLANETS_P, planetThumb
-// │ usa 08-partida-estado: t, tutorial
-// │ usa 10-ritmo-y-objetos: COIN_RINGS
-// │ usa 25-selector-niveles: LEVELS, lvStarsGot
-// │ usa 26-pantalla-inicio: elHome, muted, renderHome
-// │ usa 28-sonidos-interfaz: uiTone
-// │ usa 29-planetas-hd: PLGL, uiGlass
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- misiones y polvo estelar ----------
 // estrellas = habilidad (desbloquean) · polvo estelar = constancia (compra). Diarias: tres al día, cambian a medianoche.
 // el ícono de Misiones en el inicio: una constelación de tres estrellas (una por misión del día) dentro de un arco de progreso;

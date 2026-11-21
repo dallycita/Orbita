@@ -1,16 +1,3 @@
-// ┌─ 32-fondos-9-motor.js
-// │ da:     GLBG, REMOLINO_PHOTO, remolinoSource
-// │ lo usan: 13-agujero-de-gusano, 14-lente-gravitacional, 16-partida, 20-logica, 22-viaje-sistema-solar
-// │ usa 01-pantalla-y-utilidades: ctx, CX, CY, H, S, SUN, W
-// │ usa 08-partida-estado: sunLevel, t
-// │ usa 16-partida: rr
-// │ usa 32-fondos-1-comun: BG_VS
-// │ usa 32-fondos-2-andromeda: FS_AND, FS_AND2
-// │ usa 32-fondos-3-via-lactea: FS_MW
-// │ usa 32-fondos-4-magallanes: FS_LMC
-// │ usa 32-fondos-56-final: FS_GX
-// │ usa 32-fondos-6-foto: FS_PHOTO
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- fondos en WebGL: el motor que dibuja el shader de cada galaxia ----------
 const GLBG = (() => {
   let cv = null, gl = null, progs = {}, buf = null, failed = false, flow = 0, photoTex = {}, lastKey = '';

@@ -1,10 +1,3 @@
-// ┌─ 04-musica-horizonte.js
-// │ da:     hzDroneStop, hzS, stepCosmos
-// │ lo usan: 05-musica-reproductor
-// │ usa 02-audio: AC, musicBus, NOISE, noiseHit, ROOT
-// │ usa 03-musica-ritmos: andFast, dangerNow, lv, organ, riserOn, softKick, STEP
-// │ usa 06-record-y-estado: GOAL, state
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- "Horizonte de sucesos": la banda sonora del Sistema solar ----------
 // La idea: no es una historia de amor, es una persecución. La música tiene dos personajes:
 //  · el agujero negro: un zumbido enorme que "late" cada vez más rápido, y un motivo de dos notas que CAE medio tono,

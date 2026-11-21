@@ -1,30 +1,3 @@
-// ┌─ 22-viaje-sistema-solar.js
-// │ da:     renderScene
-// │ lo usan: 21-dibujo
-// │ usa 01-pantalla-y-utilidades: BONE, clamp, ctx, CX, CY, frac, H, PR, R0, reduceMotion, rgba, S, stars, SUN, W,
-// │        zoneOf
-// │ usa 03-musica-ritmos: dangerFlash, dangerNow
-// │ usa 06-record-y-estado: appear, astFade, charge, GOAL, jumping, level, lvl, pAng, pLevel, rings, runRecord, state
-// │ usa 07-planetas: chargeMax
-// │ usa 08-partida-estado: burns, culprit, culpritT, curGoal, debris, flash, holeFlare, landPop, particles, pulse,
-// │        shake, sunLevel, swallow, t, texts, trail, TUT_TIPS, tutorial, winT
-// │ usa 10-ritmo-y-objetos: bassBreath, beatKick, drawCoin, drawNebula, drawPulsar, obsAng, obsRad, stretchAt
-// │ usa 11-peligros-datos: skyFlash
-// │ usa 12-poderes: bhWob, drawPowerFx, drawPowerScene, drawRingPower, strainK, strainNow
-// │ usa 13-agujero-de-gusano: hideEarth, viewInside, wh
-// │ usa 14-lente-gravitacional: bend, bendRad, bendW, drawBendSphere, lensJ, lensP
-// │ usa 15-peligros: drawFlare, drawHazards, drawNova
-// │ usa 16-partida: rr
-// │ usa 21-dibujo: drawAst, drawCharge, drawPowerAura
-// │ usa 23-intro: introFade
-// │ usa 24-presentacion: brandHole, drawLogo
-// │ usa 27-inicio-animacion: camZoom, homeT, logoT0
-// │ usa 29-planetas-hd: drawPlayer, planetRing, PLGL
-// │ usa 31-fondos-2d: drawAndromeda, drawGalBG, drawMagallanes
-// │ usa 32-fondos-9-motor: GLBG, REMOLINO_PHOTO, remolinoSource
-// │ cambia 12-poderes: strainK
-// │ cambia 27-inicio-animacion: camZoom
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- el viaje por el Sistema solar: los planetas pasan en el fondo, en su orden real ----------
 // at: en qué parte del nivel (0–1) cruza el centro de la pantalla · x: lado (fracción del ancho) · r: tamaño (fracción del lado menor)
 const SOLAR_PATH = [

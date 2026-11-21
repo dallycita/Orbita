@@ -1,30 +1,3 @@
-// ┌─ 26-pantalla-inicio.js
-// │ da:     applyMute, elHome, muted, openHome, renderHome, storyReturn
-// │ lo usan: 02-audio, 03-musica-ritmos, 10-ritmo-y-objetos, 12-poderes, 13-agujero-de-gusano, 15-peligros, 18-pausa,
-// │        19-controles, 21-dibujo, 23-intro, 25-selector-niveles, 27-inicio-animacion, 28-sonidos-interfaz,
-// │        29-planetas-hd, 30-escanear, 34-misiones, 36-bucle-principal
-// │ usa 01-pantalla-y-utilidades: elHud, elPanel
-// │ usa 02-audio: AC, initAudio, outBus
-// │ usa 05-musica-reproductor: stopMusic
-// │ usa 06-record-y-estado: state
-// │ usa 07-planetas: allPlanets, PLANET_SVG
-// │ usa 08-partida-estado: tutorial
-// │ usa 16-partida: setup
-// │ usa 23-intro: introDrone, startIntro
-// │ usa 25-selector-niveles: elLv, openLevels, pendingTut, resetProgress, storySeen, tutAfterStory
-// │ usa 27-inicio-animacion: HOME_BIG, HOME_IN, homeAmbience, homeT, hsBoost, hsEvents, hsFlare, hsJet, hsRipple,
-// │        hsShake, logoT0
-// │ usa 28-sonidos-interfaz: showStart, showStop
-// │ usa 29-planetas-hd: openPlanets
-// │ usa 34-misiones: misMoons, misReady, openMissions
-// │ usa 35-medidor: medEl, MEDIR, medPrev
-// │ cambia 06-record-y-estado: state
-// │ cambia 07-planetas: allPlanets
-// │ cambia 08-partida-estado: tutorial
-// │ cambia 25-selector-niveles: pendingTut, tutAfterStory
-// │ cambia 27-inicio-animacion: homeT, hsBoost, hsEvents, hsFlare, hsJet, hsRipple, hsShake, logoT0
-// │ cambia 35-medidor: medEl, MEDIR, medPrev
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- pantalla de inicio (como Geometry Dash): se queda hasta que eliges ----------
 const elHome = document.getElementById('home');
 let muted = false;

@@ -1,9 +1,3 @@
-// ┌─ 11-peligros-datos.js
-// │ da:     BEAM_AT, beamCount, beams, COMET_AT, COMET_TIME, comets, FLARE_AT, flareT, flareWarn, hot, hotT, novaSrc,
-// │        skyFlash, SN_AT, sstars, waves
-// │ lo usan: 15-peligros, 16-partida, 20-logica, 22-viaje-sistema-solar, 29-planetas-hd
-// │ usa:    (nada de otros archivos)
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- peligros que no son asteroides ----------
 // cometas (desde el Sombrero): cruzan entre tu anillo y el siguiente; su cola apunta lejos del agujero negro
 // rayos de energía (desde M87): un anillo brilla como aviso y luego dispara

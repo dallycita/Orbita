@@ -1,10 +1,3 @@
-// ┌─ 09-recorridos.js
-// │ da:     ringType, rng, rngState, SEED, seenTypes, TYPE_INFO
-// │ lo usan: 13-agujero-de-gusano, 15-peligros, 16-partida, 20-logica, 25-selector-niveles
-// │ usa 06-record-y-estado: GOAL, lvl
-// │ usa 08-partida-estado: TUT_TYPES, tutorial
-// │ usa 10-ritmo-y-objetos: courseMaps
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // generador con semilla fija: el recorrido es siempre el mismo, como un nivel de Geometry Dash
 const SEED = 20261007;
 let rngState = SEED;

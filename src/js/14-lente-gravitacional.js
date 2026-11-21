@@ -1,14 +1,3 @@
-// ┌─ 14-lente-gravitacional.js
-// │ da:     bend, BEND_R, bendRad, bendUpdate, bendW, drawBendSphere, lensJ, lensP, WH_EXIT, WH_K, whRip, WORM_COL
-// │ lo usan: 13-agujero-de-gusano, 16-partida, 20-logica, 21-dibujo, 22-viaje-sistema-solar
-// │ usa 01-pantalla-y-utilidades: ctx, CX, CY, H, S, W
-// │ usa 06-record-y-estado: level, lvl, state
-// │ usa 08-partida-estado: t, tutorial
-// │ usa 13-agujero-de-gusano: viewInside
-// │ usa 15-peligros: hazardTip
-// │ usa 16-partida: rr
-// │ usa 32-fondos-9-motor: GLBG
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---- espacio doblado (nivel 1, anillos 27–33): un agujero de gusano flota delante de ti y dobla el espacio.
 // Es una lente gravitacional de verdad: todo lo que pasa cerca (anillos, asteroides y tu planeta) se ve empujado
 // hacia afuera de la esfera, se estira en arcos y corre más rápido alrededor de su borde. Dentro se ve el cielo del otro lado.

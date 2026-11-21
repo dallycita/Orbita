@@ -1,8 +1,3 @@
-// ┌─ 32-fondos-51-centaurus.js
-// │ da:     GX_CENTAURUS
-// │ lo usan: 32-fondos-56-final
-// │ usa:    (nada de otros archivos)
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // Centaurus A (nivel 4): cuerpo, franja de polvo, chorros y lóbulos
 const GX_CENTAURUS = `// ===================== CENTAURUS A =====================
 // tonos de las fotos de ESO: cuerpo crema-gris #d6c5c1, franja de polvo café con borde naranja, cúmulos azules,

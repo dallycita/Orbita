@@ -1,12 +1,3 @@
-// ┌─ 02-audio.js
-// │ da:     AC, applyVolumes, cowbell, initAudio, master, musicBus, musVol, noise, NOISE, noiseHit, outBus, ROOT,
-// │        saveVolumes, SCALE, shaper, sub, suck, thump, volGain, volMus, volSfx
-// │ lo usan: 03-musica-ritmos, 04-musica-horizonte, 05-musica-reproductor, 10-ritmo-y-objetos, 12-poderes,
-// │        13-agujero-de-gusano, 15-peligros, 16-partida, 17-tutorial, 18-pausa, 19-controles, 20-logica, 21-dibujo,
-// │        23-intro, 24-presentacion, 25-selector-niveles, 26-pantalla-inicio, 27-inicio-animacion,
-// │        28-sonidos-interfaz, 29-planetas-hd, 30-escanear, 34-misiones
-// │ usa 26-pantalla-inicio: muted
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- audio ----------
 let AC = null, master = null, musicBus = null, NOISE = null, shaper = null, outBus = null, musVol = null;
 // volumen de la música y de los efectos (0–100), se guardan; la curva es cuadrática para que el control se sienta parejo

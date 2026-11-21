@@ -1,20 +1,3 @@
-// ┌─ 27-inicio-animacion.js
-// │ da:     camZoom, HOME_BIG, HOME_IN, homeAmbience, homeT, hsBoost, hsEvents, hsFlare, hsJet, hsRipple, hsShake,
-// │        logoSounds, logoT0, renderHomeIntro, updateHomeShow
-// │ lo usan: 17-tutorial, 19-controles, 22-viaje-sistema-solar, 23-intro, 25-selector-niveles, 26-pantalla-inicio,
-// │        36-bucle-principal
-// │ usa 01-pantalla-y-utilidades: BONE, buzz, clamp, ctx, CX, CY, H, PR, reduceMotion, S, stars, SUN, W
-// │ usa 02-audio: AC, master, noiseHit, ROOT
-// │ usa 03-musica-ritmos: echoBus
-// │ usa 08-partida-estado: sunLevel, t
-// │ usa 16-partida: rr
-// │ usa 23-intro: easeIO
-// │ usa 24-presentacion: bhCore, bhDiskK, BR0, BR1, drawLogo, sfl, SK
-// │ usa 26-pantalla-inicio: muted
-// │ usa 28-sonidos-interfaz: bigSuck, gwChirp, rockIn, showOut, showStop, uiOut, uiTone
-// │ usa 29-planetas-hd: drawPlayer
-// │ cambia 24-presentacion: sfl
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- entrada a la pantalla de inicio: un agujero negro enorme que se aleja ----------
 // música de misterio: un zumbido profundo que respira, notas de cristal flotando y un viento cósmico
 function homeAmbience(on){

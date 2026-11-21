@@ -1,18 +1,3 @@
-// ┌─ 05-musica-reproductor.js
-// │ da:     startMusic, stopMusic
-// │ lo usan: 16-partida, 17-tutorial, 18-pausa, 19-controles, 25-selector-niveles, 26-pantalla-inicio
-// │ usa 01-pantalla-y-utilidades: musicStyle
-// │ usa 02-audio: AC, master, musicBus, musVol
-// │ usa 03-musica-ritmos: andFast, echoBus, GAL_CFG, impact, kickQueue, musicOn, musicStart, nextT, riser, riserOn,
-// │        ROOT_A, schedTimer, step, STEP, stepAndromeda, stepEspacial, stepGalaxy, stepMagallanes, stepPhonk,
-// │        stepSynthwave, SW_AT, switchAt, switchMsg, tensionOn
-// │ usa 04-musica-horizonte: hzDroneStop, hzS, stepCosmos
-// │ usa 06-record-y-estado: level, lvl, state
-// │ usa 08-partida-estado: tutorial
-// │ cambia 01-pantalla-y-utilidades: musicStyle
-// │ cambia 03-musica-ritmos: andFast, kickQueue, musicOn, musicStart, nextT, riserOn, schedTimer, step, switchAt,
-// │        switchMsg
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- el reproductor: qué estilo suena, cuándo arranca y cuándo para ----------
 function scheduleStep(s, t0){
   if (musicStyle === 'espacial' && state === 'play' && level >= SW_AT){

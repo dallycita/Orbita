@@ -1,27 +1,3 @@
-// ┌─ 13-agujero-de-gusano.js
-// │ da:     drawInside, gapC, hideEarth, ORB_W, viewInside, wh, WH_IN, WH_OUT, whEnter, whGap, whShock, whStartOut,
-// │        whTap, whTrans
-// │ lo usan: 14-lente-gravitacional, 16-partida, 19-controles, 20-logica, 21-dibujo, 22-viaje-sistema-solar
-// │ usa 01-pantalla-y-utilidades: BONE, buzz, clamp, ctx, CX, CY, frac, GAP, H, PR, R0, reduceMotion, S, W
-// │ usa 02-audio: AC, master, noise, noiseHit, ROOT, thump
-// │ usa 03-musica-ritmos: dKick, echoBus, impact, TB
-// │ usa 06-record-y-estado: appear, camLevel, GOAL, jumping, jumpTarget, level, pAng, pLevel, score, state,
-// │        updateRingHUD
-// │ usa 07-planetas: sizeK
-// │ usa 08-partida-estado: burns, flash, lastEaten, particles, pending, pulse, shake, sunLevel, t, texts, trail,
-// │        tutorial
-// │ usa 09-recorridos: seenTypes
-// │ usa 10-ritmo-y-objetos: beatKick, beatTime
-// │ usa 14-lente-gravitacional: bend, bendW, lensP, WH_K, whRip, WORM_COL
-// │ usa 15-peligros: hazardTip
-// │ usa 16-partida: ensureRings, rr
-// │ usa 26-pantalla-inicio: muted
-// │ usa 32-fondos-9-motor: GLBG
-// │ usa 34-misiones: misEvent
-// │ cambia 06-record-y-estado: appear, camLevel, jumping, jumpTarget, level, pAng, pLevel, score
-// │ cambia 08-partida-estado: burns, flash, lastEaten, pending, pulse, shake, sunLevel, texts, trail
-// │ cambia 14-lente-gravitacional: bend, whRip
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---- dentro del agujero de gusano: modo ÓRBITA (anillos 30–41) ----
 // La corriente del gusano te lanza sola al siguiente anillo cada dos golpes de la música.
 // Tú ya no saltas: tocas para cambiar el sentido en que la Tierra gira sobre su anillo y te colocas bajo el hueco.

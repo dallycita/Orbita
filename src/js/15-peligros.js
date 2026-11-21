@@ -1,26 +1,3 @@
-// ┌─ 15-peligros.js
-// │ da:     drawFlare, drawHazards, drawNova, hazardsOnLand, hazardsReset, hazardsUpdate, hazardTip, NOVA_LIFE,
-// │        novaBurst, novaHit, novaSound, TUNE, waveBeepT, waveProx
-// │ lo usan: 13-agujero-de-gusano, 14-lente-gravitacional, 16-partida, 20-logica, 22-viaje-sistema-solar,
-// │        29-planetas-hd
-// │ usa 01-pantalla-y-utilidades: BONE, buzz, clamp, ctx, CX, CY, frac, GAP, H, PR, R0, reduceMotion, S, W
-// │ usa 02-audio: AC, noise, NOISE, ROOT
-// │ usa 03-musica-ritmos: TB
-// │ usa 06-record-y-estado: camLevel, jumping, level, lvl, pAng, pLevel, rings, state
-// │ usa 07-planetas: sizeK
-// │ usa 08-partida-estado: flash, holeFlare, particles, pulse, shake, sunLevel, t, texts, tutorial
-// │ usa 09-recorridos: seenTypes
-// │ usa 10-ritmo-y-objetos: beatKick, beatPhase, beatTime, NOVA_BAR, novaEnv, novaPush, novaTau, obsAng
-// │ usa 11-peligros-datos: BEAM_AT, beamCount, beams, COMET_AT, COMET_TIME, comets, FLARE_AT, flareT, flareWarn, hot,
-// │        hotT, novaSrc, skyFlash, SN_AT, sstars, waves
-// │ usa 16-partida: rr
-// │ usa 26-pantalla-inicio: muted
-// │ usa 28-sonidos-interfaz: uiOut, uiTone
-// │ usa 34-misiones: misEvent
-// │ cambia 08-partida-estado: flash, holeFlare, pulse, shake, texts
-// │ cambia 11-peligros-datos: beamCount, beams, comets, flareT, flareWarn, hot, hotT, novaSrc, skyFlash, sstars,
-// │        waves
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 const NOVA_AT = {2: {6: {sp: 52, per: 8, gaps: 3, gw: .62, n: 3}, 15: {sp: 58, per: 8, gaps: 3, gw: .52, n: 4}, 24: {sp: 64, per: 6, gaps: 2, gw: .5, n: 5}, 33: {sp: 70, per: 6, gaps: 2, gw: .44, n: 5}, 43: {sp: 40, per: 99, gaps: 1, gw: .55, n: 1, big: 1}}};
 const NOVA_LIFE = 5.2;
 function novaBurst(s){

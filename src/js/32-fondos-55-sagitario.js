@@ -1,8 +1,3 @@
-// ┌─ 32-fondos-55-sagitario.js
-// │ da:     GX_SAGITARIO
-// │ lo usan: 32-fondos-56-final
-// │ usa:    (nada de otros archivos)
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // Sagitario A* (nivel 8): el centro de nuestra galaxia
 const GX_SAGITARIO = `// ===================== SAGITARIO A* =====================
 // centro galáctico: en luz visible nubes doradas y polvo; el compuesto de NASA (Hubble+Spitzer+Chandra) en violeta #3e3775,

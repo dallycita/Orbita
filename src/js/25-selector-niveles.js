@@ -1,33 +1,3 @@
-// ┌─ 25-selector-niveles.js
-// │ da:     afterSplash, elLv, LEVELS, lvIndex, lvStarsGot, openLevels, pendingTut, resetProgress, startLevel,
-// │        storySeen, tutAfterStory
-// │ lo usan: 10-ritmo-y-objetos, 16-partida, 17-tutorial, 18-pausa, 19-controles, 23-intro, 24-presentacion,
-// │        26-pantalla-inicio, 33-tarjetas-niveles, 34-misiones
-// │ usa 00-iconos-flechas: ARC_L, ARC_R, CHEV_L, CHEV_R
-// │ usa 01-pantalla-y-utilidades: elHud, elPanel
-// │ usa 02-audio: AC, initAudio
-// │ usa 05-musica-reproductor: stopMusic
-// │ usa 06-record-y-estado: appear, attemptsOf, best, bestOf, bestRing, GOAL, lvl, state
-// │ usa 07-planetas: allPlanets, curPlanet, maxPerf, plutoOk
-// │ usa 08-partida-estado: attempts, hintsShown, tutorial, tutorialDone
-// │ usa 09-recorridos: seenTypes
-// │ usa 10-ritmo-y-objetos: COIN_RINGS, updateWallet, wallet
-// │ usa 16-partida: sesTries, setup
-// │ usa 23-intro: introDrone, introFade, MENU_HTML, startIntro
-// │ usa 26-pantalla-inicio: applyMute, openHome, storyReturn
-// │ usa 27-inicio-animacion: homeAmbience
-// │ usa 28-sonidos-interfaz: showStop
-// │ usa 33-tarjetas-niveles: lvArts, lvCanvas
-// │ cambia 06-record-y-estado: appear, best, bestRing, lvl, state
-// │ cambia 07-planetas: allPlanets, curPlanet, maxPerf, plutoOk
-// │ cambia 08-partida-estado: attempts, hintsShown, tutorial, tutorialDone
-// │ cambia 09-recorridos: seenTypes
-// │ cambia 10-ritmo-y-objetos: wallet
-// │ cambia 16-partida: sesTries
-// │ cambia 23-intro: introFade
-// │ cambia 26-pantalla-inicio: storyReturn
-// │ cambia 33-tarjetas-niveles: lvArts, lvCanvas
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- selector de niveles (todos abiertos, como Geometry Dash) ----------
 const LEVELS = [
   {name:'Sistema solar', diff:'Fácil', col:'#86c99a', ready:true, icon:'solar', dist:'Aquí, en casa',

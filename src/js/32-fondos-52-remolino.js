@@ -1,8 +1,3 @@
-// ┌─ 32-fondos-52-remolino.js
-// │ da:     GX_REMOLINO
-// │ lo usan: 32-fondos-56-final
-// │ usa:    (nada de otros archivos)
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // El Remolino, M51 (nivel 5): el viaje por dentro de la galaxia
 const GX_REMOLINO = `// ===================== REMOLINO M51 =====================
 // Hubble: brazos azul-grisáceos #8aa0b8, núcleo amarillo #e8d0a8, regiones HII rojo-rosa muy marcadas, polvo café #5f4f49,

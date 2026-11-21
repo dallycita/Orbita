@@ -1,26 +1,3 @@
-// ┌─ 23-intro.js
-// │ da:     doblesHechos, easeIO, endIntro, introDrone, introFade, MENU_HTML, noteDouble, renderIntro, startIntro,
-// │        updateIntro
-// │ lo usan: 12-poderes, 16-partida, 19-controles, 20-logica, 21-dibujo, 22-viaje-sistema-solar, 25-selector-niveles,
-// │        26-pantalla-inicio, 27-inicio-animacion, 36-bucle-principal
-// │ usa 01-pantalla-y-utilidades: BONE, buzz, chipsHTML, clamp, ctx, CX, CY, elHud, elPanel, H, PR, reduceMotion,
-// │        rgba, S, stars, SUN, W, ZONES
-// │ usa 02-audio: AC, master, noise, noiseHit, suck, thump
-// │ usa 06-record-y-estado: appear, lvl, state
-// │ usa 08-partida-estado: flash, holeFlare, pulse, shake, sunLevel, t, tutorial
-// │ usa 16-partida: rr
-// │ usa 21-dibujo: drawEarth
-// │ usa 24-presentacion: bhDiskK
-// │ usa 25-selector-niveles: LEVELS, openLevels, storySeen, tutAfterStory
-// │ usa 26-pantalla-inicio: openHome, storyReturn
-// │ usa 27-inicio-animacion: homeAmbience
-// │ usa 29-planetas-hd: drawBigPlanet, PLGL
-// │ usa 34-misiones: misEvent
-// │ cambia 06-record-y-estado: appear, lvl, state
-// │ cambia 08-partida-estado: flash, holeFlare, pulse, shake, t
-// │ cambia 25-selector-niveles: storySeen, tutAfterStory
-// │ cambia 26-pantalla-inicio: storyReturn
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- intro: un agujero negro errante entra al sistema solar ----------
 const PLANETS = [
   {n:'Mercurio', r:38,  s:3.5, c:'#a9a6a0'},

@@ -1,8 +1,3 @@
-// ┌─ 32-fondos-4-magallanes.js
-// │ da:     FS_LMC
-// │ lo usan: 32-fondos-9-motor
-// │ usa 32-fondos-1-comun: BG_COMMON
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // Nubes de Magallanes (nivel 2)
 // Nubes de Magallanes: el viaje pasa por sus lugares reales
 const FS_LMC = BG_COMMON + `

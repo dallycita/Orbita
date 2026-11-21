@@ -1,8 +1,3 @@
-// ┌─ 32-fondos-54-m87.js
-// │ da:     GX_M87
-// │ lo usan: 32-fondos-56-final
-// │ usa:    (nada de otros archivos)
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // M87 (nivel 7): halo, chorro, gas y el anillo del Event Horizon Telescope
 const GX_M87 = `// ===================== M87 =====================
 // Hubble: halo crema-amarillo #ca9f72 → #d5c7b8 muy suave, el chorro azul-violeta con nudos, miles de cúmulos globulares;

@@ -1,8 +1,3 @@
-// ┌─ 32-fondos-2-andromeda.js
-// │ da:     FS_AND, FS_AND2
-// │ lo usan: 32-fondos-9-motor
-// │ usa 32-fondos-1-comun: BG_COMMON
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // Andrómeda (nivel 3): el shader de la galaxia vista desde dentro
 // Andrómeda: disco inclinado ~77°, núcleo de estrellas viejas, brazos azules, franjas de polvo, regiones rosadas, M32 y M110
 const FS_AND = BG_COMMON + `

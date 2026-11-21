@@ -1,8 +1,3 @@
-// ┌─ 32-fondos-6-foto.js
-// │ da:     FS_PHOTO
-// │ lo usan: 32-fondos-9-motor
-// │ usa 32-fondos-1-comun: BG_COMMON
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // fotos reales como fondo (si hay)
 const FS_PHOTO = BG_COMMON + `
 uniform sampler2D uImg; uniform vec2 uImgSize; uniform vec4 uFit; // xy: centro de la foto en pantalla (0-1), z: zoom

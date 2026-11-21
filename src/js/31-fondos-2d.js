@@ -1,9 +1,3 @@
-// ┌─ 31-fondos-2d.js
-// │ da:     drawAndromeda, drawGalBG, drawMagallanes
-// │ lo usan: 22-viaje-sistema-solar
-// │ usa 01-pantalla-y-utilidades: clamp, ctx, CX, CY, H, W
-// │ usa 08-partida-estado: t
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- dentro de Andrómeda: toda la pantalla es la galaxia (colores reales) ----------
 // núcleo amarillo-blanco de estrellas viejas, brazos espirales azules de estrellas jóvenes,
 // franjas de polvo café, nebulosas rosadas de hidrógeno donde nacen estrellas, y sus satélites M32 y M110

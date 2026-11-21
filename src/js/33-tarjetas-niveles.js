@@ -1,12 +1,3 @@
-// ┌─ 33-tarjetas-niveles.js
-// │ da:     drawLevelsBG, lvArts, lvCanvas
-// │ lo usan: 25-selector-niveles, 36-bucle-principal
-// │ usa 01-pantalla-y-utilidades: ctx, H, W
-// │ usa 08-partida-estado: t
-// │ usa 24-presentacion: bhCore, bhDiskK, BR0, BR1, SK
-// │ usa 25-selector-niveles: elLv, LEVELS
-// │ usa 29-planetas-hd: drawBigPlanet
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- tarjetas vivas: cada galaxia se dibuja en movimiento, en tiempo real (WebGL) ----------
 // Una sola escena a pantalla completa detrás de las tarjetas: al deslizar, cada galaxia se mueve con su tarjeta.
 const LVGL = (() => {

@@ -1,21 +1,3 @@
-// ┌─ 21-dibujo.js
-// │ da:     astPrebake, drawAst, drawCharge, drawEarth, drawPowerAura, powerReadySound, render
-// │ lo usan: 16-partida, 22-viaje-sistema-solar, 23-intro, 29-planetas-hd, 36-bucle-principal
-// │ usa 01-pantalla-y-utilidades: BONE, clamp, ctx, CX, CY, DPR, frac, H, PR, S, W
-// │ usa 02-audio: AC, ROOT
-// │ usa 06-record-y-estado: camLevel, charge, jumping, level, pLevel, state
-// │ usa 07-planetas: chargeMax, sizeK
-// │ usa 08-partida-estado: chargeFlash, hintT, particles, pipFlash, readyT, t, tutorial
-// │ usa 13-agujero-de-gusano: drawInside, hideEarth, viewInside, wh, WH_IN, WH_OUT, whShock
-// │ usa 14-lente-gravitacional: bend
-// │ usa 22-viaje-sistema-solar: renderScene
-// │ usa 23-intro: doblesHechos
-// │ usa 26-pantalla-inicio: muted
-// │ usa 28-sonidos-interfaz: uiOut, uiTone
-// │ usa 29-planetas-hd: drawBigPlanet, PLGL
-// │ cambia 06-record-y-estado: camLevel
-// │ cambia 13-agujero-de-gusano: hideEarth, viewInside
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- dibujo ----------
 // asteroides con volumen: roca sombreada iluminada por el disco del agujero negro (borde naranja hacia el centro) y con cráteres.
 // Se dibujan una vez en pequeñas imágenes (8 formas × 12 giros × tamaño) y luego solo se copian: rápido incluso en celulares.

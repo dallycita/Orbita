@@ -1,30 +1,3 @@
-// ┌─ 19-controles.js
-// │ da:     (nada: todo es privado de este archivo)
-// │ usa 01-pantalla-y-utilidades: BONE, elPanel, hudMode, musicStyle, R0, refreshChips
-// │ usa 02-audio: AC, initAudio
-// │ usa 05-musica-reproductor: startMusic, stopMusic
-// │ usa 06-record-y-estado: charge, jumping, lvl, state
-// │ usa 07-planetas: chargeMax
-// │ usa 08-partida-estado: canRestart, gest, pending, pendingT, texts, tutorial
-// │ usa 10-ritmo-y-objetos: pushing
-// │ usa 13-agujero-de-gusano: wh, whTap
-// │ usa 16-partida: doubleJump, jump, sesTries, showTry, start, upgradeToDouble
-// │ usa 17-tutorial: startTutorial
-// │ usa 18-pausa: paused, pauseGame, pausePress, pzCount, resumeGame
-// │ usa 23-intro: endIntro
-// │ usa 24-presentacion: skipSplash, splashT
-// │ usa 25-selector-niveles: elLv, LEVELS, lvIndex, openLevels, pendingTut, startLevel
-// │ usa 26-pantalla-inicio: elHome, openHome
-// │ usa 27-inicio-animacion: HOME_IN, homeT, logoT0
-// │ usa 28-sonidos-interfaz: showStop
-// │ usa 29-planetas-hd: planetStep, uiGlass
-// │ cambia 01-pantalla-y-utilidades: hudMode, musicStyle
-// │ cambia 06-record-y-estado: state
-// │ cambia 08-partida-estado: gest, pending, pendingT
-// │ cambia 16-partida: sesTries
-// │ cambia 25-selector-niveles: lvIndex, pendingTut
-// │ cambia 27-inicio-animacion: homeT, logoT0
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- entrada ----------
 function press(e){
   if (paused){ pausePress(e); return; }

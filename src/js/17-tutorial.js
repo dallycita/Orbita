@@ -1,21 +1,3 @@
-// ┌─ 17-tutorial.js
-// │ da:     startTutorial, tutorialWin, tutRespawn
-// │ lo usan: 16-partida, 19-controles
-// │ usa 01-pantalla-y-utilidades: BONE, buzz, elHud, elPanel, R0, reduceMotion
-// │ usa 02-audio: noise
-// │ usa 05-musica-reproductor: startMusic, stopMusic
-// │ usa 06-record-y-estado: charge, jumping, jumpTarget, level, newRec, pLevel, runRecord, state, updateRingHUD
-// │ usa 07-planetas: shieldLeft, usedDouble
-// │ usa 08-partida-estado: canRestart, culprit, culpritT, flash, gest, lastEaten, particles, pending, perfCount,
-// │        pulse, shake, showHint, sunLevel, swallow, texts, tutorial, tutorialDone, winT
-// │ usa 16-partida: setup, winSound
-// │ usa 25-selector-niveles: elLv
-// │ usa 27-inicio-animacion: homeAmbience
-// │ cambia 06-record-y-estado: charge, jumping, jumpTarget, newRec, pLevel, runRecord, state
-// │ cambia 07-planetas: shieldLeft, usedDouble
-// │ cambia 08-partida-estado: canRestart, culprit, culpritT, flash, gest, lastEaten, pending, perfCount, pulse, shake,
-// │        showHint, sunLevel, swallow, tutorial, tutorialDone, winT
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- el tutorial: reaparecer sin perder, terminarlo y empezarlo ----------
 function tutRespawn(x, y){
   state = 'dead'; flash = .4; shake = reduceMotion ? 0 : 6; buzz(30); noise(.35, 3000, 200, .35, 'lowpass');

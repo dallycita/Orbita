@@ -1,18 +1,3 @@
-// ┌─ 03-musica-ritmos.js
-// │ da:     alarmTick, andFast, dangerFlash, dangerNow, dKick, echoBus, GAL_CFG, impact, kickQueue, lv, musicOn,
-// │        musicStart, nextT, organ, riser, riserOn, ROOT_A, schedTimer, softKick, step, STEP, stepAndromeda,
-// │        stepEspacial, stepGalaxy, stepMagallanes, stepPhonk, stepSynthwave, SW_AT, switchAt, switchMsg, TB,
-// │        tensionOn, tensionSet, tensT
-// │ lo usan: 04-musica-horizonte, 05-musica-reproductor, 10-ritmo-y-objetos, 13-agujero-de-gusano, 15-peligros,
-// │        16-partida, 20-logica, 22-viaje-sistema-solar, 27-inicio-animacion
-// │ usa 01-pantalla-y-utilidades: buzz, clamp, reduceMotion
-// │ usa 02-audio: AC, musicBus, NOISE, noiseHit, ROOT, shaper
-// │ usa 06-record-y-estado: level, pLevel, state
-// │ usa 08-partida-estado: shake, sunLevel, tutorial
-// │ usa 26-pantalla-inicio: muted
-// │ cambia 02-audio: shaper
-// │ cambia 08-partida-estado: shake
-// └─ generado por `node build.mjs --deps`; no se edita a mano
 // ---------- beat (se van sumando capas al subir) ----------
 const BPM = 140, STEP = 60/BPM/4, TB = 60/BPM;
 let musicOn = false, nextT = 0, step = 0, schedTimer = null, kickQueue = [], musicStart = -1;
