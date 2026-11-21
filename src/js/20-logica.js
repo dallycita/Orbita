@@ -1,13 +1,18 @@
 // ---------- lógica ----------
 function update(dt) {
   // tiempo real: cámara lenta, sacudida, destello
-  if (slowTimer > 0) slowTimer -= dt;
-  else timeScale += (1 - timeScale) * Math.min(1, dt * 5);
+  if (slowTimer > 0) {
+    slowTimer -= dt;
+  } else {
+    timeScale += (1 - timeScale) * Math.min(1, dt * 5);
+  }
   culpritT = Math.max(0, culpritT - dt);
   hintT = Math.max(0, hintT - dt);
   if (pending) {
     pendingT += dt;
-    if (pendingT > 0.09) pending = false;
+    if (pendingT > 0.09) {
+      pending = false;
+    }
   }
   const bi = AC && musicOn && musicStart >= 0 ? Math.floor(beatTime() / TB) : -1;
   if (bi !== lastBeatIdx) {
@@ -32,7 +37,9 @@ function update(dt) {
       }
     }
   }
-  for (let i = 0; i < 10; i++) pipFlash[i] = Math.max(0, pipFlash[i] - dt * 3);
+  for (let i = 0; i < 10; i++) {
+    pipFlash[i] = Math.max(0, pipFlash[i] - dt * 3);
+  }
   chargeFlash = Math.max(0, chargeFlash - dt * 1.6);
   readyT = charge >= chargeMax() && state === 'play' ? readyT + dt : 0;
   astFade = Math.max(0, astFade - dt * 5);
@@ -41,12 +48,15 @@ function update(dt) {
   shake = Math.max(0, shake - dt * 40);
   flash = Math.max(0, flash - dt * 2.6);
   pulse = Math.max(0, pulse - dt * 3.5);
-  if (AC)
+  if (AC) {
     while (kickQueue.length && AC.currentTime >= kickQueue[0]) {
       kickQueue.shift();
       pulse = 1;
-      if (dangerNow() > 0.55) buzz(14);
+      if (dangerNow() > 0.55) {
+        buzz(14);
+      }
     }
+  }
   if (switchAt && AC && AC.currentTime >= switchAt) {
     switchAt = 0;
     flash = 0.35;
@@ -78,18 +88,26 @@ function update(dt) {
         ? rings.get(level + 1)
         : null;
   for (const r of rings.values()) {
-    if (r.tid !== undefined) r.tid += (r.tv || 0.5) * d;
-    if (r === frozen && !r.sync) continue;
+    if (r.tid !== undefined) {
+      r.tid += (r.tv || 0.5) * d;
+    }
+    if (r === frozen && !r.sync) {
+      continue;
+    }
     const ph0 = r.phase,
       fz = r.frozenT > 0;
-    if (fz) r.frozenT -= dt; // Urano: el anillo congelado no gira (y al soltarse sigue desde ahí, sin saltos)
+    if (fz) {
+      r.frozenT -= dt;
+    } // Urano: el anillo congelado no gira (y al soltarse sigue desde ahí, sin saltos)
     if (r.holdT > 0) {
       r.holdT -= dt;
       continue;
     } // Neptuno: el viento sostiene el hueco encima de ti un momento
     if (r.type === 'marea') {
       r.phase += r.w * (1 + 0.8 * Math.sin(t * 1.4 + r.ws)) * d;
-      if (fz) r.poff = (r.poff || 0) + r.phase - ph0;
+      if (fz) {
+        r.poff = (r.poff || 0) + r.phase - ph0;
+      }
       continue;
     }
     if (r.type === 'freno') {
@@ -104,22 +122,35 @@ function update(dt) {
         }
       }
       r.phase += r.w * r.sgn * d;
-    } else if (r.sync) r.phase = r.w * beatTime();
-    else r.phase += r.w * d;
-    if (fz) r.poff = (r.poff || 0) + r.phase - ph0;
+    } else if (r.sync) {
+      r.phase = r.w * beatTime();
+    } else {
+      r.phase += r.w * d;
+    }
+    if (fz) {
+      r.poff = (r.poff || 0) + r.phase - ph0;
+    }
   }
 
-  if (lvl === 2 && !tutorial) novaSound();
+  if (lvl === 2 && !tutorial) {
+    novaSound();
+  }
   bendUpdate(dt * timeScale);
   if (whShock) {
     whShock.t += dt;
-    if (whShock.t > 1.1) whShock = null;
+    if (whShock.t > 1.1) {
+      whShock = null;
+    }
   }
   if (whRip) {
     whRip.t += dt;
-    if (whRip.t > 1.1) whRip = null;
+    if (whRip.t > 1.1) {
+      whRip = null;
+    }
   }
-  if (wh && wh.flipT) wh.flipT = Math.max(0, wh.flipT - dt * 4);
+  if (wh && wh.flipT) {
+    wh.flipT = Math.max(0, wh.flipT - dt * 4);
+  }
   if (state === 'play' && wh && wh.ph !== 'orb') {
     whTrans(dt);
   } else if (state === 'play') {
@@ -158,10 +189,13 @@ function update(dt) {
       }
     } else if (!jumping && !pushing) {
       const cr = rings.get(level);
-      if (cr && cr.type === 'arrastre') pAng += cr.w * d;
-      else {
+      if (cr && cr.type === 'arrastre') {
+        pAng += cr.w * d;
+      } else {
         const df = Math.atan2(Math.sin(-Math.PI / 2 - pAng), Math.cos(-Math.PI / 2 - pAng));
-        if (Math.abs(df) > 0.0005) pAng += df * Math.min(1, d * 5);
+        if (Math.abs(df) > 0.0005) {
+          pAng += df * Math.min(1, d * 5);
+        }
       }
       pAng = Math.atan2(Math.sin(pAng), Math.cos(pAng));
     }
@@ -219,8 +253,12 @@ function update(dt) {
     // el sol crece y se come los anillos; si te quedas quieto, te alcanza
     const gap = pLevel - sunLevel;
     let sp = (tutorial ? 0.1 : 0.2 + Math.min(level * 0.006, 0.26)) * (HOLE_MUL[lvl] || 1); // nivel 1: un punto medio; tutorial: muy lento
-    if (gap > 2.4) sp += (gap - 2.4) * 1.15;
-    if (!(wh && wh.ph === 'orb')) sunLevel += sp * d; // dentro del gusano el agujero negro no te puede seguir
+    if (gap > 2.4) {
+      sp += (gap - 2.4) * 1.15;
+    }
+    if (!(wh && wh.ph === 'orb')) {
+      sunLevel += sp * d;
+    } // dentro del gusano el agujero negro no te puede seguir
     eatRings();
     if (sunLevel >= pLevel - catchMargin()) {
       const pr0 = rr(pLevel);
@@ -228,7 +266,9 @@ function update(dt) {
       return;
     }
     trail.push({ a: pAng, l: pLevel });
-    if (trail.length > 22) trail.shift();
+    if (trail.length > 22) {
+      trail.shift();
+    }
 
     const pr = rr(pLevel),
       [px, py] = lensP(Math.cos(pAng) * pr, Math.sin(pAng) * pr);
@@ -243,10 +283,14 @@ function update(dt) {
     const check = jumping && jumpTarget === 1 && !pending ? [level + 1] : [];
     for (const k of check) {
       const ring = rings.get(k);
-      if (!ring) continue;
+      if (!ring) {
+        continue;
+      }
       const R = rr(k);
       for (const o of ring.obs) {
-        if (o.melt) continue;
+        if (o.melt) {
+          continue;
+        }
         const oa = obsAng(ring, o),
           Rs = R * stretchAt(ring, oa),
           [ox, oy] = lensP(Math.cos(oa) * Rs, Math.sin(oa) * Rs);
@@ -265,7 +309,9 @@ function update(dt) {
           continue;
         }
         if (dist < PR * sizeK() + obsRad(ring, o) * 0.66 && ghostT <= 0 && shieldT <= 0) {
-          if (caronteSaves(px, py, ox, oy)) break;
+          if (caronteSaves(px, py, ox, oy)) {
+            break;
+          }
           die(px, py, k === level ? 'hit' : 'jump', { k, o });
           return;
         }
@@ -322,7 +368,9 @@ function update(dt) {
     pLevel += dt * (1.2 + winT * 4);
     sunLevel -= dt * (0.6 + winT * 0.8);
     trail.push({ a: pAng, l: pLevel });
-    if (trail.length > 30) trail.shift();
+    if (trail.length > 30) {
+      trail.shift();
+    }
   }
   holeFlare = Math.max(0, holeFlare - dt * 1.4);
   introFade = Math.max(0, introFade - dt * 1.6);
@@ -368,15 +416,21 @@ function update(dt) {
     p.x += p.vx * d;
     p.y += p.vy * d;
     p.life -= d * 0.8;
-    if (len < Math.max(rr(sunLevel), SUN)) p.life -= d * 3;
+    if (len < Math.max(rr(sunLevel), SUN)) {
+      p.life -= d * 3;
+    }
   }
   particles = particles.filter(p => p.life > 0);
   for (const tx of texts) {
     tx.life -= dt;
-    if (!tx.center) tx.y -= dt * 22;
+    if (!tx.center) {
+      tx.y -= dt * 22;
+    }
   }
   texts = texts.filter(tx => tx.life > 0);
-  for (const b of burns) b.life -= dt * 1.6;
+  for (const b of burns) {
+    b.life -= dt * 1.6;
+  }
   const hw = Math.max(rr(sunLevel), SUN);
   for (const db of debris) {
     db.r -= (14 + 1400 / Math.max(db.r, 10)) * dt;
