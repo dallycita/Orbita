@@ -252,7 +252,8 @@ function update(dt) {
     camLevel += (level - camLevel) * Math.min(1, d * 6);
     // el sol crece y se come los anillos; si te quedas quieto, te alcanza
     const gap = pLevel - sunLevel;
-    let sp = (tutorial ? 0.1 : 0.2 + Math.min(level * 0.006, 0.26)) * (HOLE_MUL[lvl] || 1); // nivel 1: un punto medio; tutorial: muy lento
+    // nivel 1: un punto medio; tutorial: muy lento
+    let sp = (tutorial ? 0.1 : 0.2 + Math.min(level * 0.006, 0.26)) * (HOLE_MUL[lvl] || 1);
     if (gap > 2.4) {
       sp += (gap - 2.4) * 1.15;
     }
