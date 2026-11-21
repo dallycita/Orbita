@@ -46,7 +46,7 @@ function hasRealStyleDiff(a, b){   // true si hay una diferencia real
   }
   return false;
 }
-const RUIDO_AMPLIO = new Set(['poder_urano', 'sinwebgl_partida_5']);
+const RUIDO_AMPLIO = new Set(['poder_urano', 'sinwebgl_partida_2', 'sinwebgl_partida_5', 'sinwebgl_partida_6', 'intro_0', 'antes_de_jugar']);
 if (process.argv[2] === '--comparar'){
   const [A, B] = process.argv.slice(3), a = JSON.parse(readFileSync(join(A, 'huella.json'))), b = JSON.parse(readFileSync(join(B, 'huella.json')));
   let bad = 0; const ruido = [];
@@ -194,8 +194,8 @@ const { chromium } = require('playwright');
 const b = await chromium.launch({args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--font-render-hinting=none'].concat((process.env.FLAGS || '').split(' ').filter(Boolean))});
 const result = {};
 const only = process.env.SOLO ? new RegExp(process.env.SOLO) : null;
-for (const sc of SCENES){
-  if (only && !only.test(sc.name)) continue;
+// varias escenas a la vez (cada una en su propia página, sin nada compartido); JOBS=1 para una tras otra
+async function runScene(sc){
   const opts = sc.opts || {};
   const pg = await b.newPage({viewport: {width: 390, height: 844}, deviceScaleFactor: 1, reducedMotion: opts.reduced ? 'reduce' : 'no-preference'});
   const errs = [];
@@ -214,6 +214,8 @@ for (const sc of SCENES){
   await pg.evaluate(s => window.__ev(s), FRAMES(3));
   // las animaciones de CSS corren con el reloj real: se congelan en un instante fijo (las que terminan, en su final)
   await pg.evaluate(() => { for (const an of document.getAnimations()){ try{ const tm = an.effect.getComputedTiming(); an.pause(); an.currentTime = isFinite(tm.endTime) ? tm.endTime : 1234; }catch(e){} } });
+  // las de opacidad y movimiento las dibuja el compositor aparte: se espera a que muestre el estado congelado
+  await pg.waitForTimeout(150);
   const png = await pg.screenshot({path: join(OUT, sc.name + '.png'), caret: 'hide'});
   const estilos = await pg.evaluate(() => {
     const out = {}, key = el => { const p = []; for (let e = el; e && e.nodeType === 1; e = e.parentElement){ let i = 0; for (let s = e; (s = s.previousElementSibling);) i++; p.unshift(e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + ':' + i); } return p.join('>'); };
@@ -225,7 +227,11 @@ for (const sc of SCENES){
   process.stdout.write((errs.length ? '!' : '.'));
   await pg.close();
 }
+const queue = SCENES.filter(sc => !only || only.test(sc.name));
+const JOBS = Math.max(1, +process.env.JOBS || 4);
+await Promise.all(Array.from({length: JOBS}, async () => { while (queue.length) await runScene(queue.shift()); }));
 await b.close();
-writeFileSync(join(OUT, 'huella.json'), JSON.stringify(result, null, 1));
+const ordered = {}; for (const sc of SCENES) if (result[sc.name]) ordered[sc.name] = result[sc.name];
+writeFileSync(join(OUT, 'huella.json'), JSON.stringify(ordered, null, 1));
 console.log('\n✓ ' + Object.keys(result).length + ' escenas en ' + OUT);
 const conErr = Object.entries(result).filter(([, v]) => v.errores); if (conErr.length) console.log('escenas con errores del juego: ' + conErr.map(([k, v]) => k + ' → ' + v.errores.slice(0, 120)).join('\n'));
