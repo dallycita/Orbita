@@ -37,7 +37,9 @@ function updateRingHUD() {
     }
     if (elPnum) {
       elPnum.innerHTML = v + '<span>/ ' + g + '</span>';
-      if (elPnum.classList) elPnum.classList.toggle('beat', rec > 0 && v > rec);
+      if (elPnum.classList) {
+        elPnum.classList.toggle('beat', rec > 0 && v > rec);
+      }
     }
   }
   elScore.innerHTML = Math.min(level, curGoal()) + '<small>/ ' + curGoal() + '</small>';
