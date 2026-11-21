@@ -16,13 +16,14 @@ let splashT = 0,
   sflared = false,
   sfl = 0;
 try {
-  if (document.fonts && document.fonts.load)
+  if (document.fonts && document.fonts.load) {
     document.fonts.load('400 52px Unbounded').then(
       () => {
         splashFont = true;
       },
       () => {},
     );
+  }
 } catch (e) {}
 const easeIO2 = v => (v < 0.5 ? 2 * v * v : 1 - Math.pow(-2 * v + 2, 2) / 2);
 function bcol(b, a) {
@@ -45,7 +46,9 @@ function bbright(th, r, r0, r1) {
 }
 function bstyle(cx, cy, r, k, r0, r1, a, lensMode, nStops) {
   const g = ctx.createConicGradient ? ctx.createConicGradient(0, cx, cy) : null;
-  if (!g) return bcol(bbright(Math.PI, r, r0, r1), a);
+  if (!g) {
+    return bcol(bbright(Math.PI, r, r0, r1), a);
+  }
   const n = nStops || 28;
   for (let i = 0; i <= n; i++) {
     const ph = (i / n) * Math.PI * 2,
@@ -55,7 +58,9 @@ function bstyle(cx, cy, r, k, r0, r1, a, lensMode, nStops) {
   return g;
 }
 function bhDisk(cx, cy, R, from, to, alpha, f1) {
-  if (BHGL.draw(from > 1 ? 0 : 1, cx, cy, R, SK, BR0, f1 || BR1, alpha)) return;
+  if (BHGL.draw(from > 1 ? 0 : 1, cx, cy, R, SK, BR0, f1 || BR1, alpha)) {
+    return;
+  }
   const r0 = R * BR0,
     r1 = R * (f1 || BR1),
     step = Math.max(1, R * 0.02),
@@ -75,7 +80,9 @@ function bhDiskK(cx, cy, R, k, f0, f1, from, to, alpha) {
       BHGL.draw(1, cx, cy, R, k, f0, f1, alpha);
       return;
     }
-  } else if (BHGL.draw(from > 1 ? 0 : 1, cx, cy, R, k, f0, f1, alpha)) return;
+  } else if (BHGL.draw(from > 1 ? 0 : 1, cx, cy, R, k, f0, f1, alpha)) {
+    return;
+  }
   const r0 = R * f0,
     r1 = R * f1,
     step = Math.max(1.6, R * 0.035);
@@ -132,7 +139,9 @@ const BHGL = (() => {
     gl_FragColor = o;
   }`;
   function init() {
-    if (ok !== null) return ok;
+    if (ok !== null) {
+      return ok;
+    }
     try {
       cv = document.createElement('canvas');
       gl = cv.getContext('webgl', { premultipliedAlpha: true, alpha: true, antialias: false });
@@ -144,7 +153,9 @@ const BHGL = (() => {
         const o = gl.createShader(t);
         gl.shaderSource(o, src);
         gl.compileShader(o);
-        if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o));
+        if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) {
+          throw new Error(gl.getShaderInfoLog(o));
+        }
         return o;
       };
       pr = gl.createProgram();
@@ -154,7 +165,9 @@ const BHGL = (() => {
       );
       gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS));
       gl.linkProgram(pr);
-      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error('link');
+      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) {
+        throw new Error('link');
+      }
       gl.useProgram(pr);
       const b = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, b);
@@ -180,7 +193,9 @@ const BHGL = (() => {
   }
   // dibuja una parte del agujero negro centrada en (cx, cy) del lienzo principal
   function draw(part, cx, cy, R, k, f0, f1, alpha) {
-    if (!init() || !(R > 2)) return false;
+    if (!init() || !(R > 2)) {
+      return false;
+    }
     let sc = 1;
     try {
       const m = ctx.getTransform && ctx.getTransform();
@@ -253,7 +268,9 @@ function drawAccent(cx, cy, R, p) {
     g.addColorStop(0, 'rgba(143,208,255,0)');
     g.addColorStop(1, 'rgba(143,208,255,.75)');
     ctx.fillStyle = g;
-  } else ctx.fillStyle = 'rgba(143,208,255,.5)';
+  } else {
+    ctx.fillStyle = 'rgba(143,208,255,.5)';
+  }
   ctx.beginPath();
   ctx.moveTo(tx, ty);
   ctx.lineTo(ex + px, ey + py);
@@ -263,7 +280,9 @@ function drawAccent(cx, cy, R, p) {
   splashEarth(ex, ey, re);
 }
 function drawLogo(midX, cy, fs, p) {
-  if (p === undefined) p = 99;
+  if (p === undefined) {
+    p = 99;
+  }
   ctx.save();
   const pO = easeIO2(clamp(p / 1.0, 0, 1)),
     Rf0 = fs * LOGO.r,
@@ -295,7 +314,9 @@ function drawLogo(midX, cy, fs, p) {
   // letras una por una, subiendo suavemente (como en la presentación)
   for (let i = 0; i < word.length; i++) {
     const la = clamp((p - (0.7 + i * 0.16)) / 0.5, 0, 1);
-    if (la <= 0) continue;
+    if (la <= 0) {
+      continue;
+    }
     ctx.globalAlpha = easeIO2(la);
     ctx.fillText(
       word[i],
@@ -305,7 +326,9 @@ function drawLogo(midX, cy, fs, p) {
   }
   ctx.globalAlpha = 1;
   // la Tierra sale disparada del agujero negro y se queda como el acento
-  if (p > 1.6) drawAccent(cx, cy, Rf, 1 - Math.pow(1 - clamp((p - 1.6) / 0.55, 0, 1), 3));
+  if (p > 1.6) {
+    drawAccent(cx, cy, Rf, 1 - Math.pow(1 - clamp((p - 1.6) / 0.55, 0, 1), 3));
+  }
   ctx.restore();
 }
 function bhCore(cx, cy, R, alpha) {
@@ -320,11 +343,11 @@ function bhCore(cx, cy, R, alpha) {
     ns = R > 30 ? 48 : 28;
   if (BHGL.draw(2, cx, cy, R, 1, 1, 1, alpha)) {
     /* anillo de luz en alta calidad */
-  } else
+  } else {
     for (let q = 0; q <= 1.0001; q += dq) {
       const rd = R * BR0 + q * R * (BR1 - BR0),
         g = ctx.createConicGradient ? ctx.createConicGradient(0, cx, cy) : null;
-      if (g)
+      if (g) {
         for (let i = 0; i <= ns; i++) {
           const ph = (i / ns) * Math.PI * 2,
             up = 0.5 - 0.5 * Math.sin(ph);
@@ -333,6 +356,7 @@ function bhCore(cx, cy, R, alpha) {
             bcol(bbright(ph, rd, R * BR0, R * BR1), alpha * (1 - q * 0.6) * (0.45 + 0.45 * up)),
           );
         }
+      }
       ctx.beginPath();
       for (let i = 0; i <= N; i++) {
         const ph = (i / N) * Math.PI * 2,
@@ -347,6 +371,7 @@ function bhCore(cx, cy, R, alpha) {
       ctx.lineWidth = Math.max(1.8, R * 0.03);
       ctx.stroke();
     }
+  }
   ctx.globalAlpha = alpha;
   ctx.strokeStyle = bcol(0.95, 0.85);
   ctx.lineWidth = Math.max(1.2, R * 0.022) + sfl * 5;
@@ -379,7 +404,9 @@ function splashEarth(ex, ey, r) {
 }
 // el sonido de la marca: un rumor que crece, las letras como notas, la Tierra que cae y un golpe final
 function splashSounds() {
-  if (!AC) return;
+  if (!AC) {
+    return;
+  }
   try {
     const n = AC.currentTime + 0.05;
     splashBus = AC.createGain();
@@ -390,7 +417,9 @@ function splashSounds() {
         g = AC.createGain();
       o.type = type;
       o.frequency.setValueAtTime(f0, t0);
-      if (f1) o.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+      if (f1) {
+        o.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+      }
       g.gain.setValueAtTime(0.0001, t0);
       g.gain.exponentialRampToValueAtTime(peak, t0 + att);
       g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
@@ -423,7 +452,7 @@ function splashSounds() {
     osc('sine', ROOT * 2 * Math.pow(2, 7 / 12), 0, n + 5.3, 1.4, 0.1, 0.004); // la Tierra cae en el acento
     osc('sine', 72, 38, n + 5.5, 1.6, 0.9, 0.005); // golpe
     noiseHit(n + 5.5, 1.6, 'highpass', 3000, 0.35, splashBus);
-    for (const s of [0, 3, 7, 12])
+    for (const s of [0, 3, 7, 12]) {
       for (const det of [-7, 7]) {
         // acorde final
         const o = AC.createOscillator(),
@@ -443,6 +472,7 @@ function splashSounds() {
         o.start(n + 5.5);
         o.stop(n + 9.6);
       }
+    }
     osc('sine', ROOT * 4, 0, n + 5.55, 2.8, 0.07, 0.005);
     osc('sine', ROOT * 4 * Math.pow(2, 7 / 12), 0, n + 5.6, 2.6, 0.05, 0.005); // campanas
   } catch (e) {}
@@ -469,7 +499,9 @@ function skipSplash() {
 }
 function updateSplash(dt) {
   t += dt;
-  if (state === 'splash') splashT += dt;
+  if (state === 'splash') {
+    splashT += dt;
+  }
   flash = Math.max(0, flash - dt * 2);
   sfl = Math.max(0, sfl - dt * 1.3);
   if (state === 'splash' && !sflared && splashT >= 5.5) {
@@ -478,7 +510,9 @@ function updateSplash(dt) {
     sfl = 1;
     buzz([30, 40, 80]);
   }
-  if (state === 'splash' && splashT >= SPLASH_END) afterSplash();
+  if (state === 'splash' && splashT >= SPLASH_END) {
+    afterSplash();
+  }
 }
 function renderSplash() {
   const T = splashT;
@@ -540,7 +574,9 @@ function renderSplash() {
   ctx.lineJoin = 'round';
   for (let i = 0; i < word.length; i++) {
     const la = clamp((T - (4 + i * 0.22)) / 0.32, 0, 1);
-    if (la <= 0) continue;
+    if (la <= 0) {
+      continue;
+    }
     const lx = tx + mw(word.slice(0, i)) + ls * i,
       ly = base + (1 - easeIO2(la)) * 14;
     ctx.globalAlpha = la;
