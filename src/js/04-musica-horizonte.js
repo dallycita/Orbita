@@ -1,14 +1,16 @@
-// ---------- "Horizonte de sucesos": la banda sonora del Sistema solar ----------
-// La idea: no es una historia de amor, es una persecución. La música tiene dos personajes:
-// · el agujero negro: un zumbido enorme que "late" cada vez más rápido, y un motivo de dos notas
-// que CAE medio tono,
-// como la gravedad, y que se repite cada vez más seguido cuanto más cerca está (como el tiburón de
-// Tiburón);
-//  · la Tierra: una frase de cristal, frágil, que corre cada vez más rápido para escapar.
-// Debajo, un tono que sube sin fin (escala de Shepard): la sensación de que algo se acerca y nunca
-// termina.
-// Todo con una reverberación de varios segundos, como un espacio inmenso y vacío.
+/**
+ * "Horizonte de sucesos": la banda sonora del Sistema solar, sintetizada con Web Audio paso a paso
+ * (stepCosmos). Es una persecución con dos personajes: el agujero negro (zumbido que late y un
+ * motivo que cae medio tono, cada vez más seguido) y la Tierra (frase de cristal que corre).
+ * Debajo, una escala de Shepard que sube sin fin; todo con reverberación de varios segundos.
+ */
+/** Estado del sintetizador: nodos de reverberación, zumbido, bus y sección actual. */
 let hzS = null;
+/**
+ * Crea el estado del sintetizador la primera vez, o de nuevo si cambió el contexto de audio.
+ *
+ * @returns {object} El estado hzS.
+ */
 function hzEnsure() {
   if (hzS && hzS.ac === AC) {
     return hzS;
@@ -35,6 +37,13 @@ function hzEnsure() {
   out.connect(hzBus());
   return hzS;
 }
+/**
+ * Conecta un sonido a la salida: una parte directa y otra a la reverberación.
+ *
+ * @param {AudioNode} node Sonido que se conecta.
+ * @param {number} dry Volumen directo, de 0 a 1.
+ * @param {number} wet Volumen hacia la reverberación, de 0 a 1.
+ */
 function hzOut(node, dry, wet) {
   const a = AC.createGain(),
     b = AC.createGain();
@@ -80,6 +89,11 @@ function hzDroneStart() {
   [oA, oB, oS].forEach(o => o.start(n));
   S.drone = { g, lp, oA, oB, oS, f };
 }
+/**
+ * Apaga el zumbido del agujero negro.
+ *
+ * @param {boolean} quick Apagarlo casi al instante en vez de con un desvanecido.
+ */
 function hzDroneStop(quick) {
   if (!hzS || !hzS.drone) {
     return;
@@ -159,8 +173,8 @@ function hzGlass(t0, f, gain, dur) {
     o.stop(t0 + dur + 0.05);
   }
 }
-// el tono que sube sin fin (escala de Shepard–Risset): siete voces separadas por octavas que suben
-// juntas
+// El tono que sube sin fin (escala de Shepard–Risset): siete voces separadas por octavas suben
+// juntas; las de los extremos suenan bajito, así que el oído no nota dónde vuelve a empezar.
 function hzShepard(t0, dur, gain, rate) {
   const S = hzEnsure(),
     p0 = S.shep,
@@ -187,8 +201,11 @@ function hzShepard(t0, dur, gain, rate) {
   }
   S.shep = (p0 + rate) % 7;
 }
-// ---- producción: bus propio con compresión (para que suene lleno y fuerte) y más instrumentos
-// ----
+/**
+ * Bus propio de la banda sonora con compresión, para que suene llena y fuerte.
+ *
+ * @returns {AudioNode} Entrada del bus (se crea una vez por contexto de audio).
+ */
 function hzBus() {
   const S = hzEnsure();
   if (S.bus) {
@@ -209,6 +226,13 @@ function hzBus() {
   S.bus = g;
   return g;
 }
+/**
+ * Coloca un sonido a la izquierda o a la derecha, si el navegador lo permite.
+ *
+ * @param {AudioNode} node Sonido.
+ * @param {number} pan De -1 (izquierda) a 1 (derecha).
+ * @returns {AudioNode} El nodo que hay que conectar después.
+ */
 function hzPan(node, pan) {
   if (!AC.createStereoPanner) {
     return node;
@@ -381,6 +405,7 @@ function hzTaiko(t0, gain) {
   src.start(t0);
   src.stop(t0 + 0.15);
 }
+/** Platillo al revés: ruido que crece hasta el tiempo t0 + dur (segundos de AC). */
 function hzSwell(t0, dur, gain) {
   const src = AC.createBufferSource();
   src.buffer = NOISE;
@@ -399,6 +424,7 @@ function hzSwell(t0, dur, gain) {
   src.start(t0);
   src.stop(t0 + dur + 0.05);
 }
+/** Golpe de platillo: ruido agudo que se apaga en unos 2 segundos. */
 function hzCrash(t0, gain) {
   const src = AC.createBufferSource();
   src.buffer = NOISE;
@@ -497,7 +523,13 @@ const HZ_OSTS = {
   b: [0, 0, 7, 0, 0, 7, 0, 12, 0, 0, 7, 0, 10, 7, 3, 7],
   c: [0, 12, 0, 12, 7, 12, 0, 12, 0, 12, 0, 12, 10, 12, 7, 12],
 };
-// la sección según qué tan lejos vas
+/**
+ * Elige la sección de la música según qué tan lejos va el jugador.
+ *
+ * @param {number} L Nivel de anillo alcanzado.
+ * @param {boolean} fast Si está el tramo final rápido (clímax).
+ * @returns {string} 'vacio', 'caza', 'eco', 'respiro', 'carrera' o 'climax'.
+ */
 function hzSection(L, fast) {
   if (fast) {
     return 'climax';
@@ -554,6 +586,12 @@ function hzLead(t0, f, gain, dur, bright, pan) {
   vib.start(t0);
   vib.stop(t0 + dur + 0.05);
 }
+/**
+ * Programa un paso (semicorchea) de la banda sonora del Sistema solar.
+ *
+ * @param {number} s Número de paso desde que empezó la canción.
+ * @param {number} t0 Momento en que suena el paso, en segundos del reloj de audio (AC).
+ */
 function stepCosmos(s, t0) {
   hzEnsure();
   hzBus();
@@ -706,7 +744,7 @@ function stepCosmos(s, t0) {
       hzGlass(t0, hzf(n), 0.034 + 0.01 * prog, 1.1);
     }
   } else if (sec === 'eco') {
-    // ahora lo canta una voz cálida, y el cristal le responde una octava arriba
+    // lo canta una voz cálida, y el cristal le responde una octava arriba
     const n = note(hook, s32);
     if (n !== null) {
       hzLead(t0, hzf(n), 0.04, s32 % 8 === 6 || s32 % 8 === 0 ? 0.32 : 0.24, 0.35, -0.15);
