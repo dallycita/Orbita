@@ -19,3 +19,14 @@ Cada una se decide aparte, cuando termine la limpieza.
   `if (uSpec > 0. && uK != 0){ }` y uniforms que no se usan (`uLay`, y `c3`/`c4` en los cráteres).
 - **Comentario viejo de la lente gravitacional** (`14-lente-gravitacional.js`): decía "anillos 27–33", pero el
   código usa `BEND_AT = {3: [26, 28]}`. El comentario nuevo describe lo que hace el código.
+- **Pantalla que nunca existe** (`19-controles.js`, `press()`): revisa `state === 'missions'`, pero ningún
+  archivo pone `state` en ese valor. Esa parte de la condición nunca se cumple.
+- **Parámetro sin uso** (`21-dibujo.js`): `drawCharge(px, py, z)` nunca usa `z`.
+- **Cálculos que no hacen nada** (`33-tarjetas-niveles.js`, `drawLevelsBG`): `W / 2 - (i - pos) * 0` multiplica
+  por 0, y `zA` y `zB` valen siempre 1.
+- **Números de nivel mezclados:** en comentarios y shaders los niveles van del 1 al 8 (Magallanes es el 2); en
+  el código `lvl` empieza en 0 (`lvl === 1` es Magallanes).
+- **Evento con número** (`34-misiones.js`): la misión `streak3` usa el evento `'streak3'`; las demás usan
+  nombres sin número (`'perf'`, `'ring'`).
+- **Clave guardada con "v2"**: el récord se guarda en `orbita_best_v2`. Es FIJO (cambiarla borraría el récord de
+  los jugadores), así que se queda.
