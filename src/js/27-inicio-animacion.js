@@ -33,8 +33,9 @@ import {
   uiOut,
   uiTone,
 } from './28-sonidos-interfaz.js';
-import { drawPlayer } from './29-planetas-hd.js';
+
 import { muted } from './core/settings.js';
+import { drawPlayer } from './render/planets.js';
 
 /**
  * Enciende o apaga la música de misterio de los menús: un zumbido profundo que respira, notas de

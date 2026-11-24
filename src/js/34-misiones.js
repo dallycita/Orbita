@@ -11,11 +11,12 @@ import { t, tutorial } from './08-partida-estado.js';
 import { lvStarsGot } from './25-selector-niveles.js';
 import { elHome, renderHome } from './26-pantalla-inicio.js';
 import { uiTone } from './28-sonidos-interfaz.js';
-import { PLGL, uiGlass } from './29-planetas-hd.js';
+import { uiGlass } from './29-planetas-hd.js';
 import { COIN_RINGS, LEVELS } from './data/levels.js';
 
 import { MIS_ACH, MIS_DAILY, MIS_FACT } from './data/missions.js';
 import { muted } from './core/settings.js';
+import { PLGL } from './render/planets.js';
 
 /**
  * Arma el ícono de Misiones del inicio: una constelación de tres estrellas (una por misión del

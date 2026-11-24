@@ -7331,6 +7331,99 @@ const CHEV_R =
     }
   }
 
+  // src/js/data/planets.js
+  var PLANET_SVG = {
+    tierra: '<circle cx="50" cy="50" r="26" fill="#3d8bff"/><path d="M34 40 Q42 30 52 38 Q48 48 38 47 Z M56 56 Q66 50 70 60 Q62 70 55 64 Z" fill="#5ccf6b"/><path d="M30 46 Q50 42 70 47" stroke="#fff" stroke-opacity=".7" stroke-width="2" fill="none"/>',
+    saturno: '<ellipse cx="50" cy="50" rx="44" ry="12" transform="rotate(-18 50 50)" fill="none" stroke="#f3e2b0" stroke-width="5" stroke-opacity=".9"/><circle cx="50" cy="50" r="22" fill="#e6cf8f"/><rect x="28" y="44" width="44" height="4" fill="#c9a86a" opacity=".6"/><rect x="28" y="53" width="44" height="5" fill="#c9a86a" opacity=".5"/><path d="M8 58 A44 12 -18 0 0 92 42" transform="rotate(0)" fill="none" stroke="#f3e2b0" stroke-width="5" stroke-opacity=".9"/>',
+    urano: '<ellipse cx="50" cy="50" rx="9" ry="40" transform="rotate(8 50 50)" fill="none" stroke="#c8f0fa" stroke-width="3" stroke-opacity=".6"/><circle cx="50" cy="50" r="23" fill="#8fd3e0"/>',
+    neptuno: '<circle cx="50" cy="50" r="24" fill="#3f6fd6"/><rect x="26" y="42" width="48" height="5" fill="#2b4fa8" opacity=".6"/><ellipse cx="58" cy="57" rx="6" ry="3.5" fill="#1f3f8f" opacity=".8"/>',
+    pluton: '<circle cx="50" cy="50" r="17" fill="#d9c7b4"/><path d="M52 62 C44 57 45 49 52 52 C59 49 60 57 52 62 Z" fill="#f4ebe0"/>'
+  };
+  var PFEAT = {
+    tierra: [
+      [0, -0.35, 0.5, 0.25, "#5ccf6b"],
+      [1.4, 0.15, 0.35, 0.45, "#5ccf6b"],
+      [2.6, -0.05, 0.45, 0.3, "#5ccf6b"],
+      [3.9, 0.5, 0.3, 0.15, "#5ccf6b"],
+      [4.9, -0.2, 0.4, 0.35, "#5ccf6b"],
+      [0.8, -0.6, 0.6, 0.06, "rgba(255,255,255,.85)"],
+      [2.2, 0.35, 0.7, 0.06, "rgba(255,255,255,.8)"],
+      [4.2, -0.4, 0.6, 0.05, "rgba(255,255,255,.8)"]
+    ],
+    luna: [
+      [0.4, -0.25, 0.35, 0.28, "#9a9a9a"],
+      [1.6, 0.2, 0.25, 0.2, "#a3a3a3"],
+      [2.9, -0.1, 0.4, 0.3, "#959595"],
+      [4.3, 0.35, 0.18, 0.14, "#8d8d8d"],
+      [5.4, -0.4, 0.14, 0.12, "#b0b0b0"]
+    ],
+    mercurio: [
+      [0.3, 0.2, 0.16, 0.14, "#867a6d"],
+      [1.3, -0.35, 0.2, 0.17, "#8e8275"],
+      [2.4, 0.05, 0.12, 0.1, "#7d7266"],
+      [3.5, 0.4, 0.22, 0.16, "#8a7e71"],
+      [4.7, -0.15, 0.15, 0.13, "#7f7367"],
+      [5.6, 0.3, 0.1, 0.09, "#867a6d"]
+    ],
+    venus: [
+      [1, 0.1, 0.7, 0.1, "rgba(255,245,220,.45)"],
+      [3.2, -0.25, 0.8, 0.08, "rgba(255,240,205,.4)"],
+      [5, 0.3, 0.6, 0.07, "rgba(255,245,220,.35)"]
+    ],
+    marte: [
+      [0.5, 0.1, 0.45, 0.25, "#8a3a26"],
+      [2.1, -0.2, 0.3, 0.3, "#94402a"],
+      [3.7, 0.25, 0.4, 0.18, "#7e3422"],
+      [5.1, -0.05, 0.25, 0.2, "#8a3a26"],
+      [0, -0.88, 1, 0.14, "rgba(255,255,255,.9)"]
+    ],
+    jupiter: [
+      [1.8, 0.28, 0.26, 0.13, "#c0533a"],
+      [4.5, -0.3, 0.12, 0.06, "rgba(255,240,220,.6)"]
+    ],
+    saturno: [
+      [1.2, 0.3, 0.25, 0.12, "rgba(255,245,220,.5)"],
+      [3.8, -0.2, 0.2, 0.1, "rgba(255,245,220,.4)"]
+    ],
+    urano: [[2, 0, 0.3, 0.15, "rgba(200,245,250,.35)"]],
+    neptuno: [
+      [1.5, 0.25, 0.32, 0.18, "#1f3f8f"],
+      [4, -0.3, 0.18, 0.08, "rgba(230,240,255,.8)"],
+      [5.2, 0.1, 0.14, 0.06, "rgba(230,240,255,.6)"]
+    ],
+    pluton: [
+      [0, 0.15, 0.55, 0.5, "#f4ebe0"],
+      [2.5, -0.3, 0.3, 0.2, "#9a8371"],
+      [4.1, 0.35, 0.25, 0.18, "#9a8371"],
+      [5.3, -0.1, 0.2, 0.14, "#b9a48f"]
+    ],
+    sol: [
+      [1, 0.2, 0.1, 0.07, "rgba(160,70,10,.55)"],
+      [3.4, -0.15, 0.08, 0.06, "rgba(160,70,10,.5)"],
+      [5, 0.35, 0.07, 0.05, "rgba(160,70,10,.45)"]
+    ]
+  };
+  var PBASE = {
+    tierra: "#2f6fd8",
+    luna: "#bcbcbc",
+    mercurio: "#a59a8f",
+    venus: "#e3c27a",
+    marte: "#c1543a",
+    jupiter: "#d7a86e",
+    saturno: "#e6cf8f",
+    urano: "#8fd3e0",
+    neptuno: "#3f6fd6",
+    pluton: "#cdb9a4",
+    sol: "#ffcf5a"
+  };
+  var PBANDS = {
+    saturno: ["rgba(170,130,70,.35)", [-0.45, -0.15, 0.2, 0.5]],
+    neptuno: ["rgba(25,45,130,.35)", [-0.3, 0.25]],
+    urano: ["rgba(120,190,205,.3)", []],
+    jupiter: ["rgba(130,80,45,.45)", [-0.7, -0.42, -0.12, 0.1, 0.38, 0.62]],
+    venus: ["rgba(200,160,90,.25)", [-0.5, 0.05, 0.45]]
+  };
+
   // src/js/11-peligros-datos.js
   var comets = [], beams = [], flareT = 0, flareWarn = 0, sstars = [], beamCount = 0;
   var waves = [], hot = 0, hotT = 0, skyFlash = 0;
@@ -11915,6 +12008,599 @@ void main(){
     ctx.restore();
   }
 
+  // src/js/30-escanear.js
+  var scanOn = false, scanK = 0, pRot = 0, scanLineT = 0, scanApplyAt = 0;
+  function statWords(k, v) {
+    if (k === "size") {
+      return v <= -10 ? ["Pequeño", "pasa fácil por los huecos"] : v >= 10 ? ["Grande", "más difícil de esquivar"] : ["Normal", "como la Tierra"];
+    }
+    if (k === "vel") {
+      return v <= -10 ? ["Lento", "salta flotando"] : v >= 5 ? ["Rápido", "salta al instante"] : ["Normal", "como la Tierra"];
+    }
+    return v <= -30 ? ["Frágil", "el agujero negro lo alcanza antes"] : v <= -8 ? ["Algo frágil", "aguanta un poco menos"] : ["Firme", "aguanta cerca del agujero negro"];
+  }
+  var STAT_ROWS = [
+    [
+      "size",
+      "Tamaño",
+      (v) => v <= -10 ? "Pequeño: pasa fácil por los huecos" : v >= 10 ? "Grande: más difícil de esquivar" : "Como la Tierra",
+      (P) => "Diámetro real: " + P.d,
+      (v) => v < 0
+    ],
+    [
+      "vel",
+      "Velocidad",
+      (v) => v <= -10 ? "Lento: salta flotando" : v >= 5 ? "Rápido: salta al instante" : "Salto normal",
+      (P) => "Velocidad en su órbita: " + P.v,
+      (v) => v > 0
+    ],
+    [
+      "res",
+      "Resistencia",
+      (v) => v <= -30 ? "Frágil: el agujero negro lo alcanza antes" : v <= -8 ? "Algo frágil" : "Firme cerca del agujero negro",
+      (P) => "Densidad real: " + P.rho,
+      (v) => v > 0
+    ]
+  ];
+  function applyScanBars() {
+    if (!elPl || !elPl.querySelectorAll || !elPl.querySelector) {
+      return;
+    }
+    elPl.querySelectorAll(".sbar i").forEach((i) => {
+      const v = Math.max(-50, Math.min(50, Number(i.dataset.v)));
+      i.style.width = Math.abs(v) + "%";
+      i.style.left = (v >= 0 ? 50 : 50 - Math.abs(v)) + "%";
+    });
+    elPl.querySelectorAll(".spips i").forEach((i) => {
+      i.style.opacity = "1";
+    });
+    const pw = elPl.querySelector(".spower");
+    if (pw) {
+      setTimeout(() => pw.classList.add("on"), 650);
+    }
+  }
+  function uiScan() {
+    if (!AC || muted) {
+      return;
+    }
+    try {
+      const n = AC.currentTime, out = uiOut();
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(140, n);
+      o.frequency.exponentialRampToValueAtTime(1300, n + 0.7);
+      g.gain.setValueAtTime(1e-4, n);
+      g.gain.exponentialRampToValueAtTime(0.06, n + 0.35);
+      g.gain.exponentialRampToValueAtTime(1e-4, n + 0.75);
+      o.connect(g);
+      g.connect(out);
+      o.start(n);
+      o.stop(n + 0.8);
+      [0, 3, 7, 12].forEach(
+        (sm, i) => uiTone(ROOT * 2 * Math.pow(2, sm / 12), n + 0.75 + i * 0.15, 0.6, 0.035)
+      );
+    } catch (e) {
+    }
+  }
+  function setScan(on) {
+    scanOn = on;
+    scanLineT = 0;
+    if (elPl) {
+      elPl.classList.toggle("scanning", on);
+    }
+    if (on) {
+      uiScan();
+      scanApplyAt = performance.now() + 650;
+    }
+  }
+  function setPRot(value) {
+    pRot = value;
+    return value;
+  }
+  function setScanApplyAt(value) {
+    scanApplyAt = value;
+    return value;
+  }
+  function setScanK(value) {
+    scanK = value;
+    return value;
+  }
+  function setScanLineT(value) {
+    scanLineT = value;
+    return value;
+  }
+  function setScanOn(value) {
+    scanOn = value;
+    return value;
+  }
+
+  // src/js/29-planetas-hd.js
+  var elPl;
+  var pIndex = 0, pSwap = 0, pDir = 1, pTarget = 0, pPos = 0, pDrag = 0, pSlots = [], pScan = false, pScanT = 0, pSK = 0, pUse = 0;
+  var pGeom = () => ({ R0: Math.min(W * 0.2, H * 0.15), cx0: W / 2, cy0: H * 0.3 });
+  function renderPlanetsScene(dt) {
+    setT(t + dt);
+    pSwap = Math.max(0, pSwap - dt * 3.2);
+    const target = scanOn ? 1 : 0;
+    setScanK(scanK + (target - scanK) * Math.min(1, dt * 4.2));
+    if (Math.abs(target - scanK) < 3e-3) {
+      setScanK(target);
+    }
+    setPRot(pRot + dt * (0.35 + 7 * Math.sin(Math.PI * scanK)));
+    if (scanOn && scanK > 0.9 && scanLineT < 1) {
+      setScanLineT(Math.min(1, scanLineT + dt / 0.75));
+    }
+    if (scanApplyAt && performance.now() >= scanApplyAt) {
+      setScanApplyAt(0);
+      applyScanBars();
+    }
+    const P = PLANETS_P[pIndex], locked = !planetOk(P), hide = P.secret && !locked ? false : P.secret && locked;
+    ctx.save();
+    ctx.fillStyle = "#05060c";
+    ctx.fillRect(0, 0, W, H);
+    const neb = ctx.createRadialGradient(W / 2, H * 0.38, 0, W / 2, H * 0.38, Math.max(W, H) * 0.6);
+    neb.addColorStop(0, rgba(P.col, locked ? 0.05 : 0.16));
+    neb.addColorStop(1, rgba(P.col, 0));
+    ctx.fillStyle = neb;
+    ctx.fillRect(0, 0, W, H);
+    const sr = Math.max(W, H) * 0.62;
+    for (const s of stars) {
+      const a = s.a + t * 0.01, x = W / 2 + Math.cos(a) * s.r * sr, y = H * 0.4 + Math.sin(a) * s.r * sr;
+      ctx.globalAlpha = 0.15 + 0.35 * (0.5 + 0.5 * Math.sin(t * 1.3 + s.tw));
+      ctx.fillStyle = BONE;
+      ctx.fillRect(x, y, s.s * 0.8, s.s * 0.8);
+    }
+    if (scanK < 0.01) {
+      drawPlanetOrbit(dt, P);
+      ctx.restore();
+      return;
+    }
+    ctx.globalAlpha = 1 - pSwap;
+    const R = Math.min(W * 0.27, H * 0.17) * (P.id === "pluton" ? 0.78 : 1) * (1 - pSwap * 0.15) * (1 - 0.55 * scanK);
+    const cx = W / 2 + pDir * pSwap * W * 0.25, cy = H * 0.38 * (1 - scanK) + H * 0.165 * scanK + Math.sin(t * 0.8) * 4 * (1 - scanK);
+    drawBigPlanet(P.id, cx, cy, R, pRot, locked && hide, "left");
+    if (scanOn && scanLineT > 0 && scanLineT < 1) {
+      const yy = cy - R * 1.25 + R * 2.5 * scanLineT, w2 = R * 1.6;
+      const lg = ctx.createLinearGradient(cx - w2, yy, cx + w2, yy);
+      if (lg && lg.addColorStop) {
+        lg.addColorStop(0, "rgba(143,208,255,0)");
+        lg.addColorStop(0.5, "rgba(200,235,255,.95)");
+        lg.addColorStop(1, "rgba(143,208,255,0)");
+        ctx.fillStyle = lg;
+      }
+      ctx.globalAlpha = 1;
+      ctx.fillRect(cx - w2, yy - 1, w2 * 2, 2);
+      ctx.globalAlpha = 0.12;
+      ctx.fillStyle = "#8fd0ff";
+      ctx.fillRect(cx - w2, cy - R * 1.25, w2 * 2, yy - (cy - R * 1.25));
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+  function drawPlanetOrbit(dt, P) {
+    const N = PLANETS_P.length;
+    pPos += (pTarget - pPos) * Math.min(1, dt * 7.5);
+    const pos = pPos + pDrag;
+    pSK += ((pScan ? 1 : 0) - pSK) * Math.min(1, dt * 3.2);
+    if (Math.abs((pScan ? 1 : 0) - pSK) < 2e-3) {
+      pSK = pScan ? 1 : 0;
+    }
+    setPRot(pRot + dt * 6.5 * Math.sin(Math.PI * pSK));
+    const G = pGeom(), R02 = G.R0 * (1 - 0.3 * pSK), cx0 = G.cx0, cy0 = G.cy0 - G.R0 * 0.12 * pSK + Math.sin(t * 0.8) * 3 * (1 - pSK);
+    const RA = Math.max(W, H) * 1.25, yTop = H * 0.45, acx = W / 2, acy = yTop + RA;
+    const step2 = Math.asin(Math.min(0.95, Math.max(W * 0.3, R02 * 1.6) / RA));
+    const arcSlot = (o) => {
+      const th = o * step2;
+      return [acx + RA * Math.sin(th), acy - RA * Math.cos(th)];
+    };
+    ctx.save();
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = "rgba(236,230,216,.16)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(acx, acy, RA, -Math.PI / 2 - 1.2, -Math.PI / 2 + 1.2);
+    ctx.stroke();
+    const gl = ctx.createLinearGradient(W / 2 - R02 * 1.2, 0, W / 2 + R02 * 1.2, 0);
+    if (gl && gl.addColorStop) {
+      gl.addColorStop(0, "rgba(255,161,85,0)");
+      gl.addColorStop(0.5, "rgba(255,161,85,.85)");
+      gl.addColorStop(1, "rgba(255,161,85,0)");
+      ctx.strokeStyle = gl;
+    }
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(acx, acy, RA, -Math.PI / 2 - R02 * 1.2 / RA, -Math.PI / 2 + R02 * 1.2 / RA);
+    ctx.stroke();
+    ctx.restore();
+    const list = [];
+    for (let i = 0; i < N; i++) {
+      let o = i - pos;
+      o = (o % N + N + N / 2) % N - N / 2;
+      const ao = Math.abs(o);
+      if (ao > 2.7) {
+        continue;
+      }
+      let x, y, r;
+      const a1 = arcSlot(Math.sign(o) || 1), r1 = R02 * 0.36;
+      if (ao <= 1) {
+        const e = ao * ao * (3 - 2 * ao);
+        x = cx0 + (a1[0] - cx0) * e;
+        y = cy0 + (a1[1] - cy0) * e;
+        r = R02 + (r1 - R02) * e;
+      } else {
+        const s2 = arcSlot(o);
+        x = s2[0];
+        y = s2[1];
+        r = r1 * Math.pow(0.72, ao - 1);
+      }
+      list.push({ i, o, ao, x, y, r });
+    }
+    list.sort((a, b) => b.ao - a.ao);
+    pSlots = [];
+    for (const it of list) {
+      const Q = PLANETS_P[it.i], ok = planetOk(Q);
+      const fade = (1 - Math.max(0, (it.ao - 2.1) / 0.6)) * (it.ao > 0.5 ? 1 - 0.8 * pSK : 1), dim = 0.5 + 0.5 * Math.max(0, 1 - it.ao);
+      const rr0 = it.r * (Q.id === "pluton" ? 0.82 : 1);
+      ctx.save();
+      ctx.globalAlpha = fade * (ok ? dim : 0.9);
+      drawBigPlanet(Q.id, it.x, it.y, rr0, pRot + it.i, !ok, {
+        x: (W / 2 - it.x) / W * 1.6 - 0.55,
+        y: -0.45
+      });
+      if (ok && it.ao > 0.2) {
+        ctx.globalAlpha = (1 - dim) * 0.55 * fade;
+        ctx.fillStyle = "#05060c";
+        ctx.beginPath();
+        ctx.arc(it.x, it.y, rr0 * 1.02, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+      if (Q.id === curPlanet && fade > 0.05) {
+        const my = it.y + rr0 * (Q.id === "saturno" ? 0.95 : 1.22) + 6, a0 = fade * (0.75 + 0.25 * Math.sin(t * 3));
+        ctx.save();
+        ctx.globalAlpha = a0 * 0.35;
+        ctx.fillStyle = "#ffd36b";
+        ctx.beginPath();
+        ctx.arc(it.x, my, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = a0;
+        ctx.beginPath();
+        ctx.arc(it.x, my, 2.6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      pSlots.push({ i: it.i, o: it.o, x: it.x, y: it.y, r: Math.max(rr0, 26) });
+    }
+    if (pUse > 0) {
+      pUse = Math.max(0, pUse - dt * 1.6);
+      const u = 1 - pUse;
+      ctx.save();
+      ctx.globalAlpha = pUse * 0.8;
+      ctx.strokeStyle = "#ffd36b";
+      ctx.lineWidth = 2.5 * pUse + 0.5;
+      ctx.beginPath();
+      ctx.arc(cx0, cy0, R02 * (1.05 + 0.55 * u), 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = pUse * 0.25;
+      ctx.fillStyle = "#ffd36b";
+      ctx.beginPath();
+      ctx.arc(cx0, cy0, R02 * 1.02, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    if (pScan) {
+      pScanT += dt;
+      const k = Math.min(1, pScanT / 0.5), Rr = R02 * 1.16;
+      ctx.save();
+      ctx.translate(cx0, cy0);
+      ctx.globalAlpha = 0.55 * k;
+      ctx.strokeStyle = "#8fd0ff";
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([2, 7]);
+      ctx.lineDashOffset = -t * 12;
+      ctx.beginPath();
+      ctx.arc(0, 0, Rr, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.rotate(t * 0.35);
+      ctx.globalAlpha = 0.9 * k;
+      ctx.strokeStyle = "#ffa155";
+      ctx.lineWidth = 2.2;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.arc(0, 0, Rr, -0.5, 0.1);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(0, 0, Rr, Math.PI - 0.5, Math.PI + 0.1);
+      ctx.stroke();
+      ctx.rotate(-t * 0.35);
+      ctx.globalAlpha = 0.7 * k;
+      ctx.strokeStyle = "#ece6d8";
+      ctx.lineWidth = 1.4;
+      for (let a = 0; a < 4; a++) {
+        const an = a * Math.PI / 2;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(an) * (Rr + 4), Math.sin(an) * (Rr + 4));
+        ctx.lineTo(Math.cos(an) * (Rr + 14), Math.sin(an) * (Rr + 14));
+        ctx.stroke();
+      }
+      ctx.restore();
+      const SD = 0.9, NP = 3;
+      let ph = -1, dn = 1;
+      if (pScanT < SD * NP) {
+        const n = Math.floor(pScanT / SD);
+        ph = (pScanT - n * SD) / SD;
+        dn = n % 2 ? -1 : 1;
+      } else {
+        const q = (pScanT - SD * NP) % 3.5;
+        if (q < 1.2) {
+          ph = q / 1.2;
+          dn = 1;
+        }
+      }
+      if (ph >= 0) {
+        const e = ph * ph * (3 - 2 * ph), f = dn > 0 ? e : 1 - e, yy = cy0 - R02 * 1.1 + 2.2 * R02 * f, w2 = R02 * 1.12, strong = pScanT < SD * NP ? 1 : 0.45;
+        const lg = ctx.createLinearGradient(cx0 - w2, 0, cx0 + w2, 0);
+        if (lg && lg.addColorStop) {
+          lg.addColorStop(0, "rgba(143,208,255,0)");
+          lg.addColorStop(0.5, "rgba(210,240,255,.95)");
+          lg.addColorStop(1, "rgba(143,208,255,0)");
+          ctx.fillStyle = lg;
+        }
+        ctx.save();
+        ctx.globalAlpha = strong;
+        ctx.fillRect(cx0 - w2, yy - 1, w2 * 2, 2);
+        ctx.beginPath();
+        ctx.arc(cx0, cy0, R02 * 1.02, 0, Math.PI * 2);
+        ctx.clip();
+        const y0 = dn > 0 ? cy0 - R02 * 1.1 : yy, y1 = dn > 0 ? yy : cy0 + R02 * 1.1;
+        ctx.globalAlpha = 0.1 * strong;
+        ctx.fillStyle = "#8fd0ff";
+        ctx.fillRect(cx0 - w2, y0, w2 * 2, y1 - y0);
+        ctx.globalAlpha = 0.22 * strong;
+        ctx.strokeStyle = "#8fd0ff";
+        ctx.lineWidth = 1;
+        const gs = Math.max(8, R02 / 7);
+        ctx.beginPath();
+        for (let gy = cy0 - R02; gy < cy0 + R02; gy += gs) {
+          if (gy >= y0 && gy <= y1) {
+            ctx.moveTo(cx0 - R02, gy);
+            ctx.lineTo(cx0 + R02, gy);
+          }
+        }
+        for (let gx = cx0 - R02; gx < cx0 + R02; gx += gs) {
+          ctx.moveTo(gx, y0);
+          ctx.lineTo(gx, y1);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+  }
+  var POW_ICO = {
+    luna: '<circle cx="12" cy="12" r="8"/><path d="M15.5 4.8a8 8 0 0 1 0 14.4 6.5 6.5 0 0 0 0-14.4z" class="f"/>',
+    mercurio: '<path d="M13.5 2.5 5.5 13.5h6l-1 8 8-11h-6z"/>',
+    venus: '<path d="M18.5 9A7 7 0 1 0 19 15"/><path d="M19.5 4v5h-5"/>',
+    tierra: '<path d="M6 12.5l6-6 6 6M6 18.5l6-6 6 6"/>',
+    marte: '<path d="M2.5 19.5 9.5 7l4 6 2.5-3.5 5.5 10z"/>',
+    jupiter: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3.5M12 18v3.5M2.5 12H6M18 12h3.5M5.3 5.3l2.4 2.4M16.3 16.3l2.4 2.4M18.7 5.3l-2.4 2.4M7.7 16.3l-2.4 2.4"/>',
+    saturno: '<circle cx="12" cy="12" r="5"/><ellipse cx="12" cy="12" rx="10" ry="3.4" transform="rotate(-18 12 12)"/>',
+    urano: '<path d="M12 2.5v19M3.8 7.2l16.4 9.6M20.2 7.2 3.8 16.8M9.5 4.5 12 7l2.5-2.5M9.5 19.5 12 17l2.5 2.5"/>',
+    neptuno: '<path d="M3 8.5h11a3 3 0 1 0-3-3M3 12.5h16a3 3 0 1 1-3 3M3 16.5h7"/>',
+    pluton: '<circle cx="9" cy="12" r="5.5"/><circle cx="18.5" cy="8" r="2.8"/>',
+    sol: '<path d="M12 21.5c-4 0-6.5-2.8-6.5-6.3 0-3.7 3-5.4 3.5-9.7 2.4 1.6 3.4 3.8 3.4 5.6 1-.7 1.7-2 1.8-3.4 2.3 1.9 4.3 4.3 4.3 7.5 0 3.5-2.5 6.3-6.5 6.3z"/>'
+  };
+  function renderPlanets() {
+    if (!elPl) {
+      return;
+    }
+    const P = PLANETS_P[pIndex], ok = planetOk(P), sel = P.id === curPlanet, hide = P.secret && !ok;
+    const G = pGeom(), SCN = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+    let scanUI = "";
+    if (!hide) {
+      scanUI = '<button type="button" class="pscan' + (pScan ? " on" : "") + '" style="left:' + (G.cx0 + G.R0 * (pScan ? 0.62 : 0.78)).toFixed(0) + "px;top:" + (G.cy0 + G.R0 * (pScan ? 0.42 : 0.78)).toFixed(0) + 'px" aria-label="Escanear" aria-pressed="' + pScan + '">' + SCN + "<span>" + (pScan ? "Cerrar" : "Escanear") + "</span></button>";
+    }
+    elPl.innerHTML = '<div class="pswipe"></div><button type="button" class="back" aria-label="Volver al inicio">' + ARC_L + CHEV_L + '</button><div class="ptop">PLANETAS</div>' + scanUI + '<div class="pinfo po" style="--dir:' + pDir + '"><div class="pidx">◂ ' + (pIndex + 1) + " / " + PLANETS_P.length + ' ▸</div><div class="pname">' + (hide ? "???" : P.name) + "</div>" + (pScan && !hide ? '<div class="pread">' + STAT_ROWS.map(([k, lab, hint, dat, good], i) => {
+      const v = P.st[k], col = v === 0 ? "#ece6d8" : good(v) ? "#7ad38a" : "#ff8a4d";
+      const [word, eff] = statWords(k, v);
+      return '<div class="prc" style="animation-delay:' + (0.75 + i * 0.9) + 's"><small>' + lab + '</small><b style="color:' + col + '">' + word + "</b><i>" + eff + "</i><em>" + dat(P).replace(/^[^:]*: /, "") + "</em></div>";
+    }).join("") + '</div><p class="ppowd"><span>' + P.power[0] + "</span> · " + P.power[1] + "</p>" : "") + (hide || pScan ? "" : '<div class="ppow' + (ok ? "" : " off") + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + (POW_ICO[P.id] || POW_ICO.tierra) + "</svg>" + P.power[0] + "</div>") + (pScan && !hide ? "" : '<p class="pdesc">' + (hide ? "Un planeta que no se rinde…" : P.desc) + "</p>") + (ok && sel ? '<div class="pinuse"><i></i>En uso</div>' : ok ? '<button type="button" class="pbtn">Usar</button>' : '<div class="plock">▸ ' + P.how + "</div>") + "</div>";
+    elPl.classList.toggle("scanning", scanOn && !hide);
+    if (!elPl.querySelectorAll || !elPl.querySelector) {
+      return;
+    }
+    elPl.querySelectorAll(".arrow").forEach((b) => b.addEventListener("click", () => planetStep(Number(b.dataset.d))));
+    const sw = elPl.querySelector(".pswipe");
+    if (sw && sw.addEventListener) {
+      let x0 = null, moved = 0;
+      sw.addEventListener("pointerdown", (e) => {
+        x0 = e.clientX;
+        moved = 0;
+        try {
+          sw.setPointerCapture(e.pointerId);
+        } catch (_) {
+        }
+      });
+      sw.addEventListener("pointermove", (e) => {
+        if (x0 === null) {
+          return;
+        }
+        const dx = e.clientX - x0;
+        moved = Math.max(moved, Math.abs(dx));
+        pDrag = -dx / Math.max(160, W * 0.32);
+      });
+      const end = (e) => {
+        if (x0 === null) {
+          return;
+        }
+        const dx = e.clientX - x0;
+        x0 = null;
+        if (moved > 30) {
+          const n = Math.round(-dx / Math.max(160, W * 0.32)) || (dx < 0 ? 1 : -1);
+          pTarget += 0;
+          pPos += pDrag;
+          pDrag = 0;
+          uiGlass(n > 0 ? 1 : -1);
+          planetStep(n);
+          return;
+        }
+        pDrag = 0;
+        const r = cvs.getBoundingClientRect ? cvs.getBoundingClientRect() : { left: 0, top: 0 }, x = e.clientX - r.left, y = e.clientY - r.top;
+        let best4 = null;
+        for (const sl of pSlots) {
+          const d2 = Math.hypot(x - sl.x, y - sl.y);
+          if (d2 < sl.r * 1.2 && (!best4 || Math.abs(sl.o) < Math.abs(best4.o))) {
+            best4 = sl;
+          }
+        }
+        if (best4 && Math.abs(best4.o) > 0.5) {
+          const n = Math.round(best4.o);
+          uiGlass(n > 0 ? 1 : -1);
+          planetStep(n);
+        }
+      };
+      sw.addEventListener("pointerup", end);
+      sw.addEventListener("pointercancel", () => {
+        x0 = null;
+        pDrag = 0;
+      });
+    }
+    const pb = elPl.querySelector(".pbtn");
+    if (pb && !pb.disabled) {
+      pb.addEventListener("click", () => {
+        setCurPlanet(P.id);
+        pUse = 1;
+        try {
+          localStorage.setItem("orbita_p1_planeta", curPlanet);
+        } catch (e) {
+        }
+        if (AC && !muted) {
+          try {
+            const n = AC.currentTime;
+            uiTone(880, n, 0.14, 0.05);
+            uiTone(1320, n + 0.09, 0.22, 0.04);
+          } catch (e) {
+          }
+        }
+        renderPlanets();
+      });
+    }
+    const bk = elPl.querySelector(".back");
+    if (bk) {
+      bk.addEventListener("click", closePlanets);
+    }
+    const sb = elPl.querySelector(".scanbtn");
+    if (sb) {
+      sb.addEventListener("click", () => setScan(true));
+    }
+    const ps = elPl.querySelector(".pscan");
+    if (ps) {
+      ps.addEventListener("click", () => {
+        pScan = !pScan;
+        pScanT = 0;
+        if (pScan && AC && !muted) {
+          try {
+            const n = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
+            o.type = "sine";
+            o.frequency.setValueAtTime(500, n);
+            o.frequency.exponentialRampToValueAtTime(1800, n + 0.6);
+            g.gain.setValueAtTime(1e-4, n);
+            g.gain.exponentialRampToValueAtTime(0.05, n + 0.05);
+            g.gain.exponentialRampToValueAtTime(1e-4, n + 0.7);
+            o.connect(g);
+            g.connect(uiOut());
+            o.start(n);
+            o.stop(n + 0.75);
+          } catch (e) {
+          }
+        }
+        renderPlanets();
+      });
+    }
+    const sc = elPl.querySelector(".sclose");
+    if (sc) {
+      sc.addEventListener("click", () => setScan(false));
+    }
+    if (scanOn && !hide) {
+      setScanApplyAt(performance.now() + 120);
+    }
+    if (scanOn && hide) {
+      setScanOn(false);
+    }
+  }
+  function planetStep(d) {
+    pScan = false;
+    pTarget += d;
+    pIndex = (pTarget % PLANETS_P.length + PLANETS_P.length) % PLANETS_P.length;
+    pDir = d > 0 ? 1 : -1;
+    pSwap = 1;
+    renderPlanets();
+    warmNext(d);
+  }
+  function warmNext(d) {
+    const n = PLANETS_P[(pIndex + (d || 1) + PLANETS_P.length) % PLANETS_P.length];
+    setTimeout(() => {
+      try {
+        if (state === "planets") {
+          PLGL.warm(n.id, true);
+        }
+      } catch (e) {
+      }
+    }, 450);
+  }
+  function openPlanets() {
+    try {
+      localStorage.removeItem("orbita_pl_nuevo");
+    } catch (e) {
+    }
+    setScanOn(false);
+    setScanK(0);
+    setState("planets");
+    pIndex = Math.max(
+      0,
+      PLANETS_P.findIndex((P) => P.id === curPlanet)
+    );
+    pTarget = pPos = pIndex;
+    pDrag = 0;
+    pSwap = 0;
+    pScan = false;
+    renderPlanets();
+    if (elPl) {
+      elPl.classList.remove("off");
+    }
+    if (elHome) {
+      elHome.classList.add("off");
+    }
+  }
+  function closePlanets() {
+    setScanOn(false);
+    if (elPl) {
+      elPl.classList.remove("scanning");
+    }
+    if (elPl) {
+      elPl.classList.add("off");
+    }
+    setState("home");
+    if (elHome) {
+      elHome.classList.remove("off");
+    }
+  }
+  function uiGlass(dir) {
+    if (!AC || muted) {
+      return;
+    }
+    try {
+      const n = AC.currentTime, a = [12, 19], b = [19, 12], seq = dir < 0 ? b : a;
+      uiTone(ROOT * Math.pow(2, seq[0] / 12), n, 1.1, 0.06);
+      uiTone(ROOT * Math.pow(2, seq[1] / 12), n + 0.07, 1.3, 0.055);
+      uiTone(ROOT * 2 * Math.pow(2, seq[1] / 12), n + 0.07, 0.7, 0.015);
+    } catch (e) {
+    }
+  }
+  function initPlanetsScreen() {
+    elPl = document.getElementById("planets");
+  }
+
   // src/js/data/levels.js
   var LEVELS = [
     {
@@ -13313,15 +13999,6 @@ void main(){
     medPrev = value;
     return value;
   }
-
-  // src/js/data/planets.js
-  var PLANET_SVG = {
-    tierra: '<circle cx="50" cy="50" r="26" fill="#3d8bff"/><path d="M34 40 Q42 30 52 38 Q48 48 38 47 Z M56 56 Q66 50 70 60 Q62 70 55 64 Z" fill="#5ccf6b"/><path d="M30 46 Q50 42 70 47" stroke="#fff" stroke-opacity=".7" stroke-width="2" fill="none"/>',
-    saturno: '<ellipse cx="50" cy="50" rx="44" ry="12" transform="rotate(-18 50 50)" fill="none" stroke="#f3e2b0" stroke-width="5" stroke-opacity=".9"/><circle cx="50" cy="50" r="22" fill="#e6cf8f"/><rect x="28" y="44" width="44" height="4" fill="#c9a86a" opacity=".6"/><rect x="28" y="53" width="44" height="5" fill="#c9a86a" opacity=".5"/><path d="M8 58 A44 12 -18 0 0 92 42" transform="rotate(0)" fill="none" stroke="#f3e2b0" stroke-width="5" stroke-opacity=".9"/>',
-    urano: '<ellipse cx="50" cy="50" rx="9" ry="40" transform="rotate(8 50 50)" fill="none" stroke="#c8f0fa" stroke-width="3" stroke-opacity=".6"/><circle cx="50" cy="50" r="23" fill="#8fd3e0"/>',
-    neptuno: '<circle cx="50" cy="50" r="24" fill="#3f6fd6"/><rect x="26" y="42" width="48" height="5" fill="#2b4fa8" opacity=".6"/><ellipse cx="58" cy="57" rx="6" ry="3.5" fill="#1f3f8f" opacity=".8"/>',
-    pluton: '<circle cx="50" cy="50" r="17" fill="#d9c7b4"/><path d="M52 62 C44 57 45 49 52 52 C59 49 60 57 52 62 Z" fill="#f4ebe0"/>'
-  };
 
   // src/js/26-pantalla-inicio.js
   var elHome;
@@ -20635,200 +21312,7 @@ void main(){
     return value;
   }
 
-  // src/js/30-escanear.js
-  var scanOn = false, scanK = 0, pRot = 0, scanLineT = 0, scanApplyAt = 0;
-  function statWords(k, v) {
-    if (k === "size") {
-      return v <= -10 ? ["Pequeño", "pasa fácil por los huecos"] : v >= 10 ? ["Grande", "más difícil de esquivar"] : ["Normal", "como la Tierra"];
-    }
-    if (k === "vel") {
-      return v <= -10 ? ["Lento", "salta flotando"] : v >= 5 ? ["Rápido", "salta al instante"] : ["Normal", "como la Tierra"];
-    }
-    return v <= -30 ? ["Frágil", "el agujero negro lo alcanza antes"] : v <= -8 ? ["Algo frágil", "aguanta un poco menos"] : ["Firme", "aguanta cerca del agujero negro"];
-  }
-  var STAT_ROWS = [
-    [
-      "size",
-      "Tamaño",
-      (v) => v <= -10 ? "Pequeño: pasa fácil por los huecos" : v >= 10 ? "Grande: más difícil de esquivar" : "Como la Tierra",
-      (P) => "Diámetro real: " + P.d,
-      (v) => v < 0
-    ],
-    [
-      "vel",
-      "Velocidad",
-      (v) => v <= -10 ? "Lento: salta flotando" : v >= 5 ? "Rápido: salta al instante" : "Salto normal",
-      (P) => "Velocidad en su órbita: " + P.v,
-      (v) => v > 0
-    ],
-    [
-      "res",
-      "Resistencia",
-      (v) => v <= -30 ? "Frágil: el agujero negro lo alcanza antes" : v <= -8 ? "Algo frágil" : "Firme cerca del agujero negro",
-      (P) => "Densidad real: " + P.rho,
-      (v) => v > 0
-    ]
-  ];
-  function applyScanBars() {
-    if (!elPl || !elPl.querySelectorAll || !elPl.querySelector) {
-      return;
-    }
-    elPl.querySelectorAll(".sbar i").forEach((i) => {
-      const v = Math.max(-50, Math.min(50, Number(i.dataset.v)));
-      i.style.width = Math.abs(v) + "%";
-      i.style.left = (v >= 0 ? 50 : 50 - Math.abs(v)) + "%";
-    });
-    elPl.querySelectorAll(".spips i").forEach((i) => {
-      i.style.opacity = "1";
-    });
-    const pw = elPl.querySelector(".spower");
-    if (pw) {
-      setTimeout(() => pw.classList.add("on"), 650);
-    }
-  }
-  function uiScan() {
-    if (!AC || muted) {
-      return;
-    }
-    try {
-      const n = AC.currentTime, out = uiOut();
-      const o = AC.createOscillator(), g = AC.createGain();
-      o.type = "sine";
-      o.frequency.setValueAtTime(140, n);
-      o.frequency.exponentialRampToValueAtTime(1300, n + 0.7);
-      g.gain.setValueAtTime(1e-4, n);
-      g.gain.exponentialRampToValueAtTime(0.06, n + 0.35);
-      g.gain.exponentialRampToValueAtTime(1e-4, n + 0.75);
-      o.connect(g);
-      g.connect(out);
-      o.start(n);
-      o.stop(n + 0.8);
-      [0, 3, 7, 12].forEach(
-        (sm, i) => uiTone(ROOT * 2 * Math.pow(2, sm / 12), n + 0.75 + i * 0.15, 0.6, 0.035)
-      );
-    } catch (e) {
-    }
-  }
-  function setScan(on) {
-    scanOn = on;
-    scanLineT = 0;
-    if (elPl) {
-      elPl.classList.toggle("scanning", on);
-    }
-    if (on) {
-      uiScan();
-      scanApplyAt = performance.now() + 650;
-    }
-  }
-  function setPRot(value) {
-    pRot = value;
-    return value;
-  }
-  function setScanApplyAt(value) {
-    scanApplyAt = value;
-    return value;
-  }
-  function setScanK(value) {
-    scanK = value;
-    return value;
-  }
-  function setScanLineT(value) {
-    scanLineT = value;
-    return value;
-  }
-  function setScanOn(value) {
-    scanOn = value;
-    return value;
-  }
-
-  // src/js/29-planetas-hd.js
-  var elPl;
-  var pIndex = 0, pSwap = 0, pDir = 1, pTarget = 0, pPos = 0, pDrag = 0, pSlots = [], pScan = false, pScanT = 0, pSK = 0, pUse = 0;
-  var pGeom = () => ({ R0: Math.min(W * 0.2, H * 0.15), cx0: W / 2, cy0: H * 0.3 });
-  var PFEAT = {
-    tierra: [
-      [0, -0.35, 0.5, 0.25, "#5ccf6b"],
-      [1.4, 0.15, 0.35, 0.45, "#5ccf6b"],
-      [2.6, -0.05, 0.45, 0.3, "#5ccf6b"],
-      [3.9, 0.5, 0.3, 0.15, "#5ccf6b"],
-      [4.9, -0.2, 0.4, 0.35, "#5ccf6b"],
-      [0.8, -0.6, 0.6, 0.06, "rgba(255,255,255,.85)"],
-      [2.2, 0.35, 0.7, 0.06, "rgba(255,255,255,.8)"],
-      [4.2, -0.4, 0.6, 0.05, "rgba(255,255,255,.8)"]
-    ],
-    luna: [
-      [0.4, -0.25, 0.35, 0.28, "#9a9a9a"],
-      [1.6, 0.2, 0.25, 0.2, "#a3a3a3"],
-      [2.9, -0.1, 0.4, 0.3, "#959595"],
-      [4.3, 0.35, 0.18, 0.14, "#8d8d8d"],
-      [5.4, -0.4, 0.14, 0.12, "#b0b0b0"]
-    ],
-    mercurio: [
-      [0.3, 0.2, 0.16, 0.14, "#867a6d"],
-      [1.3, -0.35, 0.2, 0.17, "#8e8275"],
-      [2.4, 0.05, 0.12, 0.1, "#7d7266"],
-      [3.5, 0.4, 0.22, 0.16, "#8a7e71"],
-      [4.7, -0.15, 0.15, 0.13, "#7f7367"],
-      [5.6, 0.3, 0.1, 0.09, "#867a6d"]
-    ],
-    venus: [
-      [1, 0.1, 0.7, 0.1, "rgba(255,245,220,.45)"],
-      [3.2, -0.25, 0.8, 0.08, "rgba(255,240,205,.4)"],
-      [5, 0.3, 0.6, 0.07, "rgba(255,245,220,.35)"]
-    ],
-    marte: [
-      [0.5, 0.1, 0.45, 0.25, "#8a3a26"],
-      [2.1, -0.2, 0.3, 0.3, "#94402a"],
-      [3.7, 0.25, 0.4, 0.18, "#7e3422"],
-      [5.1, -0.05, 0.25, 0.2, "#8a3a26"],
-      [0, -0.88, 1, 0.14, "rgba(255,255,255,.9)"]
-    ],
-    jupiter: [
-      [1.8, 0.28, 0.26, 0.13, "#c0533a"],
-      [4.5, -0.3, 0.12, 0.06, "rgba(255,240,220,.6)"]
-    ],
-    saturno: [
-      [1.2, 0.3, 0.25, 0.12, "rgba(255,245,220,.5)"],
-      [3.8, -0.2, 0.2, 0.1, "rgba(255,245,220,.4)"]
-    ],
-    urano: [[2, 0, 0.3, 0.15, "rgba(200,245,250,.35)"]],
-    neptuno: [
-      [1.5, 0.25, 0.32, 0.18, "#1f3f8f"],
-      [4, -0.3, 0.18, 0.08, "rgba(230,240,255,.8)"],
-      [5.2, 0.1, 0.14, 0.06, "rgba(230,240,255,.6)"]
-    ],
-    pluton: [
-      [0, 0.15, 0.55, 0.5, "#f4ebe0"],
-      [2.5, -0.3, 0.3, 0.2, "#9a8371"],
-      [4.1, 0.35, 0.25, 0.18, "#9a8371"],
-      [5.3, -0.1, 0.2, 0.14, "#b9a48f"]
-    ],
-    sol: [
-      [1, 0.2, 0.1, 0.07, "rgba(160,70,10,.55)"],
-      [3.4, -0.15, 0.08, 0.06, "rgba(160,70,10,.5)"],
-      [5, 0.35, 0.07, 0.05, "rgba(160,70,10,.45)"]
-    ]
-  };
-  var PBASE = {
-    tierra: "#2f6fd8",
-    luna: "#bcbcbc",
-    mercurio: "#a59a8f",
-    venus: "#e3c27a",
-    marte: "#c1543a",
-    jupiter: "#d7a86e",
-    saturno: "#e6cf8f",
-    urano: "#8fd3e0",
-    neptuno: "#3f6fd6",
-    pluton: "#cdb9a4",
-    sol: "#ffcf5a"
-  };
-  var PBANDS = {
-    saturno: ["rgba(170,130,70,.35)", [-0.45, -0.15, 0.2, 0.5]],
-    neptuno: ["rgba(25,45,130,.35)", [-0.3, 0.25]],
-    urano: ["rgba(120,190,205,.3)", []],
-    jupiter: ["rgba(130,80,45,.45)", [-0.7, -0.42, -0.12, 0.1, 0.38, 0.62]],
-    venus: ["rgba(200,160,90,.25)", [-0.5, 0.05, 0.45]]
-  };
+  // src/js/render/planets.js
   var PLGL = (() => {
     let gl = null, cv = null, empty = null, failed = false, buf = null, bakeP = null, sphP = null, UB = {}, US = {}, deriv = false;
     const KIND = {
@@ -21349,6 +21833,105 @@ void main(){
       }
     };
   })();
+  function drawBigPlanet(id, cx, cy, R, rot, locked, light) {
+    if (locked || !(R > 0.5)) {
+      return drawBigPlanet2D(id, cx, cy, R, rot, locked, light);
+    }
+    let sc = 1;
+    try {
+      const m = ctx.getTransform && ctx.getTransform();
+      sc = m ? Math.hypot(m.a, m.b) : window.devicePixelRatio || 1;
+    } catch (e) {
+    }
+    let Lv, LC;
+    if (light === "below") {
+      Lv = [0, -0.78, 0.55];
+      LC = [1.18, 1, 0.84];
+    } else if (light && light.x !== void 0) {
+      Lv = [light.x, -light.y, 0.35];
+      LC = [1.1, 1.04, 0.96];
+    } else {
+      Lv = [-0.78, 0.42, 0.48];
+      LC = [1.12, 1.06, 0.98];
+    }
+    const res = PLGL.render(id, 2 * R * sc, rot, Lv, LC, t);
+    if (!res) {
+      return drawBigPlanet2D(id, cx, cy, R, rot, locked, light);
+    }
+    if (id === "sol") {
+      const ag = ctx.createRadialGradient(cx, cy, R * 0.9, cx, cy, R * 2.6);
+      if (ag && ag.addColorStop) {
+        ag.addColorStop(0, "rgba(255,170,70,.45)");
+        ag.addColorStop(0.4, "rgba(255,120,40,.12)");
+        ag.addColorStop(1, "rgba(255,120,40,0)");
+        ctx.fillStyle = ag;
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * 2.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    planetRing(id, cx, cy, R, "back", false);
+    const h = R * res.pad;
+    ctx.drawImage(res.cv, cx - h, cy - h, 2 * h, 2 * h);
+    planetRing(id, cx, cy, R, "front", false);
+  }
+  function drawPlayer(px, py, rad) {
+    if (!tutorial) {
+      const r0 = rad * sizeK(), g = ctx.createRadialGradient(px, py, r0 * 0.8, px, py, r0 * 2.6);
+      if (g && g.addColorStop) {
+        g.addColorStop(0, "rgba(3,4,10,.75)");
+        g.addColorStop(1, "rgba(3,4,10,0)");
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(px, py, r0 * 2.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    const r = rad * sizeK();
+    if (curPlanet === "pluton" && !tutorial) {
+      drawCaronteBack(px, py);
+    }
+    setRingBoostNow(
+      curPlanet === "saturno" && shieldT > 0 && !tutorial ? Math.min(1 - Math.pow(1 - Math.min(1, (1.5 - shieldT) / 0.28), 3), shieldT / 0.35) : 0
+    );
+    if (curPlanet === "tierra" || !curPlanet) {
+      drawEarth(px, py, r);
+    } else {
+      drawBigPlanet(curPlanet, px, py, r, t * 0.6, false, "below");
+    }
+    setRingBoostNow(0);
+    if (waveProx > 0.05 && !tutorial && state === "play") {
+      const k = waveProx, pl = 0.5 + 0.5 * Math.sin(t * 18);
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      ctx.globalAlpha = k * (0.55 + 0.45 * pl);
+      ctx.strokeStyle = "#ff6fa8";
+      ctx.lineWidth = 2 + 2.5 * k;
+      ctx.beginPath();
+      ctx.arc(px, py, r + 3 + 6 * k * pl, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+      const vg = ctx.createRadialGradient(
+        CX,
+        CY,
+        Math.min(W, H) * 0.35,
+        CX,
+        CY,
+        Math.max(W, H) * 0.75
+      );
+      if (vg && vg.addColorStop) {
+        vg.addColorStop(0, "rgba(255,60,140,0)");
+        vg.addColorStop(1, "rgba(255,60,140," + (0.32 * k * (0.6 + 0.4 * pl)).toFixed(3) + ")");
+        ctx.save();
+        ctx.fillStyle = vg;
+        ctx.fillRect(0, 0, W, H);
+        ctx.restore();
+      }
+    }
+    if (hot && !tutorial) {
+      drawHot(px, py, r);
+    }
+  }
   function planetRing(id, cx, cy, R, half, locked) {
     if (id !== "saturno" && id !== "urano") {
       return;
@@ -21457,48 +22040,6 @@ void main(){
     }
     ctx.restore();
   }
-  function drawBigPlanet(id, cx, cy, R, rot, locked, light) {
-    if (locked || !(R > 0.5)) {
-      return drawBigPlanet2D(id, cx, cy, R, rot, locked, light);
-    }
-    let sc = 1;
-    try {
-      const m = ctx.getTransform && ctx.getTransform();
-      sc = m ? Math.hypot(m.a, m.b) : window.devicePixelRatio || 1;
-    } catch (e) {
-    }
-    let Lv, LC;
-    if (light === "below") {
-      Lv = [0, -0.78, 0.55];
-      LC = [1.18, 1, 0.84];
-    } else if (light && light.x !== void 0) {
-      Lv = [light.x, -light.y, 0.35];
-      LC = [1.1, 1.04, 0.96];
-    } else {
-      Lv = [-0.78, 0.42, 0.48];
-      LC = [1.12, 1.06, 0.98];
-    }
-    const res = PLGL.render(id, 2 * R * sc, rot, Lv, LC, t);
-    if (!res) {
-      return drawBigPlanet2D(id, cx, cy, R, rot, locked, light);
-    }
-    if (id === "sol") {
-      const ag = ctx.createRadialGradient(cx, cy, R * 0.9, cx, cy, R * 2.6);
-      if (ag && ag.addColorStop) {
-        ag.addColorStop(0, "rgba(255,170,70,.45)");
-        ag.addColorStop(0.4, "rgba(255,120,40,.12)");
-        ag.addColorStop(1, "rgba(255,120,40,0)");
-        ctx.fillStyle = ag;
-        ctx.beginPath();
-        ctx.arc(cx, cy, R * 2.6, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-    planetRing(id, cx, cy, R, "back", false);
-    const h = R * res.pad;
-    ctx.drawImage(res.cv, cx - h, cy - h, 2 * h, 2 * h);
-    planetRing(id, cx, cy, R, "front", false);
-  }
   function drawBigPlanet2D(id, cx, cy, R, rot, locked, light) {
     const ring = (from, to) => {
       if (id === "saturno") {
@@ -21603,63 +22144,6 @@ void main(){
     }
     ring(0, Math.PI);
   }
-  function drawPlayer(px, py, rad) {
-    if (!tutorial) {
-      const r0 = rad * sizeK(), g = ctx.createRadialGradient(px, py, r0 * 0.8, px, py, r0 * 2.6);
-      if (g && g.addColorStop) {
-        g.addColorStop(0, "rgba(3,4,10,.75)");
-        g.addColorStop(1, "rgba(3,4,10,0)");
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(px, py, r0 * 2.6, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-    const r = rad * sizeK();
-    if (curPlanet === "pluton" && !tutorial) {
-      drawCaronteBack(px, py);
-    }
-    setRingBoostNow(
-      curPlanet === "saturno" && shieldT > 0 && !tutorial ? Math.min(1 - Math.pow(1 - Math.min(1, (1.5 - shieldT) / 0.28), 3), shieldT / 0.35) : 0
-    );
-    if (curPlanet === "tierra" || !curPlanet) {
-      drawEarth(px, py, r);
-    } else {
-      drawBigPlanet(curPlanet, px, py, r, t * 0.6, false, "below");
-    }
-    setRingBoostNow(0);
-    if (waveProx > 0.05 && !tutorial && state === "play") {
-      const k = waveProx, pl = 0.5 + 0.5 * Math.sin(t * 18);
-      ctx.save();
-      ctx.globalCompositeOperation = "lighter";
-      ctx.globalAlpha = k * (0.55 + 0.45 * pl);
-      ctx.strokeStyle = "#ff6fa8";
-      ctx.lineWidth = 2 + 2.5 * k;
-      ctx.beginPath();
-      ctx.arc(px, py, r + 3 + 6 * k * pl, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-      const vg = ctx.createRadialGradient(
-        CX,
-        CY,
-        Math.min(W, H) * 0.35,
-        CX,
-        CY,
-        Math.max(W, H) * 0.75
-      );
-      if (vg && vg.addColorStop) {
-        vg.addColorStop(0, "rgba(255,60,140,0)");
-        vg.addColorStop(1, "rgba(255,60,140," + (0.32 * k * (0.6 + 0.4 * pl)).toFixed(3) + ")");
-        ctx.save();
-        ctx.fillStyle = vg;
-        ctx.fillRect(0, 0, W, H);
-        ctx.restore();
-      }
-    }
-    if (hot && !tutorial) {
-      drawHot(px, py, r);
-    }
-  }
   function drawHot(px, py, r) {
     const k = Math.min(1, hotT / 0.4), pl = 0.5 + 0.5 * Math.sin(t * 6);
     ctx.save();
@@ -21704,488 +22188,6 @@ void main(){
         s: 1.2 + Math.random() * 1.8
       });
     }
-  }
-  function renderPlanetsScene(dt) {
-    setT(t + dt);
-    pSwap = Math.max(0, pSwap - dt * 3.2);
-    const target = scanOn ? 1 : 0;
-    setScanK(scanK + (target - scanK) * Math.min(1, dt * 4.2));
-    if (Math.abs(target - scanK) < 3e-3) {
-      setScanK(target);
-    }
-    setPRot(pRot + dt * (0.35 + 7 * Math.sin(Math.PI * scanK)));
-    if (scanOn && scanK > 0.9 && scanLineT < 1) {
-      setScanLineT(Math.min(1, scanLineT + dt / 0.75));
-    }
-    if (scanApplyAt && performance.now() >= scanApplyAt) {
-      setScanApplyAt(0);
-      applyScanBars();
-    }
-    const P = PLANETS_P[pIndex], locked = !planetOk(P), hide = P.secret && !locked ? false : P.secret && locked;
-    ctx.save();
-    ctx.fillStyle = "#05060c";
-    ctx.fillRect(0, 0, W, H);
-    const neb = ctx.createRadialGradient(W / 2, H * 0.38, 0, W / 2, H * 0.38, Math.max(W, H) * 0.6);
-    neb.addColorStop(0, rgba(P.col, locked ? 0.05 : 0.16));
-    neb.addColorStop(1, rgba(P.col, 0));
-    ctx.fillStyle = neb;
-    ctx.fillRect(0, 0, W, H);
-    const sr = Math.max(W, H) * 0.62;
-    for (const s of stars) {
-      const a = s.a + t * 0.01, x = W / 2 + Math.cos(a) * s.r * sr, y = H * 0.4 + Math.sin(a) * s.r * sr;
-      ctx.globalAlpha = 0.15 + 0.35 * (0.5 + 0.5 * Math.sin(t * 1.3 + s.tw));
-      ctx.fillStyle = BONE;
-      ctx.fillRect(x, y, s.s * 0.8, s.s * 0.8);
-    }
-    if (scanK < 0.01) {
-      drawPlanetOrbit(dt, P);
-      ctx.restore();
-      return;
-    }
-    ctx.globalAlpha = 1 - pSwap;
-    const R = Math.min(W * 0.27, H * 0.17) * (P.id === "pluton" ? 0.78 : 1) * (1 - pSwap * 0.15) * (1 - 0.55 * scanK);
-    const cx = W / 2 + pDir * pSwap * W * 0.25, cy = H * 0.38 * (1 - scanK) + H * 0.165 * scanK + Math.sin(t * 0.8) * 4 * (1 - scanK);
-    drawBigPlanet(P.id, cx, cy, R, pRot, locked && hide, "left");
-    if (scanOn && scanLineT > 0 && scanLineT < 1) {
-      const yy = cy - R * 1.25 + R * 2.5 * scanLineT, w2 = R * 1.6;
-      const lg = ctx.createLinearGradient(cx - w2, yy, cx + w2, yy);
-      if (lg && lg.addColorStop) {
-        lg.addColorStop(0, "rgba(143,208,255,0)");
-        lg.addColorStop(0.5, "rgba(200,235,255,.95)");
-        lg.addColorStop(1, "rgba(143,208,255,0)");
-        ctx.fillStyle = lg;
-      }
-      ctx.globalAlpha = 1;
-      ctx.fillRect(cx - w2, yy - 1, w2 * 2, 2);
-      ctx.globalAlpha = 0.12;
-      ctx.fillStyle = "#8fd0ff";
-      ctx.fillRect(cx - w2, cy - R * 1.25, w2 * 2, yy - (cy - R * 1.25));
-    }
-    ctx.globalAlpha = 1;
-    ctx.restore();
-  }
-  function drawPlanetOrbit(dt, P) {
-    const N = PLANETS_P.length;
-    pPos += (pTarget - pPos) * Math.min(1, dt * 7.5);
-    const pos = pPos + pDrag;
-    pSK += ((pScan ? 1 : 0) - pSK) * Math.min(1, dt * 3.2);
-    if (Math.abs((pScan ? 1 : 0) - pSK) < 2e-3) {
-      pSK = pScan ? 1 : 0;
-    }
-    setPRot(pRot + dt * 6.5 * Math.sin(Math.PI * pSK));
-    const G = pGeom(), R02 = G.R0 * (1 - 0.3 * pSK), cx0 = G.cx0, cy0 = G.cy0 - G.R0 * 0.12 * pSK + Math.sin(t * 0.8) * 3 * (1 - pSK);
-    const RA = Math.max(W, H) * 1.25, yTop = H * 0.45, acx = W / 2, acy = yTop + RA;
-    const step2 = Math.asin(Math.min(0.95, Math.max(W * 0.3, R02 * 1.6) / RA));
-    const arcSlot = (o) => {
-      const th = o * step2;
-      return [acx + RA * Math.sin(th), acy - RA * Math.cos(th)];
-    };
-    ctx.save();
-    ctx.globalAlpha = 1;
-    ctx.strokeStyle = "rgba(236,230,216,.16)";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(acx, acy, RA, -Math.PI / 2 - 1.2, -Math.PI / 2 + 1.2);
-    ctx.stroke();
-    const gl = ctx.createLinearGradient(W / 2 - R02 * 1.2, 0, W / 2 + R02 * 1.2, 0);
-    if (gl && gl.addColorStop) {
-      gl.addColorStop(0, "rgba(255,161,85,0)");
-      gl.addColorStop(0.5, "rgba(255,161,85,.85)");
-      gl.addColorStop(1, "rgba(255,161,85,0)");
-      ctx.strokeStyle = gl;
-    }
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(acx, acy, RA, -Math.PI / 2 - R02 * 1.2 / RA, -Math.PI / 2 + R02 * 1.2 / RA);
-    ctx.stroke();
-    ctx.restore();
-    const list = [];
-    for (let i = 0; i < N; i++) {
-      let o = i - pos;
-      o = (o % N + N + N / 2) % N - N / 2;
-      const ao = Math.abs(o);
-      if (ao > 2.7) {
-        continue;
-      }
-      let x, y, r;
-      const a1 = arcSlot(Math.sign(o) || 1), r1 = R02 * 0.36;
-      if (ao <= 1) {
-        const e = ao * ao * (3 - 2 * ao);
-        x = cx0 + (a1[0] - cx0) * e;
-        y = cy0 + (a1[1] - cy0) * e;
-        r = R02 + (r1 - R02) * e;
-      } else {
-        const s2 = arcSlot(o);
-        x = s2[0];
-        y = s2[1];
-        r = r1 * Math.pow(0.72, ao - 1);
-      }
-      list.push({ i, o, ao, x, y, r });
-    }
-    list.sort((a, b) => b.ao - a.ao);
-    pSlots = [];
-    for (const it of list) {
-      const Q = PLANETS_P[it.i], ok = planetOk(Q);
-      const fade = (1 - Math.max(0, (it.ao - 2.1) / 0.6)) * (it.ao > 0.5 ? 1 - 0.8 * pSK : 1), dim = 0.5 + 0.5 * Math.max(0, 1 - it.ao);
-      const rr0 = it.r * (Q.id === "pluton" ? 0.82 : 1);
-      ctx.save();
-      ctx.globalAlpha = fade * (ok ? dim : 0.9);
-      drawBigPlanet(Q.id, it.x, it.y, rr0, pRot + it.i, !ok, {
-        x: (W / 2 - it.x) / W * 1.6 - 0.55,
-        y: -0.45
-      });
-      if (ok && it.ao > 0.2) {
-        ctx.globalAlpha = (1 - dim) * 0.55 * fade;
-        ctx.fillStyle = "#05060c";
-        ctx.beginPath();
-        ctx.arc(it.x, it.y, rr0 * 1.02, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
-      if (Q.id === curPlanet && fade > 0.05) {
-        const my = it.y + rr0 * (Q.id === "saturno" ? 0.95 : 1.22) + 6, a0 = fade * (0.75 + 0.25 * Math.sin(t * 3));
-        ctx.save();
-        ctx.globalAlpha = a0 * 0.35;
-        ctx.fillStyle = "#ffd36b";
-        ctx.beginPath();
-        ctx.arc(it.x, my, 7, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalAlpha = a0;
-        ctx.beginPath();
-        ctx.arc(it.x, my, 2.6, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-      pSlots.push({ i: it.i, o: it.o, x: it.x, y: it.y, r: Math.max(rr0, 26) });
-    }
-    if (pUse > 0) {
-      pUse = Math.max(0, pUse - dt * 1.6);
-      const u = 1 - pUse;
-      ctx.save();
-      ctx.globalAlpha = pUse * 0.8;
-      ctx.strokeStyle = "#ffd36b";
-      ctx.lineWidth = 2.5 * pUse + 0.5;
-      ctx.beginPath();
-      ctx.arc(cx0, cy0, R02 * (1.05 + 0.55 * u), 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.globalAlpha = pUse * 0.25;
-      ctx.fillStyle = "#ffd36b";
-      ctx.beginPath();
-      ctx.arc(cx0, cy0, R02 * 1.02, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-    if (pScan) {
-      pScanT += dt;
-      const k = Math.min(1, pScanT / 0.5), Rr = R02 * 1.16;
-      ctx.save();
-      ctx.translate(cx0, cy0);
-      ctx.globalAlpha = 0.55 * k;
-      ctx.strokeStyle = "#8fd0ff";
-      ctx.lineWidth = 1.2;
-      ctx.setLineDash([2, 7]);
-      ctx.lineDashOffset = -t * 12;
-      ctx.beginPath();
-      ctx.arc(0, 0, Rr, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.rotate(t * 0.35);
-      ctx.globalAlpha = 0.9 * k;
-      ctx.strokeStyle = "#ffa155";
-      ctx.lineWidth = 2.2;
-      ctx.lineCap = "round";
-      ctx.beginPath();
-      ctx.arc(0, 0, Rr, -0.5, 0.1);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(0, 0, Rr, Math.PI - 0.5, Math.PI + 0.1);
-      ctx.stroke();
-      ctx.rotate(-t * 0.35);
-      ctx.globalAlpha = 0.7 * k;
-      ctx.strokeStyle = "#ece6d8";
-      ctx.lineWidth = 1.4;
-      for (let a = 0; a < 4; a++) {
-        const an = a * Math.PI / 2;
-        ctx.beginPath();
-        ctx.moveTo(Math.cos(an) * (Rr + 4), Math.sin(an) * (Rr + 4));
-        ctx.lineTo(Math.cos(an) * (Rr + 14), Math.sin(an) * (Rr + 14));
-        ctx.stroke();
-      }
-      ctx.restore();
-      const SD = 0.9, NP = 3;
-      let ph = -1, dn = 1;
-      if (pScanT < SD * NP) {
-        const n = Math.floor(pScanT / SD);
-        ph = (pScanT - n * SD) / SD;
-        dn = n % 2 ? -1 : 1;
-      } else {
-        const q = (pScanT - SD * NP) % 3.5;
-        if (q < 1.2) {
-          ph = q / 1.2;
-          dn = 1;
-        }
-      }
-      if (ph >= 0) {
-        const e = ph * ph * (3 - 2 * ph), f = dn > 0 ? e : 1 - e, yy = cy0 - R02 * 1.1 + 2.2 * R02 * f, w2 = R02 * 1.12, strong = pScanT < SD * NP ? 1 : 0.45;
-        const lg = ctx.createLinearGradient(cx0 - w2, 0, cx0 + w2, 0);
-        if (lg && lg.addColorStop) {
-          lg.addColorStop(0, "rgba(143,208,255,0)");
-          lg.addColorStop(0.5, "rgba(210,240,255,.95)");
-          lg.addColorStop(1, "rgba(143,208,255,0)");
-          ctx.fillStyle = lg;
-        }
-        ctx.save();
-        ctx.globalAlpha = strong;
-        ctx.fillRect(cx0 - w2, yy - 1, w2 * 2, 2);
-        ctx.beginPath();
-        ctx.arc(cx0, cy0, R02 * 1.02, 0, Math.PI * 2);
-        ctx.clip();
-        const y0 = dn > 0 ? cy0 - R02 * 1.1 : yy, y1 = dn > 0 ? yy : cy0 + R02 * 1.1;
-        ctx.globalAlpha = 0.1 * strong;
-        ctx.fillStyle = "#8fd0ff";
-        ctx.fillRect(cx0 - w2, y0, w2 * 2, y1 - y0);
-        ctx.globalAlpha = 0.22 * strong;
-        ctx.strokeStyle = "#8fd0ff";
-        ctx.lineWidth = 1;
-        const gs = Math.max(8, R02 / 7);
-        ctx.beginPath();
-        for (let gy = cy0 - R02; gy < cy0 + R02; gy += gs) {
-          if (gy >= y0 && gy <= y1) {
-            ctx.moveTo(cx0 - R02, gy);
-            ctx.lineTo(cx0 + R02, gy);
-          }
-        }
-        for (let gx = cx0 - R02; gx < cx0 + R02; gx += gs) {
-          ctx.moveTo(gx, y0);
-          ctx.lineTo(gx, y1);
-        }
-        ctx.stroke();
-        ctx.restore();
-      }
-    }
-  }
-  var POW_ICO = {
-    luna: '<circle cx="12" cy="12" r="8"/><path d="M15.5 4.8a8 8 0 0 1 0 14.4 6.5 6.5 0 0 0 0-14.4z" class="f"/>',
-    mercurio: '<path d="M13.5 2.5 5.5 13.5h6l-1 8 8-11h-6z"/>',
-    venus: '<path d="M18.5 9A7 7 0 1 0 19 15"/><path d="M19.5 4v5h-5"/>',
-    tierra: '<path d="M6 12.5l6-6 6 6M6 18.5l6-6 6 6"/>',
-    marte: '<path d="M2.5 19.5 9.5 7l4 6 2.5-3.5 5.5 10z"/>',
-    jupiter: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3.5M12 18v3.5M2.5 12H6M18 12h3.5M5.3 5.3l2.4 2.4M16.3 16.3l2.4 2.4M18.7 5.3l-2.4 2.4M7.7 16.3l-2.4 2.4"/>',
-    saturno: '<circle cx="12" cy="12" r="5"/><ellipse cx="12" cy="12" rx="10" ry="3.4" transform="rotate(-18 12 12)"/>',
-    urano: '<path d="M12 2.5v19M3.8 7.2l16.4 9.6M20.2 7.2 3.8 16.8M9.5 4.5 12 7l2.5-2.5M9.5 19.5 12 17l2.5 2.5"/>',
-    neptuno: '<path d="M3 8.5h11a3 3 0 1 0-3-3M3 12.5h16a3 3 0 1 1-3 3M3 16.5h7"/>',
-    pluton: '<circle cx="9" cy="12" r="5.5"/><circle cx="18.5" cy="8" r="2.8"/>',
-    sol: '<path d="M12 21.5c-4 0-6.5-2.8-6.5-6.3 0-3.7 3-5.4 3.5-9.7 2.4 1.6 3.4 3.8 3.4 5.6 1-.7 1.7-2 1.8-3.4 2.3 1.9 4.3 4.3 4.3 7.5 0 3.5-2.5 6.3-6.5 6.3z"/>'
-  };
-  function renderPlanets() {
-    if (!elPl) {
-      return;
-    }
-    const P = PLANETS_P[pIndex], ok = planetOk(P), sel = P.id === curPlanet, hide = P.secret && !ok;
-    const G = pGeom(), SCN = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
-    let scanUI = "";
-    if (!hide) {
-      scanUI = '<button type="button" class="pscan' + (pScan ? " on" : "") + '" style="left:' + (G.cx0 + G.R0 * (pScan ? 0.62 : 0.78)).toFixed(0) + "px;top:" + (G.cy0 + G.R0 * (pScan ? 0.42 : 0.78)).toFixed(0) + 'px" aria-label="Escanear" aria-pressed="' + pScan + '">' + SCN + "<span>" + (pScan ? "Cerrar" : "Escanear") + "</span></button>";
-    }
-    elPl.innerHTML = '<div class="pswipe"></div><button type="button" class="back" aria-label="Volver al inicio">' + ARC_L + CHEV_L + '</button><div class="ptop">PLANETAS</div>' + scanUI + '<div class="pinfo po" style="--dir:' + pDir + '"><div class="pidx">◂ ' + (pIndex + 1) + " / " + PLANETS_P.length + ' ▸</div><div class="pname">' + (hide ? "???" : P.name) + "</div>" + (pScan && !hide ? '<div class="pread">' + STAT_ROWS.map(([k, lab, hint, dat, good], i) => {
-      const v = P.st[k], col = v === 0 ? "#ece6d8" : good(v) ? "#7ad38a" : "#ff8a4d";
-      const [word, eff] = statWords(k, v);
-      return '<div class="prc" style="animation-delay:' + (0.75 + i * 0.9) + 's"><small>' + lab + '</small><b style="color:' + col + '">' + word + "</b><i>" + eff + "</i><em>" + dat(P).replace(/^[^:]*: /, "") + "</em></div>";
-    }).join("") + '</div><p class="ppowd"><span>' + P.power[0] + "</span> · " + P.power[1] + "</p>" : "") + (hide || pScan ? "" : '<div class="ppow' + (ok ? "" : " off") + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + (POW_ICO[P.id] || POW_ICO.tierra) + "</svg>" + P.power[0] + "</div>") + (pScan && !hide ? "" : '<p class="pdesc">' + (hide ? "Un planeta que no se rinde…" : P.desc) + "</p>") + (ok && sel ? '<div class="pinuse"><i></i>En uso</div>' : ok ? '<button type="button" class="pbtn">Usar</button>' : '<div class="plock">▸ ' + P.how + "</div>") + "</div>";
-    elPl.classList.toggle("scanning", scanOn && !hide);
-    if (!elPl.querySelectorAll || !elPl.querySelector) {
-      return;
-    }
-    elPl.querySelectorAll(".arrow").forEach((b) => b.addEventListener("click", () => planetStep(Number(b.dataset.d))));
-    const sw = elPl.querySelector(".pswipe");
-    if (sw && sw.addEventListener) {
-      let x0 = null, moved = 0;
-      sw.addEventListener("pointerdown", (e) => {
-        x0 = e.clientX;
-        moved = 0;
-        try {
-          sw.setPointerCapture(e.pointerId);
-        } catch (_) {
-        }
-      });
-      sw.addEventListener("pointermove", (e) => {
-        if (x0 === null) {
-          return;
-        }
-        const dx = e.clientX - x0;
-        moved = Math.max(moved, Math.abs(dx));
-        pDrag = -dx / Math.max(160, W * 0.32);
-      });
-      const end = (e) => {
-        if (x0 === null) {
-          return;
-        }
-        const dx = e.clientX - x0;
-        x0 = null;
-        if (moved > 30) {
-          const n = Math.round(-dx / Math.max(160, W * 0.32)) || (dx < 0 ? 1 : -1);
-          pTarget += 0;
-          pPos += pDrag;
-          pDrag = 0;
-          uiGlass(n > 0 ? 1 : -1);
-          planetStep(n);
-          return;
-        }
-        pDrag = 0;
-        const r = cvs.getBoundingClientRect ? cvs.getBoundingClientRect() : { left: 0, top: 0 }, x = e.clientX - r.left, y = e.clientY - r.top;
-        let best4 = null;
-        for (const sl of pSlots) {
-          const d2 = Math.hypot(x - sl.x, y - sl.y);
-          if (d2 < sl.r * 1.2 && (!best4 || Math.abs(sl.o) < Math.abs(best4.o))) {
-            best4 = sl;
-          }
-        }
-        if (best4 && Math.abs(best4.o) > 0.5) {
-          const n = Math.round(best4.o);
-          uiGlass(n > 0 ? 1 : -1);
-          planetStep(n);
-        }
-      };
-      sw.addEventListener("pointerup", end);
-      sw.addEventListener("pointercancel", () => {
-        x0 = null;
-        pDrag = 0;
-      });
-    }
-    const pb = elPl.querySelector(".pbtn");
-    if (pb && !pb.disabled) {
-      pb.addEventListener("click", () => {
-        setCurPlanet(P.id);
-        pUse = 1;
-        try {
-          localStorage.setItem("orbita_p1_planeta", curPlanet);
-        } catch (e) {
-        }
-        if (AC && !muted) {
-          try {
-            const n = AC.currentTime;
-            uiTone(880, n, 0.14, 0.05);
-            uiTone(1320, n + 0.09, 0.22, 0.04);
-          } catch (e) {
-          }
-        }
-        renderPlanets();
-      });
-    }
-    const bk = elPl.querySelector(".back");
-    if (bk) {
-      bk.addEventListener("click", closePlanets);
-    }
-    const sb = elPl.querySelector(".scanbtn");
-    if (sb) {
-      sb.addEventListener("click", () => setScan(true));
-    }
-    const ps = elPl.querySelector(".pscan");
-    if (ps) {
-      ps.addEventListener("click", () => {
-        pScan = !pScan;
-        pScanT = 0;
-        if (pScan && AC && !muted) {
-          try {
-            const n = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
-            o.type = "sine";
-            o.frequency.setValueAtTime(500, n);
-            o.frequency.exponentialRampToValueAtTime(1800, n + 0.6);
-            g.gain.setValueAtTime(1e-4, n);
-            g.gain.exponentialRampToValueAtTime(0.05, n + 0.05);
-            g.gain.exponentialRampToValueAtTime(1e-4, n + 0.7);
-            o.connect(g);
-            g.connect(uiOut());
-            o.start(n);
-            o.stop(n + 0.75);
-          } catch (e) {
-          }
-        }
-        renderPlanets();
-      });
-    }
-    const sc = elPl.querySelector(".sclose");
-    if (sc) {
-      sc.addEventListener("click", () => setScan(false));
-    }
-    if (scanOn && !hide) {
-      setScanApplyAt(performance.now() + 120);
-    }
-    if (scanOn && hide) {
-      setScanOn(false);
-    }
-  }
-  function planetStep(d) {
-    pScan = false;
-    pTarget += d;
-    pIndex = (pTarget % PLANETS_P.length + PLANETS_P.length) % PLANETS_P.length;
-    pDir = d > 0 ? 1 : -1;
-    pSwap = 1;
-    renderPlanets();
-    warmNext(d);
-  }
-  function warmNext(d) {
-    const n = PLANETS_P[(pIndex + (d || 1) + PLANETS_P.length) % PLANETS_P.length];
-    setTimeout(() => {
-      try {
-        if (state === "planets") {
-          PLGL.warm(n.id, true);
-        }
-      } catch (e) {
-      }
-    }, 450);
-  }
-  function openPlanets() {
-    try {
-      localStorage.removeItem("orbita_pl_nuevo");
-    } catch (e) {
-    }
-    setScanOn(false);
-    setScanK(0);
-    setState("planets");
-    pIndex = Math.max(
-      0,
-      PLANETS_P.findIndex((P) => P.id === curPlanet)
-    );
-    pTarget = pPos = pIndex;
-    pDrag = 0;
-    pSwap = 0;
-    pScan = false;
-    renderPlanets();
-    if (elPl) {
-      elPl.classList.remove("off");
-    }
-    if (elHome) {
-      elHome.classList.add("off");
-    }
-  }
-  function closePlanets() {
-    setScanOn(false);
-    if (elPl) {
-      elPl.classList.remove("scanning");
-    }
-    if (elPl) {
-      elPl.classList.add("off");
-    }
-    setState("home");
-    if (elHome) {
-      elHome.classList.remove("off");
-    }
-  }
-  function uiGlass(dir) {
-    if (!AC || muted) {
-      return;
-    }
-    try {
-      const n = AC.currentTime, a = [12, 19], b = [19, 12], seq = dir < 0 ? b : a;
-      uiTone(ROOT * Math.pow(2, seq[0] / 12), n, 1.1, 0.06);
-      uiTone(ROOT * Math.pow(2, seq[1] / 12), n + 0.07, 1.3, 0.055);
-      uiTone(ROOT * 2 * Math.pow(2, seq[1] / 12), n + 0.07, 0.7, 0.015);
-    } catch (e) {
-    }
-  }
-  function initPlanetsScreen() {
-    elPl = document.getElementById("planets");
   }
 
   // src/js/07-planetas.js

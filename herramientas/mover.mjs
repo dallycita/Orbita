@@ -104,6 +104,17 @@ function addImport(code, file, nameSet, self){
   const c0 = a.comments[0]; const at = c0 && c0.range[0] === code.search(/\S/) ? c0.range[1] : 0;
   return code.slice(0, at) + (at ? '\n' : '') + line + code.slice(at);
 }
+// si el destino ya importaba algo de lo que se muda, ese import sobra (ahora se declara aquí)
+if (existsSync(TO)){
+  const a0 = parse(dst);
+  for (const imp of importsOf(a0).reverse()){
+    const keep = imp.specifiers.filter(sp => !moved.has(sp.local.name));
+    if (keep.length === imp.specifiers.length) continue;
+    const text = keep.length ? 'import { ' + keep.map(sp => sp.imported.name === sp.local.name ? sp.local.name : sp.imported.name + ' as ' + sp.local.name).join(', ') + " } from '" + imp.source.value + "';" : '';
+    let end = imp.range[1]; if (!keep.length && dst[end] === '\n') end++;
+    dst = dst.slice(0, imp.range[0]) + text + dst.slice(end);
+  }
+}
 for (const [file, ns] of needImports) dst = addImport(dst, file, ns, TO);
 dst = dst.replace(/\s*(export \{[^}]*\};?\s*)?$/, m => '\n\n' + movedCode.trim() + '\n' + (m.includes('export {') ? '\n' + m.trim() + '\n' : ''));
 

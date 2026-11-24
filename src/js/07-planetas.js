@@ -5,8 +5,9 @@
  */
 import { GOAL, bestOf, bestRing } from './06-record-y-estado.js';
 import { JUMP_DUR, perfCount } from './08-partida-estado.js';
-import { PLGL } from './29-planetas-hd.js';
+
 import { PLANET_SVG } from './data/planets.js';
+import { PLGL } from './render/planets.js';
 
 // Planeta elegido, récord de Perfectos en una partida, secreto de Plutón, truco de todos los
 // planetas, cargas de escudo y si se usó el salto doble en la partida.
