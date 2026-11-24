@@ -15,4 +15,30 @@ function setElLv(value) {
   return value;
 }
 
-export { elLv, setElLv };
+let elHome;
+
+/**
+ * Cambia `elHome` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+function setElHome(value) {
+  elHome = value;
+  return value;
+}
+
+let elPl;
+
+/**
+ * Cambia `elPl` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+function setElPl(value) {
+  elPl = value;
+  return value;
+}
+
+export { elHome, elLv, elPl, setElHome, setElLv, setElPl };

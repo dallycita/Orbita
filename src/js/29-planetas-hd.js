@@ -8,7 +8,6 @@ import { AC } from './02-audio.js';
 import { setState, state } from './06-record-y-estado.js';
 import { PLANETS_P, curPlanet, planetOk, setCurPlanet } from './07-planetas.js';
 import { setT, t } from './08-partida-estado.js';
-import { elHome } from './26-pantalla-inicio.js';
 
 import { muted } from './core/settings.js';
 import {
@@ -29,8 +28,8 @@ import {
 } from './30-escanear.js';
 import { PLGL, drawBigPlanet } from './render/planets.js';
 import { uiGlass, uiOut, uiTone } from './audio/ui-sounds.js';
+import { elHome, elPl, setElPl } from './core/dom.js';
 
-let elPl;
 let pIndex = 0;
 let pSwap = 0;
 let pDir = 1;
@@ -652,7 +651,7 @@ function closePlanets() {
 
 /** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
 export function initPlanetsScreen() {
-  elPl = document.getElementById('planets');
+  setElPl(document.getElementById('planets'));
 }
 
-export { elPl, openPlanets, planetStep, renderPlanetsScene };
+export { openPlanets, planetStep, renderPlanetsScene };

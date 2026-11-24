@@ -537,10 +537,56 @@ function gwChirp() {
   } catch (e) {}
 }
 
+let droneNodes = null;
+
+/**
+ * Zumbido grave de fondo de la intro (55 Hz con una sierra levemente desafinada).
+ *
+ * @param {boolean} on true para encenderlo, false para apagarlo con un desvanecido.
+ */
+function introDrone(on) {
+  if (!AC) {
+    return;
+  }
+  try {
+    const n = AC.currentTime;
+    if (on) {
+      const o = AC.createOscillator(),
+        o2 = AC.createOscillator(),
+        g = AC.createGain(),
+        lp = AC.createBiquadFilter();
+      o.type = 'sine';
+      o.frequency.value = 55;
+      o2.type = 'sawtooth';
+      o2.frequency.value = 55.6;
+      lp.type = 'lowpass';
+      lp.frequency.value = 220;
+      g.gain.setValueAtTime(0.0001, n);
+      g.gain.exponentialRampToValueAtTime(0.22, n + 2.5);
+      o.connect(g);
+      o2.connect(lp);
+      lp.connect(g);
+      g.connect(master);
+      o.start(n);
+      o2.start(n);
+      droneNodes = { o, o2, g };
+    } else if (droneNodes) {
+      const d = droneNodes;
+      droneNodes = null;
+      d.g.gain.cancelScheduledValues(n);
+      d.g.gain.setValueAtTime(Math.max(d.g.gain.value, 0.0001), n);
+      d.g.gain.exponentialRampToValueAtTime(0.0001, n + 0.6);
+      d.o.stop(n + 0.7);
+      d.o2.stop(n + 0.7);
+    }
+  } catch (e) {}
+}
+
 export {
   bigSuck,
   gwChirp,
   homeAmbience,
+  introDrone,
   rockIn,
   showOut,
   showStart,

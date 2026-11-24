@@ -4,7 +4,7 @@
  * Todos los niveles están abiertos desde el inicio, como en Geometry Dash.
  */
 import { elHud, elPanel } from './01-pantalla-y-utilidades.js';
-import { AC, initAudio } from './02-audio.js';
+import { AC, applyMute, initAudio } from './02-audio.js';
 import { stopMusic } from './05-musica-reproductor.js';
 import { bestOf, setAppear, setBest, setBestRing, setLvl, setState } from './06-record-y-estado.js';
 import { setAllPlanets, setCurPlanet, setMaxPerf, setPlutoOk } from './07-planetas.js';
@@ -12,18 +12,23 @@ import { setAttempts, setHintsShown, setTutorial, setTutorialDone } from './08-p
 import { setSeenTypes } from './09-recorridos.js';
 import { setWallet, updateWallet } from './10-ritmo-y-objetos.js';
 import { setSesTries, setup } from './16-partida.js';
-import { MENU_HTML, introDrone, startIntro } from './23-intro.js';
-import { applyMute, openHome, setStoryReturn } from './26-pantalla-inicio.js';
 
 import { setLvArts, setLvCanvas } from './33-tarjetas-niveles.js';
 import { COIN_RINGS, GOAL, LEVELS } from './data/levels.js';
-import { homeAmbience, showStop } from './audio/ui-sounds.js';
+import { homeAmbience, introDrone, showStop } from './audio/ui-sounds.js';
 import { lvStarsGot } from './game/progress.js';
-import { setIntroFade, setPendingTut } from './core/screen.js';
+import {
+  openScreen,
+  registerScreen,
+  setIntroFade,
+  setPendingTut,
+  setStoryReturn,
+  setStorySeen,
+  setTutAfterStory,
+} from './core/screen.js';
 import { elLv, setElLv } from './core/dom.js';
+import { MENU_HTML } from './screens/menu.js';
 
-/** Si el jugador ya vio la historia de introducción (se guarda en localStorage). */
-let storySeen = false;
 /** Índice del nivel elegido en el selector. */
 let lvIndex = 0;
 let LV_ICONS;
@@ -204,7 +209,7 @@ function renderLevels() {
     .forEach(b => b.addEventListener('click', () => startLevel(Number(b.dataset.play))));
   const bk = elLv.querySelector('.back');
   if (bk) {
-    bk.addEventListener('click', () => openHome());
+    bk.addEventListener('click', () => openScreen('home'));
   }
   requestAnimationFrame(() => {
     track.style.scrollBehavior = 'auto';
@@ -276,13 +281,9 @@ function sigType(i) {
   sigTimer = setTimeout(step, 420);
 }
 
-const levelsUnlocked = () => true; // todos los niveles están abiertos desde el inicio
-// tutAfterStory: al terminar la historia sigue el tutorial ("Repetir tutorial").
-// pendingTut: al tocar en el menú empieza el tutorial en vez de la partida.
-let tutAfterStory = false;
-/** Al terminar la pantalla de presentación, abre el inicio. */
+const levelsUnlocked = () => true; /** Al terminar la pantalla de presentación, abre el inicio. */
 function afterSplash() {
-  openHome(true);
+  openScreen('home', true);
 }
 /** Empieza como jugador nuevo: olvida historia, tutorial, intentos y récords. */
 function resetProgress() {
@@ -318,7 +319,7 @@ function resetProgress() {
       'orbita_p8_intentos',
     ].forEach(k => localStorage.removeItem(k));
   } catch (e) {}
-  storySeen = false;
+  setStorySeen(false);
   setTutorialDone(true);
   setAttempts(0);
   setBestRing(0);
@@ -340,8 +341,8 @@ function resetProgress() {
     elLv.classList.add('off');
   }
   setStoryReturn(null);
-  tutAfterStory = false;
-  startIntro();
+  setTutAfterStory(false);
+  openScreen('intro');
 }
 /** Abre el selector de niveles: para la música de partida y suena el ambiente del inicio. */
 function openLevels() {
@@ -394,8 +395,9 @@ function startLevel(i) {
 
 /** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
 export function initLevelSelect() {
+  registerScreen('levels', openLevels);
   try {
-    storySeen = localStorage.getItem('orbita_p1_historia') === '1';
+    setStorySeen(localStorage.getItem('orbita_p1_historia') === '1');
   } catch (e) {}
   setElLv(document.getElementById('levels'));
   LV_ICONS = {
@@ -504,26 +506,4 @@ export function setLvIndex(value) {
   return value;
 }
 
-/**
- * Cambia `storySeen` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setStorySeen(value) {
-  storySeen = value;
-  return value;
-}
-
-/**
- * Cambia `tutAfterStory` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setTutAfterStory(value) {
-  tutAfterStory = value;
-  return value;
-}
-
-export { afterSplash, lvIndex, openLevels, resetProgress, startLevel, storySeen, tutAfterStory };
+export { afterSplash, lvIndex, openLevels, resetProgress, startLevel };

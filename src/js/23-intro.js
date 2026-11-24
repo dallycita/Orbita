@@ -14,7 +14,6 @@ import {
   SUN,
   W,
   buzz,
-  chipsHTML,
   clamp,
   ctx,
   elHud,
@@ -24,7 +23,7 @@ import {
   stars,
 } from './01-pantalla-y-utilidades.js';
 import { AC, master, noise, noiseHit, suck, thump } from './02-audio.js';
-import { lvl, setAppear, setLvl, setState, state } from './06-record-y-estado.js';
+import { setAppear, setLvl, setState, state } from './06-record-y-estado.js';
 import {
   flash,
   holeFlare,
@@ -41,21 +40,23 @@ import {
 import { rr } from './16-partida.js';
 import { drawEarth } from './21-dibujo.js';
 
+import { PLGL, drawBigPlanet } from './render/planets.js';
+import { homeAmbience, introDrone } from './audio/ui-sounds.js';
+import { bhDiskK } from './render/black-hole.js';
 import {
-  openLevels,
+  openScreen,
+  registerScreen,
+  setIntroFade,
+  setStoryReturn,
   setStorySeen,
   setTutAfterStory,
+  storyReturn,
   tutAfterStory,
-} from './25-selector-niveles.js';
-import { openHome, setStoryReturn, storyReturn } from './26-pantalla-inicio.js';
-
-import { LEVELS } from './data/levels.js';
-import { PLGL, drawBigPlanet } from './render/planets.js';
-import { homeAmbience } from './audio/ui-sounds.js';
-import { bhDiskK } from './render/black-hole.js';
-import { setIntroFade } from './core/screen.js';
+} from './core/screen.js';
 import { setDoblesHechos } from './game/progress.js';
 import { ZONES } from './game/zones.js';
+import { easeIO } from './core/math.js';
+import { MENU_HTML } from './screens/menu.js';
 
 // Planetas de la intro. r: radio de la órbita y s: tamaño, en unidades de la intro.
 const PLANETS = [
@@ -92,7 +93,6 @@ let introT = 0;
 let ip = [];
 let iparts = [];
 let SI = 1;
-let droneNodes = null;
 let cues = {};
 /**
  * Reinicia el reloj, las partículas y los planetas de la intro.
@@ -114,7 +114,6 @@ function introSetup() {
 }
 // true solo la primera vez que se pide cada señal `k`, para disparar sonidos una vez.
 const once = k => (cues[k] ? false : (cues[k] = true));
-const easeIO = x => (x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
 /**
  * Posición del agujero negro: llega desde afuera por una curva de Bézier y se instala donde
  * estaba el Sol.
@@ -138,18 +137,6 @@ const bhRadius = () => 8 + 12 * clamp((introT - T_ARRIVE) / (T_DISK_END - T_ARRI
 const diskK = () => clamp((introT - 4.8) / (T_DISK_END - 4.8), 0, 1);
 const sunK = () => clamp((introT - T_ARRIVE) / (T_SUN_END - T_ARRIVE), 0, 1);
 
-// Panel previo a jugar: nivel elegido, invitación a tocar y los avisos de ayuda.
-const MENU_HTML = () => {
-  const L = LEVELS[lvl] || LEVELS[0];
-  return (
-    '<div class="mlv">Nivel ' +
-    (LEVELS.indexOf(L) + 1) +
-    ' · ' +
-    L.name +
-    '</div><div class="cta mgo">Toca para escapar</div>' +
-    chipsHTML()
-  );
-};
 /**
  * Empieza la historia de introducción desde el principio.
  */
@@ -188,9 +175,9 @@ function endIntro(skipped) {
     const r = storyReturn;
     setStoryReturn(null);
     if (r === 'levels') {
-      openLevels();
+      openScreen('levels');
     } else {
-      openHome();
+      openScreen('home');
     }
     return;
   }
@@ -201,48 +188,6 @@ function endIntro(skipped) {
   elPanel.innerHTML = MENU_HTML();
   elPanel.classList.add('top');
   elPanel.classList.remove('hide');
-}
-/**
- * Zumbido grave de fondo de la intro (55 Hz con una sierra levemente desafinada).
- *
- * @param {boolean} on true para encenderlo, false para apagarlo con un desvanecido.
- */
-function introDrone(on) {
-  if (!AC) {
-    return;
-  }
-  try {
-    const n = AC.currentTime;
-    if (on) {
-      const o = AC.createOscillator(),
-        o2 = AC.createOscillator(),
-        g = AC.createGain(),
-        lp = AC.createBiquadFilter();
-      o.type = 'sine';
-      o.frequency.value = 55;
-      o2.type = 'sawtooth';
-      o2.frequency.value = 55.6;
-      lp.type = 'lowpass';
-      lp.frequency.value = 220;
-      g.gain.setValueAtTime(0.0001, n);
-      g.gain.exponentialRampToValueAtTime(0.22, n + 2.5);
-      o.connect(g);
-      o2.connect(lp);
-      lp.connect(g);
-      g.connect(master);
-      o.start(n);
-      o2.start(n);
-      droneNodes = { o, o2, g };
-    } else if (droneNodes) {
-      const d = droneNodes;
-      droneNodes = null;
-      d.g.gain.cancelScheduledValues(n);
-      d.g.gain.setValueAtTime(Math.max(d.g.gain.value, 0.0001), n);
-      d.g.gain.exponentialRampToValueAtTime(0.0001, n + 0.6);
-      d.o.stop(n + 0.7);
-      d.o2.stop(n + 0.7);
-    }
-  } catch (e) {}
 }
 /**
  * Sonido de un planeta tragado: un tono que cae con ruido sordo.
@@ -708,6 +653,7 @@ function renderIntro() {
 
 /** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
 export function initIntro() {
+  registerScreen('intro', startIntro);
   introSetup();
   try {
     setDoblesHechos(parseInt(localStorage.getItem('orbita_p1_dobles') || '0', 10) || 0);
@@ -715,4 +661,4 @@ export function initIntro() {
   EARTH_W = 0.9 * Math.pow(60 / 84, 1.5);
 }
 
-export { MENU_HTML, easeIO, endIntro, introDrone, renderIntro, startIntro, updateIntro };
+export { endIntro, renderIntro, startIntro, updateIntro };

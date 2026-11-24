@@ -8,120 +8,18 @@ import { AC, ROOT, noise } from './02-audio.js';
 import { PLANETS_P, curPlanet } from './07-planetas.js';
 import { t } from './08-partida-estado.js';
 
-import { elHome, renderHome } from './26-pantalla-inicio.js';
-
-import { COIN_RINGS, LEVELS } from './data/levels.js';
+import { COIN_RINGS } from './data/levels.js';
 
 import { MIS_ACH, MIS_FACT } from './data/missions.js';
 import { muted } from './core/settings.js';
 import { PLGL, planetThumb } from './render/planets.js';
 import { uiGlass, uiTone } from './audio/ui-sounds.js';
 import { lvStarsGot } from './game/progress.js';
-import { MIS, misDef, misLoad, misRoll, misSave, misToday } from './game/missions.js';
-import { on } from './core/events.js';
+import { MIS, achProg, misDef, misLoad, misRoll, misSave, misToday } from './game/missions.js';
+import { emit, on } from './core/events.js';
+import { elHome } from './core/dom.js';
+import { misMoons } from './render/mission-icons.js';
 
-/**
- * Arma el ícono de Misiones del inicio: una constelación de tres estrellas (una por misión del
- * día) dentro de un arco de progreso. Cada misión cumplida enciende una estrella y llena un
- * tercio del arco; con las tres, la constelación se une y el círculo se cierra.
- *
- * @returns {string} Contenido SVG (sin la etiqueta `<svg>`), en un cuadro de 100 × 100.
- */
-function misMoons() {
-  misLoad();
-  const done = Math.min(
-    3,
-    MIS.daily.filter(m => m.c || m.p >= (misDef(m.id) || { n: 1 }).n).length,
-  );
-  const P = [
-      [25, 68],
-      [50, 32],
-      [75, 68],
-    ],
-    st = (x, y, r) =>
-      'M' +
-      x +
-      ' ' +
-      (y - r) +
-      ' L' +
-      (x + r * 0.26) +
-      ' ' +
-      (y - r * 0.26) +
-      ' L' +
-      (x + r) +
-      ' ' +
-      y +
-      ' L' +
-      (x + r * 0.26) +
-      ' ' +
-      (y + r * 0.26) +
-      ' L' +
-      x +
-      ' ' +
-      (y + r) +
-      ' L' +
-      (x - r * 0.26) +
-      ' ' +
-      (y + r * 0.26) +
-      ' L' +
-      (x - r) +
-      ' ' +
-      y +
-      ' L' +
-      (x - r * 0.26) +
-      ' ' +
-      (y - r * 0.26) +
-      'Z';
-  let h =
-    '<circle cx="50" cy="50" r="45" fill="none" stroke="#ece6d8" stroke-opacity=".2" stroke-width="5"/>';
-  if (done === 3) {
-    h +=
-      '<circle class="lit" cx="50" cy="50" r="45" fill="none" stroke="#ff8a3d" stroke-width="6"/>';
-  } else if (done > 0) {
-    const a = -Math.PI / 2 + (Math.PI * 2 * done) / 3;
-    h +=
-      '<path class="lit" d="M50 5 A45 45 0 ' +
-      (done > 1 ? 1 : 0) +
-      ' 1 ' +
-      (50 + 45 * Math.cos(a)).toFixed(1) +
-      ' ' +
-      (50 + 45 * Math.sin(a)).toFixed(1) +
-      '" fill="none" stroke="#ff8a3d" stroke-width="6" stroke-linecap="round"/>';
-  }
-  for (let i = 0; i < 2; i++) {
-    const [ax, ay] = P[i],
-      [bx, by] = P[i + 1],
-      L = Math.hypot(bx - ax, by - ay),
-      ux = (bx - ax) / L,
-      uy = (by - ay) / L,
-      g = 15; // la línea se detiene antes de cada estrella, como en un mapa del cielo
-    h +=
-      '<line x1="' +
-      (ax + ux * g).toFixed(1) +
-      '" y1="' +
-      (ay + uy * g).toFixed(1) +
-      '" x2="' +
-      (bx - ux * g).toFixed(1) +
-      '" y2="' +
-      (by - uy * g).toFixed(1) +
-      '" stroke="' +
-      (done === 3 ? '#ff8a3d' : '#8fd0ff') +
-      '" stroke-opacity="' +
-      (done === 3 ? 0.85 : 0.6) +
-      '" stroke-width="2.6" stroke-linecap="round"' +
-      (done === 3 ? '' : ' stroke-dasharray="4 5"') +
-      '/>';
-  }
-  P.forEach(([x, y], i) => {
-    h +=
-      i < done
-        ? '<path class="lit" d="' + st(x, y, 11) + '" fill="#ff8a3d"/>'
-        : '<path d="' +
-          st(x, y, 10.5) +
-          '" fill="none" stroke="#ece6d8" stroke-width="3.2" stroke-linejoin="round"/>';
-  });
-  return h;
-}
 /**
  * Ícono SVG de cristales de polvo estelar. Cada llamada usa un id de degradado distinto para que
  * varios íconos en la misma página no compartan el mismo `<linearGradient>`.
@@ -168,92 +66,6 @@ function misPing() {
       [19, 24].forEach((sm, i) => uiTone(ROOT * 2 * Math.pow(2, sm / 12), n + i * 0.07, 0.6, 0.03));
     } catch (e) {}
   }
-}
-/**
- * Busca el nivel donde se han recogido más estrellas.
- *
- * @returns {number[]} [estrellas recogidas, índice del nivel] (índice -1 si no hay ninguna).
- */
-function misStarsBest() {
-  let best = 0,
-    bi = -1;
-  COIN_RINGS.forEach((set, i) => {
-    if (!set) {
-      return;
-    }
-    const g = lvStarsGot(i);
-    let c = 0;
-    set.forEach(k => {
-      if (g.includes(k)) {
-        c++;
-      }
-    });
-    if (c > best) {
-      best = c;
-      bi = i;
-    }
-  });
-  return [best, bi];
-}
-/**
- * Progreso de un logro.
- *
- * @param {object} a Logro de `MIS_ACH`.
- * @returns {Array} [valor actual, meta, texto de progreso para mostrar].
- */
-function achProg(a) {
-  const M = MIS;
-  switch (a.id) {
-    case 'tierra8':
-      return [M.tierraLv.length, 8, M.tierraLv.length + ' / 8 niveles'];
-    case 'cada':
-      return [
-        M.planetsWon.length,
-        PLANETS_P.length,
-        M.planetsWon.length + ' de ' + PLANETS_P.length + ' planetas',
-      ];
-    case 'andro1':
-      return [M.andro1 ? 1 : 0, 1, a.d];
-    case 'seis': {
-      const [b, i] = misStarsBest();
-      return [
-        b >= 6 ? 1 : 0,
-        1,
-        i >= 0 && LEVELS[i] ? LEVELS[i].name + ' · ' + b + ' de 6' : 'Todas las de un mismo nivel',
-      ];
-    }
-    case 'perf100':
-      return [
-        Math.min(100, M.st.perf || 0),
-        100,
-        (M.st.perf || 0) >= 100 ? a.d : Math.min(100, M.st.perf || 0) + ' de 100',
-      ];
-    case 'ondas20':
-      return [Math.min(20, M.st.onda || 0), 20, Math.min(20, M.st.onda || 0) + ' de 20 · ' + a.d];
-    case 'todos':
-      return [M.lvWon.length, 8, M.lvWon.length + ' de 8 galaxias'];
-    case 'sol':
-      return [M.sol ? 1 : 0, 1, a.d];
-  }
-  return [0, 1, ''];
-}
-/**
- * Indica si hay algo listo para cobrar (misión, premio del día o logro), para marcar el botón.
- *
- * @returns {boolean} true si hay premios sin cobrar.
- */
-function misReady() {
-  misLoad();
-  if (MIS.daily.some(m => !m.c && m.p >= (misDef(m.id) || { n: 1 }).n)) {
-    return true;
-  }
-  if (!MIS.bonus && MIS.daily.every(m => m.c)) {
-    return true;
-  }
-  return MIS_ACH.some(a => {
-    const [c, n] = achProg(a);
-    return c >= n && !MIS.ach[a.id];
-  });
 }
 /**
  * Racha de días seguidos con el premio diario cobrado; se pierde si se salta un día.
@@ -357,7 +169,7 @@ function closeMissions() {
       elMis.classList.add('off');
     }
   }, 320);
-  renderHome();
+  emit('homeChanged');
   if (elHome) {
     elHome.classList.remove('off');
   }
@@ -1514,4 +1326,4 @@ export function initMissions() {
   on('missionReady', misPing);
 }
 
-export { misMoons, misOpen, misPlanetDraw, misReady, openMissions };
+export { misOpen, misPlanetDraw, openMissions };

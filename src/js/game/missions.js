@@ -2,8 +2,11 @@
  * (encabezado pendiente)
  */
 import { tutorial } from '../08-partida-estado.js';
-import { MIS_DAILY } from '../data/missions.js';
+import { MIS_ACH, MIS_DAILY } from '../data/missions.js';
 import { emit } from '../core/events.js';
+import { PLANETS_P } from '../07-planetas.js';
+import { COIN_RINGS, LEVELS } from '../data/levels.js';
+import { lvStarsGot } from './progress.js';
 
 var MIS = null;
 
@@ -163,4 +166,93 @@ function misWin(lv, planet, tries) {
   misEvent('win');
 }
 
-export { MIS, misDef, misEvent, misLoad, misRoll, misSave, misToday, misWin };
+/**
+ * Indica si hay algo listo para cobrar (misión, premio del día o logro), para marcar el botón.
+ *
+ * @returns {boolean} true si hay premios sin cobrar.
+ */
+function misReady() {
+  misLoad();
+  if (MIS.daily.some(m => !m.c && m.p >= (misDef(m.id) || { n: 1 }).n)) {
+    return true;
+  }
+  if (!MIS.bonus && MIS.daily.every(m => m.c)) {
+    return true;
+  }
+  return MIS_ACH.some(a => {
+    const [c, n] = achProg(a);
+    return c >= n && !MIS.ach[a.id];
+  });
+}
+
+/**
+ * Progreso de un logro.
+ *
+ * @param {object} a Logro de `MIS_ACH`.
+ * @returns {Array} [valor actual, meta, texto de progreso para mostrar].
+ */
+function achProg(a) {
+  const M = MIS;
+  switch (a.id) {
+    case 'tierra8':
+      return [M.tierraLv.length, 8, M.tierraLv.length + ' / 8 niveles'];
+    case 'cada':
+      return [
+        M.planetsWon.length,
+        PLANETS_P.length,
+        M.planetsWon.length + ' de ' + PLANETS_P.length + ' planetas',
+      ];
+    case 'andro1':
+      return [M.andro1 ? 1 : 0, 1, a.d];
+    case 'seis': {
+      const [b, i] = misStarsBest();
+      return [
+        b >= 6 ? 1 : 0,
+        1,
+        i >= 0 && LEVELS[i] ? LEVELS[i].name + ' · ' + b + ' de 6' : 'Todas las de un mismo nivel',
+      ];
+    }
+    case 'perf100':
+      return [
+        Math.min(100, M.st.perf || 0),
+        100,
+        (M.st.perf || 0) >= 100 ? a.d : Math.min(100, M.st.perf || 0) + ' de 100',
+      ];
+    case 'ondas20':
+      return [Math.min(20, M.st.onda || 0), 20, Math.min(20, M.st.onda || 0) + ' de 20 · ' + a.d];
+    case 'todos':
+      return [M.lvWon.length, 8, M.lvWon.length + ' de 8 galaxias'];
+    case 'sol':
+      return [M.sol ? 1 : 0, 1, a.d];
+  }
+  return [0, 1, ''];
+}
+
+/**
+ * Busca el nivel donde se han recogido más estrellas.
+ *
+ * @returns {number[]} [estrellas recogidas, índice del nivel] (índice -1 si no hay ninguna).
+ */
+function misStarsBest() {
+  let best = 0,
+    bi = -1;
+  COIN_RINGS.forEach((set, i) => {
+    if (!set) {
+      return;
+    }
+    const g = lvStarsGot(i);
+    let c = 0;
+    set.forEach(k => {
+      if (g.includes(k)) {
+        c++;
+      }
+    });
+    if (c > best) {
+      best = c;
+      bi = i;
+    }
+  });
+  return [best, bi];
+}
+
+export { MIS, achProg, misDef, misEvent, misLoad, misReady, misRoll, misSave, misToday, misWin };

@@ -4,9 +4,9 @@
  */
 import { AC, ROOT } from './02-audio.js';
 
-import { elPl } from './29-planetas-hd.js';
 import { muted } from './core/settings.js';
 import { uiOut, uiTone } from './audio/ui-sounds.js';
+import { elPl } from './core/dom.js';
 
 // scanOn: escaneo activo; scanK: avance de la animación, de 0 a 1; pRot: giro del planeta en
 // radianes; scanLineT: avance de la línea de luz; scanApplyAt: cuándo crecen las barras

@@ -3,14 +3,14 @@
  * misiones, historia o ajustes).
  */
 import { elHud, elPanel } from './01-pantalla-y-utilidades.js';
-import { AC, initAudio, outBus } from './02-audio.js';
+import { AC, applyMute, initAudio } from './02-audio.js';
 import { stopMusic } from './05-musica-reproductor.js';
 import { setState } from './06-record-y-estado.js';
 import { allPlanets, setAllPlanets } from './07-planetas.js';
 import { setTutorial } from './08-partida-estado.js';
 import { setup } from './16-partida.js';
-import { introDrone, startIntro } from './23-intro.js';
-import { openLevels, resetProgress, setTutAfterStory, storySeen } from './25-selector-niveles.js';
+import { startIntro } from './23-intro.js';
+import { openLevels, resetProgress } from './25-selector-niveles.js';
 import {
   HOME_BIG,
   setHsBoost,
@@ -22,25 +22,28 @@ import {
 } from './27-inicio-animacion.js';
 
 import { openPlanets } from './29-planetas-hd.js';
-import { misMoons, misReady, openMissions } from './34-misiones.js';
+import { openMissions } from './34-misiones.js';
 import { MEDIR, medEl, setMEDIR, setMedEl, setMedPrev } from './35-medidor.js';
 import { PLANET_SVG } from './data/planets.js';
 import { loadMute, muted, setMuted } from './core/settings.js';
-import { homeAmbience, showStart, showStop } from './audio/ui-sounds.js';
-import { HOME_IN, homeT, setHomeT, setLogoT0, setPendingTut } from './core/screen.js';
-import { elLv } from './core/dom.js';
+import { homeAmbience, introDrone, showStart, showStop } from './audio/ui-sounds.js';
+import {
+  HOME_IN,
+  homeT,
+  registerScreen,
+  setHomeT,
+  setLogoT0,
+  setPendingTut,
+  setStoryReturn,
+  setTutAfterStory,
+  storySeen,
+} from './core/screen.js';
+import { elHome, elLv, setElHome } from './core/dom.js';
+import { misReady } from './game/missions.js';
+import { misMoons } from './render/mission-icons.js';
+import { on } from './core/events.js';
 
-let elHome;
-/** Sonido apagado por el jugador (se guarda en localStorage). */
-/** Aplica `muted` al volumen general de salida. */
-function applyMute() {
-  if (AC && outBus) {
-    try {
-      outBus.gain.setValueAtTime(muted ? 0 : 0.6, AC.currentTime);
-    } catch (e) {}
-  }
-}
-let storyReturn = null; // a dónde volver después de ver la historia desde un menú
+// a dónde volver después de ver la historia desde un menú
 /**
  * Si hay un planeta recién desbloqueado que el jugador aún no vio.
  *
@@ -113,7 +116,7 @@ function homeAction(a, b) {
     }
   } else if (a === 'story') {
     hideHome();
-    storyReturn = 'home';
+    setStoryReturn('home');
     startIntro();
   } else if (a === 'tut') {
     hideHome();
@@ -231,19 +234,11 @@ function openHome(withIntro) {
 
 /** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
 export function initHome() {
-  elHome = document.getElementById('home');
+  registerScreen('home', openHome);
+  // las misiones avisan cuando cambia algo que muestra el inicio
+  on('homeChanged', renderHome);
+  setElHome(document.getElementById('home'));
   loadMute();
 }
 
-/**
- * Cambia `storyReturn` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setStoryReturn(value) {
-  storyReturn = value;
-  return value;
-}
-
-export { applyMute, elHome, openHome, renderHome, storyReturn };
+export { openHome, renderHome };

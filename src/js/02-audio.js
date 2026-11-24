@@ -238,11 +238,22 @@ export function setShaper(value) {
   return value;
 }
 
+/** Sonido apagado por el jugador (se guarda en localStorage). */
+/** Aplica `muted` al volumen general de salida. */
+function applyMute() {
+  if (AC && outBus) {
+    try {
+      outBus.gain.setValueAtTime(muted ? 0 : 0.6, AC.currentTime);
+    } catch (e) {}
+  }
+}
+
 export {
   AC,
   NOISE,
   ROOT,
   SCALE,
+  applyMute,
   applyVolumes,
   cowbell,
   initAudio,
