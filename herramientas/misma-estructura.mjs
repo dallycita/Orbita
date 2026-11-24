@@ -1,13 +1,15 @@
 // Comprueba que dos versiones de index.html tienen exactamente el mismo programa (JavaScript), aunque cambien
 // los espacios, los saltos de línea, las comillas o los comentarios.
-//   node herramientas/misma-estructura.mjs <index-a.html> <index-b.html>
+//   node herramientas/misma-estructura.mjs <index-a.html> <index-b.html> [--renombres]
+// Con --renombres también se aceptan cambios de nombre de variables y funciones (consistentes en todos sus usos).
 // Compara el árbol de sintaxis de cada <script>: tipo de cada nodo, nombres, operadores y el valor de cada
 // literal (no cómo está escrito: '.5' y '0.5' son el mismo número). Si sale "idéntica", el juego hace lo mismo.
 // Sirve para los cambios mecánicos (formato, comentarios); lo demás se comprueba con la huella.
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const espree = require('espree');
+const espree = require('espree'), eslintScope = require('eslint-scope');
+const RENAMES = process.argv.includes('--renombres');
 
 const scripts = file => [...readFileSync(file, 'utf8').matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map(m => m[1]);
 const SKIP = new Set(['loc', 'range', 'start', 'end', 'raw', 'comments', 'tokens']);
@@ -33,14 +35,27 @@ function canon(node){
   const keys = Object.keys(node).filter(k => !SKIP.has(k)).sort();
   return '{' + keys.map(k => k + ':' + canon(node[k])).join(',') + '}';
 }
+// con --renombres, cada variable o función que no es global se cambia por un nombre según su orden de aparición:
+// dos programas que solo difieren en cómo se llaman sus variables dan el mismo resultado
+function alphaRename(ast){
+  const sm = eslintScope.analyze(ast, {ecmaVersion: 2022, sourceType: 'script'});
+  const ids = new Map(); let n = 0;
+  for (const sc of sm.scopes){
+    if (sc.type === 'global') continue;
+    for (const v of sc.variables){ const name = '$' + (n++); for (const d of v.identifiers) ids.set(d, name); for (const r of v.references) ids.set(r.identifier, name); }
+  }
+  (function walk(node){ if (!node || typeof node.type !== 'string') return; if (node.type === 'Identifier' && ids.has(node)) node.name = ids.get(node);
+    for (const k in node){ if (k === 'range' || k === 'loc') continue; const v = node[k]; if (Array.isArray(v)) v.forEach(walk); else if (v && typeof v.type === 'string') walk(v); } })(ast);
+  return ast;
+}
 function program(file){
   return scripts(file).map((s, i) => {
-    try{ return canon(espree.parse(s, {ecmaVersion: 'latest', sourceType: 'script'})); }
+    try{ const ast = espree.parse(s, {ecmaVersion: 'latest', sourceType: 'script', range: RENAMES}); return canon(RENAMES ? alphaRename(ast) : ast); }
     catch(e){ throw new Error(file + ', script ' + (i + 1) + ': ' + e.message); }
   });
 }
 
-const [A, B] = process.argv.slice(2);
+const [A, B] = process.argv.slice(2).filter(a => !a.startsWith('--'));
 const a = program(A), b = program(B);
 if (a.length !== b.length){ console.log('✗ distinto número de <script>: ' + a.length + ' y ' + b.length); process.exit(1); }
 let bad = 0;
