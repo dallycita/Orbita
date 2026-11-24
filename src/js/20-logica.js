@@ -2,18 +2,7 @@
  * Lógica de la partida en cada cuadro: tiempo y cámara lenta, giro de los anillos, salto y
  * aterrizaje, avance del agujero negro, choques con asteroides y peligros, y agujero de gusano.
  */
-import {
-  BONE,
-  CX,
-  CY,
-  PR,
-  R0,
-  S,
-  SUN,
-  buzz,
-  reduceMotion,
-  zoneOf,
-} from './01-pantalla-y-utilidades.js';
+import { BONE, CX, CY, PR, R0, S, SUN, buzz, reduceMotion } from './01-pantalla-y-utilidades.js';
 import { AC, noise, thump } from './02-audio.js';
 import {
   TB,
@@ -33,7 +22,6 @@ import {
   tensionSet,
 } from './03-musica-ritmos.js';
 import {
-  GOAL,
   appear,
   astFade,
   camLevel,
@@ -149,6 +137,8 @@ import { die, eatRings, jump, onLand, rr } from './16-partida.js';
 
 import { introFade, setIntroFade } from './core/screen.js';
 import { advanceJourney, setJourneyBand } from './core/journey.js';
+import { GOAL } from './data/levels.js';
+import { zoneOf } from './game/zones.js';
 
 /**
  * Avanza el juego un cuadro.

@@ -75,11 +75,10 @@ import {
 import { beatTime, obsAng, obsRad } from './10-ritmo-y-objetos.js';
 import { rr } from './16-partida.js';
 
-import { uiTone } from './28-sonidos-interfaz.js';
-
 import { muted } from './core/settings.js';
 import { PLGL, drawPlayer } from './render/planets.js';
 import { noteDouble } from './game/progress.js';
+import { uiTone } from './audio/ui-sounds.js';
 
 let ghostT = 0;
 let shieldT = 0;

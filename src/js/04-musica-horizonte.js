@@ -6,7 +6,8 @@
  */
 import { AC, NOISE, ROOT, musicBus, noiseHit } from './02-audio.js';
 import { STEP, andFast, dangerNow, lv, organ, riserOn, softKick } from './03-musica-ritmos.js';
-import { GOAL, state } from './06-record-y-estado.js';
+import { state } from './06-record-y-estado.js';
+import { GOAL } from './data/levels.js';
 
 /** Estado del sintetizador: nodos de reverberación, zumbido, bus y sección actual. */
 let hzS = null;

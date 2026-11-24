@@ -3,9 +3,10 @@
  * cómo se siente en el juego. El dibujo del escaneo está en 29-planetas-hd.
  */
 import { AC, ROOT } from './02-audio.js';
-import { uiOut, uiTone } from './28-sonidos-interfaz.js';
+
 import { elPl } from './29-planetas-hd.js';
 import { muted } from './core/settings.js';
+import { uiOut, uiTone } from './audio/ui-sounds.js';
 
 // scanOn: escaneo activo; scanK: avance de la animación, de 0 a 1; pRot: giro del planeta en
 // radianes; scanLineT: avance de la línea de luz; scanApplyAt: cuándo crecen las barras

@@ -74,11 +74,11 @@ import {
   waves,
 } from './11-peligros-datos.js';
 import { rr } from './16-partida.js';
-import { uiOut, uiTone } from './28-sonidos-interfaz.js';
 
 import { BEAM_AT, COMET_AT, COMET_TIME, FLARE_AT, SN_AT } from './data/hazards.js';
 import { muted } from './core/settings.js';
 import { misEvent } from './game/missions.js';
+import { uiOut, uiTone } from './audio/ui-sounds.js';
 
 // Novas por nivel y anillo: sp es la velocidad de la cáscara (unidades del juego por segundo),
 // per el periodo entre cáscaras en golpes, gaps y gw el número y ancho (radianes) de los huecos,

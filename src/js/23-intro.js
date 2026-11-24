@@ -13,7 +13,6 @@ import {
   S,
   SUN,
   W,
-  ZONES,
   buzz,
   chipsHTML,
   clamp,
@@ -56,6 +55,7 @@ import { homeAmbience } from './audio/ui-sounds.js';
 import { bhDiskK } from './render/black-hole.js';
 import { setIntroFade } from './core/screen.js';
 import { setDoblesHechos } from './game/progress.js';
+import { ZONES } from './game/zones.js';
 
 // Planetas de la intro. r: radio de la órbita y s: tamaño, en unidades de la intro.
 const PLANETS = [

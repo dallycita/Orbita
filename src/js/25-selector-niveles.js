@@ -6,15 +6,7 @@
 import { elHud, elPanel } from './01-pantalla-y-utilidades.js';
 import { AC, initAudio } from './02-audio.js';
 import { stopMusic } from './05-musica-reproductor.js';
-import {
-  GOAL,
-  bestOf,
-  setAppear,
-  setBest,
-  setBestRing,
-  setLvl,
-  setState,
-} from './06-record-y-estado.js';
+import { bestOf, setAppear, setBest, setBestRing, setLvl, setState } from './06-record-y-estado.js';
 import { setAllPlanets, setCurPlanet, setMaxPerf, setPlutoOk } from './07-planetas.js';
 import { setAttempts, setHintsShown, setTutorial, setTutorialDone } from './08-partida-estado.js';
 import { setSeenTypes } from './09-recorridos.js';
@@ -23,10 +15,9 @@ import { setSesTries, setup } from './16-partida.js';
 import { MENU_HTML, introDrone, startIntro } from './23-intro.js';
 import { applyMute, openHome, setStoryReturn } from './26-pantalla-inicio.js';
 
-import { showStop } from './28-sonidos-interfaz.js';
 import { setLvArts, setLvCanvas } from './33-tarjetas-niveles.js';
-import { COIN_RINGS, LEVELS } from './data/levels.js';
-import { homeAmbience } from './audio/ui-sounds.js';
+import { COIN_RINGS, GOAL, LEVELS } from './data/levels.js';
+import { homeAmbience, showStop } from './audio/ui-sounds.js';
 import { lvStarsGot } from './game/progress.js';
 import { setIntroFade, setPendingTut } from './core/screen.js';
 import { elLv, setElLv } from './core/dom.js';

@@ -24,20 +24,11 @@ import { sunLevel, t } from './08-partida-estado.js';
 import { rr } from './16-partida.js';
 import { easeIO } from './23-intro.js';
 
-import {
-  bigSuck,
-  gwChirp,
-  rockIn,
-  showOut,
-  showStop,
-  uiOut,
-  uiTone,
-} from './28-sonidos-interfaz.js';
-
 import { muted } from './core/settings.js';
 import { drawPlayer } from './render/planets.js';
 import { BR0, BR1, SK, bhCore, bhDiskK, drawLogo, setSfl, sfl } from './render/black-hole.js';
 import { HOME_IN, homeT, logoT0 } from './core/screen.js';
+import { bigSuck, gwChirp, rockIn, showOut, showStop, uiOut, uiTone } from './audio/ui-sounds.js';
 
 // ---- La demostración: el agujero negro dobla la luz, se come rocas y destroza una estrella ----
 // HOME_BIG: segundo en que el agujero empieza a alejarse; HOME_IN: segundo en que llega a su

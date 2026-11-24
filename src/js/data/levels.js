@@ -95,4 +95,7 @@ const COIN_RINGS = [
   new Set([4, 9, 15, 17, 31, 43]),
 ];
 
-export { COIN_RINGS, LEVELS };
+// Anillo de la salida.
+const GOAL = 50;
+
+export { COIN_RINGS, GOAL, LEVELS };

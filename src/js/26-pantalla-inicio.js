@@ -20,13 +20,13 @@ import {
   setHsRipple,
   setHsShake,
 } from './27-inicio-animacion.js';
-import { showStart, showStop } from './28-sonidos-interfaz.js';
+
 import { openPlanets } from './29-planetas-hd.js';
 import { misMoons, misReady, openMissions } from './34-misiones.js';
 import { MEDIR, medEl, setMEDIR, setMedEl, setMedPrev } from './35-medidor.js';
 import { PLANET_SVG } from './data/planets.js';
 import { loadMute, muted, setMuted } from './core/settings.js';
-import { homeAmbience } from './audio/ui-sounds.js';
+import { homeAmbience, showStart, showStop } from './audio/ui-sounds.js';
 import { HOME_IN, homeT, setHomeT, setLogoT0, setPendingTut } from './core/screen.js';
 import { elLv } from './core/dom.js';
 

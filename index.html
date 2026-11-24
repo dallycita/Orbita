@@ -4797,6 +4797,411 @@ document.addEventListener(
 const CHEV_R =
   '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9.5 5.5 16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 (() => {
+  // src/js/01-pantalla-y-utilidades.js
+  var cvs;
+  var ctx;
+  var elScore;
+  var elBest;
+  var elPbar;
+  var elPnum;
+  var elWrap;
+  var elArcFg;
+  var hudMode = "faltan";
+  var musicStyle = "espacial";
+  function chipsHTML() {
+    return "";
+  }
+  function refreshChips() {
+    document.querySelectorAll(".chip").forEach(
+      (c) => c.classList.toggle(
+        "on",
+        c.dataset.mode ? c.dataset.mode === hudMode : c.dataset.music === musicStyle
+      )
+    );
+  }
+  var elHud;
+  var elPanel;
+  var reduceMotion;
+  var W;
+  var H;
+  var DPR;
+  var S;
+  var CX;
+  var CY;
+  var R0 = 96;
+  var GAP = 34;
+  var PR = 8;
+  var SUN = 16;
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    const r = cvs.getBoundingClientRect();
+    W = r.width;
+    H = r.height;
+    cvs.width = Math.round(W * DPR);
+    cvs.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    S = Math.min(W / 2 / 170, H / 2 / 250);
+    CX = W / 2;
+    CY = H * 0.62;
+  }
+  var BONE = "#ece6d8";
+  function rgba(hex, a) {
+    const n = parseInt(hex.slice(1), 16);
+    return "rgba(" + (n >> 16) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")";
+  }
+  var stars;
+  var frac = (x) => x - Math.floor(x);
+  var clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  var buzz = (p) => {
+    try {
+      if (navigator.vibrate) {
+        navigator.vibrate(p);
+      }
+    } catch (e) {
+    }
+  };
+  function initScreen() {
+    cvs = document.getElementById("c");
+    ctx = cvs.getContext("2d");
+    elScore = document.getElementById("score");
+    elBest = document.getElementById("best");
+    elPbar = document.getElementById("pbar");
+    elPnum = document.getElementById("pnum");
+    elWrap = document.getElementById("scorewrap");
+    elArcFg = document.querySelector("#arc .fg");
+    {
+      const c0 = document.getElementById("chips0");
+      if (c0) {
+        c0.innerHTML = chipsHTML();
+      }
+    }
+    elHud = document.getElementById("hud");
+    elPanel = document.getElementById("panel");
+    reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.addEventListener("resize", resize);
+    resize();
+    stars = Array.from({ length: 140 }, () => ({
+      a: Math.random() * Math.PI * 2,
+      r: Math.sqrt(Math.random()) * 1.2,
+      s: Math.random() * 1.3 + 0.3,
+      tw: Math.random() * 6
+    }));
+  }
+  function setHudMode(value) {
+    hudMode = value;
+    return value;
+  }
+  function setMusicStyle(value) {
+    musicStyle = value;
+    return value;
+  }
+
+  // src/js/core/settings.js
+  var muted = false;
+  var volMus = 100;
+  var volSfx = 100;
+  function initAudioSettings() {
+    try {
+      const a = localStorage.getItem("orbita_vol_mus"), b = localStorage.getItem("orbita_vol_sfx");
+      if (a !== null) {
+        volMus = Math.max(0, Math.min(100, +a || 0));
+      }
+      if (b !== null) {
+        volSfx = Math.max(0, Math.min(100, +b || 0));
+      }
+    } catch (e) {
+    }
+  }
+  function setVolMus(value) {
+    volMus = value;
+    return value;
+  }
+  function setVolSfx(value) {
+    volSfx = value;
+    return value;
+  }
+  function loadMute() {
+    try {
+      muted = localStorage.getItem("orbita_p1_sonido") === "0";
+    } catch (e) {
+    }
+  }
+  function setMuted(value) {
+    muted = value;
+    return value;
+  }
+
+  // src/js/02-audio.js
+  var AC = null;
+  var master = null;
+  var musicBus = null;
+  var NOISE = null;
+  var shaper = null;
+  var outBus = null;
+  var musVol = null;
+  var volGain = (v) => Math.pow(v / 100, 2);
+  function applyVolumes() {
+    if (!AC || !master || !musVol) {
+      return;
+    }
+    try {
+      const n = AC.currentTime;
+      master.gain.setTargetAtTime(volGain(volSfx), n, 0.03);
+      musVol.gain.setTargetAtTime(volGain(volMus), n, 0.03);
+    } catch (e) {
+    }
+  }
+  function saveVolumes() {
+    try {
+      localStorage.setItem("orbita_vol_mus", String(Math.round(volMus)));
+      localStorage.setItem("orbita_vol_sfx", String(Math.round(volSfx)));
+    } catch (e) {
+    }
+  }
+  function initAudio() {
+    if (AC) {
+      return;
+    }
+    try {
+      AC = new (window.AudioContext || window.webkitAudioContext)();
+      outBus = AC.createGain();
+      outBus.gain.value = typeof muted !== "undefined" && muted ? 0 : 0.6;
+      const comp = AC.createDynamicsCompressor();
+      outBus.connect(comp);
+      comp.connect(AC.destination);
+      master = AC.createGain();
+      master.gain.value = volGain(volSfx);
+      master.connect(outBus);
+      musVol = AC.createGain();
+      musVol.gain.value = volGain(volMus);
+      musVol.connect(outBus);
+      musicBus = AC.createGain();
+      musicBus.gain.value = 1e-4;
+      musicBus.connect(musVol);
+      const len = AC.sampleRate * 2;
+      NOISE = AC.createBuffer(1, len, AC.sampleRate);
+      const d = NOISE.getChannelData(0);
+      for (let i = 0; i < len; i++) {
+        d[i] = Math.random() * 2 - 1;
+      }
+    } catch (e) {
+      AC = null;
+    }
+  }
+  var ROOT = 415.3;
+  var SCALE = [0, 3, 5, 7, 10, 12, 15, 17];
+  function cowbell(semi) {
+    if (!AC) {
+      return;
+    }
+    try {
+      const t0 = AC.currentTime, f = ROOT * Math.pow(2, semi / 12);
+      const o1 = AC.createOscillator(), o2 = AC.createOscillator();
+      o1.type = o2.type = "square";
+      o1.frequency.value = f;
+      o2.frequency.value = f * 1.48;
+      const bp = AC.createBiquadFilter();
+      bp.type = "bandpass";
+      bp.frequency.value = f * 1.7;
+      bp.Q.value = 1.4;
+      const g = AC.createGain();
+      g.gain.setValueAtTime(1e-4, t0);
+      g.gain.exponentialRampToValueAtTime(0.3, t0 + 4e-3);
+      g.gain.exponentialRampToValueAtTime(1e-4, t0 + 0.26);
+      o1.connect(bp);
+      o2.connect(bp);
+      bp.connect(g);
+      g.connect(master);
+      o1.start(t0);
+      o2.start(t0);
+      o1.stop(t0 + 0.3);
+      o2.stop(t0 + 0.3);
+    } catch (e) {
+    }
+  }
+  function noiseHit(t0, dur, type, freq, gain, dest, f1) {
+    const src = AC.createBufferSource();
+    src.buffer = NOISE;
+    const f = AC.createBiquadFilter();
+    f.type = type;
+    f.Q.value = 0.9;
+    f.frequency.setValueAtTime(freq, t0);
+    if (f1) {
+      f.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+    }
+    const g = AC.createGain();
+    g.gain.setValueAtTime(gain, t0);
+    g.gain.exponentialRampToValueAtTime(1e-4, t0 + dur);
+    src.connect(f);
+    f.connect(g);
+    g.connect(dest);
+    src.start(t0, Math.random() * 0.8);
+    src.stop(t0 + dur + 0.02);
+  }
+  function noise(dur, f0, f1, gain, type) {
+    if (!AC) {
+      return;
+    }
+    try {
+      noiseHit(AC.currentTime, dur, type, f0, gain, master, f1);
+    } catch (e) {
+    }
+  }
+  function thump() {
+    if (!AC) {
+      return;
+    }
+    try {
+      const t0 = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(110, t0);
+      o.frequency.exponentialRampToValueAtTime(55, t0 + 0.1);
+      g.gain.setValueAtTime(0.3, t0);
+      g.gain.exponentialRampToValueAtTime(1e-4, t0 + 0.15);
+      o.connect(g);
+      g.connect(master);
+      o.start(t0);
+      o.stop(t0 + 0.17);
+    } catch (e) {
+    }
+  }
+  function suck() {
+    if (!AC) {
+      return;
+    }
+    try {
+      const t0 = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(260, t0);
+      o.frequency.exponentialRampToValueAtTime(30, t0 + 1.8);
+      g.gain.setValueAtTime(1e-4, t0);
+      g.gain.exponentialRampToValueAtTime(0.45, t0 + 0.6);
+      g.gain.exponentialRampToValueAtTime(1e-4, t0 + 1.9);
+      o.connect(g);
+      g.connect(master);
+      o.start(t0);
+      o.stop(t0 + 2);
+      noiseHit(t0, 1.8, "lowpass", 2200, 0.45, master, 70);
+    } catch (e) {
+    }
+  }
+  function sub() {
+    if (!AC) {
+      return;
+    }
+    try {
+      const t0 = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(110, t0);
+      o.frequency.exponentialRampToValueAtTime(28, t0 + 0.9);
+      const lp = AC.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.value = 400;
+      g.gain.setValueAtTime(0.5, t0);
+      g.gain.exponentialRampToValueAtTime(1e-4, t0 + 1);
+      o.connect(lp);
+      lp.connect(g);
+      g.connect(master);
+      o.start(t0);
+      o.stop(t0 + 1.05);
+    } catch (e) {
+    }
+  }
+  function setShaper(value) {
+    shaper = value;
+    return value;
+  }
+
+  // src/js/data/levels.js
+  var LEVELS = [
+    {
+      name: "Sistema solar",
+      diff: "Fácil",
+      col: "#86c99a",
+      ready: true,
+      icon: "solar",
+      dist: "Aquí, en casa",
+      fact: "Nuestro hogar: el Sol y ocho planetas, formados hace unos 4600 millones de años.",
+      nuevo: "Muralla, respiración y escalera"
+    },
+    {
+      name: "Nubes de Magallanes",
+      diff: "Fácil",
+      col: "#86c99a",
+      ready: true,
+      icon: "magallanes",
+      dist: "A unos 160 000 años luz",
+      fact: "Dos galaxias enanas que giran una alrededor de la otra mientras orbitan la Vía Láctea. Se ven a simple vista desde el hemisferio sur.",
+      nuevo: "Contragiro"
+    },
+    {
+      name: "Andrómeda",
+      diff: "Medio",
+      col: "#e3bf72",
+      ready: true,
+      icon: "andromeda",
+      dist: "A unos 2,5 millones de años luz",
+      fact: "La galaxia grande más cercana a la nuestra. Se acerca: chocará con la Vía Láctea en unos 4500 millones de años.",
+      nuevo: "Nebulosas que te impulsan y púlsares que te empujan"
+    },
+    {
+      name: "Centaurus A",
+      diff: "Medio",
+      col: "#e3bf72",
+      ready: true,
+      icon: "centaurus",
+      dist: "A unos 12 millones de años luz",
+      fact: "Nació de la fusión de dos galaxias. Una enorme franja de polvo la cruza, y su agujero negro lanza chorros gigantes.",
+      nuevo: "Freno"
+    },
+    {
+      name: "Remolino",
+      diff: "Medio",
+      col: "#e3bf72",
+      ready: true,
+      icon: "remolino",
+      dist: "A unos 23 a 31 millones de años luz",
+      fact: "Una galaxia espiral que está chocando con una galaxia vecina más pequeña, y sus fuerzas de marea la deforman.",
+      nuevo: "Fuerzas de marea"
+    },
+    {
+      name: "Sombrero",
+      diff: "Medio",
+      col: "#e3bf72",
+      ready: true,
+      icon: "sombrero",
+      dist: "A unos 30 millones de años luz",
+      fact: "Su núcleo brillante y su franja oscura de polvo, vistos casi de lado, le dan forma de sombrero.",
+      nuevo: "Cometas que recorren tu anillo"
+    },
+    {
+      name: "M87",
+      diff: "Difícil",
+      col: "#e98d63",
+      ready: true,
+      icon: "m87",
+      dist: "A unos 54 millones de años luz",
+      fact: "Su agujero negro fue el primero en ser fotografiado, en 2019. Lanza un chorro de energía de miles de años luz.",
+      nuevo: "Rayos de energía"
+    },
+    {
+      name: "Sagitario A*",
+      diff: "Muy difícil",
+      col: "#e9738a",
+      ready: true,
+      icon: "sgr",
+      dist: "A unos 26 000 años luz: el regreso a casa",
+      fact: "El agujero negro del centro de nuestra galaxia, unos 4 millones de veces más masivo que el Sol. Vencerlo te devuelve al Sol.",
+      nuevo: "Llamaradas y cometas en pinza"
+    }
+  ];
+  var COIN_RINGS = [
+    /* @__PURE__ */ new Set([4, 12, 22, 28, 37, 45]),
+    /* @__PURE__ */ new Set([4, 9, 15, 18, 32, 40]),
+    /* @__PURE__ */ new Set([4, 9, 15, 17, 31, 43])
+  ];
+  var GOAL = 50;
+
   // src/js/08-partida-estado.js
   var winT = 0;
   var perfCount = 0;
@@ -5082,7 +5487,6 @@ const CHEV_R =
   var charge = 0;
   var jumpTarget = 1;
   var crossed = false;
-  var GOAL = 50;
   var lvl = 0;
   var best2 = 0;
   var attempts2 = 0;
@@ -5237,337 +5641,6 @@ const CHEV_R =
   }
   function setState(value) {
     state = value;
-    return value;
-  }
-
-  // src/js/01-pantalla-y-utilidades.js
-  var cvs;
-  var ctx;
-  var elScore;
-  var elBest;
-  var elPbar;
-  var elPnum;
-  var elWrap;
-  var elArcFg;
-  var hudMode = "faltan";
-  var musicStyle = "espacial";
-  function chipsHTML() {
-    return "";
-  }
-  function refreshChips() {
-    document.querySelectorAll(".chip").forEach(
-      (c) => c.classList.toggle(
-        "on",
-        c.dataset.mode ? c.dataset.mode === hudMode : c.dataset.music === musicStyle
-      )
-    );
-  }
-  var elHud;
-  var elPanel;
-  var reduceMotion;
-  var W;
-  var H;
-  var DPR;
-  var S;
-  var CX;
-  var CY;
-  var R0 = 96;
-  var GAP = 34;
-  var PR = 8;
-  var SUN = 16;
-  function resize() {
-    DPR = Math.min(window.devicePixelRatio || 1, 2);
-    const r = cvs.getBoundingClientRect();
-    W = r.width;
-    H = r.height;
-    cvs.width = Math.round(W * DPR);
-    cvs.height = Math.round(H * DPR);
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    S = Math.min(W / 2 / 170, H / 2 / 250);
-    CX = W / 2;
-    CY = H * 0.62;
-  }
-  var BONE = "#ece6d8";
-  var ZONES = [
-    { ring: BONE, ast: BONE, s1: "#ffe2b0", s2: "#ff5a1f", bg: "#0d1220" },
-    { ring: BONE, ast: BONE, s1: "#ffe2b0", s2: "#ff5a1f", bg: "#120f1e" },
-    { ring: BONE, ast: BONE, s1: "#ffe2b0", s2: "#ff5a1f", bg: "#0f1220" },
-    { ring: BONE, ast: BONE, s1: "#ffe2b0", s2: "#ff5a1f", bg: "#120c22" }
-  ];
-  function rgba(hex, a) {
-    const n = parseInt(hex.slice(1), 16);
-    return "rgba(" + (n >> 16) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")";
-  }
-  var ZONE_AND = { ring: "#ece6d8", ast: "#ece6d8", s1: "#ffe2b0", s2: "#ff5a1f", bg: "#060714" };
-  var ZONE_MAG = { ring: "#ece6d8", ast: "#ece6d8", s1: "#ffe2b0", s2: "#ff5a1f", bg: "#04070e" };
-  var ZONE_LV = {
-    3: { ring: "#ece6d8", ast: "#ece6d8", s1: "#ffe2b0", s2: "#ff5a1f", bg: "#07060a" },
-    4: { ring: "#ece6d8", ast: "#ece6d8", s1: "#ffe2b0", s2: "#ff5a1f", bg: "#050712" },
-    5: { ring: "#ece6d8", ast: "#ece6d8", s1: "#ffe2b0", s2: "#ff5a1f", bg: "#05050a" },
-    6: { ring: "#ece6d8", ast: "#ece6d8", s1: "#ffe2b0", s2: "#ff5a1f", bg: "#07050a" },
-    7: { ring: "#ece6d8", ast: "#ece6d8", s1: "#ffe2b0", s2: "#ff5a1f", bg: "#0a0607" }
-  };
-  var zoneOf = (k) => lvl >= 3 && !tutorial ? ZONE_LV[lvl] : lvl === 1 && !tutorial ? ZONE_MAG : lvl === 2 && !tutorial ? ZONE_AND : ZONES[Math.floor(k / 25) % ZONES.length];
-  var stars;
-  var frac = (x) => x - Math.floor(x);
-  var clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  var buzz = (p) => {
-    try {
-      if (navigator.vibrate) {
-        navigator.vibrate(p);
-      }
-    } catch (e) {
-    }
-  };
-  function initScreen() {
-    cvs = document.getElementById("c");
-    ctx = cvs.getContext("2d");
-    elScore = document.getElementById("score");
-    elBest = document.getElementById("best");
-    elPbar = document.getElementById("pbar");
-    elPnum = document.getElementById("pnum");
-    elWrap = document.getElementById("scorewrap");
-    elArcFg = document.querySelector("#arc .fg");
-    {
-      const c0 = document.getElementById("chips0");
-      if (c0) {
-        c0.innerHTML = chipsHTML();
-      }
-    }
-    elHud = document.getElementById("hud");
-    elPanel = document.getElementById("panel");
-    reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    window.addEventListener("resize", resize);
-    resize();
-    stars = Array.from({ length: 140 }, () => ({
-      a: Math.random() * Math.PI * 2,
-      r: Math.sqrt(Math.random()) * 1.2,
-      s: Math.random() * 1.3 + 0.3,
-      tw: Math.random() * 6
-    }));
-  }
-  function setHudMode(value) {
-    hudMode = value;
-    return value;
-  }
-  function setMusicStyle(value) {
-    musicStyle = value;
-    return value;
-  }
-
-  // src/js/core/settings.js
-  var muted = false;
-  var volMus = 100;
-  var volSfx = 100;
-  function initAudioSettings() {
-    try {
-      const a = localStorage.getItem("orbita_vol_mus"), b = localStorage.getItem("orbita_vol_sfx");
-      if (a !== null) {
-        volMus = Math.max(0, Math.min(100, +a || 0));
-      }
-      if (b !== null) {
-        volSfx = Math.max(0, Math.min(100, +b || 0));
-      }
-    } catch (e) {
-    }
-  }
-  function setVolMus(value) {
-    volMus = value;
-    return value;
-  }
-  function setVolSfx(value) {
-    volSfx = value;
-    return value;
-  }
-  function loadMute() {
-    try {
-      muted = localStorage.getItem("orbita_p1_sonido") === "0";
-    } catch (e) {
-    }
-  }
-  function setMuted(value) {
-    muted = value;
-    return value;
-  }
-
-  // src/js/02-audio.js
-  var AC = null;
-  var master = null;
-  var musicBus = null;
-  var NOISE = null;
-  var shaper = null;
-  var outBus = null;
-  var musVol = null;
-  var volGain = (v) => Math.pow(v / 100, 2);
-  function applyVolumes() {
-    if (!AC || !master || !musVol) {
-      return;
-    }
-    try {
-      const n = AC.currentTime;
-      master.gain.setTargetAtTime(volGain(volSfx), n, 0.03);
-      musVol.gain.setTargetAtTime(volGain(volMus), n, 0.03);
-    } catch (e) {
-    }
-  }
-  function saveVolumes() {
-    try {
-      localStorage.setItem("orbita_vol_mus", String(Math.round(volMus)));
-      localStorage.setItem("orbita_vol_sfx", String(Math.round(volSfx)));
-    } catch (e) {
-    }
-  }
-  function initAudio() {
-    if (AC) {
-      return;
-    }
-    try {
-      AC = new (window.AudioContext || window.webkitAudioContext)();
-      outBus = AC.createGain();
-      outBus.gain.value = typeof muted !== "undefined" && muted ? 0 : 0.6;
-      const comp = AC.createDynamicsCompressor();
-      outBus.connect(comp);
-      comp.connect(AC.destination);
-      master = AC.createGain();
-      master.gain.value = volGain(volSfx);
-      master.connect(outBus);
-      musVol = AC.createGain();
-      musVol.gain.value = volGain(volMus);
-      musVol.connect(outBus);
-      musicBus = AC.createGain();
-      musicBus.gain.value = 1e-4;
-      musicBus.connect(musVol);
-      const len = AC.sampleRate * 2;
-      NOISE = AC.createBuffer(1, len, AC.sampleRate);
-      const d = NOISE.getChannelData(0);
-      for (let i = 0; i < len; i++) {
-        d[i] = Math.random() * 2 - 1;
-      }
-    } catch (e) {
-      AC = null;
-    }
-  }
-  var ROOT = 415.3;
-  var SCALE = [0, 3, 5, 7, 10, 12, 15, 17];
-  function cowbell(semi) {
-    if (!AC) {
-      return;
-    }
-    try {
-      const t0 = AC.currentTime, f = ROOT * Math.pow(2, semi / 12);
-      const o1 = AC.createOscillator(), o2 = AC.createOscillator();
-      o1.type = o2.type = "square";
-      o1.frequency.value = f;
-      o2.frequency.value = f * 1.48;
-      const bp = AC.createBiquadFilter();
-      bp.type = "bandpass";
-      bp.frequency.value = f * 1.7;
-      bp.Q.value = 1.4;
-      const g = AC.createGain();
-      g.gain.setValueAtTime(1e-4, t0);
-      g.gain.exponentialRampToValueAtTime(0.3, t0 + 4e-3);
-      g.gain.exponentialRampToValueAtTime(1e-4, t0 + 0.26);
-      o1.connect(bp);
-      o2.connect(bp);
-      bp.connect(g);
-      g.connect(master);
-      o1.start(t0);
-      o2.start(t0);
-      o1.stop(t0 + 0.3);
-      o2.stop(t0 + 0.3);
-    } catch (e) {
-    }
-  }
-  function noiseHit(t0, dur, type, freq, gain, dest, f1) {
-    const src = AC.createBufferSource();
-    src.buffer = NOISE;
-    const f = AC.createBiquadFilter();
-    f.type = type;
-    f.Q.value = 0.9;
-    f.frequency.setValueAtTime(freq, t0);
-    if (f1) {
-      f.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
-    }
-    const g = AC.createGain();
-    g.gain.setValueAtTime(gain, t0);
-    g.gain.exponentialRampToValueAtTime(1e-4, t0 + dur);
-    src.connect(f);
-    f.connect(g);
-    g.connect(dest);
-    src.start(t0, Math.random() * 0.8);
-    src.stop(t0 + dur + 0.02);
-  }
-  function noise(dur, f0, f1, gain, type) {
-    if (!AC) {
-      return;
-    }
-    try {
-      noiseHit(AC.currentTime, dur, type, f0, gain, master, f1);
-    } catch (e) {
-    }
-  }
-  function thump() {
-    if (!AC) {
-      return;
-    }
-    try {
-      const t0 = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
-      o.type = "sine";
-      o.frequency.setValueAtTime(110, t0);
-      o.frequency.exponentialRampToValueAtTime(55, t0 + 0.1);
-      g.gain.setValueAtTime(0.3, t0);
-      g.gain.exponentialRampToValueAtTime(1e-4, t0 + 0.15);
-      o.connect(g);
-      g.connect(master);
-      o.start(t0);
-      o.stop(t0 + 0.17);
-    } catch (e) {
-    }
-  }
-  function suck() {
-    if (!AC) {
-      return;
-    }
-    try {
-      const t0 = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
-      o.type = "sine";
-      o.frequency.setValueAtTime(260, t0);
-      o.frequency.exponentialRampToValueAtTime(30, t0 + 1.8);
-      g.gain.setValueAtTime(1e-4, t0);
-      g.gain.exponentialRampToValueAtTime(0.45, t0 + 0.6);
-      g.gain.exponentialRampToValueAtTime(1e-4, t0 + 1.9);
-      o.connect(g);
-      g.connect(master);
-      o.start(t0);
-      o.stop(t0 + 2);
-      noiseHit(t0, 1.8, "lowpass", 2200, 0.45, master, 70);
-    } catch (e) {
-    }
-  }
-  function sub() {
-    if (!AC) {
-      return;
-    }
-    try {
-      const t0 = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
-      o.type = "sawtooth";
-      o.frequency.setValueAtTime(110, t0);
-      o.frequency.exponentialRampToValueAtTime(28, t0 + 0.9);
-      const lp = AC.createBiquadFilter();
-      lp.type = "lowpass";
-      lp.frequency.value = 400;
-      g.gain.setValueAtTime(0.5, t0);
-      g.gain.exponentialRampToValueAtTime(1e-4, t0 + 1);
-      o.connect(lp);
-      lp.connect(g);
-      g.connect(master);
-      o.start(t0);
-      o.stop(t0 + 1.05);
-    } catch (e) {
-    }
-  }
-  function setShaper(value) {
-    shaper = value;
     return value;
   }
 
@@ -7585,6 +7658,250 @@ const CHEV_R =
     return value;
   }
 
+  // src/js/data/hazards.js
+  var COMET_AT = {
+    5: /* @__PURE__ */ new Set([5, 9, 15, 21, 26, 31, 38, 44]),
+    6: /* @__PURE__ */ new Set([9, 13, 17, 22, 26, 30, 34, 38, 42, 46]),
+    7: /* @__PURE__ */ new Set([10, 16, 22, 29, 35, 43, 48])
+  };
+  var COMET_TIME = { 5: 2.4, 6: 1.9, 7: 1.8 };
+  var BEAM_AT = {
+    6: /* @__PURE__ */ new Set([7, 11, 15, 19, 24, 28, 32, 36, 40, 44, 47]),
+    7: /* @__PURE__ */ new Set([8, 14, 20, 27, 33, 39, 44])
+  };
+  var FLARE_AT = { 7: /* @__PURE__ */ new Set([6, 12, 18, 24, 30, 36, 41, 46]) };
+  var SN_AT = { 1: { 5: 1, 19: 1, 27: 1, 32: 1, 35: 1, 40: 2 } };
+  var OBJ_NEBULA = /* @__PURE__ */ new Set([3, 6, 10, 14, 18, 25, 33]);
+  var OBJ_PULSAR = /* @__PURE__ */ new Set([22, 23, 26, 30, 34, 41, 42, 45]);
+  var NEB_AT = {
+    3: /* @__PURE__ */ new Set([2, 9, 16, 23, 42]),
+    4: /* @__PURE__ */ new Set([2, 8, 16, 30, 45]),
+    5: /* @__PURE__ */ new Set([2, 8, 16, 25, 36]),
+    6: /* @__PURE__ */ new Set([2, 9, 18, 28]),
+    7: /* @__PURE__ */ new Set([2, 14, 17, 29])
+  };
+  var PUL_AT = {
+    3: /* @__PURE__ */ new Set([11, 22, 43]),
+    4: /* @__PURE__ */ new Set([9, 17, 22, 31, 46]),
+    5: /* @__PURE__ */ new Set([6, 14, 19, 34, 39]),
+    6: /* @__PURE__ */ new Set([10, 19, 29, 43]),
+    7: /* @__PURE__ */ new Set([5, 15, 38, 47])
+  };
+
+  // src/js/data/missions.js
+  var MIS_DAILY = [
+    { id: "perf10", g: 0, t: "Haz 10 Perfectos", d: "En cualquier nivel", n: 10, ev: "perf", rw: 40 },
+    {
+      id: "streak3",
+      g: 0,
+      t: "Haz 3 Perfectos seguidos",
+      d: "Sin fallar entre ellos",
+      n: 1,
+      ev: "streak3",
+      rw: 50
+    },
+    {
+      id: "reach30",
+      g: 0,
+      t: "Llega al anillo 30",
+      d: "En un solo intento",
+      n: 30,
+      ev: "reach",
+      max: true,
+      rw: 40
+    },
+    {
+      id: "ring100",
+      g: 1,
+      t: "Salta 100 anillos",
+      d: "Sumando todos tus intentos",
+      n: 100,
+      ev: "ring",
+      rw: 40
+    },
+    { id: "star2", g: 1, t: "Atrapa 2 estrellas", d: "En cualquier nivel", n: 2, ev: "star", rw: 50 },
+    {
+      id: "win1",
+      g: 1,
+      t: "Escapa de un nivel",
+      d: "Llega a la salida de cualquier galaxia",
+      n: 1,
+      ev: "win",
+      rw: 60
+    },
+    { id: "onda3", g: 2, t: "Escapa de 3 ondas", d: "Nubes de Magallanes", n: 3, ev: "onda", rw: 60 },
+    {
+      id: "power3",
+      g: 2,
+      t: "Usa tu poder 3 veces",
+      d: "Desliza hacia arriba con el poder listo",
+      n: 3,
+      ev: "power",
+      rw: 50
+    }
+  ];
+  var MIS_ACH = [
+    {
+      id: "tierra8",
+      t: "Todos los niveles con la Tierra",
+      d: "Escapa de cada galaxia usándola",
+      rw: 300,
+      feat: true
+    },
+    {
+      id: "cada",
+      t: "Un nivel con cada planeta",
+      d: "Escapa de cualquier nivel con cada uno",
+      rw: 500
+    },
+    { id: "andro1", t: "Andrómeda en un intento", d: "Sin morir ni una vez", rw: 400 },
+    { id: "seis", t: "6 estrellas en un nivel", rw: 200 },
+    { id: "perf100", t: "Haz 100 Perfectos", d: "Sumando todos tus intentos", rw: 150 },
+    { id: "ondas20", t: "Escapa de 20 ondas", d: "Nubes de Magallanes", rw: 150 },
+    { id: "todos", t: "Escapa de las 8 galaxias", d: "Todos los niveles", rw: 500 },
+    { id: "sol", t: "Llega al Sol", d: "El final del viaje", rw: 1e3, secret: true }
+  ];
+  var MIS_FACT = {
+    tierra8: "La Tierra viaja alrededor del Sol a unos 30 km por segundo. Es el único planeta conocido con agua líquida en su superficie.",
+    cada: "El sistema solar tiene 8 planetas y, por ahora, 5 planetas enanos reconocidos, entre ellos Plutón.",
+    andro1: "Andrómeda tiene cerca de un billón de estrellas y se acerca a nosotros a unos 110 km por segundo.",
+    seis: "Desde un lugar oscuro se pueden ver a simple vista unas 9 000 estrellas en todo el cielo, aunque solo la mitad a la vez.",
+    perf100: "Las órbitas no son círculos perfectos: en enero la Tierra está unos 5 millones de km más cerca del Sol que en julio.",
+    ondas20: "La supernova 1987A, en la Gran Nube de Magallanes, fue la más cercana vista desde 1604. Se vio a simple vista.",
+    todos: "Se calcula que en el universo observable hay cientos de miles de millones de galaxias.",
+    sol: "La luz del Sol tarda unos 8 minutos y 20 segundos en llegar a la Tierra."
+  };
+
+  // src/js/core/events.js
+  var listeners = /* @__PURE__ */ new Map();
+  function on(name, listener) {
+    if (!listeners.has(name)) {
+      listeners.set(name, []);
+    }
+    listeners.get(name).push(listener);
+  }
+  function emit(name, ...args) {
+    for (const listener of listeners.get(name) || []) {
+      listener(...args);
+    }
+  }
+
+  // src/js/game/missions.js
+  var MIS = null;
+  function misToday(off) {
+    const d = /* @__PURE__ */ new Date();
+    if (off) {
+      d.setDate(d.getDate() + off);
+    }
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function misLoad() {
+    if (!MIS) {
+      let d = {};
+      try {
+        d = JSON.parse(localStorage.getItem("orbita_mis") || "{}") || {};
+      } catch (e) {
+        d = {};
+      }
+      MIS = Object.assign(
+        {
+          polvo: 0,
+          day: "",
+          daily: [],
+          bonus: false,
+          streak: 0,
+          lastBonus: "",
+          st: { perf: 0, onda: 0 },
+          ach: {},
+          tierraLv: [],
+          planetsWon: [],
+          lvWon: [],
+          andro1: false,
+          sol: false,
+          factSeen: false
+        },
+        d
+      );
+    }
+    misRoll();
+    return MIS;
+  }
+  function misSave() {
+    try {
+      localStorage.setItem("orbita_mis", JSON.stringify(MIS));
+    } catch (e) {
+    }
+  }
+  function misRoll() {
+    const day = misToday();
+    if (MIS.day === day && MIS.daily.length === 3) {
+      return;
+    }
+    MIS.day = day;
+    MIS.bonus = false;
+    let h = 7;
+    for (const ch of day) {
+      h = h * 31 + ch.charCodeAt(0) | 0;
+    }
+    MIS.daily = [0, 1, 2].map((g) => {
+      const L = MIS_DAILY.filter((m) => m.g === g);
+      return { id: L[Math.abs(h >> g * 4) % L.length].id, p: 0, c: false };
+    });
+    misSave();
+  }
+  var misDef = (id) => MIS_DAILY.find((m) => m.id === id);
+  function misEvent(ev, v) {
+    if (tutorial) {
+      return;
+    }
+    misLoad();
+    if (ev === "perf") {
+      MIS.st.perf = (MIS.st.perf || 0) + 1;
+    }
+    if (ev === "onda") {
+      MIS.st.onda = (MIS.st.onda || 0) + 1;
+    }
+    let newly = false;
+    for (const m of MIS.daily) {
+      const D = misDef(m.id);
+      if (!D || D.ev !== ev || m.c) {
+        continue;
+      }
+      const was = m.p >= D.n;
+      m.p = Math.min(D.n, D.max ? Math.max(m.p, v || 0) : m.p + 1);
+      if (!was && m.p >= D.n) {
+        newly = true;
+      }
+    }
+    misSave();
+    if (newly) {
+      emit("missionReady");
+    }
+  }
+  function misWin(lv2, planet, tries) {
+    if (tutorial) {
+      return;
+    }
+    misLoad();
+    const add = (arr, x) => {
+      if (!arr.includes(x)) {
+        arr.push(x);
+      }
+    };
+    add(MIS.lvWon, lv2);
+    add(MIS.planetsWon, planet || "tierra");
+    if ((planet || "tierra") === "tierra") {
+      add(MIS.tierraLv, lv2);
+    }
+    if (lv2 === 2 && tries === 1) {
+      MIS.andro1 = true;
+    }
+    if (lv2 === 7) {
+      MIS.sol = true;
+    }
+    misEvent("win");
+  }
+
   // src/js/audio/ui-sounds.js
   function uiGlass(dir) {
     if (!AC || muted) {
@@ -7678,187 +7995,7 @@ const CHEV_R =
     }
   }
   var amb = null;
-
-  // src/js/core/screen.js
-  var introFade = 0;
-  function setIntroFade(value) {
-    introFade = value;
-    return value;
-  }
-  var HOME_IN = 8;
-  var logoT0 = -99;
-  var camZoom = 1;
-  var homeT = HOME_IN;
-  function setCamZoom(value) {
-    camZoom = value;
-    return value;
-  }
-  function setHomeT(value) {
-    homeT = value;
-    return value;
-  }
-  function setLogoT0(value) {
-    logoT0 = value;
-    return value;
-  }
-  var paused = false;
-  function setPaused(value) {
-    paused = value;
-    return value;
-  }
-  var pendingTut = false;
-  function setPendingTut(value) {
-    pendingTut = value;
-    return value;
-  }
-
-  // src/js/audio/pause-sounds.js
-  var pzAC = null;
-  var pzBus = null;
-  var pzNoise = null;
-  var pzHoverT = 0;
-  function pzCtx() {
-    if (!pzAC) {
-      pzAC = new (window.AudioContext || window.webkitAudioContext)();
-      const out = pzAC.createGain(), comp = pzAC.createDynamicsCompressor(), dl = pzAC.createDelay(1), fb = pzAC.createGain(), wet = pzAC.createGain();
-      out.gain.value = 0.6;
-      dl.delayTime.value = 0.27;
-      fb.gain.value = 0.35;
-      wet.gain.value = 0.45;
-      pzBus = pzAC.createGain();
-      pzBus.connect(out);
-      pzBus.connect(dl);
-      dl.connect(fb);
-      fb.connect(dl);
-      dl.connect(wet);
-      wet.connect(out);
-      out.connect(comp);
-      comp.connect(pzAC.destination);
-      const len = pzAC.sampleRate;
-      pzNoise = pzAC.createBuffer(1, len, pzAC.sampleRate);
-      const d = pzNoise.getChannelData(0);
-      for (let i = 0; i < len; i++) {
-        d[i] = Math.random() * 2 - 1;
-      }
-    }
-    if (pzAC.state === "suspended") {
-      pzAC.resume();
-    }
-    pzBus.gain.value = volGain(volSfx);
-    return pzAC;
-  }
-  function pzTone(semi, t0, dur, gain, type) {
-    const A = pzAC, o = A.createOscillator(), g = A.createGain(), lp = A.createBiquadFilter();
-    o.type = type || "sine";
-    o.frequency.value = ROOT * Math.pow(2, semi / 12);
-    lp.type = "lowpass";
-    lp.frequency.value = 3200;
-    g.gain.setValueAtTime(1e-4, t0);
-    g.gain.exponentialRampToValueAtTime(gain, t0 + 6e-3);
-    g.gain.exponentialRampToValueAtTime(1e-4, t0 + dur);
-    o.connect(lp);
-    lp.connect(g);
-    g.connect(pzBus);
-    o.start(t0);
-    o.stop(t0 + dur + 0.05);
-  }
-  function pzAir(t0, dur, f0, f1, gain, type) {
-    const A = pzAC, src = A.createBufferSource(), f = A.createBiquadFilter(), g = A.createGain();
-    src.buffer = pzNoise;
-    src.loop = true;
-    f.type = type || "bandpass";
-    f.Q.value = 0.9;
-    f.frequency.setValueAtTime(f0, t0);
-    f.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
-    g.gain.setValueAtTime(1e-4, t0);
-    g.gain.exponentialRampToValueAtTime(gain, t0 + dur * 0.25);
-    g.gain.exponentialRampToValueAtTime(1e-4, t0 + dur);
-    src.connect(f);
-    f.connect(g);
-    g.connect(pzBus);
-    src.start(t0);
-    src.stop(t0 + dur + 0.05);
-  }
-  function pzSub(t0, f0, f1, dur, gain) {
-    const A = pzAC, o = A.createOscillator(), g = A.createGain();
-    o.type = "sine";
-    o.frequency.setValueAtTime(f0, t0);
-    o.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
-    g.gain.setValueAtTime(1e-4, t0);
-    g.gain.exponentialRampToValueAtTime(gain, t0 + 0.015);
-    g.gain.exponentialRampToValueAtTime(1e-4, t0 + dur);
-    o.connect(g);
-    g.connect(pzBus);
-    o.start(t0);
-    o.stop(t0 + dur + 0.05);
-  }
-  function pzSnd(kind, v) {
-    if (muted) {
-      return;
-    }
-    try {
-      pzCtx();
-      const n = pzAC.currentTime + 5e-3;
-      if (kind === "open") {
-        pzAir(n, 0.55, 3200, 260, 0.2, "lowpass");
-        pzSub(n, 140, 46, 0.5, 0.3);
-        pzTone(19, n, 1.2, 0.06);
-        pzTone(15, n + 0.07, 1.2, 0.05);
-        pzTone(12, n + 0.14, 1.6, 0.055);
-        pzTone(24, n + 0.14, 0.7, 0.012);
-      } else if (kind === "go") {
-        pzTone(12, n, 1, 0.06);
-        pzTone(19, n + 0.06, 1.1, 0.05);
-        pzTone(24, n + 0.12, 1.3, 0.045);
-        pzAir(n, 0.4, 400, 4200, 0.1);
-      } else if (kind === "count") {
-        const s = { 3: 12, 2: 15, 1: 19 }[v] || 12;
-        pzTone(s, n, 0.55, 0.075);
-        pzTone(s + 12, n, 0.3, 0.018);
-        pzSub(n, 110, 70, 0.14, 0.14);
-      } else if (kind === "launch") {
-        pzTone(24, n, 0.9, 0.05);
-        pzTone(31, n + 0.03, 0.7, 0.02);
-        pzAir(n, 0.35, 6e3, 1200, 0.12, "highpass");
-        pzSub(n, 70, 140, 0.22, 0.2);
-      } else if (kind === "again") {
-        pzAir(n, 0.32, 300, 3800, 0.16);
-        pzTone(7, n, 0.5, 0.05);
-        pzTone(12, n + 0.08, 0.7, 0.055);
-        pzSub(n + 0.02, 60, 110, 0.2, 0.18);
-      } else if (kind === "levels") {
-        pzTone(19, n, 1.1, 0.06);
-        pzTone(12, n + 0.07, 1.3, 0.055);
-        pzTone(24, n + 0.07, 0.7, 0.015);
-      } else if (kind === "mute") {
-        pzTone(12, n, 0.4, 0.045);
-        pzTone(5, n + 0.06, 0.6, 0.04);
-      } else if (kind === "unmute") {
-        pzTone(5, n, 0.4, 0.04);
-        pzTone(12, n + 0.06, 0.6, 0.05);
-      } else if (kind === "slide") {
-        const sc = [0, 3, 5, 7, 10, 12, 15, 17, 19, 22, 24], s = sc[Math.min(sc.length - 1, Math.round(v / 100 * (sc.length - 1)))];
-        pzTone(s, n, 0.35, 0.02 + 0.045 * v / 100);
-        pzTone(s + 12, n, 0.18, 8e-3);
-      } else if (kind === "hover") {
-        const now = performance.now();
-        if (now - pzHoverT < 60) {
-          return;
-        }
-        pzHoverT = now;
-        const nt = [0, 3, 7, 10, 12, 15];
-        pzTone(nt[Math.floor(Math.random() * nt.length)] + 12, n, 0.9, 0.04);
-      }
-    } catch (e) {
-    }
-  }
-  function pzTick(i) {
-    pzSnd("count", i);
-  }
-
-  // src/js/28-sonidos-interfaz.js
   var uiBus = null;
-  var lastHover = null;
   var uiLastT = 0;
   function uiOut() {
     if (uiBus) {
@@ -8177,290 +8314,6 @@ const CHEV_R =
       }
     } catch (e) {
     }
-  }
-  function initUiSounds() {
-    window.addEventListener("pointerover", (e) => {
-      if (e.pointerType && e.pointerType !== "mouse") {
-        return;
-      }
-      const b = e.target && e.target.closest ? e.target.closest("button") : null;
-      if (b && !b.disabled && b !== lastHover) {
-        lastHover = b;
-        if (paused) {
-          pzSnd("hover");
-        } else {
-          uiHover();
-        }
-      }
-      if (!b) {
-        lastHover = null;
-      }
-    });
-    window.addEventListener(
-      "click",
-      (e) => {
-        const b = e.target && e.target.closest ? e.target.closest("button") : null;
-        if (!b || b.disabled) {
-          return;
-        }
-        if (b.id === "quit" || paused || b.closest && b.closest(".pzp")) {
-          return;
-        }
-        if (b.classList.contains("glass") || b.classList.contains("arrow")) {
-          uiGlass(b.classList.contains("l") ? -1 : 1);
-          return;
-        }
-        if (b.classList.contains("scanbtn")) {
-          return;
-        }
-        uiClick(b.classList.contains("bigplay") || b.classList.contains("play") ? "play" : "soft");
-      },
-      true
-    );
-  }
-
-  // src/js/data/hazards.js
-  var COMET_AT = {
-    5: /* @__PURE__ */ new Set([5, 9, 15, 21, 26, 31, 38, 44]),
-    6: /* @__PURE__ */ new Set([9, 13, 17, 22, 26, 30, 34, 38, 42, 46]),
-    7: /* @__PURE__ */ new Set([10, 16, 22, 29, 35, 43, 48])
-  };
-  var COMET_TIME = { 5: 2.4, 6: 1.9, 7: 1.8 };
-  var BEAM_AT = {
-    6: /* @__PURE__ */ new Set([7, 11, 15, 19, 24, 28, 32, 36, 40, 44, 47]),
-    7: /* @__PURE__ */ new Set([8, 14, 20, 27, 33, 39, 44])
-  };
-  var FLARE_AT = { 7: /* @__PURE__ */ new Set([6, 12, 18, 24, 30, 36, 41, 46]) };
-  var SN_AT = { 1: { 5: 1, 19: 1, 27: 1, 32: 1, 35: 1, 40: 2 } };
-  var OBJ_NEBULA = /* @__PURE__ */ new Set([3, 6, 10, 14, 18, 25, 33]);
-  var OBJ_PULSAR = /* @__PURE__ */ new Set([22, 23, 26, 30, 34, 41, 42, 45]);
-  var NEB_AT = {
-    3: /* @__PURE__ */ new Set([2, 9, 16, 23, 42]),
-    4: /* @__PURE__ */ new Set([2, 8, 16, 30, 45]),
-    5: /* @__PURE__ */ new Set([2, 8, 16, 25, 36]),
-    6: /* @__PURE__ */ new Set([2, 9, 18, 28]),
-    7: /* @__PURE__ */ new Set([2, 14, 17, 29])
-  };
-  var PUL_AT = {
-    3: /* @__PURE__ */ new Set([11, 22, 43]),
-    4: /* @__PURE__ */ new Set([9, 17, 22, 31, 46]),
-    5: /* @__PURE__ */ new Set([6, 14, 19, 34, 39]),
-    6: /* @__PURE__ */ new Set([10, 19, 29, 43]),
-    7: /* @__PURE__ */ new Set([5, 15, 38, 47])
-  };
-
-  // src/js/data/missions.js
-  var MIS_DAILY = [
-    { id: "perf10", g: 0, t: "Haz 10 Perfectos", d: "En cualquier nivel", n: 10, ev: "perf", rw: 40 },
-    {
-      id: "streak3",
-      g: 0,
-      t: "Haz 3 Perfectos seguidos",
-      d: "Sin fallar entre ellos",
-      n: 1,
-      ev: "streak3",
-      rw: 50
-    },
-    {
-      id: "reach30",
-      g: 0,
-      t: "Llega al anillo 30",
-      d: "En un solo intento",
-      n: 30,
-      ev: "reach",
-      max: true,
-      rw: 40
-    },
-    {
-      id: "ring100",
-      g: 1,
-      t: "Salta 100 anillos",
-      d: "Sumando todos tus intentos",
-      n: 100,
-      ev: "ring",
-      rw: 40
-    },
-    { id: "star2", g: 1, t: "Atrapa 2 estrellas", d: "En cualquier nivel", n: 2, ev: "star", rw: 50 },
-    {
-      id: "win1",
-      g: 1,
-      t: "Escapa de un nivel",
-      d: "Llega a la salida de cualquier galaxia",
-      n: 1,
-      ev: "win",
-      rw: 60
-    },
-    { id: "onda3", g: 2, t: "Escapa de 3 ondas", d: "Nubes de Magallanes", n: 3, ev: "onda", rw: 60 },
-    {
-      id: "power3",
-      g: 2,
-      t: "Usa tu poder 3 veces",
-      d: "Desliza hacia arriba con el poder listo",
-      n: 3,
-      ev: "power",
-      rw: 50
-    }
-  ];
-  var MIS_ACH = [
-    {
-      id: "tierra8",
-      t: "Todos los niveles con la Tierra",
-      d: "Escapa de cada galaxia usándola",
-      rw: 300,
-      feat: true
-    },
-    {
-      id: "cada",
-      t: "Un nivel con cada planeta",
-      d: "Escapa de cualquier nivel con cada uno",
-      rw: 500
-    },
-    { id: "andro1", t: "Andrómeda en un intento", d: "Sin morir ni una vez", rw: 400 },
-    { id: "seis", t: "6 estrellas en un nivel", rw: 200 },
-    { id: "perf100", t: "Haz 100 Perfectos", d: "Sumando todos tus intentos", rw: 150 },
-    { id: "ondas20", t: "Escapa de 20 ondas", d: "Nubes de Magallanes", rw: 150 },
-    { id: "todos", t: "Escapa de las 8 galaxias", d: "Todos los niveles", rw: 500 },
-    { id: "sol", t: "Llega al Sol", d: "El final del viaje", rw: 1e3, secret: true }
-  ];
-  var MIS_FACT = {
-    tierra8: "La Tierra viaja alrededor del Sol a unos 30 km por segundo. Es el único planeta conocido con agua líquida en su superficie.",
-    cada: "El sistema solar tiene 8 planetas y, por ahora, 5 planetas enanos reconocidos, entre ellos Plutón.",
-    andro1: "Andrómeda tiene cerca de un billón de estrellas y se acerca a nosotros a unos 110 km por segundo.",
-    seis: "Desde un lugar oscuro se pueden ver a simple vista unas 9 000 estrellas en todo el cielo, aunque solo la mitad a la vez.",
-    perf100: "Las órbitas no son círculos perfectos: en enero la Tierra está unos 5 millones de km más cerca del Sol que en julio.",
-    ondas20: "La supernova 1987A, en la Gran Nube de Magallanes, fue la más cercana vista desde 1604. Se vio a simple vista.",
-    todos: "Se calcula que en el universo observable hay cientos de miles de millones de galaxias.",
-    sol: "La luz del Sol tarda unos 8 minutos y 20 segundos en llegar a la Tierra."
-  };
-
-  // src/js/core/events.js
-  var listeners = /* @__PURE__ */ new Map();
-  function on(name, listener) {
-    if (!listeners.has(name)) {
-      listeners.set(name, []);
-    }
-    listeners.get(name).push(listener);
-  }
-  function emit(name, ...args) {
-    for (const listener of listeners.get(name) || []) {
-      listener(...args);
-    }
-  }
-
-  // src/js/game/missions.js
-  var MIS = null;
-  function misToday(off) {
-    const d = /* @__PURE__ */ new Date();
-    if (off) {
-      d.setDate(d.getDate() + off);
-    }
-    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
-  }
-  function misLoad() {
-    if (!MIS) {
-      let d = {};
-      try {
-        d = JSON.parse(localStorage.getItem("orbita_mis") || "{}") || {};
-      } catch (e) {
-        d = {};
-      }
-      MIS = Object.assign(
-        {
-          polvo: 0,
-          day: "",
-          daily: [],
-          bonus: false,
-          streak: 0,
-          lastBonus: "",
-          st: { perf: 0, onda: 0 },
-          ach: {},
-          tierraLv: [],
-          planetsWon: [],
-          lvWon: [],
-          andro1: false,
-          sol: false,
-          factSeen: false
-        },
-        d
-      );
-    }
-    misRoll();
-    return MIS;
-  }
-  function misSave() {
-    try {
-      localStorage.setItem("orbita_mis", JSON.stringify(MIS));
-    } catch (e) {
-    }
-  }
-  function misRoll() {
-    const day = misToday();
-    if (MIS.day === day && MIS.daily.length === 3) {
-      return;
-    }
-    MIS.day = day;
-    MIS.bonus = false;
-    let h = 7;
-    for (const ch of day) {
-      h = h * 31 + ch.charCodeAt(0) | 0;
-    }
-    MIS.daily = [0, 1, 2].map((g) => {
-      const L = MIS_DAILY.filter((m) => m.g === g);
-      return { id: L[Math.abs(h >> g * 4) % L.length].id, p: 0, c: false };
-    });
-    misSave();
-  }
-  var misDef = (id) => MIS_DAILY.find((m) => m.id === id);
-  function misEvent(ev, v) {
-    if (tutorial) {
-      return;
-    }
-    misLoad();
-    if (ev === "perf") {
-      MIS.st.perf = (MIS.st.perf || 0) + 1;
-    }
-    if (ev === "onda") {
-      MIS.st.onda = (MIS.st.onda || 0) + 1;
-    }
-    let newly = false;
-    for (const m of MIS.daily) {
-      const D = misDef(m.id);
-      if (!D || D.ev !== ev || m.c) {
-        continue;
-      }
-      const was = m.p >= D.n;
-      m.p = Math.min(D.n, D.max ? Math.max(m.p, v || 0) : m.p + 1);
-      if (!was && m.p >= D.n) {
-        newly = true;
-      }
-    }
-    misSave();
-    if (newly) {
-      emit("missionReady");
-    }
-  }
-  function misWin(lv2, planet, tries) {
-    if (tutorial) {
-      return;
-    }
-    misLoad();
-    const add = (arr, x) => {
-      if (!arr.includes(x)) {
-        arr.push(x);
-      }
-    };
-    add(MIS.lvWon, lv2);
-    add(MIS.planetsWon, planet || "tierra");
-    if ((planet || "tierra") === "tierra") {
-      add(MIS.tierraLv, lv2);
-    }
-    if (lv2 === 2 && tries === 1) {
-      MIS.andro1 = true;
-    }
-    if (lv2 === 7) {
-      MIS.sol = true;
-    }
-    misEvent("win");
   }
 
   // src/js/15-peligros.js
@@ -11763,95 +11616,6 @@ void main(){
     startMusic();
   }
 
-  // src/js/data/levels.js
-  var LEVELS = [
-    {
-      name: "Sistema solar",
-      diff: "Fácil",
-      col: "#86c99a",
-      ready: true,
-      icon: "solar",
-      dist: "Aquí, en casa",
-      fact: "Nuestro hogar: el Sol y ocho planetas, formados hace unos 4600 millones de años.",
-      nuevo: "Muralla, respiración y escalera"
-    },
-    {
-      name: "Nubes de Magallanes",
-      diff: "Fácil",
-      col: "#86c99a",
-      ready: true,
-      icon: "magallanes",
-      dist: "A unos 160 000 años luz",
-      fact: "Dos galaxias enanas que giran una alrededor de la otra mientras orbitan la Vía Láctea. Se ven a simple vista desde el hemisferio sur.",
-      nuevo: "Contragiro"
-    },
-    {
-      name: "Andrómeda",
-      diff: "Medio",
-      col: "#e3bf72",
-      ready: true,
-      icon: "andromeda",
-      dist: "A unos 2,5 millones de años luz",
-      fact: "La galaxia grande más cercana a la nuestra. Se acerca: chocará con la Vía Láctea en unos 4500 millones de años.",
-      nuevo: "Nebulosas que te impulsan y púlsares que te empujan"
-    },
-    {
-      name: "Centaurus A",
-      diff: "Medio",
-      col: "#e3bf72",
-      ready: true,
-      icon: "centaurus",
-      dist: "A unos 12 millones de años luz",
-      fact: "Nació de la fusión de dos galaxias. Una enorme franja de polvo la cruza, y su agujero negro lanza chorros gigantes.",
-      nuevo: "Freno"
-    },
-    {
-      name: "Remolino",
-      diff: "Medio",
-      col: "#e3bf72",
-      ready: true,
-      icon: "remolino",
-      dist: "A unos 23 a 31 millones de años luz",
-      fact: "Una galaxia espiral que está chocando con una galaxia vecina más pequeña, y sus fuerzas de marea la deforman.",
-      nuevo: "Fuerzas de marea"
-    },
-    {
-      name: "Sombrero",
-      diff: "Medio",
-      col: "#e3bf72",
-      ready: true,
-      icon: "sombrero",
-      dist: "A unos 30 millones de años luz",
-      fact: "Su núcleo brillante y su franja oscura de polvo, vistos casi de lado, le dan forma de sombrero.",
-      nuevo: "Cometas que recorren tu anillo"
-    },
-    {
-      name: "M87",
-      diff: "Difícil",
-      col: "#e98d63",
-      ready: true,
-      icon: "m87",
-      dist: "A unos 54 millones de años luz",
-      fact: "Su agujero negro fue el primero en ser fotografiado, en 2019. Lanza un chorro de energía de miles de años luz.",
-      nuevo: "Rayos de energía"
-    },
-    {
-      name: "Sagitario A*",
-      diff: "Muy difícil",
-      col: "#e9738a",
-      ready: true,
-      icon: "sgr",
-      dist: "A unos 26 000 años luz: el regreso a casa",
-      fact: "El agujero negro del centro de nuestra galaxia, unos 4 millones de veces más masivo que el Sol. Vencerlo te devuelve al Sol.",
-      nuevo: "Llamaradas y cometas en pinza"
-    }
-  ];
-  var COIN_RINGS = [
-    /* @__PURE__ */ new Set([4, 12, 22, 28, 37, 45]),
-    /* @__PURE__ */ new Set([4, 9, 15, 18, 32, 40]),
-    /* @__PURE__ */ new Set([4, 9, 15, 17, 31, 43])
-  ];
-
   // src/js/audio/sfx.js
   function powerReadySound() {
     if (!AC || muted) {
@@ -11902,6 +11666,57 @@ void main(){
     doblesHechos = value;
     return value;
   }
+
+  // src/js/core/screen.js
+  var introFade = 0;
+  function setIntroFade(value) {
+    introFade = value;
+    return value;
+  }
+  var HOME_IN = 8;
+  var logoT0 = -99;
+  var camZoom = 1;
+  var homeT = HOME_IN;
+  function setCamZoom(value) {
+    camZoom = value;
+    return value;
+  }
+  function setHomeT(value) {
+    homeT = value;
+    return value;
+  }
+  function setLogoT0(value) {
+    logoT0 = value;
+    return value;
+  }
+  var paused = false;
+  function setPaused(value) {
+    paused = value;
+    return value;
+  }
+  var pendingTut = false;
+  function setPendingTut(value) {
+    pendingTut = value;
+    return value;
+  }
+
+  // src/js/game/zones.js
+  var ZONES = [
+    { ring: BONE, ast: BONE, s1: "#ffe2b0", s2: "#ff5a1f", bg: "#0d1220" },
+    { ring: BONE, ast: BONE, s1: "#ffe2b0", s2: "#ff5a1f", bg: "#120f1e" },
+    { ring: BONE, ast: BONE, s1: "#ffe2b0", s2: "#ff5a1f", bg: "#0f1220" },
+    { ring: BONE, ast: BONE, s1: "#ffe2b0", s2: "#ff5a1f", bg: "#120c22" }
+  ];
+  var ZONE_AND = { ring: "#ece6d8", ast: "#ece6d8", s1: "#ffe2b0", s2: "#ff5a1f", bg: "#060714" };
+  var ZONE_MAG = { ring: "#ece6d8", ast: "#ece6d8", s1: "#ffe2b0", s2: "#ff5a1f", bg: "#04070e" };
+  var ZONE_LV = {
+    3: { ring: "#ece6d8", ast: "#ece6d8", s1: "#ffe2b0", s2: "#ff5a1f", bg: "#07060a" },
+    4: { ring: "#ece6d8", ast: "#ece6d8", s1: "#ffe2b0", s2: "#ff5a1f", bg: "#050712" },
+    5: { ring: "#ece6d8", ast: "#ece6d8", s1: "#ffe2b0", s2: "#ff5a1f", bg: "#05050a" },
+    6: { ring: "#ece6d8", ast: "#ece6d8", s1: "#ffe2b0", s2: "#ff5a1f", bg: "#07050a" },
+    7: { ring: "#ece6d8", ast: "#ece6d8", s1: "#ffe2b0", s2: "#ff5a1f", bg: "#0a0607" }
+  };
+  var zoneOf = (k) => lvl >= 3 && !tutorial ? ZONE_LV[lvl] : lvl === 1 && !tutorial ? ZONE_MAG : lvl === 2 && !tutorial ? ZONE_AND : ZONES[Math.floor(k / 25) % ZONES.length];
 
   // src/js/16-partida.js
   function makeRing(k) {
@@ -21830,6 +21645,150 @@ void main(){
     return value;
   }
 
+  // src/js/audio/pause-sounds.js
+  var pzAC = null;
+  var pzBus = null;
+  var pzNoise = null;
+  var pzHoverT = 0;
+  function pzCtx() {
+    if (!pzAC) {
+      pzAC = new (window.AudioContext || window.webkitAudioContext)();
+      const out = pzAC.createGain(), comp = pzAC.createDynamicsCompressor(), dl = pzAC.createDelay(1), fb = pzAC.createGain(), wet = pzAC.createGain();
+      out.gain.value = 0.6;
+      dl.delayTime.value = 0.27;
+      fb.gain.value = 0.35;
+      wet.gain.value = 0.45;
+      pzBus = pzAC.createGain();
+      pzBus.connect(out);
+      pzBus.connect(dl);
+      dl.connect(fb);
+      fb.connect(dl);
+      dl.connect(wet);
+      wet.connect(out);
+      out.connect(comp);
+      comp.connect(pzAC.destination);
+      const len = pzAC.sampleRate;
+      pzNoise = pzAC.createBuffer(1, len, pzAC.sampleRate);
+      const d = pzNoise.getChannelData(0);
+      for (let i = 0; i < len; i++) {
+        d[i] = Math.random() * 2 - 1;
+      }
+    }
+    if (pzAC.state === "suspended") {
+      pzAC.resume();
+    }
+    pzBus.gain.value = volGain(volSfx);
+    return pzAC;
+  }
+  function pzTone(semi, t0, dur, gain, type) {
+    const A = pzAC, o = A.createOscillator(), g = A.createGain(), lp = A.createBiquadFilter();
+    o.type = type || "sine";
+    o.frequency.value = ROOT * Math.pow(2, semi / 12);
+    lp.type = "lowpass";
+    lp.frequency.value = 3200;
+    g.gain.setValueAtTime(1e-4, t0);
+    g.gain.exponentialRampToValueAtTime(gain, t0 + 6e-3);
+    g.gain.exponentialRampToValueAtTime(1e-4, t0 + dur);
+    o.connect(lp);
+    lp.connect(g);
+    g.connect(pzBus);
+    o.start(t0);
+    o.stop(t0 + dur + 0.05);
+  }
+  function pzAir(t0, dur, f0, f1, gain, type) {
+    const A = pzAC, src = A.createBufferSource(), f = A.createBiquadFilter(), g = A.createGain();
+    src.buffer = pzNoise;
+    src.loop = true;
+    f.type = type || "bandpass";
+    f.Q.value = 0.9;
+    f.frequency.setValueAtTime(f0, t0);
+    f.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+    g.gain.setValueAtTime(1e-4, t0);
+    g.gain.exponentialRampToValueAtTime(gain, t0 + dur * 0.25);
+    g.gain.exponentialRampToValueAtTime(1e-4, t0 + dur);
+    src.connect(f);
+    f.connect(g);
+    g.connect(pzBus);
+    src.start(t0);
+    src.stop(t0 + dur + 0.05);
+  }
+  function pzSub(t0, f0, f1, dur, gain) {
+    const A = pzAC, o = A.createOscillator(), g = A.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(f0, t0);
+    o.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+    g.gain.setValueAtTime(1e-4, t0);
+    g.gain.exponentialRampToValueAtTime(gain, t0 + 0.015);
+    g.gain.exponentialRampToValueAtTime(1e-4, t0 + dur);
+    o.connect(g);
+    g.connect(pzBus);
+    o.start(t0);
+    o.stop(t0 + dur + 0.05);
+  }
+  function pzSnd(kind, v) {
+    if (muted) {
+      return;
+    }
+    try {
+      pzCtx();
+      const n = pzAC.currentTime + 5e-3;
+      if (kind === "open") {
+        pzAir(n, 0.55, 3200, 260, 0.2, "lowpass");
+        pzSub(n, 140, 46, 0.5, 0.3);
+        pzTone(19, n, 1.2, 0.06);
+        pzTone(15, n + 0.07, 1.2, 0.05);
+        pzTone(12, n + 0.14, 1.6, 0.055);
+        pzTone(24, n + 0.14, 0.7, 0.012);
+      } else if (kind === "go") {
+        pzTone(12, n, 1, 0.06);
+        pzTone(19, n + 0.06, 1.1, 0.05);
+        pzTone(24, n + 0.12, 1.3, 0.045);
+        pzAir(n, 0.4, 400, 4200, 0.1);
+      } else if (kind === "count") {
+        const s = { 3: 12, 2: 15, 1: 19 }[v] || 12;
+        pzTone(s, n, 0.55, 0.075);
+        pzTone(s + 12, n, 0.3, 0.018);
+        pzSub(n, 110, 70, 0.14, 0.14);
+      } else if (kind === "launch") {
+        pzTone(24, n, 0.9, 0.05);
+        pzTone(31, n + 0.03, 0.7, 0.02);
+        pzAir(n, 0.35, 6e3, 1200, 0.12, "highpass");
+        pzSub(n, 70, 140, 0.22, 0.2);
+      } else if (kind === "again") {
+        pzAir(n, 0.32, 300, 3800, 0.16);
+        pzTone(7, n, 0.5, 0.05);
+        pzTone(12, n + 0.08, 0.7, 0.055);
+        pzSub(n + 0.02, 60, 110, 0.2, 0.18);
+      } else if (kind === "levels") {
+        pzTone(19, n, 1.1, 0.06);
+        pzTone(12, n + 0.07, 1.3, 0.055);
+        pzTone(24, n + 0.07, 0.7, 0.015);
+      } else if (kind === "mute") {
+        pzTone(12, n, 0.4, 0.045);
+        pzTone(5, n + 0.06, 0.6, 0.04);
+      } else if (kind === "unmute") {
+        pzTone(5, n, 0.4, 0.04);
+        pzTone(12, n + 0.06, 0.6, 0.05);
+      } else if (kind === "slide") {
+        const sc = [0, 3, 5, 7, 10, 12, 15, 17, 19, 22, 24], s = sc[Math.min(sc.length - 1, Math.round(v / 100 * (sc.length - 1)))];
+        pzTone(s, n, 0.35, 0.02 + 0.045 * v / 100);
+        pzTone(s + 12, n, 0.18, 8e-3);
+      } else if (kind === "hover") {
+        const now = performance.now();
+        if (now - pzHoverT < 60) {
+          return;
+        }
+        pzHoverT = now;
+        const nt = [0, 3, 7, 10, 12, 15];
+        pzTone(nt[Math.floor(Math.random() * nt.length)] + 12, n, 0.9, 0.04);
+      }
+    } catch (e) {
+    }
+  }
+  function pzTick(i) {
+    pzSnd("count", i);
+  }
+
   // src/js/18-pausa.js
   var pzCount = null;
   var pzPanelCls = "";
@@ -22860,6 +22819,49 @@ void main(){
       }
     }
     setBurns(burns.filter((b) => b.life > 0));
+  }
+
+  // src/js/28-sonidos-interfaz.js
+  var lastHover = null;
+  function initUiSounds() {
+    window.addEventListener("pointerover", (e) => {
+      if (e.pointerType && e.pointerType !== "mouse") {
+        return;
+      }
+      const b = e.target && e.target.closest ? e.target.closest("button") : null;
+      if (b && !b.disabled && b !== lastHover) {
+        lastHover = b;
+        if (paused) {
+          pzSnd("hover");
+        } else {
+          uiHover();
+        }
+      }
+      if (!b) {
+        lastHover = null;
+      }
+    });
+    window.addEventListener(
+      "click",
+      (e) => {
+        const b = e.target && e.target.closest ? e.target.closest("button") : null;
+        if (!b || b.disabled) {
+          return;
+        }
+        if (b.id === "quit" || paused || b.closest && b.closest(".pzp")) {
+          return;
+        }
+        if (b.classList.contains("glass") || b.classList.contains("arrow")) {
+          uiGlass(b.classList.contains("l") ? -1 : 1);
+          return;
+        }
+        if (b.classList.contains("scanbtn")) {
+          return;
+        }
+        uiClick(b.classList.contains("bigplay") || b.classList.contains("play") ? "play" : "soft");
+      },
+      true
+    );
   }
 
   // src/js/36-bucle-principal.js

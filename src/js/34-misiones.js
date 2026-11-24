@@ -9,14 +9,13 @@ import { PLANETS_P, curPlanet } from './07-planetas.js';
 import { t } from './08-partida-estado.js';
 
 import { elHome, renderHome } from './26-pantalla-inicio.js';
-import { uiTone } from './28-sonidos-interfaz.js';
 
 import { COIN_RINGS, LEVELS } from './data/levels.js';
 
 import { MIS_ACH, MIS_FACT } from './data/missions.js';
 import { muted } from './core/settings.js';
 import { PLGL, planetThumb } from './render/planets.js';
-import { uiGlass } from './audio/ui-sounds.js';
+import { uiGlass, uiTone } from './audio/ui-sounds.js';
 import { lvStarsGot } from './game/progress.js';
 import { MIS, misDef, misLoad, misRoll, misSave, misToday } from './game/missions.js';
 import { on } from './core/events.js';

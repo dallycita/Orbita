@@ -9,7 +9,7 @@ import { setState, state } from './06-record-y-estado.js';
 import { PLANETS_P, curPlanet, planetOk, setCurPlanet } from './07-planetas.js';
 import { setT, t } from './08-partida-estado.js';
 import { elHome } from './26-pantalla-inicio.js';
-import { uiOut, uiTone } from './28-sonidos-interfaz.js';
+
 import { muted } from './core/settings.js';
 import {
   STAT_ROWS,
@@ -28,7 +28,7 @@ import {
   statWords,
 } from './30-escanear.js';
 import { PLGL, drawBigPlanet } from './render/planets.js';
-import { uiGlass } from './audio/ui-sounds.js';
+import { uiGlass, uiOut, uiTone } from './audio/ui-sounds.js';
 
 let elPl;
 let pIndex = 0;

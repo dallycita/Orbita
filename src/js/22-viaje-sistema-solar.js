@@ -19,11 +19,9 @@ import {
   reduceMotion,
   rgba,
   stars,
-  zoneOf,
 } from './01-pantalla-y-utilidades.js';
 import { dangerFlash, dangerNow } from './03-musica-ritmos.js';
 import {
-  GOAL,
   appear,
   astFade,
   charge,
@@ -89,6 +87,8 @@ import { GLBG, REMOLINO_PHOTO, remolinoSource } from './32-fondos-9-motor.js';
 import { drawPlayer } from './render/planets.js';
 import { brandHole, drawLogo } from './render/black-hole.js';
 import { camZoom, homeT, introFade, logoT0, setCamZoom } from './core/screen.js';
+import { GOAL } from './data/levels.js';
+import { zoneOf } from './game/zones.js';
 
 /**
  * Dibuja la escena completa de la partida en el lienzo principal, con temblor y zoom de cámara.

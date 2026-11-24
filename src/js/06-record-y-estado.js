@@ -79,8 +79,6 @@ let appear = 1;
 let charge = 0;
 let jumpTarget = 1;
 let crossed = false;
-// Anillo de la salida.
-const GOAL = 50;
 let lvl = 0; // Índice en LEVELS: 0 Sistema solar, 1 Nubes de Magallanes, 2 Andrómeda…
 let best2 = 0;
 let attempts2 = 0;
@@ -416,7 +414,6 @@ export function setState(value) {
 }
 
 export {
-  GOAL,
   appear,
   astFade,
   attX,

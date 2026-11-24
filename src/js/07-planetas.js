@@ -3,10 +3,11 @@
  * elegido y cómo sus estadísticas cambian el juego (tamaño, salto, resistencia, carga).
  * Las estadísticas st son porcentajes respecto a la Tierra; el balance se revisa con simulaciones.
  */
-import { GOAL, bestOf, bestRing } from './06-record-y-estado.js';
+import { bestOf, bestRing } from './06-record-y-estado.js';
 import { JUMP_DUR, perfCount } from './08-partida-estado.js';
 
 import { planetThumb } from './render/planets.js';
+import { GOAL } from './data/levels.js';
 
 // Planeta elegido, récord de Perfectos en una partida, secreto de Plutón, truco de todos los
 // planetas, cargas de escudo y si se usó el salto doble en la partida.

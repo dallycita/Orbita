@@ -24,7 +24,6 @@ import {
 import { AC, ROOT, master, noise, noiseHit, thump } from './02-audio.js';
 import { TB, dKick, echoBus, impact } from './03-musica-ritmos.js';
 import {
-  GOAL,
   camLevel,
   level,
   pAng,
@@ -67,6 +66,7 @@ import { ensureRings, rr } from './16-partida.js';
 import { muted } from './core/settings.js';
 import { misEvent } from './game/missions.js';
 import { advanceJourney } from './core/journey.js';
+import { GOAL } from './data/levels.js';
 
 /**
  * Golpes de música entre lanzamientos: cuatro en los primeros anillos (para aprender), luego tres.

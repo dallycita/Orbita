@@ -2,8 +2,9 @@
  * (encabezado pendiente)
  */
 import { AC, ROOT } from '../02-audio.js';
-import { uiOut, uiTone } from '../28-sonidos-interfaz.js';
+
 import { muted } from '../core/settings.js';
+import { uiOut, uiTone } from './ui-sounds.js';
 
 /** Sonido del poder listo: un arpegio brillante que sube y un destello. */
 function powerReadySound() {

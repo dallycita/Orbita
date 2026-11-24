@@ -2,10 +2,11 @@
  * Recorridos fijos de los niveles 1 a 3: qué tipo de anillo hay en cada posición, y el generador
  * aleatorio con semilla fija que hace que cada partida sea igual.
  */
-import { GOAL, lvl } from './06-record-y-estado.js';
+import { lvl } from './06-record-y-estado.js';
 import { TUT_TYPES, tutorial } from './08-partida-estado.js';
 import { courseMaps } from './10-ritmo-y-objetos.js';
 import { COURSE, COURSE2, COURSE3, courseMap, courseMap2, courseMap3 } from './data/courses.js';
+import { GOAL } from './data/levels.js';
 
 // Generador con semilla fija: el recorrido es siempre el mismo, como un nivel de Geometry Dash.
 const SEED = 20261007;

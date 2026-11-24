@@ -12,7 +12,6 @@ import {
   elHud,
   elPanel,
   reduceMotion,
-  zoneOf,
 } from './01-pantalla-y-utilidades.js';
 import { AC, NOISE, ROOT, SCALE, cowbell, master, noise, sub, suck, thump } from './02-audio.js';
 import { TB } from './03-musica-ritmos.js';
@@ -177,6 +176,7 @@ import { lvStarsGot, noteDouble } from './game/progress.js';
 import { setPendingTut } from './core/screen.js';
 import { misEvent, misWin } from './game/missions.js';
 import { resetJourney } from './core/journey.js';
+import { zoneOf } from './game/zones.js';
 
 /**
  * Crea un anillo con sus obstáculos y su giro según el tipo que le toca en el nivel.

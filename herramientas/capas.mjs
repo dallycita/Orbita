@@ -12,7 +12,7 @@ const JS = join(dirname(new URL(import.meta.url).pathname), '..', 'src', 'js');
 const LAYERS = ['data', 'core', 'audio', 'game', 'render', 'screens', 'main'];
 const PENDIENTES = {
   '01': 'core', '06': 'core', '08': 'core', '07': 'game', '09': 'game',
-  '02': 'audio', '03': 'audio', '04': 'audio', '05': 'audio', '28': 'audio',
+  '02': 'audio', '03': 'audio', '04': 'audio', '05': 'audio', '28': 'screens',
   '10': 'game', '11': 'game', '12': 'game', '13': 'game', '14': 'game', '15': 'game', '16': 'game', '17': 'game', '20': 'game',
   '21': 'render', '22': 'render', '31': 'render', '32': 'render',
   '18': 'screens', '19': 'screens', '23': 'screens', '24': 'screens', '25': 'screens', '26': 'screens', '27': 'screens',

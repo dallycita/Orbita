@@ -2,7 +2,7 @@
  * Estado compartido de la partida: contadores, tutorial, gestos, rachas, reloj del juego (`t`) y
  * listas de efectos en pantalla. Solo declara variables; las cambian muchos archivos.
  */
-import { GOAL } from './06-record-y-estado.js';
+import { GOAL } from './data/levels.js';
 
 // winT: segundos desde que se ganó; perfCount: saltos perfectos; attempts: intentos guardados
 let winT = 0;
