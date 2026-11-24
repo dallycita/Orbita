@@ -1,5 +1,8 @@
-// Galaxias lejanas (niveles 4 a 8): lo que comparten sus fondos (estrellas, cúmulos, meteoros,
-// destellos)
+/**
+ * Primera parte del shader de las galaxias lejanas (niveles 4 a 8): lo que comparten sus fondos
+ * (estrellas, cúmulos, meteoros y destellos). 32-fondos-56-final la une con las demás en FS_GX.
+ * Todo es código GLSL dentro de un texto: cambiar algo ahí dentro cambia el juego.
+ */
 const GX_BASE = `
 uniform float uScale; uniform float uKind;
 float fbm7(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 7; i++){ s += a*vn(p); p = m*p; a *= .5; } return s; }

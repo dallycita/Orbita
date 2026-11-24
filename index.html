@@ -4776,15 +4776,21 @@ body.paused #wallet {
   </div>
 </div>
 <script>
+/**
+ * Íconos SVG de las flechas (chevrones y arcos de gravedad) y su animación al tocarlas.
+ * Escucha los clics en todo el documento: al tocar una flecha (.arrow o .back) le pone la clase
+ * 'go' y se la quita al terminar la animación.
+ */
 const CHEV_L =
   '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-// arco de gravedad para las flechas: medio anillo que se abre hacia donde vas, con una pincelada
-// naranja
+// Arco de gravedad para las flechas: medio anillo que se abre hacia donde se va, con una pincelada
+// naranja.
 const ARC_L =
   '<svg class="arc" viewBox="0 0 52 52" aria-hidden="true"><path class="base" d="M34 6 A22 22 0 1 0 34 46"/><path class="hot" d="M34 6 A22 22 0 0 0 9 18"/></svg>';
 const ARC_R =
   '<svg class="arc" viewBox="0 0 52 52" aria-hidden="true"><path class="base" d="M18 6 A22 22 0 1 1 18 46"/><path class="hot" d="M18 6 A22 22 0 0 1 43 18"/></svg>';
-// al tocar una flecha, el arco naranja da una vuelta, como algo que entra en órbita
+// Al tocar una flecha, el arco naranja da una vuelta, como algo que entra en órbita. Quitar la
+// clase y leer offsetWidth reinicia la animación aunque ya estuviera puesta.
 document.addEventListener(
   'click',
   e => {
@@ -7153,7 +7159,18 @@ function stepCosmos(s, t0) {
     }
   }
 }
-// ---------- el reproductor: qué estilo suena, cuándo arranca y cuándo para ----------
+/**
+ * Reproductor de música: elige el estilo según el nivel, programa cada paso un poco por
+ * adelantado en el reloj de Web Audio, cambia de estilo a mitad de partida y arranca o para.
+ * Los cambios de estilo esperan al inicio de una frase de 32 pasos, tras un crescendo de 16.
+ */
+/**
+ * Programa un paso de la música del estilo actual. A cierta altura de la partida lanza un
+ * crescendo y cambia a una versión más rápida (synthwave, o el modo rápido de las galaxias).
+ *
+ * @param {number} s Número de paso, de 0 a 127.
+ * @param {number} t0 Momento en que suena, en segundos del reloj de Web Audio.
+ */
 function scheduleStep(s, t0) {
   if (musicStyle === 'espacial' && state === 'play' && level >= SW_AT) {
     if (!riserOn && s % 32 === 16) {
@@ -7202,6 +7219,10 @@ function scheduleStep(s, t0) {
     stepEspacial(s, t0);
   }
 }
+/**
+ * Programa los pasos que caen en los próximos 0,12 segundos; se llama cada 25 ms. Si el reloj
+ * se atrasó (pestaña en segundo plano), salta al presente en lugar de tocar todo de golpe.
+ */
 function tick() {
   if (!AC || !musicOn) {
     return;
@@ -7217,6 +7238,7 @@ function tick() {
     }
   } catch (e) {}
 }
+/** Arranca la música del nivel actual (o la del menú) desde el principio, con una entrada suave. */
 function startMusic() {
   if (!AC) {
     return;
@@ -7255,7 +7277,12 @@ function startMusic() {
     tick();
   } catch (e) {}
 }
-let galAmb = null;
+let galAmb = null; // ambiente de Andrómeda sonando: {g, nodes}
+/**
+ * Enciende o apaga el ambiente grave de Andrómeda: cinco tonos que respiran lentamente.
+ *
+ * @param {boolean} on true para encender, false para apagar con un fundido de 0,6 segundos.
+ */
 function galAmbience(on) {
   if (!AC) {
     return;
@@ -7314,6 +7341,11 @@ function galAmbience(on) {
     galAmb = { g, nodes };
   } catch (e) {}
 }
+/**
+ * Detiene la música con un fundido.
+ *
+ * @param {boolean} [quick] true para un corte casi inmediato (0,06 s en vez de 0,35 s).
+ */
 function stopMusic(quick) {
   galAmbience(false);
   try {
@@ -7469,10 +7501,14 @@ function setBestOf(i, v) {
  */
 const attemptsOf = i =>
   i >= 3 ? attX[i] || 0 : i === 2 ? attempts3 : i === 1 ? attempts2 : attempts;
-// ---------- planetas para rescatar y jugar ----------
-// ---------- planetas: estadísticas sacadas de datos reales ----------
-// size: diámetro real (escala logarítmica) · vel: velocidad orbital real · res: densidad real
-// (resistencia a la fuerza de marea) · charge: rotación real
+/**
+ * Planetas que se rescatan y se juegan: sus datos reales, poderes, cómo se desbloquean, cuál está
+ * elegido y cómo sus estadísticas cambian el juego (tamaño, salto, resistencia, carga).
+ * Las estadísticas st son porcentajes respecto a la Tierra; el balance se revisa con simulaciones.
+ */
+// Estadísticas sacadas de datos reales: size del diámetro (escala logarítmica), vel de la
+// velocidad orbital, res de la densidad (resistencia a la fuerza de marea) y charge de la
+// rotación (cuántos Perfectos hacen falta para cargar el poder).
 const PLANETS_P = [
   {
     id: 'luna',
@@ -7674,6 +7710,8 @@ const PLANETS_P = [
     ],
   },
 ];
+// Planeta elegido, récord de Perfectos en una partida, secreto de Plutón, truco de todos los
+// planetas, cargas de escudo y si se usó el salto doble en la partida.
 let curPlanet = 'tierra',
   maxPerf = 0,
   plutoOk = false,
@@ -7689,18 +7727,45 @@ try {
 if (!PLANETS_P.some(P => P.id === curPlanet)) {
   curPlanet = 'tierra';
 }
+/**
+ * @param {object} P Planeta de PLANETS_P.
+ * @returns {boolean} true si está desbloqueado.
+ */
 const planetOk = P => allPlanets || P.ok();
+/** @returns {object} Datos del planeta elegido (la Tierra si no se encuentra). */
 const curP = () => PLANETS_P.find(P => P.id === curPlanet) || PLANETS_P[3];
+/** @returns {object} Estadísticas del planeta elegido. */
 const pst = () => curP().st;
-const chargeMax = () => pst().charge; // rotación real
-// de Plutón (×0.85) a Júpiter (×1.22): se ve y se siente, sin ser abismal // diámetro real
+/** @returns {number} Perfectos necesarios para cargar el poder (de la rotación real). */
+const chargeMax = () => pst().charge;
+/**
+ * Factor de tamaño del planeta según su diámetro real: de Plutón (×0.85) a Júpiter (×1.22), se
+ * nota sin ser abismal.
+ *
+ * @returns {number} Multiplicador del radio.
+ */
 const sizeK = () => 1 + (pst().size / 100) * 0.7;
-// los lentos flotan (hasta ~40% más de tiempo en el aire) // velocidad orbital real
+/**
+ * Duración del salto según la velocidad orbital real: los lentos flotan hasta ~40 % más tiempo.
+ *
+ * @returns {number} Duración, en segundos.
+ */
 const jumpDur = () => Math.max(0.09, JUMP_DUR * (1 - (pst().vel / 100) * 0.75));
-// los frágiles: el agujero negro los alcanza hasta ~media vuelta de anillo antes // densidad real:
-// los menos densos se despedazan antes
+/**
+ * Margen con que el agujero negro alcanza al planeta según su densidad real: los menos densos se
+ * despedazan antes por la marea (hasta ~media vuelta de anillo antes).
+ *
+ * @returns {number} Margen, en niveles de anillo.
+ */
 const catchMargin = () => 0.18 - (pst().res / 100) * 0.6;
+/** @returns {string[]} Identificadores de los planetas desbloqueados. */
 const unlockedIds = () => PLANETS_P.filter(planetOk).map(P => P.id);
+/**
+ * Miniatura de un planeta para la interfaz: imagen 3D si hay WebGL, si no su ícono SVG.
+ *
+ * @param {string} id Identificador del planeta.
+ * @returns {string} HTML de la miniatura (vacío si no hay ícono).
+ */
 function planetThumb(id) {
   try {
     const r = PLGL.render(id, 120, 0.6, [-0.78, 0.42, 0.48], [1.12, 1.06, 0.98], 1);
@@ -7712,11 +7777,18 @@ function planetThumb(id) {
     ? '<svg viewBox="0 0 100 100" aria-hidden="true">' + PLANET_SVG[id] + '</svg>'
     : '';
 }
+/** Guarda que hay planetas recién rescatados, para avisar en el menú. */
 function markNewPlanets() {
   try {
     localStorage.setItem('orbita_pl_nuevo', '1');
   } catch (e) {}
 }
+/**
+ * HTML con las miniaturas de los planetas rescatados desde una lista anterior.
+ *
+ * @param {string[]} before Planetas desbloqueados antes de la partida.
+ * @returns {string} HTML, o '' si no se rescató ninguno.
+ */
 function rescuedCards(before) {
   const now = unlockedIds(),
     nuevos = PLANETS_P.filter(P => now.includes(P.id) && !before.includes(P.id));
@@ -7734,6 +7806,7 @@ function rescuedCards(before) {
     '</small></div>'
   );
 }
+/** Guarda el récord de Perfectos en una partida, que desbloquea a Mercurio y Urano. */
 function saveRunStats() {
   if (perfCount > maxPerf) {
     maxPerf = perfCount;
@@ -7742,8 +7815,7 @@ function saveRunStats() {
     } catch (e) {}
   }
 }
-// el planeta del jugador, dibujado en el juego (la luz viene de abajo, del disco del agujero negro)
-// íconos para la pantalla de planetas
+// Íconos SVG de respaldo para la pantalla de planetas (sin WebGL).
 const PLANET_SVG = {
   tierra:
     '<circle cx="50" cy="50" r="26" fill="#3d8bff"/><path d="M34 40 Q42 30 52 38 Q48 48 38 47 Z M56 56 Q66 50 70 60 Q62 70 55 64 Z" fill="#5ccf6b"/><path d="M30 46 Q50 42 70 47" stroke="#fff" stroke-opacity=".7" stroke-width="2" fill="none"/>',
@@ -7756,7 +7828,6 @@ const PLANET_SVG = {
   pluton:
     '<circle cx="50" cy="50" r="17" fill="#d9c7b4"/><path d="M52 62 C44 57 45 49 52 52 C59 49 60 57 52 62 Z" fill="#f4ebe0"/>',
 };
-// nivel 1: el sistema solar termina en el anillo 50
 /**
  * Estado compartido de la partida: contadores, tutorial, gestos, rachas, reloj del juego (`t`) y
  * listas de efectos en pantalla. Solo declara variables; las cambian muchos archivos.
@@ -10964,6 +11035,14 @@ function drawBendSphere() {
   ctx.fill();
   ctx.restore();
 }
+/**
+ * Peligros de la partida: ondas de supernova, novas, cometas, chorros de energía, llamaradas y
+ * estrellas veloces. Los crea al aterrizar, los avanza cada cuadro, detecta si alcanzan al
+ * planeta, los dibuja y les pone sonido. Su estado vive en 11-peligros-datos.
+ */
+// Novas por nivel y anillo: sp es la velocidad de la cáscara (unidades del juego por segundo),
+// per el periodo entre cáscaras en golpes, gaps y gw el número y ancho (radianes) de los huecos,
+// n cuántas cáscaras salen y big marca la gran nova final.
 const NOVA_AT = {
   2: {
     6: { sp: 52, per: 8, gaps: 3, gw: 0.62, n: 3 },
@@ -10973,7 +11052,12 @@ const NOVA_AT = {
     43: { sp: 40, per: 99, gaps: 1, gw: 0.55, n: 1, big: 1 },
   },
 };
-const NOVA_LIFE = 5.2;
+const NOVA_LIFE = 5.2; // segundos que vive cada cáscara de nova (más en la grande)
+/**
+ * Sacudida, vibración y sonido de cristal cuando una nova lanza una cáscara.
+ *
+ * @param {object} s Fuente de nova (de novaSrc); s.big indica la gran nova.
+ */
 function novaBurst(s) {
   shake = Math.max(shake, reduceMotion ? 0 : s.big ? 9 : 3);
   buzz(s.big ? [30, 30, 80] : 18);
@@ -10992,6 +11076,13 @@ function novaBurst(s) {
     } catch (e) {}
   }
 }
+/**
+ * Crea una fuente de nova a un lado del agujero, dos anillos por encima (cuatro si es la grande),
+ * sincronizada con los golpes de la música.
+ *
+ * @param {number} L Nivel de anillo donde aterrizó el planeta.
+ * @param {object} cfg Configuración de NOVA_AT para ese anillo.
+ */
 function novaSpawn(L, cfg) {
   const side = Math.random() < 0.5 ? -1 : 1,
     bt = beatTime(),
@@ -11012,7 +11103,14 @@ function novaSpawn(L, cfg) {
     lastB: -1,
   });
 }
-// las cáscaras vivas en el instante tt (tiempo de la música): [{cx, cy, r, age, s}]
+/**
+ * Lista las cáscaras de nova vivas en un instante.
+ *
+ * @param {number} tt Tiempo de la música, en segundos.
+ * @param {number} camL Nivel de anillo de la cámara.
+ * @returns {Array<object>} Cáscaras {cx, cy, r, age, s, i}: centro y radio en unidades del
+ *   juego, edad en segundos, fuente e índice de la cáscara.
+ */
 function novaShells(tt, camL) {
   const out = [];
   for (const s of novaSrc) {
@@ -11030,7 +11128,15 @@ function novaShells(tt, camL) {
   }
   return out;
 }
-// ¿el planeta en (px, py) toca un filamento (no un hueco) de alguna cáscara?
+/**
+ * Dice si el planeta toca un filamento (no un hueco) de alguna cáscara de nova.
+ *
+ * @param {number} px Posición horizontal del planeta, en unidades del juego desde el centro.
+ * @param {number} py Posición vertical del planeta, en unidades del juego desde el centro.
+ * @param {number} tt Tiempo de la música, en segundos.
+ * @param {number} camL Nivel de anillo de la cámara.
+ * @returns {boolean} true si lo toca.
+ */
 function novaHit(px, py, tt, camL) {
   const hitR = PR * sizeK() + 3.5;
   for (const sh of novaShells(tt, camL)) {
@@ -11055,12 +11161,18 @@ function novaHit(px, py, tt, camL) {
   }
   return false;
 }
+// Ajustes finos por nivel, probados con jugadores simulados: cg multiplica la velocidad de los
+// contragiros según el anillo, wv la duración de la onda, hg es el ancho de los huecos de las
+// murallas (radianes) y arc el número de piedras de cada arco del contragiro.
 const TUNE = {
   1: { cg: k => (k >= 44 ? 2.0 : 1.7), wv: 0.48, hg: 0.4, arc: 10 },
   2: { cg: k => 1.8, wv: 1, hg: 0.46, arc: 10 },
-}; // contragiros más rápidos (sin esperas eternas), onda más rápida, murallas más justas
+};
+// waveProx: qué tan cerca está la onda del planeta (0 a 1, suavizado); waveBeepT: segundos hasta
+// el siguiente pitido de aviso.
 let waveProx = 0,
-  waveBeepT = 0; // ajustes finos por nivel (probados con jugadores simulados)
+  waveBeepT = 0;
+/** Borra todos los peligros activos (al empezar o reiniciar una partida). */
 function hazardsReset() {
   comets = [];
   beams = [];
@@ -11071,6 +11183,14 @@ function hazardsReset() {
   novaSrc = [];
   sstars = [];
 }
+/**
+ * Muestra una sola vez (guardado en localStorage) el aviso que explica un peligro nuevo.
+ *
+ * @param {string} key Clave del peligro en seenTypes.
+ * @param {string} title Título del aviso.
+ * @param {string} sub Explicación corta.
+ * @param {string} col Color CSS del título.
+ */
 function hazardTip(key, title, sub, col) {
   if (seenTypes[key]) {
     return;
@@ -11092,6 +11212,10 @@ function hazardTip(key, title, sub, col) {
     tip: true,
   });
 }
+/**
+ * Al aterrizar en un anillo, lanza los peligros que el nivel tiene programados para ese anillo
+ * (cometas, chorros, ondas de supernova, novas y llamaradas). No hace nada en el tutorial.
+ */
 function hazardsOnLand() {
   if (tutorial) {
     return;
@@ -11184,6 +11308,15 @@ function hazardsOnLand() {
     hazardTip('llamarada', 'Llamarada', 'El agujero negro te ciega: sigue tu ritmo', '#ffe2b0');
   }
 }
+/**
+ * Posición de una estrella veloz en su órbita elíptica, resolviendo la ecuación de Kepler
+ * (M = E - e·sen E) con cinco pasos de Newton.
+ *
+ * @param {object} s Órbita: P periodo (segundos), M0 anomalía media inicial, e excentricidad,
+ *   a semieje mayor (unidades del juego) y w argumento del periapsis (radianes).
+ * @param {number} tt Tiempo, en segundos.
+ * @returns {number[]} [x, y] respecto al agujero negro, en unidades del juego.
+ */
 function keplerPos(s, tt) {
   const M = 2 * Math.PI * (tt / s.P) + s.M0;
   let E = M;
@@ -11195,7 +11328,13 @@ function keplerPos(s, tt) {
     an = nu + s.w;
   return [Math.cos(an) * r, Math.sin(an) * r];
 }
-// devuelve la causa si un peligro alcanza al planeta
+/**
+ * Programa una onda de supernova: sale en un golpe de la música (la grande, al inicio de un
+ * compás) y llega al anillo límite en otro golpe. Mientras espera suena un rumor que crece.
+ *
+ * @param {number} L Nivel de anillo límite hasta donde llega la onda.
+ * @param {number} reach Cuántos anillos por encima del planeta llega (3 o más es la grande).
+ */
 function spawnWave(L, reach) {
   const learn = !seenTypes.onda,
     ph = beatPhase();
@@ -11265,6 +11404,11 @@ function spawnWave(L, reach) {
     } catch (e) {}
   }
 }
+/**
+ * Suelta la onda desde el agujero negro: sacudida, destello y el estampido con su silbido.
+ *
+ * @param {object} w Onda de supernova (de waves).
+ */
 function waveRelease(w) {
   w.released = true;
   w.k0 = Math.max(sunLevel + 0.35, level - 2.4);
@@ -11331,6 +11475,11 @@ function waveRelease(w) {
     } catch (e) {}
   }
 }
+/**
+ * La onda choca contra su anillo límite y se rompe en partículas, con un acorde brillante.
+ *
+ * @param {object} w Onda de supernova (de waves).
+ */
 function waveBreak(w) {
   w.broken = 0.001;
   const R = rr(w.L);
@@ -11375,6 +11524,11 @@ function waveBreak(w) {
     } catch (e) {}
   }
 }
+/**
+ * El planeta quedó por encima del límite de la onda: cuenta para las misiones y suena el aviso.
+ *
+ * @param {object} w Onda de supernova (de waves).
+ */
 function waveSafe(w) {
   w.safe = true;
   misEvent('onda');
@@ -11388,7 +11542,14 @@ function waveSafe(w) {
     } catch (e) {}
   }
 }
-// te alcanzó: la primera vez te sobrecalienta; la segunda, estando caliente, te destruye
+/**
+ * La onda alcanzó al planeta: la primera vez lo sobrecalienta; si ya estaba caliente, lo destruye.
+ *
+ * @param {object} w Onda de supernova (de waves).
+ * @param {number} px Posición horizontal del planeta, en unidades del juego desde el centro.
+ * @param {number} py Posición vertical del planeta, en unidades del juego desde el centro.
+ * @returns {string|undefined} 'onda' si el planeta muere.
+ */
 function waveCatch(w, px, py) {
   w.hitDone = true;
   if (hot) {
@@ -11443,6 +11604,14 @@ function waveCatch(w, px, py) {
   }
   return null;
 }
+/**
+ * Avanza todos los peligros un cuadro y revisa si alguno alcanza al planeta.
+ *
+ * @param {number} d Tiempo del cuadro, en segundos.
+ * @param {number} px Posición horizontal del planeta, en unidades del juego desde el centro.
+ * @param {number} py Posición vertical del planeta, en unidades del juego desde el centro.
+ * @returns {string|null} La causa ('onda', 'comet', 'beam', 'sstar') si lo alcanza, o null.
+ */
 function hazardsUpdate(d, px, py) {
   const hitR = PR * sizeK();
   // onda de supernova
@@ -11581,8 +11750,17 @@ function hazardsUpdate(d, px, py) {
   }
   return null;
 }
-// la onda de supernova, como en las fotos: un frente irregular con filamentos, nudos brillantes y
-// restos que siguen brillando
+/**
+ * Radio del frente irregular de la onda en un punto, sumando senos de varias frecuencias que se
+ * mueven con el tiempo.
+ *
+ * @param {object} w Onda de supernova (sus fases aleatorias en w.ph).
+ * @param {number} R Radio medio, en píxeles de pantalla.
+ * @param {number} i Índice del punto en el contorno.
+ * @param {number} N Número de puntos del contorno.
+ * @param {number} wob Amplitud de la irregularidad, en píxeles de pantalla.
+ * @returns {number} Radio en ese punto, en píxeles de pantalla.
+ */
 function waveShape(w, R, i, N, wob) {
   const th = (i / N) * Math.PI * 2,
     p = w.ph;
@@ -11596,6 +11774,12 @@ function waveShape(w, R, i, N, wob) {
         0.08 * Math.sin(41 * th + p[1] * 3 + t * 3.3))
   );
 }
+/**
+ * Dibuja la onda de supernova como en las fotos: un frente irregular con filamentos, nudos
+ * brillantes y restos que siguen brillando, más el anillo límite que marca hasta dónde llega.
+ *
+ * @param {object} w Onda de supernova (de waves).
+ */
 function drawWave(w) {
   const N = 128,
     bk = beatKick();
@@ -11760,8 +11944,15 @@ function drawWave(w) {
   }
   ctx.restore();
 }
-// la nova: estrella azul-blanca con picos de difracción; tres arcos de carga (uno por golpe) y al
-// estallar, destello, ondas y restos
+/**
+ * Dibuja la nova de un anillo: estrella azul-blanca con picos de difracción, tres arcos de carga
+ * (uno por golpe) y, al estallar, destello, ondas y restos.
+ *
+ * @param {object} ring Anillo de tipo 'nova' (posición de la estrella en ring.na + ring.phase).
+ * @param {number} Rw Radio del anillo, en unidades del juego.
+ * @param {number} a Opacidad, de 0 a 1.
+ * @param {boolean} next true si es el anillo siguiente al del planeta (el único que estalla).
+ */
 function drawNova(ring, Rw, a, next) {
   const tau = novaTau(beatTime()),
     bar = NOVA_BAR(),
@@ -11893,9 +12084,12 @@ function drawNova(ring, Rw, a, next) {
     ctx.restore();
   }
 }
-let novaBeat = -1;
+let novaBeat = -1; // último golpe en que sonó la nova; -1 si no hay nova en el anillo siguiente
+/**
+ * Sonido de la nova del anillo siguiente: en cada golpe una nota de cristal que sube (carga) y,
+ * al empezar el compás, el estallido. Se llama cada cuadro.
+ */
 function novaSound() {
-  // golpes de carga (tres notas de cristal que suben) y el estallido al empezar el compás
   const nr = rings.get(level + 1);
   if (!nr || nr.type !== 'nova' || state !== 'play') {
     novaBeat = -1;
@@ -11946,6 +12140,7 @@ function novaSound() {
     } catch (e) {}
   }
 }
+/** Dibuja las cáscaras de nova (gas verde con nudos de oxígeno) y sus estrellas. */
 function drawNovaShells() {
   const bt = beatTime(),
     N = 140;
@@ -12061,6 +12256,7 @@ function drawNovaShells() {
   }
   ctx.restore();
 }
+/** Dibuja todos los peligros activos: ondas, novas, estrellas veloces, chorros y cometas. */
 function drawHazards() {
   for (const w of waves) {
     drawWave(w);
@@ -12232,6 +12428,7 @@ function drawHazards() {
   }
   ctx.globalAlpha = 1;
 }
+/** Dibuja el destello blanco de la llamarada del agujero negro sobre toda la pantalla. */
 function drawFlare() {
   if (flareT <= 0) {
     return;
@@ -12241,6 +12438,18 @@ function drawFlare() {
   ctx.fillRect(0, 0, W, H);
   ctx.globalAlpha = 1;
 }
+/**
+ * Ciclo de una partida: crea los anillos y sus obstáculos, prepara y arranca la partida, salta,
+ * aterriza, gana y muere. También muestra el contador de intentos.
+ * Los anillos se generan con la semilla fija SEED (rng), así cada nivel sale siempre igual.
+ */
+/**
+ * Crea un anillo con sus obstáculos y su giro según el tipo que le toca en el nivel.
+ *
+ * @param {number} k Nivel de anillo (0 es el anillo de partida, sin obstáculos).
+ * @returns {object} Anillo {obs, w, phase, type, …}; w es la velocidad de giro, en radianes por
+ *   segundo.
+ */
 function makeRing(k) {
   if (k === 0) {
     return { obs: [], w: 0, phase: 0, type: 'clasico' };
@@ -12262,7 +12471,7 @@ function makeRing(k) {
   if (type === 'gusano') {
     ring.w = 0;
     return ring;
-  } // donde apareces dentro del gusano
+  } // anillo donde se aparece dentro del gusano
   if (type === 'orbita') {
     // dentro del gusano: anillos quietos con uno o dos huecos; cada hueco queda a un lado del
     // anterior (izquierda o derecha)
@@ -12303,7 +12512,7 @@ function makeRing(k) {
     // anillo casi lleno con uno o dos huecos
     const gaps = lvl >= 6 && !tutorial ? 1 : 2,
       hg = lvl === 5 && !tutorial ? 0.38 : !tutorial && TUNE[lvl] ? TUNE[lvl].hg : 0.46,
-      stepA = 0.22; // nivel 1: murallas siempre con dos huecos amplios
+      stepA = 0.22;
     for (let a = 0; a < Math.PI * 2 - 1e-6; a += stepA) {
       let inGap = false;
       for (let g = 0; g < gaps; g++) {
@@ -12319,9 +12528,9 @@ function makeRing(k) {
     }
     ring.w = dir * Math.min(0.5 + k * 0.006, 0.8) * (!tutorial ? RING_MUL[lvl] : 1);
   } else if (type === 'respiracion') {
-    // asteroides grandes que se encogen en cada golpe: ahí se abre el paso
-    // 16 asteroides: grandes cierran el anillo, chicos dejan pasar a la Tierra con margen.
-    // El giro va con la música: en cada golpe en que se encogen, hay un hueco justo encima de ti.
+    // 16 asteroides que se encogen en cada golpe: grandes cierran el anillo y chicos dejan pasar
+    // a la Tierra con margen. El giro va con la música: en cada golpe en que se encogen hay un
+    // hueco justo encima del planeta.
     const n = 16,
       sig = (Math.PI * 2) / n;
     ring.w = (dir * sig) / (4 * TB);
@@ -12434,6 +12643,7 @@ function makeRing(k) {
   }
   return ring;
 }
+/** Crea los anillos que faltan cerca del planeta (hasta 6 arriba) y borra los de muy abajo. */
 function ensureRings() {
   for (let k = Math.max(0, level - 3); k <= Math.min(level + 6, curGoal()); k++) {
     if (!rings.has(k)) {
@@ -12446,6 +12656,7 @@ function ensureRings() {
     }
   }
 }
+/** Deja todo el estado de la partida como al principio y crea los primeros anillos. */
 function setup() {
   rngState = SEED;
   swallow = null;
@@ -12494,6 +12705,7 @@ function setup() {
   } catch (e) {}
   ensureRings();
 }
+/** Empieza o reinicia una partida: limpia peligros y poderes, prepara la pantalla y la música. */
 function start() {
   hot = 0;
   hotT = 0;
@@ -12549,9 +12761,22 @@ function start() {
 }
 setup();
 
+/**
+ * Radio de un anillo visto desde la cámara.
+ *
+ * @param {number} k Nivel de anillo (puede tener decimales).
+ * @returns {number} Radio, en unidades del juego.
+ */
 const rr = k => R0 + (k - camLevel) * GAP;
 
-// distancia libre entre la luna y el asteroide más cercano del anillo k
+/**
+ * Distancia libre entre el planeta y el asteroide más cercano de un anillo; sirve para decidir si
+ * un aterrizaje fue perfecto.
+ *
+ * @param {number} k Nivel de anillo.
+ * @param {boolean} onlyApproaching Si es true, solo cuenta los asteroides que vienen hacia él.
+ * @returns {number} Distancia entre bordes, en unidades del juego (999 si no hay ninguno).
+ */
 function clearance(k, onlyApproaching) {
   const ring = rings.get(k);
   if (!ring) {
@@ -12580,6 +12805,10 @@ function clearance(k, onlyApproaching) {
   }
   return m;
 }
+/**
+ * Convierte en pleno vuelo un salto simple en doble, si hay carga. Con otro planeta que no sea la
+ * Tierra usa su poder en lugar del salto doble.
+ */
 function upgradeToDouble() {
   if (
     !jumping ||
@@ -12597,6 +12826,8 @@ function upgradeToDouble() {
     usePower(true);
     return;
   }
+  // Busca el punto del salto doble con la misma altura que el simple (la curva es
+  // 1 - (1 - p)^3 y el doble recorre dos anillos), para que el planeta no dé un brinco.
   const p1 = Math.min(jumpT / jumpDur(), 1),
     e1 = 1 - Math.pow(1 - p1, 3);
   const p2 = 1 - Math.cbrt(1 - e1 / 2);
@@ -12612,7 +12843,10 @@ function upgradeToDouble() {
   cowbell(SCALE[4] + 12);
   buzz([15, 30, 25]);
 }
-// ---- la Tierra escapa: fuera del alcance del agujero negro ----
+/**
+ * El planeta llegó al último anillo y escapa del agujero negro: guarda el récord, desbloquea
+ * planetas y muestra la pantalla de victoria.
+ */
 function win() {
   if (tutorial) {
     tutorialWin();
@@ -12709,6 +12943,7 @@ function win() {
     }, 600);
   }, 2400);
 }
+/** Fanfarria de victoria. */
 function winSound() {
   if (!AC) {
     return;
@@ -12781,6 +13016,10 @@ function winSound() {
     o.stop(n + 3.3);
   } catch (e) {}
 }
+/**
+ * Salto doble desde el anillo (dos anillos de golpe), si hay carga y los anillos siguientes lo
+ * permiten. Con otro planeta que no sea la Tierra usa su poder.
+ */
 function doubleJump() {
   if (
     state !== 'play' ||
@@ -12810,6 +13049,7 @@ function doubleJump() {
   cowbell(SCALE[4] + 12);
   buzz([15, 30, 25]);
 }
+/** Salto simple al anillo siguiente. Con cargas de perihelio el salto es instantáneo. */
 function jump() {
   jumping = true;
   jumpT = 0;
@@ -12824,6 +13064,12 @@ function jump() {
   jumpClear = 999;
   noise(0.07, 2500, 7000, 0.07, 'highpass');
 }
+/**
+ * Al aterrizar: cuenta puntos y rachas de aterrizajes perfectos, recoge estrellas y objetos,
+ * lanza los peligros del anillo, avisa de tipos de anillo distintos y gana al llegar a la meta.
+ *
+ * @param {boolean} isDouble true si se llegó con un salto doble.
+ */
 function onLand(isDouble) {
   const z = zoneOf(level);
   const perfect = !isDouble && Math.min(jumpClear, clearance(level, false)) < PERFECT;
@@ -12967,8 +13213,8 @@ function onLand(isDouble) {
     try {
       localStorage.setItem('orbita_p1_vistos', JSON.stringify(seenTypes));
     } catch (e) {}
-    // sin texto: el anillo nuevo destella para avisar que algo cambia (se aprende jugando, como en
-    // Geometry Dash)
+    // Sin texto: el anillo de tipo distinto destella para avisar que algo cambia (se aprende
+    // jugando, como en Geometry Dash).
     {
       const nr = rings.get(level + 1);
       if (nr) {
@@ -13146,6 +13392,7 @@ function onLand(isDouble) {
     win();
   }
 }
+/** Marca como quemados los anillos que ya alcanzó el agujero negro (en el nivel 2, sacude). */
 function eatRings() {
   while (lastEaten + 1 <= sunLevel) {
     lastEaten++;
@@ -13157,6 +13404,15 @@ function eatRings() {
     }
   }
 }
+/**
+ * El planeta muere: lo traga el agujero (cause 'sun') o explota. Guarda récords y reinicia la
+ * partida sola al poco tiempo, sin pantalla intermedia.
+ *
+ * @param {number} x Posición horizontal del planeta, en unidades del juego desde el centro.
+ * @param {number} y Posición vertical del planeta, en unidades del juego desde el centro.
+ * @param {string} cause Causa: 'sun', 'nova', 'onda', 'comet', 'beam', 'sstar', choque…
+ * @param {object} [who] Objeto culpable, que se resalta un momento.
+ */
 function die(x, y, cause, who) {
   if (tutorial) {
     tutRespawn(x, y);
@@ -13230,9 +13486,12 @@ function die(x, y, cause, who) {
     cause === 'sun' ? 2400 : 850,
   );
 }
-// "INTENTO N" aparece grande y tenue en el espacio y se desvanece; si fue récord, lo celebra en
-// dorado
-let sesTries = 1; // intentos de esta sesión en el nivel: vuelve a 1 cada vez que entras al nivel
+let sesTries = 1; // intentos de esta sesión en el nivel; vuelve a 1 al entrar al nivel
+/**
+ * Muestra "Intento N" grande y tenue, que se desvanece; si fue récord, lo celebra en dorado.
+ *
+ * @param {number} recRing Anillo del récord recién logrado, o 0 si no hubo récord.
+ */
 function showTry(recRing) {
   let el = document.getElementById('tryn');
   if (!el) {
@@ -14127,7 +14386,15 @@ window.addEventListener('keydown', e => {
     powerKey();
   }
 });
-// ---------- lógica ----------
+/**
+ * Lógica de la partida en cada cuadro: tiempo y cámara lenta, giro de los anillos, salto y
+ * aterrizaje, avance del agujero negro, choques con asteroides y peligros, y agujero de gusano.
+ */
+/**
+ * Avanza el juego un cuadro.
+ *
+ * @param {number} dt Tiempo real desde el cuadro anterior, en segundos (antes de la cámara lenta).
+ */
 function update(dt) {
   // tiempo real: cámara lenta, sacudida, destello
   if (slowTimer > 0) {
@@ -14359,9 +14626,10 @@ function update(dt) {
       }
     }
     camLevel += (level - camLevel) * Math.min(1, d * 6);
-    // el sol crece y se come los anillos; si te quedas quieto, te alcanza
+    // El agujero negro crece y se come los anillos; si el planeta se queda quieto, lo alcanza.
+    // Si el planeta se aleja más de 2,4 anillos, acelera para no quedarse atrás.
     const gap = pLevel - sunLevel;
-    // nivel 1: un punto medio; tutorial: muy lento
+    // en el tutorial avanza muy lento
     let sp = (tutorial ? 0.1 : 0.2 + Math.min(level * 0.006, 0.26)) * (HOLE_MUL[lvl] || 1);
     if (gap > 2.4) {
       sp += (gap - 2.4) * 1.15;
@@ -14552,19 +14820,15 @@ function update(dt) {
   }
   burns = burns.filter(b => b.life > 0);
 }
-// ---------- dibujo ----------
-// asteroides con volumen: roca sombreada iluminada por el disco del agujero negro (borde naranja
-// hacia el centro) y con cráteres.
-// Se dibujan una vez en pequeñas imágenes (8 formas × 12 giros × tamaño) y luego solo se copian:
-// rápido incluso en celulares.
-
-// ---- asteroides en 3D (GPU), con la misma luz que los planetas ----
-// Cada roca es un cuerpo irregular de verdad: un elipsoide deformado con ruido, con cráteres
-// hundidos y su borde levantado.
-// Se calcula con trazado de rayos, iluminada por el disco del agujero negro (la misma luz cálida
-// que los planetas),
-// y se guarda en pequeñas imágenes (8 formas × 12 giros en 3D × tamaño) para que en el juego solo
-// se copien.
+/**
+ * Dibujo de la partida: asteroides, la Tierra, el aura y el anillo de carga del planeta, la cámara
+ * que sigue el salto y el cuadro completo (dentro y fuera del agujero de gusano).
+ * Los asteroides se dibujan una vez en imágenes pequeñas (8 formas × 12 giros × tamaño) y en el
+ * juego solo se copian, así va rápido incluso en celulares.
+ */
+// Asteroides en 3D con WebGL, con la misma luz cálida del disco del agujero negro que los
+// planetas. Cada roca es un elipsoide deformado con ruido, con cráteres hundidos de borde
+// levantado, calculado con trazado de rayos.
 const ASTGL = (() => {
   let cv = null,
     gl = null,
@@ -14666,8 +14930,14 @@ const ASTGL = (() => {
     }
     return ok;
   }
-  // dibuja una roca (forma, giro) en una imagen de sz×sz píxeles, a doble resolución y luego
-  // reducida (bordes suaves)
+  /**
+   * Dibuja una roca en una imagen, a doble resolución y luego reducida para suavizar los bordes.
+   *
+   * @param {number} shape Forma, de 0 a 7.
+   * @param {number} frame Giro, de 0 a 11 (doceavos de vuelta).
+   * @param {number} sz Lado de la imagen, en píxeles reales.
+   * @returns {HTMLCanvasElement|null} La imagen, o null sin WebGL.
+   */
   function bake(shape, frame, sz) {
     if (!init()) {
       return null;
@@ -14699,8 +14969,7 @@ const ASTGL = (() => {
     if (!g) {
       return null;
     }
-    // sombra suave detrás, para que la roca siempre se despegue del cielo (como el halo de los
-    // planetas)
+    // Sombra suave detrás, para que la roca se despegue del cielo (como el halo de los planetas).
     const hg = g.createRadialGradient(sz / 2, sz / 2, sz * 0.26, sz / 2, sz / 2, sz * 0.44);
     hg.addColorStop(0, 'rgba(3,4,10,.22)');
     hg.addColorStop(1, 'rgba(3,4,10,0)');
@@ -14714,7 +14983,16 @@ const ASTGL = (() => {
   return { bake, ok: () => init() };
 })();
 const AST_SPR = {},
-  AST_B = [8, 12, 16, 22, 30, 40, 54, 72]; // tamaños fijos: la memoria no crece
+  AST_B = [8, 12, 16, 22, 30, 40, 54, 72]; // radios fijos en píxeles: la memoria no crece
+/**
+ * Devuelve (y guarda) la imagen de un asteroide. Con WebGL es la roca 3D; sin WebGL, un dibujo
+ * 2D sombreado con cráteres.
+ *
+ * @param {number} shape Forma, de 0 a 7.
+ * @param {number} frame Giro, de 0 a 11.
+ * @param {number} rp Radio, en píxeles reales (uno de AST_B).
+ * @returns {HTMLCanvasElement|null} La imagen, o null si no se pudo crear.
+ */
 function astSprite(shape, frame, rp) {
   const key = shape + '_' + frame + '_' + rp;
   if (AST_SPR[key]) {
@@ -14725,7 +15003,7 @@ function astSprite(shape, frame, rp) {
     if (g3) {
       return (AST_SPR[key] = g3);
     }
-  } // con GPU: roca en 3D; sin GPU, el dibujo de abajo
+  } // sin GPU sigue el dibujo 2D de abajo
   const sz = Math.ceil(rp * 2.9) + 2,
     c = document.createElement('canvas');
   c.width = c.height = sz;
@@ -14835,12 +15113,13 @@ function astSprite(shape, frame, rp) {
   g.stroke();
   return (AST_SPR[key] = c);
 }
-// rocas por adelantado: las que la partida va a usar se fabrican en los menús y en "Toca para
-// escapar", poco a poco
-// (unas pocas por cuadro), para no fabricarlas en pleno juego, donde cada una era un tirón. Son
-// exactamente las mismas.
-let astPre = null,
-  astPreK = '';
+let astPre = null, // cola de rocas por preparar: [forma, giro, radio]
+  astPreK = ''; // escala y densidad de píxeles con que se armó la cola
+/**
+ * Prepara las imágenes de los asteroides que usará la partida en pantallas sin partida (menús y
+ * "Toca para escapar"), unas pocas por cuadro y sin pasar de 3 ms, para no crearlas en pleno
+ * juego. Son exactamente las mismas imágenes que se crearían al jugar.
+ */
 function astPrebake() {
   const k = S + '_' + DPR;
   if (k !== astPreK) {
@@ -14848,10 +15127,9 @@ function astPrebake() {
     astPre = null;
   }
   if (!astPre) {
-    // tamaño en pantalla: los asteroides comunes miden 9 a 10.5 y aparecen desde el 40 %; primero
-    // esos.
-    // Después los de "Respiración" (24, se encogen hasta el 30 %), que llegan más tarde; al
-    // derretirse crecen hasta 115 %
+    // Primero los tamaños de los asteroides comunes (radio 9 a 10.5, aparecen desde el 40 %);
+    // después los de "Respiración" (24, se encogen hasta el 30 %), que llegan más tarde y al
+    // derretirse crecen hasta el 115 %.
     const bk = r => AST_B.find(v => v >= r) || AST_B[AST_B.length - 1],
       full0 = bk(9 * S * DPR),
       full1 = bk(10.5 * S * DPR),
@@ -14882,6 +15160,18 @@ function astPrebake() {
     }
   }
 }
+/**
+ * Dibuja un asteroide con la imagen ya preparada de su forma, giro y tamaño, con el lado
+ * iluminado hacia el agujero negro. Si no hay imagen, dibuja un círculo del color de respaldo.
+ *
+ * @param {number} x Posición horizontal, en píxeles de pantalla.
+ * @param {number} y Posición vertical, en píxeles de pantalla.
+ * @param {number} r Radio, en píxeles de pantalla.
+ * @param {number} seed Semilla que elige la forma.
+ * @param {number} rot Giro, en radianes.
+ * @param {string} col Color CSS de respaldo.
+ * @param {number} alpha Opacidad, de 0 a 1.
+ */
 function drawAst(x, y, r, seed, rot, col, alpha) {
   let sc = 1;
   try {
@@ -14913,6 +15203,7 @@ function drawAst(x, y, r, seed, rot, col, alpha) {
   ctx.drawImage(spr, -w / 2, -w / 2, w, w);
   ctx.restore();
 }
+// Continentes y nubes de la Tierra dibujada sin WebGL, en fracciones del radio.
 const CONT = [
   { x: 0.1, y: -0.35, w: 0.42, h: 0.22 },
   { x: 0.45, y: 0.15, w: 0.3, h: 0.38 },
@@ -14924,6 +15215,13 @@ const CLOUD = [
   { x: 0.55, y: -0.1, w: 0.4 },
   { x: 0.9, y: 0.4, w: 0.45 },
 ];
+/**
+ * Dibuja la Tierra: en 3D con WebGL o, si no, un círculo con continentes y nubes que se mueven.
+ *
+ * @param {number} px Posición horizontal, en píxeles de pantalla.
+ * @param {number} py Posición vertical, en píxeles de pantalla.
+ * @param {number} rad Radio, en píxeles de pantalla.
+ */
 function drawEarth(px, py, rad) {
   if (PLGL.ok() && rad > 0.5) {
     drawBigPlanet('tierra', px, py, rad, t * 0.35, false, 'below');
@@ -14972,8 +15270,13 @@ function drawEarth(px, py, rad) {
   ctx.arc(px, py, rad + 0.6, 0, Math.PI * 2);
   ctx.stroke();
 }
-// poder listo: aura que late detrás del planeta (se nota de reojo sin quitar la vista del anillo de
-// arriba)
+/**
+ * Con el poder listo, dibuja un aura que late detrás del planeta: se nota de reojo sin quitar la
+ * vista del anillo de arriba.
+ *
+ * @param {number} px Posición horizontal del planeta, en píxeles de pantalla.
+ * @param {number} py Posición vertical del planeta, en píxeles de pantalla.
+ */
 function drawPowerAura(px, py) {
   if (charge < chargeMax()) {
     return;
@@ -15000,7 +15303,14 @@ function drawPowerAura(px, py) {
     ctx.globalAlpha = 1;
   }
 }
-// anillo de carga pegado al planeta: un arco por cada Perfecto
+/**
+ * Dibuja el anillo de carga pegado al planeta (un arco por cada Perfecto), las chispas cuando
+ * está lleno y, mientras se aprende el salto doble, una flecha con "desliza".
+ *
+ * @param {number} px Posición horizontal del planeta, en píxeles de pantalla.
+ * @param {number} py Posición vertical del planeta, en píxeles de pantalla.
+ * @param {number} z Zoom de la escena (no se usa).
+ */
 function drawCharge(px, py, z) {
   const rad = PR * S * 1.15 * sizeK(),
     cm = chargeMax(),
@@ -15010,8 +15320,7 @@ function drawCharge(px, py, z) {
     seg = (Math.PI * 2) / cm;
   ctx.lineCap = 'round';
   if (cm > 6) {
-    // muchos Perfectos (Plutón): un solo arco que se va llenando, en vez de muchas rayitas
-    // apretadas
+    // Con muchos Perfectos (Plutón) un solo arco que se llena se lee mejor que muchas rayitas.
     const fl = Math.max(...pipFlash),
       a0 = -Math.PI / 2,
       a1 = a0 + Math.PI * 2 * Math.min(1, charge / cm);
@@ -15070,8 +15379,7 @@ function drawCharge(px, py, z) {
       s: 1 + Math.random() * 1.6,
     });
   }
-  // salto doble listo: mientras lo aprendes (menos de 3 usados), una flecha que sube sobre el
-  // planeta con "desliza"
+  // Mientras se aprende el salto doble (menos de 3 usados), una flecha sube sobre el planeta.
   const learn = !tutorial && doblesHechos < 3;
   if (ready && (learn || hintT > 0) && !wh && !whShock && !bend.on) {
     const a0 = learn ? 1 : Math.min(1, hintT),
@@ -15109,7 +15417,7 @@ function drawCharge(px, py, z) {
   }
   ctx.globalAlpha = 1;
 }
-// sonido propio del poder listo: un arpegio brillante que sube y un destello
+/** Sonido del poder listo: un arpegio brillante que sube y un destello. */
 function powerReadySound() {
   if (!AC || muted) {
     return;
@@ -15133,17 +15441,17 @@ function powerReadySound() {
     o.stop(n + 0.45);
   } catch (e) {}
 }
-// el cuadro completo: elige qué dibujar (dentro o fuera del agujero de gusano) y la onda al salir
-// ---- la cámara que se ve: sigue el salto con suavidad ----
-// La lógica (choques, puntos, agujero negro) usa camLevel, que se queda quieta durante el salto y
-// arranca de golpe al
-// aterrizar: eso se veía como un tirón. Para dibujar se usa una cámara "de resorte" que empieza a
-// subir junto con el salto,
-// acelera y frena sin saltos y llega al mismo lugar en el mismo tiempo. Quieta, es idéntica a
-// camLevel.
+// Cámara que se dibuja. La lógica (choques, puntos, agujero negro) usa camLevel, que se queda
+// quieta durante el salto y arranca de golpe al aterrizar. Para dibujar se usa una cámara "de
+// resorte" que sube junto con el salto, acelera y frena sin saltos y llega al mismo lugar en el
+// mismo tiempo. Quieta, es idéntica a camLevel.
 let camView = 0,
   camVel = 0,
   camT = 0;
+/**
+ * Avanza la cámara de resorte un cuadro (resorte con amortiguación crítica, frecuencia 9 por
+ * segundo). Fuera de la partida, o tras una pausa larga, se iguala a camLevel.
+ */
 function camViewStep() {
   const dt = t - camT;
   camT = t;
@@ -15167,6 +15475,10 @@ function camViewStep() {
     camVel = 0;
   }
 }
+/**
+ * Dibuja el cuadro completo con la cámara de resorte; camLevel vuelve a su valor al terminar,
+ * aunque el dibujo falle.
+ */
 function render() {
   camViewStep();
   const camL = camLevel;
@@ -15177,6 +15489,7 @@ function render() {
     camLevel = camL;
   }
 }
+/** Elige qué dibujar: fuera, entrando, dentro o saliendo del agujero de gusano (y su onda). */
 function renderFrame() {
   hideEarth = false;
   viewInside = false;
@@ -15232,6 +15545,7 @@ function renderFrame() {
     ctx.restore();
   }
 }
+/** Dibuja la onda de choque violeta que se expande al salir del agujero de gusano. */
 function drawShock() {
   const s = whShock;
   if (!s) {
@@ -22077,8 +22391,11 @@ void main(){
   col = col/(1. + col*.5);
   gl_FragColor = vec4(col, 1.);
 }`;
-// Nubes de Magallanes (nivel 2)
-// Nubes de Magallanes: el viaje pasa por sus lugares reales
+/**
+ * Shader del fondo de las Nubes de Magallanes (nivel 2): el viaje pasa por sus lugares reales
+ * (la Gran Nube, la Tarántula, N44, la Supernova 1987A, el Puente y la Pequeña Nube).
+ * Todo es código GLSL dentro de un texto: cambiar algo ahí dentro cambia el juego.
+ */
 const FS_LMC =
   BG_COMMON +
   `
@@ -22308,8 +22625,11 @@ void main(){
   col = col/(1. + col*.5);
   gl_FragColor = vec4(col, 1.);
 }`;
-// Galaxias lejanas (niveles 4 a 8): lo que comparten sus fondos (estrellas, cúmulos, meteoros,
-// destellos)
+/**
+ * Primera parte del shader de las galaxias lejanas (niveles 4 a 8): lo que comparten sus fondos
+ * (estrellas, cúmulos, meteoros y destellos). 32-fondos-56-final la une con las demás en FS_GX.
+ * Todo es código GLSL dentro de un texto: cambiar algo ahí dentro cambia el juego.
+ */
 const GX_BASE = `
 uniform float uScale; uniform float uKind;
 float fbm7(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 7; i++){ s += a*vn(p); p = m*p; a *= .5; } return s; }
@@ -22736,7 +23056,11 @@ vec3 m87Shadow(vec2 q){
   return col;
 }
 `;
-// Sagitario A* (nivel 8): el centro de nuestra galaxia
+/**
+ * Parte del shader de las galaxias lejanas para Sagitario A* (nivel 8), el agujero negro del
+ * centro de nuestra galaxia. 32-fondos-56-final la une con las demás en FS_GX.
+ * Todo es código GLSL dentro de un texto: cambiar algo ahí dentro cambia el juego.
+ */
 const GX_SAGITARIO = `// ===================== SAGITARIO A* =====================
 // centro galáctico: en luz visible nubes doradas y polvo; el compuesto de NASA (Hubble+Spitzer+Chandra) en violeta #3e3775,
 // azul #454b9f, magenta #7e4774 y filamentos dorados; los filamentos de radio de MeerKAT; las estrellas S girando;
@@ -22806,7 +23130,11 @@ vec3 sgrShadow(vec2 q){
   return col;
 }
 `;
-// Galaxias lejanas: la Vía Láctea vista desde fuera, la capa final y main(); aquí se arma FS_GX
+/**
+ * Última parte del shader de las galaxias lejanas: la Vía Láctea vista desde fuera, la capa final
+ * común a todos los niveles y main(). Aquí se arma FS_GX uniendo todas las partes en orden.
+ * Todo es código GLSL dentro de textos: cambiar algo ahí dentro cambia el juego.
+ */
 const GX_FINAL = `// la Vía Láctea vista desde fuera: el regreso a casa
 vec3 homeGalaxy(vec2 q){
   vec2 d = (q - vec2(.5*uRes.x, .74*uRes.y))/(uScale*.36); d = rot(.4 + uT*.01)*d; d.y /= .6;
@@ -23234,10 +23562,14 @@ let REMOLINO_PHOTO = '';
 function remolinoSource() {
   return REMOLINO_PHOTO || null;
 }
-// ---------- tarjetas vivas: cada galaxia se dibuja en movimiento, en tiempo real (WebGL)
-// ----------
-// Una sola escena a pantalla completa detrás de las tarjetas: al deslizar, cada galaxia se mueve
-// con su tarjeta.
+/**
+ * Fondo vivo del selector de niveles: cada destino (Sistema solar, Magallanes, Andrómeda,
+ * Centaurus A, Remolino, Sombrero, M87, Sagitario A*) se dibuja en movimiento detrás de su tarjeta.
+ * Lo suave (gas, polvo, brillo) sale de un shader WebGL a baja resolución; lo nítido (estrellas,
+ * planetas, el Sol, los agujeros negros) se dibuja encima en 2D a resolución completa.
+ */
+// Una sola escena WebGL a pantalla completa: al deslizar, mezcla las dos galaxias vecinas y cada
+// una se mueve con su tarjeta.
 const LVGL = (() => {
   let gl = null,
     cv = null,
@@ -23384,6 +23716,11 @@ void main(){
   vec2 uv = q/uRes; col *= .5 + .5*smoothstep(1.2, .35, length((uv - .5)*vec2(1.1, .9)));
   gl_FragColor = vec4(max(col, 0.), 1.);
 }`;
+  /**
+   * Crea el contexto WebGL y compila el shader la primera vez.
+   *
+   * @returns {boolean} true si WebGL está disponible.
+   */
   function init() {
     if (gl || failed) {
       return !!gl;
@@ -23440,6 +23777,19 @@ void main(){
       return false;
     }
   }
+  /**
+   * Dibuja la parte suave de dos galaxias vecinas mezcladas, a 520 píxeles como máximo.
+   *
+   * @param {number} w Ancho de la pantalla, en píxeles de pantalla.
+   * @param {number} h Alto de la pantalla, en píxeles de pantalla.
+   * @param {number} ka Índice del destino de la izquierda.
+   * @param {number} kb Índice del destino de la derecha.
+   * @param {number} mix Mezcla entre los dos, de 0 a 1.
+   * @param {number[]} ca Centro [x, y] del destino ka, en píxeles de pantalla.
+   * @param {number[]} cb Centro [x, y] del destino kb, en píxeles de pantalla.
+   * @param {number} scale Tamaño de la galaxia, en píxeles de pantalla.
+   * @returns {HTMLCanvasElement|null} La imagen, o null sin WebGL.
+   */
   function soft(w, h, ka, kb, mix, ca, cb, scale) {
     if (!init()) {
       return null;
@@ -23469,16 +23819,24 @@ void main(){
   }
   return { soft, ok: () => init() };
 })();
+// lvCanvas: el lienzo de fondo del selector; lvArts: el recuadro de dibujo de cada tarjeta.
+// Los asigna 25-selector-niveles.
 let lvCanvas = null,
   lvArts = [];
-// ---------- tarjetas: todo lo nítido se dibuja a resolución completa (estrellas, planetas, el Sol,
-// los agujeros negros) ----------
-let lvStars = null,
-  lvSets = null;
+// Parte nítida, a resolución completa: estrellas, planetas, el Sol y los agujeros negros.
+let lvStars = null, // estrellas de fondo, con posición de 0 a 1 y profundidad
+  lvSets = null; // grupos de estrellas propios de cada destino, ya calculados
+/**
+ * Generador pseudoaleatorio de Park y Miller: siempre da la misma serie para la misma semilla.
+ *
+ * @param {number} seed Semilla entera positiva.
+ * @returns {function(): number} Función que devuelve el siguiente número, de 0 a 1.
+ */
 function lvRand(seed) {
   let s = seed;
   return () => (s = (s * 16807) % 2147483647) / 2147483647;
 }
+/** Calcula una sola vez las estrellas del fondo y de cada destino. */
 function lvPrep() {
   if (lvStars) {
     return;
@@ -23526,6 +23884,15 @@ function lvPrep() {
     }),
   };
 }
+/**
+ * Dibuja un resplandor redondo que se desvanece hacia afuera.
+ *
+ * @param {number} x Centro horizontal, en píxeles de pantalla.
+ * @param {number} y Centro vertical, en píxeles de pantalla.
+ * @param {number} r Radio, en píxeles de pantalla.
+ * @param {string} col Color CSS del centro.
+ * @param {number} a Opacidad, de 0 a 1.
+ */
 function lvGlow(x, y, r, col, a) {
   const g = ctx.createRadialGradient(x, y, 0, x, y, r);
   g.addColorStop(0, col);
@@ -23536,6 +23903,16 @@ function lvGlow(x, y, r, col, a) {
   ctx.arc(x, y, r, 0, Math.PI * 2);
   ctx.fill();
 }
+/**
+ * Dibuja un grupo de estrellas que titilan.
+ *
+ * @param {Array<object>} list Estrellas {x, y, b}: posición relativa a la escala y brillo de 0 a 1.
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} S Escala del destino, en píxeles de pantalla.
+ * @param {string} col Color CSS.
+ * @param {number} size Tamaño base de cada estrella, en píxeles de pantalla.
+ */
 function lvPoints(list, cx, cy, S, col, size) {
   for (const p of list) {
     const tw = 0.6 + 0.4 * Math.sin(t * 2 + p.b * 40);
@@ -23545,8 +23922,15 @@ function lvPoints(list, cx, cy, S, col, size) {
     ctx.fillRect(cx + p.x * S - s / 2, cy + p.y * S - s / 2, s, s);
   }
 }
+/**
+ * Dibuja una estrella brillante con cuatro picos de difracción, como en las fotos de telescopios.
+ *
+ * @param {number} x Posición horizontal, en píxeles de pantalla.
+ * @param {number} y Posición vertical, en píxeles de pantalla.
+ * @param {number} r Tamaño, en píxeles de pantalla.
+ * @param {number} a Opacidad, de 0 a 1.
+ */
 function lvSpike(x, y, r, a) {
-  // estrella brillante con destellos que se desvanecen (como en las fotos de los telescopios)
   ctx.globalAlpha = a * lvA;
   ctx.lineWidth = 1;
   for (const [dx, dy] of [
@@ -23567,6 +23951,17 @@ function lvSpike(x, y, r, a) {
   lvGlow(x, y, r * 0.7, 'rgba(200,220,255,.55)', a * lvA);
   lvGlow(x, y, r * 0.22, 'rgba(255,255,255,1)', a * lvA);
 }
+/**
+ * Posición en una órbita elíptica en el tiempo actual, resolviendo la ecuación de Kepler con
+ * seis pasos de Newton.
+ *
+ * @param {number} a Semieje mayor, en la unidad que se quiera (relativa a la escala).
+ * @param {number} e Excentricidad, de 0 a 1.
+ * @param {number} w Argumento del periapsis, en radianes.
+ * @param {number} P Periodo, en segundos.
+ * @param {number} M0 Anomalía media inicial, en radianes.
+ * @returns {number[]} [x, y] respecto al foco, en la misma unidad que a.
+ */
 function lvKepler(a, e, w, P, M0) {
   const M = (2 * Math.PI * t) / P + M0;
   let E = M;
@@ -23577,7 +23972,8 @@ function lvKepler(a, e, w, P, M0) {
     nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
   return [Math.cos(nu + w) * r, Math.sin(nu + w) * r];
 }
-let lvA = 1;
+let lvA = 1; // opacidad del destino que se está dibujando, de 0 a 1
+// Planetas del Sistema solar en la tarjeta: nombre y radio relativo a la escala.
 const LV_PL = [
   ['mercurio', 0.022],
   ['venus', 0.036],
@@ -23586,6 +23982,15 @@ const LV_PL = [
   ['jupiter', 0.085],
   ['saturno', 0.07],
 ];
+/**
+ * Dibuja la parte nítida de un destino.
+ *
+ * @param {number} k Índice del destino (0 Sistema solar … 7 Sagitario A*).
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} S Escala, en píxeles de pantalla.
+ * @param {number} alpha Opacidad, de 0 a 1.
+ */
 function lvCrisp(k, cx, cy, S, alpha) {
   lvA = alpha;
   if (alpha < 0.01) {
@@ -23749,6 +24154,10 @@ function lvCrisp(k, cx, cy, S, alpha) {
 // escala de cada galaxia dentro de su zona: Sistema solar, Magallanes, Andrómeda, Centaurus A,
 // Remolino, Sombrero, M87, Sagitario A*
 const LV_SCALE = [1.0, 0.9, 1.22, 0.95, 0.88, 1.12, 1.6, 1.02];
+/**
+ * Dibuja el fondo completo del selector de niveles según cuánto se ha deslizado entre tarjetas.
+ * Marca el selector con la clase 'live' cuando hay fondo WebGL.
+ */
 function drawLevelsBG() {
   if (!elLv || !elLv.querySelector) {
     return;
@@ -23773,8 +24182,8 @@ function drawLevelsBG() {
   const art = lvArts[ka],
     ar = art && art.getBoundingClientRect ? art.getBoundingClientRect() : null;
   const sz = (ar ? Math.min(ar.width, ar.height) : Math.min(W, H) * 0.46) * 0.95;
-  // cada destino con el mismo peso visual: los objetos chicos (M87, Sombrero…) se agrandan, sin
-  // salirse de la pantalla
+  // Mismo peso visual para todos los destinos: los objetos chicos (M87, Sombrero…) se agrandan,
+  // sin salirse de la pantalla.
   const scl = k => Math.min(sz * (LV_SCALE[k] || 1), W * 0.92, (ar ? ar.height : H) * 1.25);
   const zA = 1,
     zB = 1;
@@ -23789,9 +24198,8 @@ function drawLevelsBG() {
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(soft, 0, 0, W, H);
   }
-  // estrellas nítidas, en dos profundidades
-  // paralaje: al deslizar, las estrellas lejanas se mueven poco y las cercanas más (profundidad,
-  // sin efectos bruscos)
+  // Estrellas nítidas en dos profundidades, con paralaje: al deslizar, las lejanas se mueven poco
+  // y las cercanas más.
   for (const s of lvStars) {
     const x = (((s.x * W - t * (s.d < 0.5 ? 2 : 5) - pos * W * (0.05 + 0.22 * s.d)) % W) + W) % W,
       y = s.y * H;

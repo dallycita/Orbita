@@ -1,16 +1,12 @@
-// ---------- dibujo ----------
-// asteroides con volumen: roca sombreada iluminada por el disco del agujero negro (borde naranja
-// hacia el centro) y con cráteres.
-// Se dibujan una vez en pequeñas imágenes (8 formas × 12 giros × tamaño) y luego solo se copian:
-// rápido incluso en celulares.
-
-// ---- asteroides en 3D (GPU), con la misma luz que los planetas ----
-// Cada roca es un cuerpo irregular de verdad: un elipsoide deformado con ruido, con cráteres
-// hundidos y su borde levantado.
-// Se calcula con trazado de rayos, iluminada por el disco del agujero negro (la misma luz cálida
-// que los planetas),
-// y se guarda en pequeñas imágenes (8 formas × 12 giros en 3D × tamaño) para que en el juego solo
-// se copien.
+/**
+ * Dibujo de la partida: asteroides, la Tierra, el aura y el anillo de carga del planeta, la cámara
+ * que sigue el salto y el cuadro completo (dentro y fuera del agujero de gusano).
+ * Los asteroides se dibujan una vez en imágenes pequeñas (8 formas × 12 giros × tamaño) y en el
+ * juego solo se copian, así va rápido incluso en celulares.
+ */
+// Asteroides en 3D con WebGL, con la misma luz cálida del disco del agujero negro que los
+// planetas. Cada roca es un elipsoide deformado con ruido, con cráteres hundidos de borde
+// levantado, calculado con trazado de rayos.
 const ASTGL = (() => {
   let cv = null,
     gl = null,
@@ -112,8 +108,14 @@ const ASTGL = (() => {
     }
     return ok;
   }
-  // dibuja una roca (forma, giro) en una imagen de sz×sz píxeles, a doble resolución y luego
-  // reducida (bordes suaves)
+  /**
+   * Dibuja una roca en una imagen, a doble resolución y luego reducida para suavizar los bordes.
+   *
+   * @param {number} shape Forma, de 0 a 7.
+   * @param {number} frame Giro, de 0 a 11 (doceavos de vuelta).
+   * @param {number} sz Lado de la imagen, en píxeles reales.
+   * @returns {HTMLCanvasElement|null} La imagen, o null sin WebGL.
+   */
   function bake(shape, frame, sz) {
     if (!init()) {
       return null;
@@ -145,8 +147,7 @@ const ASTGL = (() => {
     if (!g) {
       return null;
     }
-    // sombra suave detrás, para que la roca siempre se despegue del cielo (como el halo de los
-    // planetas)
+    // Sombra suave detrás, para que la roca se despegue del cielo (como el halo de los planetas).
     const hg = g.createRadialGradient(sz / 2, sz / 2, sz * 0.26, sz / 2, sz / 2, sz * 0.44);
     hg.addColorStop(0, 'rgba(3,4,10,.22)');
     hg.addColorStop(1, 'rgba(3,4,10,0)');
@@ -160,7 +161,16 @@ const ASTGL = (() => {
   return { bake, ok: () => init() };
 })();
 const AST_SPR = {},
-  AST_B = [8, 12, 16, 22, 30, 40, 54, 72]; // tamaños fijos: la memoria no crece
+  AST_B = [8, 12, 16, 22, 30, 40, 54, 72]; // radios fijos en píxeles: la memoria no crece
+/**
+ * Devuelve (y guarda) la imagen de un asteroide. Con WebGL es la roca 3D; sin WebGL, un dibujo
+ * 2D sombreado con cráteres.
+ *
+ * @param {number} shape Forma, de 0 a 7.
+ * @param {number} frame Giro, de 0 a 11.
+ * @param {number} rp Radio, en píxeles reales (uno de AST_B).
+ * @returns {HTMLCanvasElement|null} La imagen, o null si no se pudo crear.
+ */
 function astSprite(shape, frame, rp) {
   const key = shape + '_' + frame + '_' + rp;
   if (AST_SPR[key]) {
@@ -171,7 +181,7 @@ function astSprite(shape, frame, rp) {
     if (g3) {
       return (AST_SPR[key] = g3);
     }
-  } // con GPU: roca en 3D; sin GPU, el dibujo de abajo
+  } // sin GPU sigue el dibujo 2D de abajo
   const sz = Math.ceil(rp * 2.9) + 2,
     c = document.createElement('canvas');
   c.width = c.height = sz;
@@ -281,12 +291,13 @@ function astSprite(shape, frame, rp) {
   g.stroke();
   return (AST_SPR[key] = c);
 }
-// rocas por adelantado: las que la partida va a usar se fabrican en los menús y en "Toca para
-// escapar", poco a poco
-// (unas pocas por cuadro), para no fabricarlas en pleno juego, donde cada una era un tirón. Son
-// exactamente las mismas.
-let astPre = null,
-  astPreK = '';
+let astPre = null, // cola de rocas por preparar: [forma, giro, radio]
+  astPreK = ''; // escala y densidad de píxeles con que se armó la cola
+/**
+ * Prepara las imágenes de los asteroides que usará la partida en pantallas sin partida (menús y
+ * "Toca para escapar"), unas pocas por cuadro y sin pasar de 3 ms, para no crearlas en pleno
+ * juego. Son exactamente las mismas imágenes que se crearían al jugar.
+ */
 function astPrebake() {
   const k = S + '_' + DPR;
   if (k !== astPreK) {
@@ -294,10 +305,9 @@ function astPrebake() {
     astPre = null;
   }
   if (!astPre) {
-    // tamaño en pantalla: los asteroides comunes miden 9 a 10.5 y aparecen desde el 40 %; primero
-    // esos.
-    // Después los de "Respiración" (24, se encogen hasta el 30 %), que llegan más tarde; al
-    // derretirse crecen hasta 115 %
+    // Primero los tamaños de los asteroides comunes (radio 9 a 10.5, aparecen desde el 40 %);
+    // después los de "Respiración" (24, se encogen hasta el 30 %), que llegan más tarde y al
+    // derretirse crecen hasta el 115 %.
     const bk = r => AST_B.find(v => v >= r) || AST_B[AST_B.length - 1],
       full0 = bk(9 * S * DPR),
       full1 = bk(10.5 * S * DPR),
@@ -328,6 +338,18 @@ function astPrebake() {
     }
   }
 }
+/**
+ * Dibuja un asteroide con la imagen ya preparada de su forma, giro y tamaño, con el lado
+ * iluminado hacia el agujero negro. Si no hay imagen, dibuja un círculo del color de respaldo.
+ *
+ * @param {number} x Posición horizontal, en píxeles de pantalla.
+ * @param {number} y Posición vertical, en píxeles de pantalla.
+ * @param {number} r Radio, en píxeles de pantalla.
+ * @param {number} seed Semilla que elige la forma.
+ * @param {number} rot Giro, en radianes.
+ * @param {string} col Color CSS de respaldo.
+ * @param {number} alpha Opacidad, de 0 a 1.
+ */
 function drawAst(x, y, r, seed, rot, col, alpha) {
   let sc = 1;
   try {
@@ -359,6 +381,7 @@ function drawAst(x, y, r, seed, rot, col, alpha) {
   ctx.drawImage(spr, -w / 2, -w / 2, w, w);
   ctx.restore();
 }
+// Continentes y nubes de la Tierra dibujada sin WebGL, en fracciones del radio.
 const CONT = [
   { x: 0.1, y: -0.35, w: 0.42, h: 0.22 },
   { x: 0.45, y: 0.15, w: 0.3, h: 0.38 },
@@ -370,6 +393,13 @@ const CLOUD = [
   { x: 0.55, y: -0.1, w: 0.4 },
   { x: 0.9, y: 0.4, w: 0.45 },
 ];
+/**
+ * Dibuja la Tierra: en 3D con WebGL o, si no, un círculo con continentes y nubes que se mueven.
+ *
+ * @param {number} px Posición horizontal, en píxeles de pantalla.
+ * @param {number} py Posición vertical, en píxeles de pantalla.
+ * @param {number} rad Radio, en píxeles de pantalla.
+ */
 function drawEarth(px, py, rad) {
   if (PLGL.ok() && rad > 0.5) {
     drawBigPlanet('tierra', px, py, rad, t * 0.35, false, 'below');
@@ -418,8 +448,13 @@ function drawEarth(px, py, rad) {
   ctx.arc(px, py, rad + 0.6, 0, Math.PI * 2);
   ctx.stroke();
 }
-// poder listo: aura que late detrás del planeta (se nota de reojo sin quitar la vista del anillo de
-// arriba)
+/**
+ * Con el poder listo, dibuja un aura que late detrás del planeta: se nota de reojo sin quitar la
+ * vista del anillo de arriba.
+ *
+ * @param {number} px Posición horizontal del planeta, en píxeles de pantalla.
+ * @param {number} py Posición vertical del planeta, en píxeles de pantalla.
+ */
 function drawPowerAura(px, py) {
   if (charge < chargeMax()) {
     return;
@@ -446,7 +481,14 @@ function drawPowerAura(px, py) {
     ctx.globalAlpha = 1;
   }
 }
-// anillo de carga pegado al planeta: un arco por cada Perfecto
+/**
+ * Dibuja el anillo de carga pegado al planeta (un arco por cada Perfecto), las chispas cuando
+ * está lleno y, mientras se aprende el salto doble, una flecha con "desliza".
+ *
+ * @param {number} px Posición horizontal del planeta, en píxeles de pantalla.
+ * @param {number} py Posición vertical del planeta, en píxeles de pantalla.
+ * @param {number} z Zoom de la escena (no se usa).
+ */
 function drawCharge(px, py, z) {
   const rad = PR * S * 1.15 * sizeK(),
     cm = chargeMax(),
@@ -456,8 +498,7 @@ function drawCharge(px, py, z) {
     seg = (Math.PI * 2) / cm;
   ctx.lineCap = 'round';
   if (cm > 6) {
-    // muchos Perfectos (Plutón): un solo arco que se va llenando, en vez de muchas rayitas
-    // apretadas
+    // Con muchos Perfectos (Plutón) un solo arco que se llena se lee mejor que muchas rayitas.
     const fl = Math.max(...pipFlash),
       a0 = -Math.PI / 2,
       a1 = a0 + Math.PI * 2 * Math.min(1, charge / cm);
@@ -516,8 +557,7 @@ function drawCharge(px, py, z) {
       s: 1 + Math.random() * 1.6,
     });
   }
-  // salto doble listo: mientras lo aprendes (menos de 3 usados), una flecha que sube sobre el
-  // planeta con "desliza"
+  // Mientras se aprende el salto doble (menos de 3 usados), una flecha sube sobre el planeta.
   const learn = !tutorial && doblesHechos < 3;
   if (ready && (learn || hintT > 0) && !wh && !whShock && !bend.on) {
     const a0 = learn ? 1 : Math.min(1, hintT),
@@ -555,7 +595,7 @@ function drawCharge(px, py, z) {
   }
   ctx.globalAlpha = 1;
 }
-// sonido propio del poder listo: un arpegio brillante que sube y un destello
+/** Sonido del poder listo: un arpegio brillante que sube y un destello. */
 function powerReadySound() {
   if (!AC || muted) {
     return;
@@ -579,17 +619,17 @@ function powerReadySound() {
     o.stop(n + 0.45);
   } catch (e) {}
 }
-// el cuadro completo: elige qué dibujar (dentro o fuera del agujero de gusano) y la onda al salir
-// ---- la cámara que se ve: sigue el salto con suavidad ----
-// La lógica (choques, puntos, agujero negro) usa camLevel, que se queda quieta durante el salto y
-// arranca de golpe al
-// aterrizar: eso se veía como un tirón. Para dibujar se usa una cámara "de resorte" que empieza a
-// subir junto con el salto,
-// acelera y frena sin saltos y llega al mismo lugar en el mismo tiempo. Quieta, es idéntica a
-// camLevel.
+// Cámara que se dibuja. La lógica (choques, puntos, agujero negro) usa camLevel, que se queda
+// quieta durante el salto y arranca de golpe al aterrizar. Para dibujar se usa una cámara "de
+// resorte" que sube junto con el salto, acelera y frena sin saltos y llega al mismo lugar en el
+// mismo tiempo. Quieta, es idéntica a camLevel.
 let camView = 0,
   camVel = 0,
   camT = 0;
+/**
+ * Avanza la cámara de resorte un cuadro (resorte con amortiguación crítica, frecuencia 9 por
+ * segundo). Fuera de la partida, o tras una pausa larga, se iguala a camLevel.
+ */
 function camViewStep() {
   const dt = t - camT;
   camT = t;
@@ -613,6 +653,10 @@ function camViewStep() {
     camVel = 0;
   }
 }
+/**
+ * Dibuja el cuadro completo con la cámara de resorte; camLevel vuelve a su valor al terminar,
+ * aunque el dibujo falle.
+ */
 function render() {
   camViewStep();
   const camL = camLevel;
@@ -623,6 +667,7 @@ function render() {
     camLevel = camL;
   }
 }
+/** Elige qué dibujar: fuera, entrando, dentro o saliendo del agujero de gusano (y su onda). */
 function renderFrame() {
   hideEarth = false;
   viewInside = false;
@@ -678,6 +723,7 @@ function renderFrame() {
     ctx.restore();
   }
 }
+/** Dibuja la onda de choque violeta que se expande al salir del agujero de gusano. */
 function drawShock() {
   const s = whShock;
   if (!s) {

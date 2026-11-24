@@ -1,4 +1,8 @@
-// Galaxias lejanas: la Vía Láctea vista desde fuera, la capa final y main(); aquí se arma FS_GX
+/**
+ * Última parte del shader de las galaxias lejanas: la Vía Láctea vista desde fuera, la capa final
+ * común a todos los niveles y main(). Aquí se arma FS_GX uniendo todas las partes en orden.
+ * Todo es código GLSL dentro de textos: cambiar algo ahí dentro cambia el juego.
+ */
 const GX_FINAL = `// la Vía Láctea vista desde fuera: el regreso a casa
 vec3 homeGalaxy(vec2 q){
   vec2 d = (q - vec2(.5*uRes.x, .74*uRes.y))/(uScale*.36); d = rot(.4 + uT*.01)*d; d.y /= .6;

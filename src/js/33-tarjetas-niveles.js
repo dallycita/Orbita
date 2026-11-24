@@ -1,7 +1,11 @@
-// ---------- tarjetas vivas: cada galaxia se dibuja en movimiento, en tiempo real (WebGL)
-// ----------
-// Una sola escena a pantalla completa detrás de las tarjetas: al deslizar, cada galaxia se mueve
-// con su tarjeta.
+/**
+ * Fondo vivo del selector de niveles: cada destino (Sistema solar, Magallanes, Andrómeda,
+ * Centaurus A, Remolino, Sombrero, M87, Sagitario A*) se dibuja en movimiento detrás de su tarjeta.
+ * Lo suave (gas, polvo, brillo) sale de un shader WebGL a baja resolución; lo nítido (estrellas,
+ * planetas, el Sol, los agujeros negros) se dibuja encima en 2D a resolución completa.
+ */
+// Una sola escena WebGL a pantalla completa: al deslizar, mezcla las dos galaxias vecinas y cada
+// una se mueve con su tarjeta.
 const LVGL = (() => {
   let gl = null,
     cv = null,
@@ -148,6 +152,11 @@ void main(){
   vec2 uv = q/uRes; col *= .5 + .5*smoothstep(1.2, .35, length((uv - .5)*vec2(1.1, .9)));
   gl_FragColor = vec4(max(col, 0.), 1.);
 }`;
+  /**
+   * Crea el contexto WebGL y compila el shader la primera vez.
+   *
+   * @returns {boolean} true si WebGL está disponible.
+   */
   function init() {
     if (gl || failed) {
       return !!gl;
@@ -204,6 +213,19 @@ void main(){
       return false;
     }
   }
+  /**
+   * Dibuja la parte suave de dos galaxias vecinas mezcladas, a 520 píxeles como máximo.
+   *
+   * @param {number} w Ancho de la pantalla, en píxeles de pantalla.
+   * @param {number} h Alto de la pantalla, en píxeles de pantalla.
+   * @param {number} ka Índice del destino de la izquierda.
+   * @param {number} kb Índice del destino de la derecha.
+   * @param {number} mix Mezcla entre los dos, de 0 a 1.
+   * @param {number[]} ca Centro [x, y] del destino ka, en píxeles de pantalla.
+   * @param {number[]} cb Centro [x, y] del destino kb, en píxeles de pantalla.
+   * @param {number} scale Tamaño de la galaxia, en píxeles de pantalla.
+   * @returns {HTMLCanvasElement|null} La imagen, o null sin WebGL.
+   */
   function soft(w, h, ka, kb, mix, ca, cb, scale) {
     if (!init()) {
       return null;
@@ -233,16 +255,24 @@ void main(){
   }
   return { soft, ok: () => init() };
 })();
+// lvCanvas: el lienzo de fondo del selector; lvArts: el recuadro de dibujo de cada tarjeta.
+// Los asigna 25-selector-niveles.
 let lvCanvas = null,
   lvArts = [];
-// ---------- tarjetas: todo lo nítido se dibuja a resolución completa (estrellas, planetas, el Sol,
-// los agujeros negros) ----------
-let lvStars = null,
-  lvSets = null;
+// Parte nítida, a resolución completa: estrellas, planetas, el Sol y los agujeros negros.
+let lvStars = null, // estrellas de fondo, con posición de 0 a 1 y profundidad
+  lvSets = null; // grupos de estrellas propios de cada destino, ya calculados
+/**
+ * Generador pseudoaleatorio de Park y Miller: siempre da la misma serie para la misma semilla.
+ *
+ * @param {number} seed Semilla entera positiva.
+ * @returns {function(): number} Función que devuelve el siguiente número, de 0 a 1.
+ */
 function lvRand(seed) {
   let s = seed;
   return () => (s = (s * 16807) % 2147483647) / 2147483647;
 }
+/** Calcula una sola vez las estrellas del fondo y de cada destino. */
 function lvPrep() {
   if (lvStars) {
     return;
@@ -290,6 +320,15 @@ function lvPrep() {
     }),
   };
 }
+/**
+ * Dibuja un resplandor redondo que se desvanece hacia afuera.
+ *
+ * @param {number} x Centro horizontal, en píxeles de pantalla.
+ * @param {number} y Centro vertical, en píxeles de pantalla.
+ * @param {number} r Radio, en píxeles de pantalla.
+ * @param {string} col Color CSS del centro.
+ * @param {number} a Opacidad, de 0 a 1.
+ */
 function lvGlow(x, y, r, col, a) {
   const g = ctx.createRadialGradient(x, y, 0, x, y, r);
   g.addColorStop(0, col);
@@ -300,6 +339,16 @@ function lvGlow(x, y, r, col, a) {
   ctx.arc(x, y, r, 0, Math.PI * 2);
   ctx.fill();
 }
+/**
+ * Dibuja un grupo de estrellas que titilan.
+ *
+ * @param {Array<object>} list Estrellas {x, y, b}: posición relativa a la escala y brillo de 0 a 1.
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} S Escala del destino, en píxeles de pantalla.
+ * @param {string} col Color CSS.
+ * @param {number} size Tamaño base de cada estrella, en píxeles de pantalla.
+ */
 function lvPoints(list, cx, cy, S, col, size) {
   for (const p of list) {
     const tw = 0.6 + 0.4 * Math.sin(t * 2 + p.b * 40);
@@ -309,8 +358,15 @@ function lvPoints(list, cx, cy, S, col, size) {
     ctx.fillRect(cx + p.x * S - s / 2, cy + p.y * S - s / 2, s, s);
   }
 }
+/**
+ * Dibuja una estrella brillante con cuatro picos de difracción, como en las fotos de telescopios.
+ *
+ * @param {number} x Posición horizontal, en píxeles de pantalla.
+ * @param {number} y Posición vertical, en píxeles de pantalla.
+ * @param {number} r Tamaño, en píxeles de pantalla.
+ * @param {number} a Opacidad, de 0 a 1.
+ */
 function lvSpike(x, y, r, a) {
-  // estrella brillante con destellos que se desvanecen (como en las fotos de los telescopios)
   ctx.globalAlpha = a * lvA;
   ctx.lineWidth = 1;
   for (const [dx, dy] of [
@@ -331,6 +387,17 @@ function lvSpike(x, y, r, a) {
   lvGlow(x, y, r * 0.7, 'rgba(200,220,255,.55)', a * lvA);
   lvGlow(x, y, r * 0.22, 'rgba(255,255,255,1)', a * lvA);
 }
+/**
+ * Posición en una órbita elíptica en el tiempo actual, resolviendo la ecuación de Kepler con
+ * seis pasos de Newton.
+ *
+ * @param {number} a Semieje mayor, en la unidad que se quiera (relativa a la escala).
+ * @param {number} e Excentricidad, de 0 a 1.
+ * @param {number} w Argumento del periapsis, en radianes.
+ * @param {number} P Periodo, en segundos.
+ * @param {number} M0 Anomalía media inicial, en radianes.
+ * @returns {number[]} [x, y] respecto al foco, en la misma unidad que a.
+ */
 function lvKepler(a, e, w, P, M0) {
   const M = (2 * Math.PI * t) / P + M0;
   let E = M;
@@ -341,7 +408,8 @@ function lvKepler(a, e, w, P, M0) {
     nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
   return [Math.cos(nu + w) * r, Math.sin(nu + w) * r];
 }
-let lvA = 1;
+let lvA = 1; // opacidad del destino que se está dibujando, de 0 a 1
+// Planetas del Sistema solar en la tarjeta: nombre y radio relativo a la escala.
 const LV_PL = [
   ['mercurio', 0.022],
   ['venus', 0.036],
@@ -350,6 +418,15 @@ const LV_PL = [
   ['jupiter', 0.085],
   ['saturno', 0.07],
 ];
+/**
+ * Dibuja la parte nítida de un destino.
+ *
+ * @param {number} k Índice del destino (0 Sistema solar … 7 Sagitario A*).
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} S Escala, en píxeles de pantalla.
+ * @param {number} alpha Opacidad, de 0 a 1.
+ */
 function lvCrisp(k, cx, cy, S, alpha) {
   lvA = alpha;
   if (alpha < 0.01) {
@@ -513,6 +590,10 @@ function lvCrisp(k, cx, cy, S, alpha) {
 // escala de cada galaxia dentro de su zona: Sistema solar, Magallanes, Andrómeda, Centaurus A,
 // Remolino, Sombrero, M87, Sagitario A*
 const LV_SCALE = [1.0, 0.9, 1.22, 0.95, 0.88, 1.12, 1.6, 1.02];
+/**
+ * Dibuja el fondo completo del selector de niveles según cuánto se ha deslizado entre tarjetas.
+ * Marca el selector con la clase 'live' cuando hay fondo WebGL.
+ */
 function drawLevelsBG() {
   if (!elLv || !elLv.querySelector) {
     return;
@@ -537,8 +618,8 @@ function drawLevelsBG() {
   const art = lvArts[ka],
     ar = art && art.getBoundingClientRect ? art.getBoundingClientRect() : null;
   const sz = (ar ? Math.min(ar.width, ar.height) : Math.min(W, H) * 0.46) * 0.95;
-  // cada destino con el mismo peso visual: los objetos chicos (M87, Sombrero…) se agrandan, sin
-  // salirse de la pantalla
+  // Mismo peso visual para todos los destinos: los objetos chicos (M87, Sombrero…) se agrandan,
+  // sin salirse de la pantalla.
   const scl = k => Math.min(sz * (LV_SCALE[k] || 1), W * 0.92, (ar ? ar.height : H) * 1.25);
   const zA = 1,
     zB = 1;
@@ -553,9 +634,8 @@ function drawLevelsBG() {
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(soft, 0, 0, W, H);
   }
-  // estrellas nítidas, en dos profundidades
-  // paralaje: al deslizar, las estrellas lejanas se mueven poco y las cercanas más (profundidad,
-  // sin efectos bruscos)
+  // Estrellas nítidas en dos profundidades, con paralaje: al deslizar, las lejanas se mueven poco
+  // y las cercanas más.
   for (const s of lvStars) {
     const x = (((s.x * W - t * (s.d < 0.5 ? 2 : 5) - pos * W * (0.05 + 0.22 * s.d)) % W) + W) % W,
       y = s.y * H;

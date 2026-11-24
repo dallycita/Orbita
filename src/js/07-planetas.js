@@ -1,7 +1,11 @@
-// ---------- planetas para rescatar y jugar ----------
-// ---------- planetas: estadísticas sacadas de datos reales ----------
-// size: diámetro real (escala logarítmica) · vel: velocidad orbital real · res: densidad real
-// (resistencia a la fuerza de marea) · charge: rotación real
+/**
+ * Planetas que se rescatan y se juegan: sus datos reales, poderes, cómo se desbloquean, cuál está
+ * elegido y cómo sus estadísticas cambian el juego (tamaño, salto, resistencia, carga).
+ * Las estadísticas st son porcentajes respecto a la Tierra; el balance se revisa con simulaciones.
+ */
+// Estadísticas sacadas de datos reales: size del diámetro (escala logarítmica), vel de la
+// velocidad orbital, res de la densidad (resistencia a la fuerza de marea) y charge de la
+// rotación (cuántos Perfectos hacen falta para cargar el poder).
 const PLANETS_P = [
   {
     id: 'luna',
@@ -203,6 +207,8 @@ const PLANETS_P = [
     ],
   },
 ];
+// Planeta elegido, récord de Perfectos en una partida, secreto de Plutón, truco de todos los
+// planetas, cargas de escudo y si se usó el salto doble en la partida.
 let curPlanet = 'tierra',
   maxPerf = 0,
   plutoOk = false,
@@ -218,18 +224,45 @@ try {
 if (!PLANETS_P.some(P => P.id === curPlanet)) {
   curPlanet = 'tierra';
 }
+/**
+ * @param {object} P Planeta de PLANETS_P.
+ * @returns {boolean} true si está desbloqueado.
+ */
 const planetOk = P => allPlanets || P.ok();
+/** @returns {object} Datos del planeta elegido (la Tierra si no se encuentra). */
 const curP = () => PLANETS_P.find(P => P.id === curPlanet) || PLANETS_P[3];
+/** @returns {object} Estadísticas del planeta elegido. */
 const pst = () => curP().st;
-const chargeMax = () => pst().charge; // rotación real
-// de Plutón (×0.85) a Júpiter (×1.22): se ve y se siente, sin ser abismal // diámetro real
+/** @returns {number} Perfectos necesarios para cargar el poder (de la rotación real). */
+const chargeMax = () => pst().charge;
+/**
+ * Factor de tamaño del planeta según su diámetro real: de Plutón (×0.85) a Júpiter (×1.22), se
+ * nota sin ser abismal.
+ *
+ * @returns {number} Multiplicador del radio.
+ */
 const sizeK = () => 1 + (pst().size / 100) * 0.7;
-// los lentos flotan (hasta ~40% más de tiempo en el aire) // velocidad orbital real
+/**
+ * Duración del salto según la velocidad orbital real: los lentos flotan hasta ~40 % más tiempo.
+ *
+ * @returns {number} Duración, en segundos.
+ */
 const jumpDur = () => Math.max(0.09, JUMP_DUR * (1 - (pst().vel / 100) * 0.75));
-// los frágiles: el agujero negro los alcanza hasta ~media vuelta de anillo antes // densidad real:
-// los menos densos se despedazan antes
+/**
+ * Margen con que el agujero negro alcanza al planeta según su densidad real: los menos densos se
+ * despedazan antes por la marea (hasta ~media vuelta de anillo antes).
+ *
+ * @returns {number} Margen, en niveles de anillo.
+ */
 const catchMargin = () => 0.18 - (pst().res / 100) * 0.6;
+/** @returns {string[]} Identificadores de los planetas desbloqueados. */
 const unlockedIds = () => PLANETS_P.filter(planetOk).map(P => P.id);
+/**
+ * Miniatura de un planeta para la interfaz: imagen 3D si hay WebGL, si no su ícono SVG.
+ *
+ * @param {string} id Identificador del planeta.
+ * @returns {string} HTML de la miniatura (vacío si no hay ícono).
+ */
 function planetThumb(id) {
   try {
     const r = PLGL.render(id, 120, 0.6, [-0.78, 0.42, 0.48], [1.12, 1.06, 0.98], 1);
@@ -241,11 +274,18 @@ function planetThumb(id) {
     ? '<svg viewBox="0 0 100 100" aria-hidden="true">' + PLANET_SVG[id] + '</svg>'
     : '';
 }
+/** Guarda que hay planetas recién rescatados, para avisar en el menú. */
 function markNewPlanets() {
   try {
     localStorage.setItem('orbita_pl_nuevo', '1');
   } catch (e) {}
 }
+/**
+ * HTML con las miniaturas de los planetas rescatados desde una lista anterior.
+ *
+ * @param {string[]} before Planetas desbloqueados antes de la partida.
+ * @returns {string} HTML, o '' si no se rescató ninguno.
+ */
 function rescuedCards(before) {
   const now = unlockedIds(),
     nuevos = PLANETS_P.filter(P => now.includes(P.id) && !before.includes(P.id));
@@ -263,6 +303,7 @@ function rescuedCards(before) {
     '</small></div>'
   );
 }
+/** Guarda el récord de Perfectos en una partida, que desbloquea a Mercurio y Urano. */
 function saveRunStats() {
   if (perfCount > maxPerf) {
     maxPerf = perfCount;
@@ -271,8 +312,7 @@ function saveRunStats() {
     } catch (e) {}
   }
 }
-// el planeta del jugador, dibujado en el juego (la luz viene de abajo, del disco del agujero negro)
-// íconos para la pantalla de planetas
+// Íconos SVG de respaldo para la pantalla de planetas (sin WebGL).
 const PLANET_SVG = {
   tierra:
     '<circle cx="50" cy="50" r="26" fill="#3d8bff"/><path d="M34 40 Q42 30 52 38 Q48 48 38 47 Z M56 56 Q66 50 70 60 Q62 70 55 64 Z" fill="#5ccf6b"/><path d="M30 46 Q50 42 70 47" stroke="#fff" stroke-opacity=".7" stroke-width="2" fill="none"/>',
@@ -285,4 +325,3 @@ const PLANET_SVG = {
   pluton:
     '<circle cx="50" cy="50" r="17" fill="#d9c7b4"/><path d="M52 62 C44 57 45 49 52 52 C59 49 60 57 52 62 Z" fill="#f4ebe0"/>',
 };
-// nivel 1: el sistema solar termina en el anillo 50

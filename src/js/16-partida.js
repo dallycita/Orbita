@@ -1,3 +1,15 @@
+/**
+ * Ciclo de una partida: crea los anillos y sus obstáculos, prepara y arranca la partida, salta,
+ * aterriza, gana y muere. También muestra el contador de intentos.
+ * Los anillos se generan con la semilla fija SEED (rng), así cada nivel sale siempre igual.
+ */
+/**
+ * Crea un anillo con sus obstáculos y su giro según el tipo que le toca en el nivel.
+ *
+ * @param {number} k Nivel de anillo (0 es el anillo de partida, sin obstáculos).
+ * @returns {object} Anillo {obs, w, phase, type, …}; w es la velocidad de giro, en radianes por
+ *   segundo.
+ */
 function makeRing(k) {
   if (k === 0) {
     return { obs: [], w: 0, phase: 0, type: 'clasico' };
@@ -19,7 +31,7 @@ function makeRing(k) {
   if (type === 'gusano') {
     ring.w = 0;
     return ring;
-  } // donde apareces dentro del gusano
+  } // anillo donde se aparece dentro del gusano
   if (type === 'orbita') {
     // dentro del gusano: anillos quietos con uno o dos huecos; cada hueco queda a un lado del
     // anterior (izquierda o derecha)
@@ -60,7 +72,7 @@ function makeRing(k) {
     // anillo casi lleno con uno o dos huecos
     const gaps = lvl >= 6 && !tutorial ? 1 : 2,
       hg = lvl === 5 && !tutorial ? 0.38 : !tutorial && TUNE[lvl] ? TUNE[lvl].hg : 0.46,
-      stepA = 0.22; // nivel 1: murallas siempre con dos huecos amplios
+      stepA = 0.22;
     for (let a = 0; a < Math.PI * 2 - 1e-6; a += stepA) {
       let inGap = false;
       for (let g = 0; g < gaps; g++) {
@@ -76,9 +88,9 @@ function makeRing(k) {
     }
     ring.w = dir * Math.min(0.5 + k * 0.006, 0.8) * (!tutorial ? RING_MUL[lvl] : 1);
   } else if (type === 'respiracion') {
-    // asteroides grandes que se encogen en cada golpe: ahí se abre el paso
-    // 16 asteroides: grandes cierran el anillo, chicos dejan pasar a la Tierra con margen.
-    // El giro va con la música: en cada golpe en que se encogen, hay un hueco justo encima de ti.
+    // 16 asteroides que se encogen en cada golpe: grandes cierran el anillo y chicos dejan pasar
+    // a la Tierra con margen. El giro va con la música: en cada golpe en que se encogen hay un
+    // hueco justo encima del planeta.
     const n = 16,
       sig = (Math.PI * 2) / n;
     ring.w = (dir * sig) / (4 * TB);
@@ -191,6 +203,7 @@ function makeRing(k) {
   }
   return ring;
 }
+/** Crea los anillos que faltan cerca del planeta (hasta 6 arriba) y borra los de muy abajo. */
 function ensureRings() {
   for (let k = Math.max(0, level - 3); k <= Math.min(level + 6, curGoal()); k++) {
     if (!rings.has(k)) {
@@ -203,6 +216,7 @@ function ensureRings() {
     }
   }
 }
+/** Deja todo el estado de la partida como al principio y crea los primeros anillos. */
 function setup() {
   rngState = SEED;
   swallow = null;
@@ -251,6 +265,7 @@ function setup() {
   } catch (e) {}
   ensureRings();
 }
+/** Empieza o reinicia una partida: limpia peligros y poderes, prepara la pantalla y la música. */
 function start() {
   hot = 0;
   hotT = 0;
@@ -306,9 +321,22 @@ function start() {
 }
 setup();
 
+/**
+ * Radio de un anillo visto desde la cámara.
+ *
+ * @param {number} k Nivel de anillo (puede tener decimales).
+ * @returns {number} Radio, en unidades del juego.
+ */
 const rr = k => R0 + (k - camLevel) * GAP;
 
-// distancia libre entre la luna y el asteroide más cercano del anillo k
+/**
+ * Distancia libre entre el planeta y el asteroide más cercano de un anillo; sirve para decidir si
+ * un aterrizaje fue perfecto.
+ *
+ * @param {number} k Nivel de anillo.
+ * @param {boolean} onlyApproaching Si es true, solo cuenta los asteroides que vienen hacia él.
+ * @returns {number} Distancia entre bordes, en unidades del juego (999 si no hay ninguno).
+ */
 function clearance(k, onlyApproaching) {
   const ring = rings.get(k);
   if (!ring) {
@@ -337,6 +365,10 @@ function clearance(k, onlyApproaching) {
   }
   return m;
 }
+/**
+ * Convierte en pleno vuelo un salto simple en doble, si hay carga. Con otro planeta que no sea la
+ * Tierra usa su poder en lugar del salto doble.
+ */
 function upgradeToDouble() {
   if (
     !jumping ||
@@ -354,6 +386,8 @@ function upgradeToDouble() {
     usePower(true);
     return;
   }
+  // Busca el punto del salto doble con la misma altura que el simple (la curva es
+  // 1 - (1 - p)^3 y el doble recorre dos anillos), para que el planeta no dé un brinco.
   const p1 = Math.min(jumpT / jumpDur(), 1),
     e1 = 1 - Math.pow(1 - p1, 3);
   const p2 = 1 - Math.cbrt(1 - e1 / 2);
@@ -369,7 +403,10 @@ function upgradeToDouble() {
   cowbell(SCALE[4] + 12);
   buzz([15, 30, 25]);
 }
-// ---- la Tierra escapa: fuera del alcance del agujero negro ----
+/**
+ * El planeta llegó al último anillo y escapa del agujero negro: guarda el récord, desbloquea
+ * planetas y muestra la pantalla de victoria.
+ */
 function win() {
   if (tutorial) {
     tutorialWin();
@@ -466,6 +503,7 @@ function win() {
     }, 600);
   }, 2400);
 }
+/** Fanfarria de victoria. */
 function winSound() {
   if (!AC) {
     return;
@@ -538,6 +576,10 @@ function winSound() {
     o.stop(n + 3.3);
   } catch (e) {}
 }
+/**
+ * Salto doble desde el anillo (dos anillos de golpe), si hay carga y los anillos siguientes lo
+ * permiten. Con otro planeta que no sea la Tierra usa su poder.
+ */
 function doubleJump() {
   if (
     state !== 'play' ||
@@ -567,6 +609,7 @@ function doubleJump() {
   cowbell(SCALE[4] + 12);
   buzz([15, 30, 25]);
 }
+/** Salto simple al anillo siguiente. Con cargas de perihelio el salto es instantáneo. */
 function jump() {
   jumping = true;
   jumpT = 0;
@@ -581,6 +624,12 @@ function jump() {
   jumpClear = 999;
   noise(0.07, 2500, 7000, 0.07, 'highpass');
 }
+/**
+ * Al aterrizar: cuenta puntos y rachas de aterrizajes perfectos, recoge estrellas y objetos,
+ * lanza los peligros del anillo, avisa de tipos de anillo distintos y gana al llegar a la meta.
+ *
+ * @param {boolean} isDouble true si se llegó con un salto doble.
+ */
 function onLand(isDouble) {
   const z = zoneOf(level);
   const perfect = !isDouble && Math.min(jumpClear, clearance(level, false)) < PERFECT;
@@ -724,8 +773,8 @@ function onLand(isDouble) {
     try {
       localStorage.setItem('orbita_p1_vistos', JSON.stringify(seenTypes));
     } catch (e) {}
-    // sin texto: el anillo nuevo destella para avisar que algo cambia (se aprende jugando, como en
-    // Geometry Dash)
+    // Sin texto: el anillo de tipo distinto destella para avisar que algo cambia (se aprende
+    // jugando, como en Geometry Dash).
     {
       const nr = rings.get(level + 1);
       if (nr) {
@@ -903,6 +952,7 @@ function onLand(isDouble) {
     win();
   }
 }
+/** Marca como quemados los anillos que ya alcanzó el agujero negro (en el nivel 2, sacude). */
 function eatRings() {
   while (lastEaten + 1 <= sunLevel) {
     lastEaten++;
@@ -914,6 +964,15 @@ function eatRings() {
     }
   }
 }
+/**
+ * El planeta muere: lo traga el agujero (cause 'sun') o explota. Guarda récords y reinicia la
+ * partida sola al poco tiempo, sin pantalla intermedia.
+ *
+ * @param {number} x Posición horizontal del planeta, en unidades del juego desde el centro.
+ * @param {number} y Posición vertical del planeta, en unidades del juego desde el centro.
+ * @param {string} cause Causa: 'sun', 'nova', 'onda', 'comet', 'beam', 'sstar', choque…
+ * @param {object} [who] Objeto culpable, que se resalta un momento.
+ */
 function die(x, y, cause, who) {
   if (tutorial) {
     tutRespawn(x, y);
@@ -987,9 +1046,12 @@ function die(x, y, cause, who) {
     cause === 'sun' ? 2400 : 850,
   );
 }
-// "INTENTO N" aparece grande y tenue en el espacio y se desvanece; si fue récord, lo celebra en
-// dorado
-let sesTries = 1; // intentos de esta sesión en el nivel: vuelve a 1 cada vez que entras al nivel
+let sesTries = 1; // intentos de esta sesión en el nivel; vuelve a 1 al entrar al nivel
+/**
+ * Muestra "Intento N" grande y tenue, que se desvanece; si fue récord, lo celebra en dorado.
+ *
+ * @param {number} recRing Anillo del récord recién logrado, o 0 si no hubo récord.
+ */
 function showTry(recRing) {
   let el = document.getElementById('tryn');
   if (!el) {
