@@ -4798,7 +4798,9 @@ const CHEV_R =
   '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9.5 5.5 16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 (() => {
   // src/js/08-partida-estado.js
-  var winT = 0, perfCount = 0, attempts = 0;
+  var winT = 0;
+  var perfCount = 0;
+  var attempts = 0;
   var TUT_GOAL = 10;
   var TUT_TYPES = [
     "vacio",
@@ -4824,19 +4826,41 @@ const CHEV_R =
     "¡Sigue!",
     "Una barrera sin huecos. Desliza hacia arriba para el salto doble."
   ];
-  var tutorial = false, tutorialDone = true;
+  var tutorial = false;
+  var tutorialDone = true;
   var curGoal = () => tutorial ? TUT_GOAL : GOAL;
   var pipFlash = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-  var readyT = 0, chargeFlash = 0, readyHintDone = false;
-  var gest = null, pending = false, pendingT = 0;
+  var readyT = 0;
+  var chargeFlash = 0;
+  var readyHintDone = false;
+  var gest = null;
+  var pending = false;
+  var pendingT = 0;
   var hintsShown = 0;
-  var showHint = false, hintT = 0;
-  var swallow = null, holeFlare = 0;
-  var streak = 0, jumpClear = 999, culprit = null, culpritT = 0, landPop = 0;
+  var showHint = false;
+  var hintT = 0;
+  var swallow = null;
+  var holeFlare = 0;
+  var streak = 0;
+  var jumpClear = 999;
+  var culprit = null;
+  var culpritT = 0;
+  var landPop = 0;
   var PERFECT = 12;
-  var t = 0, timeScale = 1, slowTimer = 0, shake = 0, flash = 0, pulse = 0, deadT = 0, canRestart = false;
-  var particles = [], trail = [], texts = [], burns = [];
-  var sunLevel = -1.6, lastEaten = -2;
+  var t = 0;
+  var timeScale = 1;
+  var slowTimer = 0;
+  var shake = 0;
+  var flash = 0;
+  var pulse = 0;
+  var deadT = 0;
+  var canRestart = false;
+  var particles = [];
+  var trail = [];
+  var texts = [];
+  var burns = [];
+  var sunLevel = -1.6;
+  var lastEaten = -2;
   var debris;
   var JUMP_DUR = 0.12;
   function initRunState() {
@@ -5015,7 +5039,8 @@ const CHEV_R =
     } catch (e) {
     }
   };
-  var runRecord = 0, newRec = false;
+  var runRecord = 0;
+  var newRec = false;
   function updateRingHUD() {
     if (elPbar && elPbar.style) {
       const g = curGoal(), v = Math.min(level, g), rec = tutorial ? 0 : Math.min(runRecord, g);
@@ -5042,13 +5067,29 @@ const CHEV_R =
     }
   }
   var state = "pretitle";
-  var rings, level, pLevel, camLevel, pAng, jumping, jumpT, combo, lastLand, score;
-  var astFade = 0, appear = 1;
-  var charge = 0, jumpTarget = 1, crossed = false;
+  var rings;
+  var level;
+  var pLevel;
+  var camLevel;
+  var pAng;
+  var jumping;
+  var jumpT;
+  var combo;
+  var lastLand;
+  var score;
+  var astFade = 0;
+  var appear = 1;
+  var charge = 0;
+  var jumpTarget = 1;
+  var crossed = false;
   var GOAL = 50;
   var lvl = 0;
-  var best2 = 0, attempts2 = 0, best3 = 0, attempts3 = 0;
-  var bestX = {}, attX = {};
+  var best2 = 0;
+  var attempts2 = 0;
+  var best3 = 0;
+  var attempts3 = 0;
+  var bestX = {};
+  var attX = {};
   var bestOf = (i) => i >= 3 ? bestX[i] || 0 : i === 2 ? best3 : i === 1 ? best2 : bestRing;
   function setBestOf(i, v) {
     if (i >= 3) {
@@ -5200,10 +5241,14 @@ const CHEV_R =
   }
 
   // src/js/01-pantalla-y-utilidades.js
-  var cvs, ctx;
-  var elScore, elBest;
-  var elPbar, elPnum;
-  var elWrap, elArcFg;
+  var cvs;
+  var ctx;
+  var elScore;
+  var elBest;
+  var elPbar;
+  var elPnum;
+  var elWrap;
+  var elArcFg;
   var hudMode = "faltan";
   var musicStyle = "espacial";
   function chipsHTML() {
@@ -5217,10 +5262,19 @@ const CHEV_R =
       )
     );
   }
-  var elHud, elPanel;
+  var elHud;
+  var elPanel;
   var reduceMotion;
-  var W, H, DPR, S, CX, CY;
-  var R0 = 96, GAP = 34, PR = 8, SUN = 16;
+  var W;
+  var H;
+  var DPR;
+  var S;
+  var CX;
+  var CY;
+  var R0 = 96;
+  var GAP = 34;
+  var PR = 8;
+  var SUN = 16;
   function resize() {
     DPR = Math.min(window.devicePixelRatio || 1, 2);
     const r = cvs.getBoundingClientRect();
@@ -5303,7 +5357,8 @@ const CHEV_R =
 
   // src/js/core/settings.js
   var muted = false;
-  var volMus = 100, volSfx = 100;
+  var volMus = 100;
+  var volSfx = 100;
   function initAudioSettings() {
     try {
       const a = localStorage.getItem("orbita_vol_mus"), b = localStorage.getItem("orbita_vol_sfx");
@@ -5336,7 +5391,13 @@ const CHEV_R =
   }
 
   // src/js/02-audio.js
-  var AC = null, master = null, musicBus = null, NOISE = null, shaper = null, outBus = null, musVol = null;
+  var AC = null;
+  var master = null;
+  var musicBus = null;
+  var NOISE = null;
+  var shaper = null;
+  var outBus = null;
+  var musVol = null;
   var volGain = (v) => Math.pow(v / 100, 2);
   function applyVolumes() {
     if (!AC || !master || !musVol) {
@@ -5511,8 +5572,15 @@ const CHEV_R =
   }
 
   // src/js/03-musica-ritmos.js
-  var BPM = 140, STEP = 60 / BPM / 4, TB = 60 / BPM;
-  var musicOn = false, nextT = 0, step = 0, schedTimer = null, kickQueue = [], musicStart = -1;
+  var BPM = 140;
+  var STEP = 60 / BPM / 4;
+  var TB = 60 / BPM;
+  var musicOn = false;
+  var nextT = 0;
+  var step = 0;
+  var schedTimer = null;
+  var kickQueue = [];
+  var musicStart = -1;
   var BASS = {
     0: [0, 0.42],
     6: [0, 0.28],
@@ -5684,7 +5752,8 @@ const CHEV_R =
   function dangerNow() {
     return state === "play" ? clamp((1.7 - (pLevel - sunLevel)) / 1.3, 0, 1) : 0;
   }
-  var tens = null, tensT = 0;
+  var tens = null;
+  var tensT = 0;
   function tensionOn() {
     if (!AC || tens) {
       return;
@@ -5730,7 +5799,9 @@ const CHEV_R =
     } catch (e) {
     }
   }
-  var alarmT = 0, alarmWas = 0, dangerFlash = 0;
+  var alarmT = 0;
+  var alarmWas = 0;
+  var dangerFlash = 0;
   function alarmTick(dt) {
     if (!AC || muted || state !== "play" || tutorial) {
       alarmT = 0;
@@ -5929,7 +6000,8 @@ const CHEV_R =
     }
   }
   var SW_AT = 30;
-  var riserOn = false, switchAt = 0;
+  var riserOn = false;
+  var switchAt = 0;
   function riser(t0, dur) {
     const src = AC.createBufferSource();
     src.buffer = NOISE;
@@ -5961,7 +6033,8 @@ const CHEV_R =
   ];
   var PHRY = [0, 1, 3, 7, 8, 10, 12, 13];
   var hzA = (sm) => ROOT_A / 2 * Math.pow(2, sm / 12);
-  var andFast = false, switchMsg = "¡A toda velocidad!";
+  var andFast = false;
+  var switchMsg = "¡A toda velocidad!";
   function fmBell(t0, f, gain, dur) {
     const c = AC.createOscillator(), m = AC.createOscillator(), mg = AC.createGain(), g = AC.createGain();
     c.type = "sine";
@@ -7425,8 +7498,16 @@ const CHEV_R =
   };
 
   // src/js/11-peligros-datos.js
-  var comets = [], beams = [], flareT = 0, flareWarn = 0, sstars = [], beamCount = 0;
-  var waves = [], hot = 0, hotT = 0, skyFlash = 0;
+  var comets = [];
+  var beams = [];
+  var flareT = 0;
+  var flareWarn = 0;
+  var sstars = [];
+  var beamCount = 0;
+  var waves = [];
+  var hot = 0;
+  var hotT = 0;
+  var skyFlash = 0;
   var novaSrc = [];
   function setBeamCount(value) {
     beamCount = value;
@@ -7597,17 +7678,77 @@ const CHEV_R =
     return value;
   }
 
-  // src/js/24-presentacion.js
-  var SPLASH_END = 10, BR0 = 1.35, BR1 = 2.05;
-  var SK;
-  var BST = [
-    [0, [50, 10, 4]],
-    [0.35, [150, 38, 8]],
-    [0.6, [255, 100, 28]],
-    [0.82, [255, 196, 96]],
-    [1, [255, 246, 222]]
-  ];
-  var splashT = 0, splashBus = null, splashFont = false, sflared = false, sfl = 0;
+  // src/js/render/black-hole.js
+  var splashFont = false;
+  function setSplashFont(value) {
+    splashFont = value;
+    return value;
+  }
+  function brandHole(cx, cy, R, alpha, flare) {
+    bhDiskK(cx, cy, R, 0.96, 1.06, 1.6, 0, Math.PI * 2, alpha);
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = bcol(0.95, 0.9);
+    ctx.lineWidth = Math.max(1.2, R * 0.03) + flare * 5;
+    ctx.shadowColor = "#ff5a1f";
+    ctx.shadowBlur = 10 + flare * 36;
+    ctx.beginPath();
+    ctx.arc(cx, cy, R * 1.015, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
+  }
+  function drawLogo(midX, cy, fs, p) {
+    if (p === void 0) {
+      p = 99;
+    }
+    ctx.save();
+    const pO = easeIO2(clamp(p / 1, 0, 1)), Rf0 = fs * LOGO.r, word = "RBITA", ls = fs * LOGO.track;
+    ctx.font = LOGO.weight + " " + fs + "px " + (splashFont ? "Unbounded" : "system-ui") + ", sans-serif";
+    const mw = (s) => {
+      const m = ctx.measureText(s);
+      return m && m.width || s.length * fs * 0.75;
+    };
+    const tw = mw(word) + ls * (word.length - 1), cx = midX - (Rf0 * LOGO.disk + Rf0 * LOGO.txt + tw) / 2 + Rf0 * LOGO.disk;
+    const Rf = Rf0 * (0.55 + 0.45 * pO);
+    ctx.globalAlpha = pO;
+    const g = ctx.createRadialGradient(cx, cy, Rf, cx, cy, Rf * 4);
+    g.addColorStop(0, "rgba(255,100,28,.16)");
+    g.addColorStop(1, "rgba(255,100,28,0)");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(cx, cy, Rf * 4, 0, Math.PI * 2);
+    ctx.fill();
+    bhDisk(cx, cy, Rf, Math.PI - 0.03, Math.PI * 2 + 0.03, pO, LOGO.disk);
+    bhCore(cx, cy, Rf, pO);
+    bhDisk(cx, cy, Rf, 0, Math.PI, pO, LOGO.disk);
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = BONE;
+    for (let i = 0; i < word.length; i++) {
+      const la = clamp((p - (0.7 + i * 0.16)) / 0.5, 0, 1);
+      if (la <= 0) {
+        continue;
+      }
+      ctx.globalAlpha = easeIO2(la);
+      ctx.fillText(
+        word[i],
+        cx + Rf0 * LOGO.txt + mw(word.slice(0, i)) + ls * i,
+        cy + fs * 0.36 + (1 - easeIO2(la)) * 8
+      );
+    }
+    ctx.globalAlpha = 1;
+    if (p > 1.6) {
+      drawAccent(cx, cy, Rf, 1 - Math.pow(1 - clamp((p - 1.6) / 0.55, 0, 1), 3));
+    }
+    ctx.restore();
+  }
+  var BR0 = 1.35;
+  var BR1 = 2.05;
+  var SK = Math.sin(37 * Math.PI / 180);
   var easeIO2 = (v) => v < 0.5 ? 2 * v * v : 1 - Math.pow(-2 * v + 2, 2) / 2;
   function bcol(b, a) {
     b = Math.max(0, Math.min(1, b));
@@ -7618,22 +7759,6 @@ const CHEV_R =
       }
     }
     return "rgba(255,246,222," + a + ")";
-  }
-  function bbright(th, r, r0, r1) {
-    const rad = 1 - (r - r0) / (r1 - r0), dop = 0.5 - 0.5 * Math.cos(th), s = 0.82 + 0.18 * Math.sin(th * 5 + r / r0 * 10 - t * 2.4 * Math.pow(r0 / r, 1.5));
-    return (0.25 + 0.75 * Math.pow(rad, 0.8)) * (0.4 + 0.6 * dop) * s;
-  }
-  function bstyle(cx, cy, r, k, r0, r1, a, lensMode, nStops) {
-    const g = ctx.createConicGradient ? ctx.createConicGradient(0, cx, cy) : null;
-    if (!g) {
-      return bcol(bbright(Math.PI, r, r0, r1), a);
-    }
-    const n = nStops || 28;
-    for (let i = 0; i <= n; i++) {
-      const ph = i / n * Math.PI * 2, th = lensMode ? ph : Math.atan2(Math.sin(ph) / k, Math.cos(ph));
-      g.addColorStop(i / n, bcol(bbright(th, r, r0, r1), a));
-    }
-    return g;
   }
   function bhDisk(cx, cy, R, from, to, alpha, f1) {
     if (BHGL.draw(from > 1 ? 0 : 1, cx, cy, R, SK, BR0, f1 || BR1, alpha)) {
@@ -7795,23 +7920,6 @@ const CHEV_R =
     }
     return { draw };
   })();
-  function brandHole(cx, cy, R, alpha, flare) {
-    bhDiskK(cx, cy, R, 0.96, 1.06, 1.6, 0, Math.PI * 2, alpha);
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = "#000";
-    ctx.beginPath();
-    ctx.arc(cx, cy, R, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = bcol(0.95, 0.9);
-    ctx.lineWidth = Math.max(1.2, R * 0.03) + flare * 5;
-    ctx.shadowColor = "#ff5a1f";
-    ctx.shadowBlur = 10 + flare * 36;
-    ctx.beginPath();
-    ctx.arc(cx, cy, R * 1.015, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.globalAlpha = 1;
-  }
   var LOGO = { r: 0.42, disk: 1.8, txt: 1.55, track: 0.2, weight: 400 };
   function drawAccent(cx, cy, R, p) {
     const dx = 0.574, dy = -0.819, ex = cx + R * 0.55 - dx * (1 - p) * R * 3, ey = cy - R * 1.62 - dy * (1 - p) * R * 3;
@@ -7831,51 +7939,6 @@ const CHEV_R =
     ctx.closePath();
     ctx.fill();
     splashEarth(ex, ey, re);
-  }
-  function drawLogo(midX, cy, fs, p) {
-    if (p === void 0) {
-      p = 99;
-    }
-    ctx.save();
-    const pO = easeIO2(clamp(p / 1, 0, 1)), Rf0 = fs * LOGO.r, word = "RBITA", ls = fs * LOGO.track;
-    ctx.font = LOGO.weight + " " + fs + "px " + (splashFont ? "Unbounded" : "system-ui") + ", sans-serif";
-    const mw = (s) => {
-      const m = ctx.measureText(s);
-      return m && m.width || s.length * fs * 0.75;
-    };
-    const tw = mw(word) + ls * (word.length - 1), cx = midX - (Rf0 * LOGO.disk + Rf0 * LOGO.txt + tw) / 2 + Rf0 * LOGO.disk;
-    const Rf = Rf0 * (0.55 + 0.45 * pO);
-    ctx.globalAlpha = pO;
-    const g = ctx.createRadialGradient(cx, cy, Rf, cx, cy, Rf * 4);
-    g.addColorStop(0, "rgba(255,100,28,.16)");
-    g.addColorStop(1, "rgba(255,100,28,0)");
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(cx, cy, Rf * 4, 0, Math.PI * 2);
-    ctx.fill();
-    bhDisk(cx, cy, Rf, Math.PI - 0.03, Math.PI * 2 + 0.03, pO, LOGO.disk);
-    bhCore(cx, cy, Rf, pO);
-    bhDisk(cx, cy, Rf, 0, Math.PI, pO, LOGO.disk);
-    ctx.textAlign = "left";
-    ctx.textBaseline = "alphabetic";
-    ctx.fillStyle = BONE;
-    for (let i = 0; i < word.length; i++) {
-      const la = clamp((p - (0.7 + i * 0.16)) / 0.5, 0, 1);
-      if (la <= 0) {
-        continue;
-      }
-      ctx.globalAlpha = easeIO2(la);
-      ctx.fillText(
-        word[i],
-        cx + Rf0 * LOGO.txt + mw(word.slice(0, i)) + ls * i,
-        cy + fs * 0.36 + (1 - easeIO2(la)) * 8
-      );
-    }
-    ctx.globalAlpha = 1;
-    if (p > 1.6) {
-      drawAccent(cx, cy, Rf, 1 - Math.pow(1 - clamp((p - 1.6) / 0.55, 0, 1), 3));
-    }
-    ctx.restore();
   }
   function bhCore(cx, cy, R, alpha) {
     ctx.globalAlpha = 1;
@@ -7920,6 +7983,30 @@ const CHEV_R =
     ctx.shadowBlur = 0;
     ctx.globalAlpha = 1;
   }
+  var BST = [
+    [0, [50, 10, 4]],
+    [0.35, [150, 38, 8]],
+    [0.6, [255, 100, 28]],
+    [0.82, [255, 196, 96]],
+    [1, [255, 246, 222]]
+  ];
+  var sfl = 0;
+  function bbright(th, r, r0, r1) {
+    const rad = 1 - (r - r0) / (r1 - r0), dop = 0.5 - 0.5 * Math.cos(th), s = 0.82 + 0.18 * Math.sin(th * 5 + r / r0 * 10 - t * 2.4 * Math.pow(r0 / r, 1.5));
+    return (0.25 + 0.75 * Math.pow(rad, 0.8)) * (0.4 + 0.6 * dop) * s;
+  }
+  function bstyle(cx, cy, r, k, r0, r1, a, lensMode, nStops) {
+    const g = ctx.createConicGradient ? ctx.createConicGradient(0, cx, cy) : null;
+    if (!g) {
+      return bcol(bbright(Math.PI, r, r0, r1), a);
+    }
+    const n = nStops || 28;
+    for (let i = 0; i <= n; i++) {
+      const ph = i / n * Math.PI * 2, th = lensMode ? ph : Math.atan2(Math.sin(ph) / k, Math.cos(ph));
+      g.addColorStop(i / n, bcol(bbright(th, r, r0, r1), a));
+    }
+    return g;
+  }
   function splashEarth(ex, ey, r) {
     ctx.fillStyle = "#3d8bff";
     ctx.beginPath();
@@ -7939,298 +8026,23 @@ const CHEV_R =
     ctx.fill();
     ctx.restore();
   }
-  function splashSounds() {
-    if (!AC) {
-      return;
-    }
-    try {
-      const n = AC.currentTime + 0.05;
-      splashBus = AC.createGain();
-      splashBus.gain.value = 0.9;
-      splashBus.connect(master);
-      const osc = (type, f0, f1, t0, dur, peak, att) => {
-        const o = AC.createOscillator(), g2 = AC.createGain();
-        o.type = type;
-        o.frequency.setValueAtTime(f0, t0);
-        if (f1) {
-          o.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
-        }
-        g2.gain.setValueAtTime(1e-4, t0);
-        g2.gain.exponentialRampToValueAtTime(peak, t0 + att);
-        g2.gain.exponentialRampToValueAtTime(1e-4, t0 + dur);
-        o.connect(g2);
-        g2.connect(splashBus);
-        o.start(t0);
-        o.stop(t0 + dur + 0.05);
-        return o;
-      };
-      osc("sine", 38, 58, n, 6, 0.35, 2.5);
-      const src = AC.createBufferSource();
-      src.buffer = NOISE;
-      const f = AC.createBiquadFilter();
-      f.type = "bandpass";
-      f.Q.value = 1.1;
-      f.frequency.setValueAtTime(200, n + 3);
-      f.frequency.exponentialRampToValueAtTime(6e3, n + 5.5);
-      const g = AC.createGain();
-      g.gain.setValueAtTime(1e-4, n + 3);
-      g.gain.exponentialRampToValueAtTime(0.28, n + 5.45);
-      g.gain.exponentialRampToValueAtTime(1e-4, n + 5.6);
-      src.connect(f);
-      f.connect(g);
-      g.connect(splashBus);
-      src.start(n + 3);
-      src.stop(n + 5.7);
-      [0, 3, 5, 7, 10].forEach(
-        (s, i) => osc("triangle", ROOT * Math.pow(2, s / 12), 0, n + 4 + i * 0.22, 0.7, 0.12, 5e-3)
-      );
-      osc("sine", ROOT * 2 * Math.pow(2, 7 / 12), 0, n + 5.3, 1.4, 0.1, 4e-3);
-      osc("sine", 72, 38, n + 5.5, 1.6, 0.9, 5e-3);
-      noiseHit(n + 5.5, 1.6, "highpass", 3e3, 0.35, splashBus);
-      for (const s of [0, 3, 7, 12]) {
-        for (const det of [-7, 7]) {
-          const o = AC.createOscillator(), gg = AC.createGain(), lp = AC.createBiquadFilter();
-          o.type = "sawtooth";
-          o.frequency.value = ROOT / 2 * Math.pow(2, s / 12);
-          o.detune.value = det;
-          lp.type = "lowpass";
-          lp.frequency.value = 1300;
-          gg.gain.setValueAtTime(1e-4, n + 5.5);
-          gg.gain.exponentialRampToValueAtTime(0.035, n + 5.6);
-          gg.gain.exponentialRampToValueAtTime(1e-4, n + 9.5);
-          o.connect(lp);
-          lp.connect(gg);
-          gg.connect(splashBus);
-          o.start(n + 5.5);
-          o.stop(n + 9.6);
-        }
-      }
-      osc("sine", ROOT * 4, 0, n + 5.55, 2.8, 0.07, 5e-3);
-      osc("sine", ROOT * 4 * Math.pow(2, 7 / 12), 0, n + 5.6, 2.6, 0.05, 5e-3);
-    } catch (e) {
-    }
-  }
-  function startSplash() {
-    setState("splash");
-    splashT = 0;
-    sflared = false;
-    sfl = 0;
-    elPanel.classList.add("hide");
-    elHud.style.opacity = 0;
-    splashSounds();
-  }
-  function skipSplash() {
-    if (splashBus && AC) {
-      try {
-        const n = AC.currentTime;
-        splashBus.gain.cancelScheduledValues(n);
-        splashBus.gain.setValueAtTime(splashBus.gain.value, n);
-        splashBus.gain.exponentialRampToValueAtTime(1e-4, n + 0.25);
-      } catch (e) {
-      }
-    }
-    afterSplash();
-  }
-  function updateSplash(dt) {
-    setT(t + dt);
-    if (state === "splash") {
-      splashT += dt;
-    }
-    setFlash(Math.max(0, flash - dt * 2));
-    sfl = Math.max(0, sfl - dt * 1.3);
-    if (state === "splash" && !sflared && splashT >= 5.5) {
-      sflared = true;
-      setFlash(0.35);
-      sfl = 1;
-      buzz([30, 40, 80]);
-    }
-    if (state === "splash" && splashT >= SPLASH_END) {
-      afterSplash();
-    }
-  }
-  function renderSplash() {
-    const T = splashT;
-    ctx.save();
-    ctx.fillStyle = "#05060c";
-    ctx.fillRect(0, 0, W, H);
-    const sr = Math.max(W, H) * 0.62;
-    for (const s of stars) {
-      const x = CX + Math.cos(s.a + t * 4e-3) * s.r * sr, y = CY + Math.sin(s.a + t * 4e-3) * s.r * sr;
-      ctx.globalAlpha = 0.1 + 0.2 * (0.5 + 0.5 * Math.sin(t * 1.3 + s.tw));
-      ctx.fillStyle = BONE;
-      ctx.fillRect(x, y, s.s * 0.8, s.s * 0.8);
-    }
-    ctx.globalAlpha = 1;
-    const fs = Math.min(54, W * 0.11), Rf = fs * LOGO.r, word = "RBITA", ls = fs * LOGO.track;
-    ctx.font = LOGO.weight + " " + fs + "px " + (splashFont ? "Unbounded" : "system-ui") + ", sans-serif";
-    const mw = (s) => {
-      const m = ctx.measureText(s);
-      return m && m.width || s.length * fs * 0.8;
-    };
-    const tw = mw(word) + ls * (word.length - 1), total = Rf * LOGO.disk + Rf * LOGO.txt + tw, fx = (W - total) / 2 + Rf * LOGO.disk, fy = H * 0.45;
-    const Rs = Math.min(W, H) * 0.17, u = easeIO2(clamp((T - 3.3) / 2.2, 0, 1));
-    const R = Rs * (0.94 + 0.06 * clamp(T / 3.3, 0, 1)) + (Rf - Rs * (0.94 + 0.06 * clamp(T / 3.3, 0, 1))) * u;
-    const cx = W / 2 + (fx - W / 2) * u, cy = fy, a = 1, dim = state === "pretitle" ? 0.5 : 0.5 * (1 - clamp(T / 1.2, 0, 1));
-    const g = ctx.createRadialGradient(cx, cy, R, cx, cy, R * 4.5);
-    g.addColorStop(0, "rgba(255,100,28," + 0.2 * a + ")");
-    g.addColorStop(1, "rgba(255,100,28,0)");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, H);
-    const df = BR1 + (LOGO.disk - BR1) * u;
-    bhDisk(cx, cy, R, Math.PI - 0.03, Math.PI * 2 + 0.03, a, df);
-    bhCore(cx, cy, R, a);
-    bhDisk(cx, cy, R, 0, Math.PI, a, df);
-    if (dim > 0) {
-      ctx.globalAlpha = dim;
-      ctx.fillStyle = "#05060c";
-      ctx.fillRect(0, 0, W, H);
-      ctx.globalAlpha = 1;
-    }
-    const tx = cx + R * LOGO.txt, base = cy + fs * 0.36;
-    ctx.textAlign = "left";
-    ctx.textBaseline = "alphabetic";
-    ctx.lineJoin = "round";
-    for (let i = 0; i < word.length; i++) {
-      const la = clamp((T - (4 + i * 0.22)) / 0.32, 0, 1);
-      if (la <= 0) {
-        continue;
-      }
-      const lx = tx + mw(word.slice(0, i)) + ls * i, ly = base + (1 - easeIO2(la)) * 14;
-      ctx.globalAlpha = la;
-      ctx.fillStyle = BONE;
-      ctx.fillText(word[i], lx, ly);
-    }
-    ctx.globalAlpha = 1;
-    if (T > 4.95) {
-      const p = clamp((T - 4.95) / 0.45, 0, 1);
-      drawAccent(cx, cy, R, 1 - Math.pow(1 - p, 3));
-    }
-    if (state === "splash" && T > 0.8 && T < 9) {
-      ctx.globalAlpha = 0.35;
-      ctx.fillStyle = BONE;
-      ctx.font = "300 12px Unbounded, system-ui, sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("Toca para saltar", CX, H - 34);
-      ctx.globalAlpha = 1;
-    }
-    if (T > 9.2) {
-      ctx.globalAlpha = clamp((T - 9.2) / 0.8, 0, 1);
-      ctx.fillStyle = "#05060c";
-      ctx.fillRect(0, 0, W, H);
-      ctx.globalAlpha = 1;
-    }
-    ctx.restore();
-    if (flash > 0) {
-      ctx.globalAlpha = flash * 0.4;
-      ctx.fillStyle = "#fffaf0";
-      ctx.fillRect(0, 0, W, H);
-      ctx.globalAlpha = 1;
-    }
-  }
-  function initSplash() {
-    SK = Math.sin(37 * Math.PI / 180);
-    try {
-      if (document.fonts && document.fonts.load) {
-        document.fonts.load("400 52px Unbounded").then(
-          () => {
-            splashFont = true;
-          },
-          () => {
-          }
-        );
-      }
-    } catch (e) {
-    }
-  }
   function setSfl(value) {
     sfl = value;
     return value;
   }
 
   // src/js/27-inicio-animacion.js
-  function homeAmbience(on) {
-    if (!AC) {
-      return;
-    }
-    try {
-      const n = AC.currentTime;
-      if (on && !amb) {
-        const g = AC.createGain();
-        g.gain.setValueAtTime(1e-4, n);
-        g.gain.exponentialRampToValueAtTime(muted ? 1e-4 : 0.9, n + 2.5);
-        g.connect(master);
-        const nodes = [];
-        const lp = AC.createBiquadFilter();
-        lp.type = "lowpass";
-        lp.frequency.value = 260;
-        lp.Q.value = 2;
-        lp.connect(g);
-        const lfo = AC.createOscillator(), lfoG = AC.createGain();
-        lfo.frequency.value = 0.07;
-        lfoG.gain.value = 160;
-        lfo.connect(lfoG);
-        lfoG.connect(lp.frequency);
-        lfo.start(n);
-        nodes.push(lfo);
-        for (const [f, ty, gn] of [
-          [ROOT / 8, "sine", 0.32],
-          [ROOT / 8 * 1.498, "sine", 0.18],
-          [ROOT / 8 * 1.006, "sawtooth", 0.08]
-        ]) {
-          const o = AC.createOscillator(), og = AC.createGain();
-          o.type = ty;
-          o.frequency.value = f;
-          og.gain.value = gn;
-          o.connect(og);
-          og.connect(lp);
-          o.start(n);
-          nodes.push(o);
-        }
-        const glass = AC.createGain();
-        glass.gain.value = 0.018;
-        glass.connect(g);
-        glass.connect(echoBus());
-        for (const [semi, rate] of [
-          [12, 0.11],
-          [19, 0.07],
-          [27, 0.05],
-          [24, 0.13]
-        ]) {
-          const o = AC.createOscillator(), og = AC.createGain(), tr = AC.createOscillator(), trg = AC.createGain();
-          o.type = "sine";
-          o.frequency.value = ROOT / 2 * Math.pow(2, semi / 12);
-          og.gain.value = 0.5;
-          tr.frequency.value = rate;
-          trg.gain.value = 0.5;
-          tr.connect(trg);
-          trg.connect(og.gain);
-          o.connect(og);
-          og.connect(glass);
-          o.start(n);
-          tr.start(n);
-          nodes.push(o, tr);
-        }
-        amb = { g, nodes };
-      } else if (!on && amb) {
-        const a = amb;
-        amb = null;
-        a.g.gain.cancelScheduledValues(n);
-        a.g.gain.setValueAtTime(Math.max(a.g.gain.value, 1e-4), n);
-        a.g.gain.exponentialRampToValueAtTime(1e-4, n + 0.8);
-        a.nodes.forEach((o) => {
-          try {
-            o.stop(n + 0.9);
-          } catch (e) {
-          }
-        });
-      }
-    } catch (e) {
-    }
-  }
-  var HOME_BIG = 6.4, HOME_IN = 8;
+  var HOME_BIG = 6.4;
+  var HOME_IN = 8;
   var logoT0 = -99;
-  var hsRipple = 0, camZoom = 1;
-  var homeT = HOME_IN, amb = null, hsFlare = 0, hsBoost = 0, hsShake = 0, hsJet = 0, hsEvents = {};
+  var hsRipple = 0;
+  var camZoom = 1;
+  var homeT = HOME_IN;
+  var hsFlare = 0;
+  var hsBoost = 0;
+  var hsShake = 0;
+  var hsJet = 0;
+  var hsEvents = {};
   var ROCKS = [
     [0.5, 0.3, 2.1, 1],
     [1.1, 2.4, 1.9, -1],
@@ -8651,7 +8463,8 @@ const CHEV_R =
   }
 
   // src/js/31-fondos-2d.js
-  var andCanvas = null, andKey = "";
+  var andCanvas = null;
+  var andKey = "";
   function buildAndromeda() {
     const key = Math.round(W) + "x" + Math.round(H);
     if (andCanvas && andKey === key) {
@@ -8794,7 +8607,8 @@ const CHEV_R =
     }
     ctx.globalAlpha = 1;
   }
-  var magCanvas = null, magKey = "";
+  var magCanvas = null;
+  var magKey = "";
   function buildMagallanes() {
     const key = Math.round(W) + "x" + Math.round(H);
     if (magCanvas && magKey === key) {
@@ -11561,7 +11375,8 @@ void main(){
     }
     return { bake, ok: () => init() };
   })();
-  var AST_SPR = {}, AST_B = [8, 12, 16, 22, 30, 40, 54, 72];
+  var AST_SPR = {};
+  var AST_B = [8, 12, 16, 22, 30, 40, 54, 72];
   function astSprite(shape, frame2, rp) {
     const key = shape + "_" + frame2 + "_" + rp;
     if (AST_SPR[key]) {
@@ -11655,7 +11470,8 @@ void main(){
     g.stroke();
     return AST_SPR[key] = c;
   }
-  var astPre = null, astPreK = "";
+  var astPre = null;
+  var astPreK = "";
   function astPrebake() {
     const k = S + "_" + DPR;
     if (k !== astPreK) {
@@ -11888,30 +11704,9 @@ void main(){
     }
     ctx.globalAlpha = 1;
   }
-  function powerReadySound() {
-    if (!AC || muted) {
-      return;
-    }
-    try {
-      const n = AC.currentTime;
-      [0, 7, 12, 16, 19, 24].forEach(
-        (sm, i) => uiTone(ROOT * 2 * Math.pow(2, sm / 12), n + i * 0.045, 0.9, 0.05)
-      );
-      const o = AC.createOscillator(), g = AC.createGain();
-      o.type = "sine";
-      o.frequency.setValueAtTime(ROOT, n);
-      o.frequency.exponentialRampToValueAtTime(ROOT * 4, n + 0.3);
-      g.gain.setValueAtTime(1e-4, n);
-      g.gain.exponentialRampToValueAtTime(0.08, n + 0.05);
-      g.gain.exponentialRampToValueAtTime(1e-4, n + 0.4);
-      o.connect(g);
-      g.connect(uiOut());
-      o.start(n);
-      o.stop(n + 0.45);
-    } catch (e) {
-    }
-  }
-  var camView = 0, camVel = 0, camT = 0;
+  var camView = 0;
+  var camVel = 0;
+  var camT = 0;
   function camViewStep() {
     const dt = t - camT;
     camT = t;
@@ -12009,7 +11804,11 @@ void main(){
   }
 
   // src/js/30-escanear.js
-  var scanOn = false, scanK = 0, pRot = 0, scanLineT = 0, scanApplyAt = 0;
+  var scanOn = false;
+  var scanK = 0;
+  var pRot = 0;
+  var scanLineT = 0;
+  var scanApplyAt = 0;
   function statWords(k, v) {
     if (k === "size") {
       return v <= -10 ? ["Pequeño", "pasa fácil por los huecos"] : v >= 10 ? ["Grande", "más difícil de esquivar"] : ["Normal", "como la Tierra"];
@@ -12114,9 +11913,113 @@ void main(){
     return value;
   }
 
+  // src/js/audio/ui-sounds.js
+  function uiGlass(dir) {
+    if (!AC || muted) {
+      return;
+    }
+    try {
+      const n = AC.currentTime, a = [12, 19], b = [19, 12], seq = dir < 0 ? b : a;
+      uiTone(ROOT * Math.pow(2, seq[0] / 12), n, 1.1, 0.06);
+      uiTone(ROOT * Math.pow(2, seq[1] / 12), n + 0.07, 1.3, 0.055);
+      uiTone(ROOT * 2 * Math.pow(2, seq[1] / 12), n + 0.07, 0.7, 0.015);
+    } catch (e) {
+    }
+  }
+  function homeAmbience(on) {
+    if (!AC) {
+      return;
+    }
+    try {
+      const n = AC.currentTime;
+      if (on && !amb) {
+        const g = AC.createGain();
+        g.gain.setValueAtTime(1e-4, n);
+        g.gain.exponentialRampToValueAtTime(muted ? 1e-4 : 0.9, n + 2.5);
+        g.connect(master);
+        const nodes = [];
+        const lp = AC.createBiquadFilter();
+        lp.type = "lowpass";
+        lp.frequency.value = 260;
+        lp.Q.value = 2;
+        lp.connect(g);
+        const lfo = AC.createOscillator(), lfoG = AC.createGain();
+        lfo.frequency.value = 0.07;
+        lfoG.gain.value = 160;
+        lfo.connect(lfoG);
+        lfoG.connect(lp.frequency);
+        lfo.start(n);
+        nodes.push(lfo);
+        for (const [f, ty, gn] of [
+          [ROOT / 8, "sine", 0.32],
+          [ROOT / 8 * 1.498, "sine", 0.18],
+          [ROOT / 8 * 1.006, "sawtooth", 0.08]
+        ]) {
+          const o = AC.createOscillator(), og = AC.createGain();
+          o.type = ty;
+          o.frequency.value = f;
+          og.gain.value = gn;
+          o.connect(og);
+          og.connect(lp);
+          o.start(n);
+          nodes.push(o);
+        }
+        const glass = AC.createGain();
+        glass.gain.value = 0.018;
+        glass.connect(g);
+        glass.connect(echoBus());
+        for (const [semi, rate] of [
+          [12, 0.11],
+          [19, 0.07],
+          [27, 0.05],
+          [24, 0.13]
+        ]) {
+          const o = AC.createOscillator(), og = AC.createGain(), tr = AC.createOscillator(), trg = AC.createGain();
+          o.type = "sine";
+          o.frequency.value = ROOT / 2 * Math.pow(2, semi / 12);
+          og.gain.value = 0.5;
+          tr.frequency.value = rate;
+          trg.gain.value = 0.5;
+          tr.connect(trg);
+          trg.connect(og.gain);
+          o.connect(og);
+          og.connect(glass);
+          o.start(n);
+          tr.start(n);
+          nodes.push(o, tr);
+        }
+        amb = { g, nodes };
+      } else if (!on && amb) {
+        const a = amb;
+        amb = null;
+        a.g.gain.cancelScheduledValues(n);
+        a.g.gain.setValueAtTime(Math.max(a.g.gain.value, 1e-4), n);
+        a.g.gain.exponentialRampToValueAtTime(1e-4, n + 0.8);
+        a.nodes.forEach((o) => {
+          try {
+            o.stop(n + 0.9);
+          } catch (e) {
+          }
+        });
+      }
+    } catch (e) {
+    }
+  }
+  var amb = null;
+
   // src/js/29-planetas-hd.js
   var elPl;
-  var pIndex = 0, pSwap = 0, pDir = 1, pTarget = 0, pPos = 0, pDrag = 0, pSlots = [], pScan = false, pScanT = 0, pSK = 0, pUse = 0;
+  var pIndex = 0;
+  var pSwap = 0;
+  var pDir = 1;
+  var pTarget = 0;
+  var pPos = 0;
+  var pDrag = 0;
+  var pSlots = [];
+  var pScan = false;
+  var pScanT = 0;
+  var pSK = 0;
+  var pUse = 0;
   var pGeom = () => ({ R0: Math.min(W * 0.2, H * 0.15), cx0: W / 2, cy0: H * 0.3 });
   function renderPlanetsScene(dt) {
     setT(t + dt);
@@ -12585,18 +12488,6 @@ void main(){
       elHome.classList.remove("off");
     }
   }
-  function uiGlass(dir) {
-    if (!AC || muted) {
-      return;
-    }
-    try {
-      const n = AC.currentTime, a = [12, 19], b = [19, 12], seq = dir < 0 ? b : a;
-      uiTone(ROOT * Math.pow(2, seq[0] / 12), n, 1.1, 0.06);
-      uiTone(ROOT * Math.pow(2, seq[1] / 12), n + 0.07, 1.3, 0.055);
-      uiTone(ROOT * 2 * Math.pow(2, seq[1] / 12), n + 0.07, 0.7, 0.015);
-    } catch (e) {
-    }
-  }
   function initPlanetsScreen() {
     elPl = document.getElementById("planets");
   }
@@ -12774,6 +12665,16 @@ void main(){
     sol: "La luz del Sol tarda unos 8 minutos y 20 segundos en llegar a la Tierra."
   };
 
+  // src/js/game/progress.js
+  function lvStarsGot(i) {
+    try {
+      const all = JSON.parse(localStorage.getItem("orbita_lvstars") || "{}");
+      return Array.isArray(all[i]) ? all[i] : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
   // src/js/34-misiones.js
   function misMoons() {
     misLoad();
@@ -12806,7 +12707,12 @@ void main(){
     return '<defs><linearGradient id="mcg' + (misCrystal.n = (misCrystal.n || 0) + 1) + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8fffb"/><stop offset="1" stop-color="#3fc7b8"/></linearGradient></defs><path d="M9 3.0 L13.030000000000001 9.5 L9 16.0 L4.97 9.5Z" fill="url(#mcg' + misCrystal.n + ')"/><path d="M17.5 10.3 L20.104 14.5 L17.5 18.7 L14.896 14.5Z" fill="url(#mcg' + misCrystal.n + ')"/><path d="M10.5 16.2 L12.236 19 L10.5 21.8 L8.764 19Z" fill="#bff3ec"/>';
   }
   var misDetail = null;
-  var MIS = null, misTab = "diarias", misTimer = null, misFx = 0, misOpen = false, misSwitch = 0;
+  var MIS = null;
+  var misTab = "diarias";
+  var misTimer = null;
+  var misFx = 0;
+  var misOpen = false;
+  var misSwitch = 0;
   function misToday(off) {
     const d = /* @__PURE__ */ new Date();
     if (off) {
@@ -13121,7 +13027,8 @@ void main(){
     todos: "galaxy",
     sol: "q"
   };
-  var misThumbs = {}, misMinis = {};
+  var misThumbs = {};
+  var misMinis = {};
   function misMini(kind) {
     if (misMinis[kind]) {
       return misMinis[kind];
@@ -13936,8 +13843,14 @@ void main(){
 
   // src/js/35-medidor.js
   var MEDIR = false;
-  var medEl = null, medPrev = 0, medMid = 0, medShow = 0;
-  var medInt = [], medJs = [], medUpd = [], medJank = [];
+  var medEl = null;
+  var medPrev = 0;
+  var medMid = 0;
+  var medShow = 0;
+  var medInt = [];
+  var medJs = [];
+  var medUpd = [];
+  var medJank = [];
   function medFrame(now, t0) {
     const t1 = performance.now();
     if (medPrev) {
@@ -14181,9 +14094,22 @@ void main(){
     Urano: 10.1,
     Neptuno: 10.8
   };
-  var INTRO_END = 15.9, T_ZOOM = 13.9, ZOOM_DUR = 1.8, T_ENTER = 2.2, T_ARRIVE = 4.1, T_SUN_END = 5.8, T_DISK_END = 6.2, T_EARTH = 6.6;
+  var INTRO_END = 15.9;
+  var T_ZOOM = 13.9;
+  var ZOOM_DUR = 1.8;
+  var T_ENTER = 2.2;
+  var T_ARRIVE = 4.1;
+  var T_SUN_END = 5.8;
+  var T_DISK_END = 6.2;
+  var T_EARTH = 6.6;
   var SUN_COLS = ["#fff3cf", "#ffd36b", "#ff9a3d", "#ff5a1f"];
-  var introT = 0, ip = [], iparts = [], introFade = 0, SI = 1, droneNodes = null, cues = {};
+  var introT = 0;
+  var ip = [];
+  var iparts = [];
+  var introFade = 0;
+  var SI = 1;
+  var droneNodes = null;
+  var cues = {};
   function introSetup() {
     introT = 0;
     iparts = [];
@@ -14932,8 +14858,10 @@ void main(){
     }
     return { soft, ok: () => init() };
   })();
-  var lvCanvas = null, lvArts = [];
-  var lvStars = null, lvSets = null;
+  var lvCanvas = null;
+  var lvArts = [];
+  var lvStars = null;
+  var lvSets = null;
   function lvRand(seed) {
     let s = seed;
     return () => (s = s * 16807 % 2147483647) / 2147483647;
@@ -15247,14 +15175,6 @@ void main(){
     "Su agujero negro tiene unos 6500 millones de veces la masa del Sol.",
     "Su primera fotografía se publicó en 2022, gracias al Event Horizon Telescope."
   ];
-  function lvStarsGot(i) {
-    try {
-      const all = JSON.parse(localStorage.getItem("orbita_lvstars") || "{}");
-      return Array.isArray(all[i]) ? all[i] : [];
-    } catch (e) {
-      return [];
-    }
-  }
   var GRAV_TIER = { Fácil: 1, Medio: 2, Difícil: 3, "Muy difícil": 4 };
   var GRAV_SVG = (n) => '<svg viewBox="0 0 30 30" aria-hidden="true">' + [6, 8.6, 11.2, 13.8].map(
     (r, i) => '<circle cx="15" cy="15" r="' + r + '" fill="none" stroke="currentColor" stroke-width="' + (i < n ? 1.5 : 1.1) + '" stroke-opacity="' + (i < n ? 0.95 : 0.18) + '"/>'
@@ -15317,7 +15237,8 @@ void main(){
       sync();
     });
   }
-  var sigShown = -1, sigTimer = null;
+  var sigShown = -1;
+  var sigTimer = null;
   var sigTxt = (i) => LV_DATO[i].replace(/(\d) (?=[\d%])/g, "$1 ");
   function sigType(i) {
     if (!elLv || !elLv.querySelectorAll) {
@@ -15368,7 +15289,8 @@ void main(){
     sigTimer = setTimeout(step2, 420);
   }
   var levelsUnlocked = () => true;
-  var tutAfterStory = false, pendingTut = false;
+  var tutAfterStory = false;
+  var pendingTut = false;
   function afterSplash() {
     openHome(true);
   }
@@ -15916,6 +15838,214 @@ void main(){
     setBurns(burns.filter((b) => b.life > 0));
   }
 
+  // src/js/24-presentacion.js
+  var SPLASH_END = 10;
+  var splashT = 0;
+  var splashBus = null;
+  var sflared = false;
+  function splashSounds() {
+    if (!AC) {
+      return;
+    }
+    try {
+      const n = AC.currentTime + 0.05;
+      splashBus = AC.createGain();
+      splashBus.gain.value = 0.9;
+      splashBus.connect(master);
+      const osc = (type, f0, f1, t0, dur, peak, att) => {
+        const o = AC.createOscillator(), g2 = AC.createGain();
+        o.type = type;
+        o.frequency.setValueAtTime(f0, t0);
+        if (f1) {
+          o.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+        }
+        g2.gain.setValueAtTime(1e-4, t0);
+        g2.gain.exponentialRampToValueAtTime(peak, t0 + att);
+        g2.gain.exponentialRampToValueAtTime(1e-4, t0 + dur);
+        o.connect(g2);
+        g2.connect(splashBus);
+        o.start(t0);
+        o.stop(t0 + dur + 0.05);
+        return o;
+      };
+      osc("sine", 38, 58, n, 6, 0.35, 2.5);
+      const src = AC.createBufferSource();
+      src.buffer = NOISE;
+      const f = AC.createBiquadFilter();
+      f.type = "bandpass";
+      f.Q.value = 1.1;
+      f.frequency.setValueAtTime(200, n + 3);
+      f.frequency.exponentialRampToValueAtTime(6e3, n + 5.5);
+      const g = AC.createGain();
+      g.gain.setValueAtTime(1e-4, n + 3);
+      g.gain.exponentialRampToValueAtTime(0.28, n + 5.45);
+      g.gain.exponentialRampToValueAtTime(1e-4, n + 5.6);
+      src.connect(f);
+      f.connect(g);
+      g.connect(splashBus);
+      src.start(n + 3);
+      src.stop(n + 5.7);
+      [0, 3, 5, 7, 10].forEach(
+        (s, i) => osc("triangle", ROOT * Math.pow(2, s / 12), 0, n + 4 + i * 0.22, 0.7, 0.12, 5e-3)
+      );
+      osc("sine", ROOT * 2 * Math.pow(2, 7 / 12), 0, n + 5.3, 1.4, 0.1, 4e-3);
+      osc("sine", 72, 38, n + 5.5, 1.6, 0.9, 5e-3);
+      noiseHit(n + 5.5, 1.6, "highpass", 3e3, 0.35, splashBus);
+      for (const s of [0, 3, 7, 12]) {
+        for (const det of [-7, 7]) {
+          const o = AC.createOscillator(), gg = AC.createGain(), lp = AC.createBiquadFilter();
+          o.type = "sawtooth";
+          o.frequency.value = ROOT / 2 * Math.pow(2, s / 12);
+          o.detune.value = det;
+          lp.type = "lowpass";
+          lp.frequency.value = 1300;
+          gg.gain.setValueAtTime(1e-4, n + 5.5);
+          gg.gain.exponentialRampToValueAtTime(0.035, n + 5.6);
+          gg.gain.exponentialRampToValueAtTime(1e-4, n + 9.5);
+          o.connect(lp);
+          lp.connect(gg);
+          gg.connect(splashBus);
+          o.start(n + 5.5);
+          o.stop(n + 9.6);
+        }
+      }
+      osc("sine", ROOT * 4, 0, n + 5.55, 2.8, 0.07, 5e-3);
+      osc("sine", ROOT * 4 * Math.pow(2, 7 / 12), 0, n + 5.6, 2.6, 0.05, 5e-3);
+    } catch (e) {
+    }
+  }
+  function startSplash() {
+    setState("splash");
+    splashT = 0;
+    sflared = false;
+    setSfl(0);
+    elPanel.classList.add("hide");
+    elHud.style.opacity = 0;
+    splashSounds();
+  }
+  function skipSplash() {
+    if (splashBus && AC) {
+      try {
+        const n = AC.currentTime;
+        splashBus.gain.cancelScheduledValues(n);
+        splashBus.gain.setValueAtTime(splashBus.gain.value, n);
+        splashBus.gain.exponentialRampToValueAtTime(1e-4, n + 0.25);
+      } catch (e) {
+      }
+    }
+    afterSplash();
+  }
+  function updateSplash(dt) {
+    setT(t + dt);
+    if (state === "splash") {
+      splashT += dt;
+    }
+    setFlash(Math.max(0, flash - dt * 2));
+    setSfl(Math.max(0, sfl - dt * 1.3));
+    if (state === "splash" && !sflared && splashT >= 5.5) {
+      sflared = true;
+      setFlash(0.35);
+      setSfl(1);
+      buzz([30, 40, 80]);
+    }
+    if (state === "splash" && splashT >= SPLASH_END) {
+      afterSplash();
+    }
+  }
+  function renderSplash() {
+    const T = splashT;
+    ctx.save();
+    ctx.fillStyle = "#05060c";
+    ctx.fillRect(0, 0, W, H);
+    const sr = Math.max(W, H) * 0.62;
+    for (const s of stars) {
+      const x = CX + Math.cos(s.a + t * 4e-3) * s.r * sr, y = CY + Math.sin(s.a + t * 4e-3) * s.r * sr;
+      ctx.globalAlpha = 0.1 + 0.2 * (0.5 + 0.5 * Math.sin(t * 1.3 + s.tw));
+      ctx.fillStyle = BONE;
+      ctx.fillRect(x, y, s.s * 0.8, s.s * 0.8);
+    }
+    ctx.globalAlpha = 1;
+    const fs = Math.min(54, W * 0.11), Rf = fs * LOGO.r, word = "RBITA", ls = fs * LOGO.track;
+    ctx.font = LOGO.weight + " " + fs + "px " + (splashFont ? "Unbounded" : "system-ui") + ", sans-serif";
+    const mw = (s) => {
+      const m = ctx.measureText(s);
+      return m && m.width || s.length * fs * 0.8;
+    };
+    const tw = mw(word) + ls * (word.length - 1), total = Rf * LOGO.disk + Rf * LOGO.txt + tw, fx = (W - total) / 2 + Rf * LOGO.disk, fy = H * 0.45;
+    const Rs = Math.min(W, H) * 0.17, u = easeIO2(clamp((T - 3.3) / 2.2, 0, 1));
+    const R = Rs * (0.94 + 0.06 * clamp(T / 3.3, 0, 1)) + (Rf - Rs * (0.94 + 0.06 * clamp(T / 3.3, 0, 1))) * u;
+    const cx = W / 2 + (fx - W / 2) * u, cy = fy, a = 1, dim = state === "pretitle" ? 0.5 : 0.5 * (1 - clamp(T / 1.2, 0, 1));
+    const g = ctx.createRadialGradient(cx, cy, R, cx, cy, R * 4.5);
+    g.addColorStop(0, "rgba(255,100,28," + 0.2 * a + ")");
+    g.addColorStop(1, "rgba(255,100,28,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+    const df = BR1 + (LOGO.disk - BR1) * u;
+    bhDisk(cx, cy, R, Math.PI - 0.03, Math.PI * 2 + 0.03, a, df);
+    bhCore(cx, cy, R, a);
+    bhDisk(cx, cy, R, 0, Math.PI, a, df);
+    if (dim > 0) {
+      ctx.globalAlpha = dim;
+      ctx.fillStyle = "#05060c";
+      ctx.fillRect(0, 0, W, H);
+      ctx.globalAlpha = 1;
+    }
+    const tx = cx + R * LOGO.txt, base = cy + fs * 0.36;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
+    ctx.lineJoin = "round";
+    for (let i = 0; i < word.length; i++) {
+      const la = clamp((T - (4 + i * 0.22)) / 0.32, 0, 1);
+      if (la <= 0) {
+        continue;
+      }
+      const lx = tx + mw(word.slice(0, i)) + ls * i, ly = base + (1 - easeIO2(la)) * 14;
+      ctx.globalAlpha = la;
+      ctx.fillStyle = BONE;
+      ctx.fillText(word[i], lx, ly);
+    }
+    ctx.globalAlpha = 1;
+    if (T > 4.95) {
+      const p = clamp((T - 4.95) / 0.45, 0, 1);
+      drawAccent(cx, cy, R, 1 - Math.pow(1 - p, 3));
+    }
+    if (state === "splash" && T > 0.8 && T < 9) {
+      ctx.globalAlpha = 0.35;
+      ctx.fillStyle = BONE;
+      ctx.font = "300 12px Unbounded, system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Toca para saltar", CX, H - 34);
+      ctx.globalAlpha = 1;
+    }
+    if (T > 9.2) {
+      ctx.globalAlpha = clamp((T - 9.2) / 0.8, 0, 1);
+      ctx.fillStyle = "#05060c";
+      ctx.fillRect(0, 0, W, H);
+      ctx.globalAlpha = 1;
+    }
+    ctx.restore();
+    if (flash > 0) {
+      ctx.globalAlpha = flash * 0.4;
+      ctx.fillStyle = "#fffaf0";
+      ctx.fillRect(0, 0, W, H);
+      ctx.globalAlpha = 1;
+    }
+  }
+  function initSplash() {
+    try {
+      if (document.fonts && document.fonts.load) {
+        document.fonts.load("400 52px Unbounded").then(
+          () => {
+            setSplashFont(true);
+          },
+          () => {
+          }
+        );
+      }
+    } catch (e) {
+    }
+  }
+
   // src/js/36-bucle-principal.js
   var last;
   function frame(now) {
@@ -15994,7 +16124,11 @@ void main(){
   }
 
   // src/js/18-pausa.js
-  var paused = false, pzCount = null, pzPanelCls = "", pzDrag = null, pzAC = null;
+  var paused = false;
+  var pzCount = null;
+  var pzPanelCls = "";
+  var pzDrag = null;
+  var pzAC = null;
   var PZ_ICO = {
     re: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12a7 7 0 1 1-2.05-4.95" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 4.5v4h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     lv: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6" fill="currentColor"/><circle cx="12" cy="12" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="9.6" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".55"/></svg>',
@@ -16045,7 +16179,10 @@ void main(){
       document.body.classList.remove("paused");
     }
   }
-  var pzBus = null, pzNoise = null, pzHoverT = 0, pzLastV = {};
+  var pzBus = null;
+  var pzNoise = null;
+  var pzHoverT = 0;
+  var pzLastV = {};
   function pzCtx() {
     if (!pzAC) {
       pzAC = new (window.AudioContext || window.webkitAudioContext)();
@@ -16347,7 +16484,9 @@ void main(){
   }
 
   // src/js/28-sonidos-interfaz.js
-  var uiBus = null, lastHover = null, uiLastT = 0;
+  var uiBus = null;
+  var lastHover = null;
+  var uiLastT = 0;
   function uiOut() {
     if (uiBus) {
       return uiBus;
@@ -16435,7 +16574,8 @@ void main(){
     } catch (e) {
     }
   }
-  var showBus = null, bed = null;
+  var showBus = null;
+  var bed = null;
   function showOut() {
     if (!showBus) {
       showBus = AC.createGain();
@@ -16823,7 +16963,8 @@ void main(){
     1: { cg: (k) => k >= 44 ? 2 : 1.7, wv: 0.48, hg: 0.4, arc: 10 },
     2: { cg: (k) => 1.8, wv: 1, hg: 0.46, arc: 10 }
   };
-  var waveProx = 0, waveBeepT = 0;
+  var waveProx = 0;
+  var waveBeepT = 0;
   function hazardsReset() {
     setComets([]);
     setBeams([]);
@@ -17887,8 +18028,13 @@ void main(){
   }
 
   // src/js/14-lente-gravitacional.js
-  var BEND_AT = { 3: [26, 28] }, BEND_R = 23, WORM_COL = "#d4c8ff", WH_K = 29, WH_EXIT = 41;
-  var bend = { str: 0, a: -Math.PI / 2, L: 0, on: false, grow: 1, fixed: false }, whRip = null;
+  var BEND_AT = { 3: [26, 28] };
+  var BEND_R = 23;
+  var WORM_COL = "#d4c8ff";
+  var WH_K = 29;
+  var WH_EXIT = 41;
+  var bend = { str: 0, a: -Math.PI / 2, L: 0, on: false, grow: 1, fixed: false };
+  var whRip = null;
   var bendRad = () => BEND_R * bend.str * (bend.grow || 1);
   function bendUpdate(d) {
     if (bend.fixed) {
@@ -17985,8 +18131,14 @@ void main(){
 
   // src/js/13-agujero-de-gusano.js
   var whGap = () => level + 1 < 34 ? 4 : 3;
-  var ORB_W = 1.75, WH_IN = 0.78, WH_OUT = 0.7;
-  var wh = null, whShock = null, gapC = {}, viewInside = false, hideEarth = false;
+  var ORB_W = 1.75;
+  var WH_IN = 0.78;
+  var WH_OUT = 0.7;
+  var wh = null;
+  var whShock = null;
+  var gapC = {};
+  var viewInside = false;
+  var hideEarth = false;
   function whPull(dur) {
     if (!AC || muted) {
       return;
@@ -18413,6 +18565,31 @@ void main(){
     setShieldLeft(1);
     setUsedDouble(false);
     startMusic();
+  }
+
+  // src/js/audio/sfx.js
+  function powerReadySound() {
+    if (!AC || muted) {
+      return;
+    }
+    try {
+      const n = AC.currentTime;
+      [0, 7, 12, 16, 19, 24].forEach(
+        (sm, i) => uiTone(ROOT * 2 * Math.pow(2, sm / 12), n + i * 0.045, 0.9, 0.05)
+      );
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(ROOT, n);
+      o.frequency.exponentialRampToValueAtTime(ROOT * 4, n + 0.3);
+      g.gain.setValueAtTime(1e-4, n);
+      g.gain.exponentialRampToValueAtTime(0.08, n + 0.05);
+      g.gain.exponentialRampToValueAtTime(1e-4, n + 0.4);
+      o.connect(g);
+      g.connect(uiOut());
+      o.start(n);
+      o.stop(n + 0.45);
+    } catch (e) {
+    }
   }
 
   // src/js/16-partida.js
@@ -19342,7 +19519,8 @@ void main(){
     const x = frac(beatTime() / (4 * TB)), sz = 0.5 - 0.5 * Math.cos(2 * Math.PI * x);
     return o.r * (0.3 + 0.7 * sz);
   }
-  var wallet = 0, runCoins = 0;
+  var wallet = 0;
+  var runCoins = 0;
   var elWallet;
   function updateWallet(pop) {
     if (!elWallet) {
@@ -19409,7 +19587,10 @@ void main(){
     ctx.stroke();
     ctx.restore();
   }
-  var pushing = false, pushT = 0, pushFrom = 0, starBoost = false;
+  var pushing = false;
+  var pushT = 0;
+  var pushFrom = 0;
+  var starBoost = false;
   function placeInGap(ring, extra) {
     if (!ring.obs.length) {
       return Object.assign({ a: 0, got: false }, extra);
@@ -19696,7 +19877,16 @@ void main(){
   }
 
   // src/js/12-poderes.js
-  var ghostT = 0, shieldT = 0, eclipseT = 0, pfx = [], lastJT = 1, periLeft = 0, predT = 0, strainK = 0, burnT = 0, ringBoostNow = 0;
+  var ghostT = 0;
+  var shieldT = 0;
+  var eclipseT = 0;
+  var pfx = [];
+  var lastJT = 1;
+  var periLeft = 0;
+  var predT = 0;
+  var strainK = 0;
+  var burnT = 0;
+  var ringBoostNow = 0;
   function strainNow() {
     if (tutorial || state !== "play") {
       return 0;
@@ -19708,7 +19898,8 @@ void main(){
     const P = curP();
     return P && P.power ? P.power[0] : "";
   }
-  var bhWob = 0, BURN_DUR = 1.5;
+  var bhWob = 0;
+  var BURN_DUR = 1.5;
   function powerShout(col) {
     pfx.push({ k: "ignite", t: 0, col: col || "#ffd36b" });
     setPulse(1);
@@ -22191,7 +22382,12 @@ void main(){
   }
 
   // src/js/07-planetas.js
-  var curPlanet = "tierra", maxPerf = 0, plutoOk = false, allPlanets = false, shieldLeft = 0, usedDouble = false;
+  var curPlanet = "tierra";
+  var maxPerf = 0;
+  var plutoOk = false;
+  var allPlanets = false;
+  var shieldLeft = 0;
+  var usedDouble = false;
   var planetOk = (P) => allPlanets || P.ok();
   var curP = () => PLANETS_P.find((P) => P.id === curPlanet) || PLANETS_P[3];
   var pst = () => curP().st;

@@ -39,7 +39,7 @@ import {
 } from './08-partida-estado.js';
 import { setup, winSound } from './16-partida.js';
 import { elLv } from './25-selector-niveles.js';
-import { homeAmbience } from './27-inicio-animacion.js';
+import { homeAmbience } from './audio/ui-sounds.js';
 
 /**
  * En el tutorial, un choque no termina la partida: el planeta estalla y reaparece en el mismo

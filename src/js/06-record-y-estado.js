@@ -26,8 +26,8 @@ const saveBestRing = () => {
     localStorage.setItem('orbita_p1_anillo', String(bestRing));
   } catch (e) {}
 };
-let runRecord = 0,
-  newRec = false;
+let runRecord = 0;
+let newRec = false;
 /**
  * Actualiza el marcador de anillos: la barra de viaje de arriba (como en Geometry Dash, el
  * planeta avanza del agujero negro a la salida y la marca dorada es el récord), el número y el
@@ -64,21 +64,30 @@ function updateRingHUD() {
 // Pantalla actual: 'pretitle', 'splash', 'intro', 'home', 'planets', 'levels', 'menu',
 // 'play', 'dead' o 'win'.
 let state = 'pretitle';
-let rings, level, pLevel, camLevel, pAng, jumping, jumpT, combo, lastLand, score;
-let astFade = 0,
-  appear = 1;
-let charge = 0,
-  jumpTarget = 1,
-  crossed = false;
+let rings;
+let level;
+let pLevel;
+let camLevel;
+let pAng;
+let jumping;
+let jumpT;
+let combo;
+let lastLand;
+let score;
+let astFade = 0;
+let appear = 1;
+let charge = 0;
+let jumpTarget = 1;
+let crossed = false;
 // Anillo de la salida.
 const GOAL = 50;
 let lvl = 0; // Índice en LEVELS: 0 Sistema solar, 1 Nubes de Magallanes, 2 Andrómeda…
-let best2 = 0,
-  attempts2 = 0,
-  best3 = 0,
-  attempts3 = 0;
-const bestX = {},
-  attX = {};
+let best2 = 0;
+let attempts2 = 0;
+let best3 = 0;
+let attempts3 = 0;
+const bestX = {};
+const attX = {};
 /**
  * Mejor anillo alcanzado en un nivel.
  *

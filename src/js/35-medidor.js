@@ -7,16 +7,16 @@
 import { particles } from './08-partida-estado.js';
 
 let MEDIR = false;
-let medEl = null,
-  medPrev = 0,
-  medMid = 0,
-  medShow = 0;
+let medEl = null;
+let medPrev = 0;
+let medMid = 0;
+let medShow = 0;
 // Últimos 120 cuadros: tiempo entre cuadros, tiempo de código y tiempo de lógica (en ms); y
 // momentos de los tirones de los últimos 10 s.
-const medInt = [],
-  medJs = [],
-  medUpd = [],
-  medJank = [];
+const medInt = [];
+const medJs = [];
+const medUpd = [];
+const medJank = [];
 /**
  * Registra un cuadro al final del bucle principal y, cada 0,5 s, actualiza el recuadro del
  * medidor. `medMid` lo marca el bucle al terminar la lógica, para separar lógica y dibujo.

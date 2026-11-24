@@ -80,16 +80,16 @@ import { uiTone } from './28-sonidos-interfaz.js';
 import { muted } from './core/settings.js';
 import { PLGL, drawPlayer } from './render/planets.js';
 
-let ghostT = 0,
-  shieldT = 0,
-  eclipseT = 0,
-  pfx = [],
-  lastJT = 1,
-  periLeft = 0,
-  predT = 0,
-  strainK = 0,
-  burnT = 0,
-  ringBoostNow = 0;
+let ghostT = 0;
+let shieldT = 0;
+let eclipseT = 0;
+let pfx = [];
+let lastJT = 1;
+let periLeft = 0;
+let predT = 0;
+let strainK = 0;
+let burnT = 0;
+let ringBoostNow = 0;
 /**
  * Cuánto se estira el planeta por la marea del agujero negro: crece al acercarse a él y con la
  * fragilidad del planeta (resistencia negativa).
@@ -108,8 +108,8 @@ function powerName() {
   const P = curP();
   return P && P.power ? P.power[0] : '';
 }
-let bhWob = 0,
-  BURN_DUR = 1.5;
+let bhWob = 0;
+let BURN_DUR = 1.5;
 /**
  * Anuncia un poder: destello de encendido, acorde propio del planeta y su nombre en pantalla.
  *

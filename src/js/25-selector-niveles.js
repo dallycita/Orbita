@@ -22,10 +22,12 @@ import { setWallet, updateWallet } from './10-ritmo-y-objetos.js';
 import { setSesTries, setup } from './16-partida.js';
 import { MENU_HTML, introDrone, setIntroFade, startIntro } from './23-intro.js';
 import { applyMute, openHome, setStoryReturn } from './26-pantalla-inicio.js';
-import { homeAmbience } from './27-inicio-animacion.js';
+
 import { showStop } from './28-sonidos-interfaz.js';
 import { setLvArts, setLvCanvas } from './33-tarjetas-niveles.js';
 import { COIN_RINGS, LEVELS } from './data/levels.js';
+import { homeAmbience } from './audio/ui-sounds.js';
+import { lvStarsGot } from './game/progress.js';
 
 /** Si el jugador ya vio la historia de introducción (se guarda en localStorage). */
 let storySeen = false;
@@ -43,20 +45,6 @@ const LV_DATO = [
   'Su agujero negro tiene unos 6500 millones de veces la masa del Sol.',
   'Su primera fotografía se publicó en 2022, gracias al Event Horizon Telescope.',
 ];
-/**
- * Lee las estrellas ganadas en un nivel.
- *
- * @param {number} i Índice del nivel en LEVELS.
- * @returns {number[]} Las estrellas conseguidas (lista vacía si no hay o no hay localStorage).
- */
-function lvStarsGot(i) {
-  try {
-    const all = JSON.parse(localStorage.getItem('orbita_lvstars') || '{}');
-    return Array.isArray(all[i]) ? all[i] : [];
-  } catch (e) {
-    return [];
-  }
-}
 // dificultad como gravedad: un mini agujero negro con 4 anillos; los encendidos dicen qué tan
 // fuerte jala
 const GRAV_TIER = { Fácil: 1, Medio: 2, Difícil: 3, 'Muy difícil': 4 };
@@ -235,8 +223,8 @@ function renderLevels() {
 }
 
 // dato real como transmisión: se escribe letra por letra al llegar a cada galaxia
-let sigShown = -1,
-  sigTimer = null;
+let sigShown = -1;
+let sigTimer = null;
 // espacio irrompible entre cifras (30 000, 99,8 %) para que no se partan en dos líneas
 const sigTxt = i => LV_DATO[i].replace(/(\d) (?=[\d%])/g, '$1\u00a0');
 /**
@@ -299,8 +287,8 @@ function sigType(i) {
 const levelsUnlocked = () => true; // todos los niveles están abiertos desde el inicio
 // tutAfterStory: al terminar la historia sigue el tutorial ("Repetir tutorial").
 // pendingTut: al tocar en el menú empieza el tutorial en vez de la partida.
-let tutAfterStory = false,
-  pendingTut = false;
+let tutAfterStory = false;
+let pendingTut = false;
 /** Al terminar la pantalla de presentación, abre el inicio. */
 function afterSplash() {
   openHome(true);
@@ -562,7 +550,6 @@ export {
   afterSplash,
   elLv,
   lvIndex,
-  lvStarsGot,
   openLevels,
   pendingTut,
   resetProgress,

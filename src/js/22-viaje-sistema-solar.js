@@ -84,12 +84,13 @@ import { drawFlare, drawHazards, drawNova } from './15-peligros.js';
 import { rr } from './16-partida.js';
 import { drawAst, drawCharge, drawPowerAura } from './21-dibujo.js';
 import { introFade } from './23-intro.js';
-import { brandHole, drawLogo } from './24-presentacion.js';
+
 import { camZoom, homeT, logoT0, setCamZoom } from './27-inicio-animacion.js';
 
 import { drawAndromeda, drawGalBG, drawMagallanes } from './31-fondos-2d.js';
 import { GLBG, REMOLINO_PHOTO, remolinoSource } from './32-fondos-9-motor.js';
 import { drawPlayer } from './render/planets.js';
+import { brandHole, drawLogo } from './render/black-hole.js';
 
 /**
  * Dibuja la escena completa de la partida en el lienzo principal, con temblor y zoom de cámara.

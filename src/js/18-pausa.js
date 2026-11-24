@@ -11,16 +11,17 @@ import { bestOf, level, lvl, rings, setState, state } from './06-record-y-estado
 import { curGoal, setGest, setPending, tutorial } from './08-partida-estado.js';
 
 import { sesTries, setSesTries, showTry, start } from './16-partida.js';
-import { lvStarsGot, openLevels } from './25-selector-niveles.js';
+import { openLevels } from './25-selector-niveles.js';
 import { setLast } from './36-bucle-principal.js';
 import { COIN_RINGS, LEVELS } from './data/levels.js';
 import { muted, setVolMus, setVolSfx, volMus, volSfx } from './core/settings.js';
+import { lvStarsGot } from './game/progress.js';
 
-let paused = false,
-  pzCount = null,
-  pzPanelCls = '',
-  pzDrag = null,
-  pzAC = null;
+let paused = false;
+let pzCount = null;
+let pzPanelCls = '';
+let pzDrag = null;
+let pzAC = null;
 const PZ_ICO = {
   re: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12a7 7 0 1 1-2.05-4.95" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 4.5v4h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   lv: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6" fill="currentColor"/><circle cx="12" cy="12" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="9.6" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".55"/></svg>',
@@ -158,10 +159,10 @@ function pzClose() {
     document.body.classList.remove('paused');
   }
 }
-let pzBus = null,
-  pzNoise = null,
-  pzHoverT = 0,
-  pzLastV = {};
+let pzBus = null;
+let pzNoise = null;
+let pzHoverT = 0;
+let pzLastV = {};
 /**
  * Prepara el contexto de audio propio de la pausa (con el mismo eco de los botones del juego
  * y un búfer de ruido) y aplica el volumen de efectos.

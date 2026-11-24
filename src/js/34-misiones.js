@@ -8,15 +8,16 @@ import { AC, ROOT, noise } from './02-audio.js';
 import { PLANETS_P, curPlanet, planetThumb } from './07-planetas.js';
 import { t, tutorial } from './08-partida-estado.js';
 
-import { lvStarsGot } from './25-selector-niveles.js';
 import { elHome, renderHome } from './26-pantalla-inicio.js';
 import { uiTone } from './28-sonidos-interfaz.js';
-import { uiGlass } from './29-planetas-hd.js';
+
 import { COIN_RINGS, LEVELS } from './data/levels.js';
 
 import { MIS_ACH, MIS_DAILY, MIS_FACT } from './data/missions.js';
 import { muted } from './core/settings.js';
 import { PLGL } from './render/planets.js';
+import { uiGlass } from './audio/ui-sounds.js';
+import { lvStarsGot } from './game/progress.js';
 
 /**
  * Arma el ícono de Misiones del inicio: una constelación de tres estrellas (una por misión del
@@ -138,12 +139,12 @@ function misCrystal() {
   );
 }
 var misDetail = null;
-var MIS = null,
-  misTab = 'diarias',
-  misTimer = null,
-  misFx = 0,
-  misOpen = false,
-  misSwitch = 0;
+var MIS = null;
+var misTab = 'diarias';
+var misTimer = null;
+var misFx = 0;
+var misOpen = false;
+var misSwitch = 0;
 /**
  * Fecha local como texto `AAAA-MM-DD`, que identifica el día de las misiones.
  *
@@ -544,8 +545,8 @@ const MIS_AICO = {
   todos: 'galaxy',
   sol: 'q',
 };
-var misThumbs = {},
-  misMinis = {};
+var misThumbs = {};
+var misMinis = {};
 // Miniaturas con el mismo lenguaje que los dibujos grandes del juego (brillos, colores de cada
 // galaxia); se dibujan una vez y se guardan como imagen en `misMinis`.
 function misMini(kind) {

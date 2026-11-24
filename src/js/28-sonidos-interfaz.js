@@ -6,12 +6,13 @@
  */
 import { AC, ROOT, master, noiseHit } from './02-audio.js';
 import { paused, pzSnd } from './18-pausa.js';
-import { uiGlass } from './29-planetas-hd.js';
-import { muted } from './core/settings.js';
 
-let uiBus = null,
-  lastHover = null,
-  uiLastT = 0;
+import { muted } from './core/settings.js';
+import { uiGlass } from './audio/ui-sounds.js';
+
+let uiBus = null;
+let lastHover = null;
+let uiLastT = 0;
 /**
  * Salida de los sonidos de interfaz, con eco de 0,27 segundos; se crea al primer uso.
  *
@@ -130,8 +131,8 @@ function uiClick(kind) {
 }
 
 // Sonido de la absorción en la presentación: showBus es su salida y bed el fondo continuo.
-let showBus = null,
-  bed = null;
+let showBus = null;
+let bed = null;
 /**
  * Salida de los sonidos de la absorción; se crea si no existe.
  *

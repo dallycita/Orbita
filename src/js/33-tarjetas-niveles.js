@@ -6,11 +6,12 @@
  */
 import { H, W, ctx } from './01-pantalla-y-utilidades.js';
 import { t } from './08-partida-estado.js';
-import { BR0, BR1, SK, bhCore, bhDiskK } from './24-presentacion.js';
+
 import { elLv } from './25-selector-niveles.js';
 
 import { LEVELS } from './data/levels.js';
 import { drawBigPlanet } from './render/planets.js';
+import { BR0, BR1, SK, bhCore, bhDiskK } from './render/black-hole.js';
 
 // Una sola escena WebGL a pantalla completa: al deslizar, mezcla las dos galaxias vecinas y cada
 // una se mueve con su tarjeta.
@@ -265,11 +266,11 @@ const LVGL = (() => {
 })();
 // lvCanvas: el lienzo de fondo del selector; lvArts: el recuadro de dibujo de cada tarjeta.
 // Los asigna 25-selector-niveles.
-let lvCanvas = null,
-  lvArts = [];
+let lvCanvas = null;
+let lvArts = [];
 // Parte nítida, a resolución completa: estrellas, planetas, el Sol y los agujeros negros.
-let lvStars = null, // estrellas de fondo, con posición de 0 a 1 y profundidad
-  lvSets = null; // grupos de estrellas propios de cada destino, ya calculados
+let lvStars = null;
+let lvSets = null; // grupos de estrellas propios de cada destino, ya calculados
 /**
  * Generador pseudoaleatorio de Park y Miller: siempre da la misma serie para la misma semilla.
  *

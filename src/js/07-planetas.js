@@ -11,12 +11,12 @@ import { PLGL } from './render/planets.js';
 
 // Planeta elegido, récord de Perfectos en una partida, secreto de Plutón, truco de todos los
 // planetas, cargas de escudo y si se usó el salto doble en la partida.
-let curPlanet = 'tierra',
-  maxPerf = 0,
-  plutoOk = false,
-  allPlanets = false,
-  shieldLeft = 0,
-  usedDouble = false;
+let curPlanet = 'tierra';
+let maxPerf = 0;
+let plutoOk = false;
+let allPlanets = false;
+let shieldLeft = 0;
+let usedDouble = false;
 /**
  * @param {object} P Planeta de PLANETS_P.
  * @returns {boolean} true si está desbloqueado.

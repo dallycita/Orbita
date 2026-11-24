@@ -5,9 +5,9 @@
 import { GOAL } from './06-record-y-estado.js';
 
 // winT: segundos desde que se ganó; perfCount: saltos perfectos; attempts: intentos guardados
-let winT = 0,
-  perfCount = 0,
-  attempts = 0;
+let winT = 0;
+let perfCount = 0;
+let attempts = 0;
 // Tutorial: los primeros 10 anillos de la huida, una cosa a la vez.
 // TUT_TYPES da el tipo de cada anillo y TUT_TIPS el consejo que se muestra en él.
 const TUT_GOAL = 10;
@@ -35,8 +35,8 @@ const TUT_TIPS = [
   '¡Sigue!',
   'Una barrera sin huecos. Desliza hacia arriba para el salto doble.',
 ];
-let tutorial = false,
-  tutorialDone = true; // el tutorial no se impone al empezar: se aprende jugando
+let tutorial = false;
+let tutorialDone = true; // el tutorial no se impone al empezar: se aprende jugando
 /**
  * Meta de la partida actual.
  *
@@ -45,42 +45,42 @@ let tutorial = false,
 const curGoal = () => (tutorial ? TUT_GOAL : GOAL);
 // brillo de cada marca de carga del poder al llenarse, de 0 a 1
 const pipFlash = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-let readyT = 0,
-  chargeFlash = 0,
-  readyHintDone = false;
+let readyT = 0;
+let chargeFlash = 0;
+let readyHintDone = false;
 // gest: gesto en curso; pending: salto pedido que espera 0,09 s por si el gesto es un
 // deslizamiento (salto doble); pendingT: segundos que lleva esperando
-let gest = null,
-  pending = false,
-  pendingT = 0;
+let gest = null;
+let pending = false;
+let pendingT = 0;
 let hintsShown = 0;
-let showHint = false,
-  hintT = 0;
-let swallow = null,
-  holeFlare = 0;
-let streak = 0,
-  jumpClear = 999,
-  culprit = null,
-  culpritT = 0,
-  landPop = 0;
+let showHint = false;
+let hintT = 0;
+let swallow = null;
+let holeFlare = 0;
+let streak = 0;
+let jumpClear = 999;
+let culprit = null;
+let culpritT = 0;
+let landPop = 0;
 // holgura máxima con los asteroides para que un salto cuente como perfecto
 const PERFECT = 12;
 // t: reloj del juego, en segundos; timeScale y slowTimer: cámara lenta
-let t = 0,
-  timeScale = 1,
-  slowTimer = 0,
-  shake = 0,
-  flash = 0,
-  pulse = 0,
-  deadT = 0,
-  canRestart = false;
-let particles = [],
-  trail = [],
-  texts = [],
-  burns = [];
+let t = 0;
+let timeScale = 1;
+let slowTimer = 0;
+let shake = 0;
+let flash = 0;
+let pulse = 0;
+let deadT = 0;
+let canRestart = false;
+let particles = [];
+let trail = [];
+let texts = [];
+let burns = [];
 // sunLevel: nivel de anillo hasta donde llega el agujero negro; lastEaten: último anillo tragado
-let sunLevel = -1.6,
-  lastEaten = -2;
+let sunLevel = -1.6;
+let lastEaten = -2;
 // restos que caen en espiral hacia el agujero negro (ángulo en radianes y distancia)
 let debris;
 // duración base de un salto entre anillos, en segundos (jumpDur la ajusta según el planeta)

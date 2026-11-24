@@ -6,10 +6,14 @@
 import { lvl } from './06-record-y-estado.js';
 import { tutorial } from './08-partida-estado.js';
 
-let cvs, ctx;
-let elScore, elBest;
-let elPbar, elPnum;
-let elWrap, elArcFg;
+let cvs;
+let ctx;
+let elScore;
+let elBest;
+let elPbar;
+let elPnum;
+let elWrap;
+let elArcFg;
 let hudMode = 'faltan';
 let musicStyle = 'espacial';
 /**
@@ -32,19 +36,25 @@ function refreshChips() {
       ),
     );
 }
-let elHud, elPanel;
+let elHud;
+let elPanel;
 let reduceMotion;
 
 // ---- Medidas ----
 // W y H: tamaño del lienzo, en píxeles CSS; DPR: densidad de píxeles (hasta 2); S: píxeles por
 // unidad del mundo; CX y CY: centro del agujero negro en pantalla.
-let W, H, DPR, S, CX, CY;
+let W;
+let H;
+let DPR;
+let S;
+let CX;
+let CY;
 // En unidades del mundo: radio del primer anillo, distancia entre anillos, radio del planeta y
 // radio mínimo del agujero negro.
-const R0 = 96,
-  GAP = 34,
-  PR = 8,
-  SUN = 16;
+const R0 = 96;
+const GAP = 34;
+const PR = 8;
+const SUN = 16;
 /**
  * Ajusta el lienzo al tamaño de la ventana y recalcula la escala para que quepa un área de
  * 340 × 500 unidades del mundo, con el agujero negro un poco por debajo del centro.

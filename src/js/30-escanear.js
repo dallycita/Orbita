@@ -10,11 +10,11 @@ import { muted } from './core/settings.js';
 // scanOn: escaneo activo; scanK: avance de la animación, de 0 a 1; pRot: giro del planeta en
 // radianes; scanLineT: avance de la línea de luz; scanApplyAt: cuándo crecen las barras
 // (milisegundos de performance.now()).
-let scanOn = false,
-  scanK = 0,
-  pRot = 0,
-  scanLineT = 0,
-  scanApplyAt = 0;
+let scanOn = false;
+let scanK = 0;
+let pRot = 0;
+let scanLineT = 0;
+let scanApplyAt = 0;
 /**
  * Cómo se siente una característica en el juego: una palabra y su efecto (los números reales
  * van debajo).

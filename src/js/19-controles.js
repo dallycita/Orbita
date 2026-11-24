@@ -52,8 +52,9 @@ import {
 import { elHome, openHome } from './26-pantalla-inicio.js';
 import { HOME_IN, homeT, setHomeT, setLogoT0 } from './27-inicio-animacion.js';
 import { showStop } from './28-sonidos-interfaz.js';
-import { planetStep, uiGlass } from './29-planetas-hd.js';
+import { planetStep } from './29-planetas-hd.js';
 import { LEVELS } from './data/levels.js';
+import { uiGlass } from './audio/ui-sounds.js';
 
 /**
  * Atiende un toque o la tecla de acción según la pantalla actual: pausa, botones de los paneles,

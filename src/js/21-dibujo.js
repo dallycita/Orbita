@@ -5,7 +5,6 @@
  * juego solo se copian, así va rápido incluso en celulares.
  */
 import { BONE, CX, CY, DPR, H, PR, S, W, clamp, ctx, frac } from './01-pantalla-y-utilidades.js';
-import { AC, ROOT } from './02-audio.js';
 import {
   camLevel,
   charge,
@@ -37,9 +36,7 @@ import {
 import { bend } from './14-lente-gravitacional.js';
 import { renderScene } from './22-viaje-sistema-solar.js';
 import { doblesHechos } from './23-intro.js';
-import { uiOut, uiTone } from './28-sonidos-interfaz.js';
 
-import { muted } from './core/settings.js';
 import { PLGL, drawBigPlanet } from './render/planets.js';
 
 // Asteroides en 3D con WebGL, con la misma luz cálida del disco del agujero negro que los
@@ -198,8 +195,8 @@ const ASTGL = (() => {
   }
   return { bake, ok: () => init() };
 })();
-const AST_SPR = {},
-  AST_B = [8, 12, 16, 22, 30, 40, 54, 72]; // radios fijos en píxeles: la memoria no crece
+const AST_SPR = {};
+const AST_B = [8, 12, 16, 22, 30, 40, 54, 72]; // radios fijos en píxeles: la memoria no crece
 /**
  * Devuelve (y guarda) la imagen de un asteroide. Con WebGL es la roca 3D; sin WebGL, un dibujo
  * 2D sombreado con cráteres.
@@ -329,8 +326,8 @@ function astSprite(shape, frame, rp) {
   g.stroke();
   return (AST_SPR[key] = c);
 }
-let astPre = null, // cola de rocas por preparar: [forma, giro, radio]
-  astPreK = ''; // escala y densidad de píxeles con que se armó la cola
+let astPre = null;
+let astPreK = ''; // escala y densidad de píxeles con que se armó la cola
 /**
  * Prepara las imágenes de los asteroides que usará la partida en pantallas sin partida (menús y
  * "Toca para escapar"), unas pocas por cuadro y sin pasar de 3 ms, para no crearlas en pleno
@@ -633,37 +630,13 @@ function drawCharge(px, py, z) {
   }
   ctx.globalAlpha = 1;
 }
-/** Sonido del poder listo: un arpegio brillante que sube y un destello. */
-function powerReadySound() {
-  if (!AC || muted) {
-    return;
-  }
-  try {
-    const n = AC.currentTime;
-    [0, 7, 12, 16, 19, 24].forEach((sm, i) =>
-      uiTone(ROOT * 2 * Math.pow(2, sm / 12), n + i * 0.045, 0.9, 0.05),
-    );
-    const o = AC.createOscillator(),
-      g = AC.createGain();
-    o.type = 'sine';
-    o.frequency.setValueAtTime(ROOT, n);
-    o.frequency.exponentialRampToValueAtTime(ROOT * 4, n + 0.3);
-    g.gain.setValueAtTime(0.0001, n);
-    g.gain.exponentialRampToValueAtTime(0.08, n + 0.05);
-    g.gain.exponentialRampToValueAtTime(0.0001, n + 0.4);
-    o.connect(g);
-    g.connect(uiOut());
-    o.start(n);
-    o.stop(n + 0.45);
-  } catch (e) {}
-}
 // Cámara que se dibuja. La lógica (choques, puntos, agujero negro) usa camLevel, que se queda
 // quieta durante el salto y arranca de golpe al aterrizar. Para dibujar se usa una cámara "de
 // resorte" que sube junto con el salto, acelera y frena sin saltos y llega al mismo lugar en el
 // mismo tiempo. Quieta, es idéntica a camLevel.
-let camView = 0,
-  camVel = 0,
-  camT = 0;
+let camView = 0;
+let camVel = 0;
+let camT = 0;
 /**
  * Avanza la cámara de resorte un cuadro (resorte con amortiguación crítica, frecuencia 9 por
  * segundo). Fuera de la partida, o tras una pausa larga, se iguala a camLevel.
@@ -782,4 +755,4 @@ function drawShock() {
   ctx.restore();
 }
 
-export { astPrebake, drawAst, drawCharge, drawEarth, drawPowerAura, powerReadySound, render };
+export { astPrebake, drawAst, drawCharge, drawEarth, drawPowerAura, render };

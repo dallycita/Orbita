@@ -7,8 +7,8 @@
 let muted = false;
 
 // Volumen de la música y de los efectos (de 0 a 100), guardados en el navegador.
-let volMus = 100,
-  volSfx = 100;
+let volMus = 100;
+let volSfx = 100;
 
 /** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
 function initAudioSettings() {

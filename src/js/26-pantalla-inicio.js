@@ -21,7 +21,6 @@ import {
 import {
   HOME_BIG,
   HOME_IN,
-  homeAmbience,
   homeT,
   setHomeT,
   setHsBoost,
@@ -38,6 +37,7 @@ import { misMoons, misReady, openMissions } from './34-misiones.js';
 import { MEDIR, medEl, setMEDIR, setMedEl, setMedPrev } from './35-medidor.js';
 import { PLANET_SVG } from './data/planets.js';
 import { loadMute, muted, setMuted } from './core/settings.js';
+import { homeAmbience } from './audio/ui-sounds.js';
 
 let elHome;
 /** Sonido apagado por el jugador (se guarda en localStorage). */

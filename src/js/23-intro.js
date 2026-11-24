@@ -42,7 +42,7 @@ import {
 } from './08-partida-estado.js';
 import { rr } from './16-partida.js';
 import { drawEarth } from './21-dibujo.js';
-import { bhDiskK } from './24-presentacion.js';
+
 import {
   openLevels,
   setStorySeen,
@@ -50,11 +50,12 @@ import {
   tutAfterStory,
 } from './25-selector-niveles.js';
 import { openHome, setStoryReturn, storyReturn } from './26-pantalla-inicio.js';
-import { homeAmbience } from './27-inicio-animacion.js';
 
 import { misEvent } from './34-misiones.js';
 import { LEVELS } from './data/levels.js';
 import { PLGL, drawBigPlanet } from './render/planets.js';
+import { homeAmbience } from './audio/ui-sounds.js';
+import { bhDiskK } from './render/black-hole.js';
 
 // Planetas de la intro. r: radio de la órbita y s: tamaño, en unidades de la intro.
 const PLANETS = [
@@ -78,22 +79,22 @@ const EAT_AT = {
   Neptuno: 10.8,
 };
 // Tiempos de la intro, en segundos.
-const INTRO_END = 15.9,
-  T_ZOOM = 13.9,
-  ZOOM_DUR = 1.8,
-  T_ENTER = 2.2,
-  T_ARRIVE = 4.1,
-  T_SUN_END = 5.8,
-  T_DISK_END = 6.2,
-  T_EARTH = 6.6;
+const INTRO_END = 15.9;
+const T_ZOOM = 13.9;
+const ZOOM_DUR = 1.8;
+const T_ENTER = 2.2;
+const T_ARRIVE = 4.1;
+const T_SUN_END = 5.8;
+const T_DISK_END = 6.2;
+const T_EARTH = 6.6;
 const SUN_COLS = ['#fff3cf', '#ffd36b', '#ff9a3d', '#ff5a1f'];
-let introT = 0,
-  ip = [],
-  iparts = [],
-  introFade = 0,
-  SI = 1,
-  droneNodes = null,
-  cues = {};
+let introT = 0;
+let ip = [];
+let iparts = [];
+let introFade = 0;
+let SI = 1;
+let droneNodes = null;
+let cues = {};
 /**
  * Reinicia el reloj, las partículas y los planetas de la intro.
  */

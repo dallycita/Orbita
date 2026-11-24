@@ -6,13 +6,13 @@
  */
 import { muted, volMus, volSfx } from './core/settings.js';
 
-let AC = null,
-  master = null,
-  musicBus = null,
-  NOISE = null,
-  shaper = null,
-  outBus = null,
-  musVol = null;
+let AC = null;
+let master = null;
+let musicBus = null;
+let NOISE = null;
+let shaper = null;
+let outBus = null;
+let musVol = null;
 /**
  * Convierte el volumen del control en ganancia; la curva es cuadrática para que el control se
  * sienta parejo al oído.

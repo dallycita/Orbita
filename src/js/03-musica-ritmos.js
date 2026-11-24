@@ -11,15 +11,15 @@ import { setShake, shake, sunLevel, tutorial } from './08-partida-estado.js';
 import { muted } from './core/settings.js';
 
 // Tempo: STEP es una semicorchea y TB un pulso, en segundos.
-const BPM = 140,
-  STEP = 60 / BPM / 4,
-  TB = 60 / BPM;
-let musicOn = false,
-  nextT = 0,
-  step = 0,
-  schedTimer = null,
-  kickQueue = [],
-  musicStart = -1;
+const BPM = 140;
+const STEP = 60 / BPM / 4;
+const TB = 60 / BPM;
+let musicOn = false;
+let nextT = 0;
+let step = 0;
+let schedTimer = null;
+let kickQueue = [];
+let musicStart = -1;
 const BASS = {
   0: [0, 0.42],
   6: [0, 0.28],
@@ -271,8 +271,8 @@ function dangerNow() {
   return state === 'play' ? clamp((1.7 - (pLevel - sunLevel)) / 1.3, 0, 1) : 0;
 }
 // Zumbido disonante que tiembla, sube de tono y se acelera con el peligro.
-let tens = null,
-  tensT = 0;
+let tens = null;
+let tensT = 0;
 /**
  * Enciende el zumbido de tensión, si no está sonando.
  */
@@ -332,9 +332,9 @@ function tensionSet(d) {
 }
 // Alarma del agujero negro: cuanto más cerca, más rápido y más fuerte late (golpe grave, sirena y
 // latido). dangerFlash es la intensidad del destello rojo en pantalla.
-let alarmT = 0,
-  alarmWas = 0,
-  dangerFlash = 0;
+let alarmT = 0;
+let alarmWas = 0;
+let dangerFlash = 0;
 /**
  * Avanza la alarma cada cuadro: suena al entrar en peligro (más de 0,18) y luego se repite
  * cada 1,2 a 0,3 segundos según lo cerca que esté el agujero negro.
@@ -583,8 +583,8 @@ function stepPhonk(s, t0) {
   }
 }
 const SW_AT = 30; // Anillo donde la música se vuelve Synthwave.
-let riserOn = false,
-  switchAt = 0;
+let riserOn = false;
+let switchAt = 0;
 /**
  * Barrido de ruido que sube antes de un cambio de estilo.
  *
@@ -630,8 +630,8 @@ const PROG_A = [
 ]; // i – bII – i – bVII
 const PHRY = [0, 1, 3, 7, 8, 10, 12, 13];
 const hzA = sm => (ROOT_A / 2) * Math.pow(2, sm / 12);
-let andFast = false,
-  switchMsg = '¡A toda velocidad!';
+let andFast = false;
+let switchMsg = '¡A toda velocidad!';
 /**
  * Campana metálica por modulación de frecuencia.
  *

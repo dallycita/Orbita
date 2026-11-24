@@ -4,7 +4,7 @@
  * Sin WebGL todo cae a un dibujo 2D más simple (drawBigPlanet2D).
  */
 import { BONE, H, W, ctx, cvs, rgba, stars } from './01-pantalla-y-utilidades.js';
-import { AC, ROOT } from './02-audio.js';
+import { AC } from './02-audio.js';
 import { setState, state } from './06-record-y-estado.js';
 import { PLANETS_P, curPlanet, planetOk, setCurPlanet } from './07-planetas.js';
 import { setT, t } from './08-partida-estado.js';
@@ -28,19 +28,20 @@ import {
   statWords,
 } from './30-escanear.js';
 import { PLGL, drawBigPlanet } from './render/planets.js';
+import { uiGlass } from './audio/ui-sounds.js';
 
 let elPl;
-let pIndex = 0,
-  pSwap = 0,
-  pDir = 1,
-  pTarget = 0,
-  pPos = 0,
-  pDrag = 0,
-  pSlots = [],
-  pScan = false,
-  pScanT = 0,
-  pSK = 0,
-  pUse = 0;
+let pIndex = 0;
+let pSwap = 0;
+let pDir = 1;
+let pTarget = 0;
+let pPos = 0;
+let pDrag = 0;
+let pSlots = [];
+let pScan = false;
+let pScanT = 0;
+let pSK = 0;
+let pUse = 0;
 const pGeom = () => ({ R0: Math.min(W * 0.2, H * 0.15), cx0: W / 2, cy0: H * 0.3 });
 
 /**
@@ -648,29 +649,10 @@ function closePlanets() {
     elHome.classList.remove('off');
   }
 }
-/**
- * Sonido de cristal para las flechas: dos notas que suben (siguiente) o bajan (anterior).
- *
- * @param {number} dir Dirección: negativo baja, positivo sube.
- */
-function uiGlass(dir) {
-  if (!AC || muted) {
-    return;
-  }
-  try {
-    const n = AC.currentTime,
-      a = [12, 19],
-      b = [19, 12],
-      seq = dir < 0 ? b : a;
-    uiTone(ROOT * Math.pow(2, seq[0] / 12), n, 1.1, 0.06);
-    uiTone(ROOT * Math.pow(2, seq[1] / 12), n + 0.07, 1.3, 0.055);
-    uiTone(ROOT * 2 * Math.pow(2, seq[1] / 12), n + 0.07, 0.7, 0.015);
-  } catch (e) {}
-}
 
 /** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
 export function initPlanetsScreen() {
   elPl = document.getElementById('planets');
 }
 
-export { elPl, openPlanets, planetStep, renderPlanetsScene, uiGlass };
+export { elPl, openPlanets, planetStep, renderPlanetsScene };

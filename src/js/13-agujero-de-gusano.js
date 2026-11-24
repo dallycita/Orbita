@@ -75,14 +75,14 @@ import { muted } from './core/settings.js';
 const whGap = () => (level + 1 < 34 ? 4 : 3);
 // ORB_W: velocidad de giro sobre el anillo, en radianes por segundo; WH_IN y WH_OUT: duración
 // del portal de entrada y de salida, en segundos.
-const ORB_W = 1.75,
-  WH_IN = 0.78,
-  WH_OUT = 0.7;
-let wh = null,
-  whShock = null,
-  gapC = {},
-  viewInside = false,
-  hideEarth = false;
+const ORB_W = 1.75;
+const WH_IN = 0.78;
+const WH_OUT = 0.7;
+let wh = null;
+let whShock = null;
+let gapC = {};
+let viewInside = false;
+let hideEarth = false;
 /**
  * Sonido de entrada: un tirón grave que sube, con el aire que se arrastra hacia la boca.
  *

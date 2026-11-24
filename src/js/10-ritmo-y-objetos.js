@@ -18,10 +18,11 @@ import {
 } from './06-record-y-estado.js';
 import { curGoal, setPending, t } from './08-partida-estado.js';
 import { rr } from './16-partida.js';
-import { lvStarsGot } from './25-selector-niveles.js';
+
 import { uiTone } from './28-sonidos-interfaz.js';
 import { COIN_RINGS } from './data/levels.js';
 import { muted } from './core/settings.js';
+import { lvStarsGot } from './game/progress.js';
 
 /**
  * Fase dentro del golpe actual de la música.
@@ -86,8 +87,8 @@ function obsRad(ring, o) {
     sz = 0.5 - 0.5 * Math.cos(2 * Math.PI * x); // respira cada 4 golpes: pequeño justo en el golpe
   return o.r * (0.3 + 0.7 * sz);
 }
-let wallet = 0,
-  runCoins = 0;
+let wallet = 0;
+let runCoins = 0;
 let elWallet;
 /**
  * Actualiza el contador de estrellas de la pantalla.
@@ -178,10 +179,10 @@ function drawCoin(x, y, sz, al) {
   ctx.stroke();
   ctx.restore();
 }
-let pushing = false,
-  pushT = 0,
-  pushFrom = 0,
-  starBoost = false;
+let pushing = false;
+let pushT = 0;
+let pushFrom = 0;
+let starBoost = false;
 /**
  * Coloca un objeto en el mayor hueco entre los asteroides del anillo, para que se pueda alcanzar.
  *

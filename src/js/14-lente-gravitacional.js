@@ -14,13 +14,13 @@ import { GLBG } from './32-fondos-9-motor.js';
 
 // BEND_AT[nivel] = [primer, último] nivel de anillo con lente; WH_K es el anillo de la boca del
 // gusano y WH_EXIT el de salida. BEND_R es el radio de Einstein de la lente.
-const BEND_AT = { 3: [26, 28] },
-  BEND_R = 23,
-  WORM_COL = '#d4c8ff',
-  WH_K = 29,
-  WH_EXIT = 41;
-let bend = { str: 0, a: -Math.PI / 2, L: 0, on: false, grow: 1, fixed: false },
-  whRip = null;
+const BEND_AT = { 3: [26, 28] };
+const BEND_R = 23;
+const WORM_COL = '#d4c8ff';
+const WH_K = 29;
+const WH_EXIT = 41;
+let bend = { str: 0, a: -Math.PI / 2, L: 0, on: false, grow: 1, fixed: false };
+let whRip = null;
 /**
  * Radio actual de la lente: crece y se apaga con su fuerza.
  *

@@ -11,8 +11,8 @@ import { t } from './08-partida-estado.js';
 // Núcleo amarillo-blanco de estrellas viejas, brazos espirales azules de estrellas jóvenes,
 // franjas de polvo café, nebulosas rosadas de hidrógeno donde nacen estrellas, y sus satélites M32
 // y M110.
-let andCanvas = null,
-  andKey = '';
+let andCanvas = null;
+let andKey = '';
 /**
  * Pinta Andrómeda en un canvas del tamaño de la pantalla (con semilla fija, así sale igual cada
  * vez) y lo guarda hasta que cambie el tamaño.
@@ -190,8 +190,8 @@ function drawAndromeda() {
 // Barra central de estrellas viejas anaranjadas, nubes irregulares de estrellas azuladas, la
 // nebulosa de la Tarántula (rosada, con su cúmulo R136), polvo oscuro, la Pequeña Nube a lo lejos
 // con un puente tenue de estrellas, y los tres anillos de la supernova 1987A.
-let magCanvas = null,
-  magKey = '';
+let magCanvas = null;
+let magKey = '';
 /**
  * Pinta la Gran Nube de Magallanes en un canvas del tamaño de la pantalla y lo guarda hasta que
  * cambie el tamaño.

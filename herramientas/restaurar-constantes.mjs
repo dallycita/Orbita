@@ -44,6 +44,8 @@ for (const rel of process.argv.slice(2)){
         case 'ConditionalExpression': return isPure(n.test, before) && isPure(n.consequent, before) && isPure(n.alternate, before);
         case 'MemberExpression': return n.object.type === 'Identifier' && n.object.name === 'Math' && !n.computed;
         case 'CallExpression': {
+          if (n.callee.type === 'MemberExpression' && n.callee.object.type === 'Identifier' && n.callee.object.name === 'Math' && !n.callee.computed && n.callee.property.name !== 'random')
+            return n.arguments.every(a => isPure(a, before));
           // módulo autoejecutable que solo prepara funciones: (() => { let a = null; function f(){…} return {f}; })()
           const fn = n.callee;
           if (n.arguments.length || !/^(ArrowFunctionExpression|FunctionExpression)$/.test(fn.type) || fn.params.length || fn.body.type !== 'BlockStatement') return false;

@@ -209,8 +209,8 @@ const TUNE = {
 };
 // waveProx: qué tan cerca está la onda del planeta (0 a 1, suavizado); waveBeepT: segundos hasta
 // el siguiente pitido de aviso.
-let waveProx = 0,
-  waveBeepT = 0;
+let waveProx = 0;
+let waveBeepT = 0;
 /** Borra todos los peligros activos (al empezar o reiniciar una partida). */
 function hazardsReset() {
   setComets([]);

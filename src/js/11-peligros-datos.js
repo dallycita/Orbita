@@ -6,16 +6,16 @@
  * Llamaradas y estrellas veloces (Sagitario A*).
  */
 
-let comets = [],
-  beams = [],
-  flareT = 0,
-  flareWarn = 0,
-  sstars = [],
-  beamCount = 0;
-let waves = [],
-  hot = 0,
-  hotT = 0,
-  skyFlash = 0;
+let comets = [];
+let beams = [];
+let flareT = 0;
+let flareWarn = 0;
+let sstars = [];
+let beamCount = 0;
+let waves = [];
+let hot = 0;
+let hotT = 0;
+let skyFlash = 0;
 // Andrómeda: nova recurrente (como la M31N 2008-12a, que estalla cada año). Una estrella fuera del
 // centro lanza, al ritmo de la música, cáscaras de gas verde esmeralda (oxígeno). Las cáscaras
 // cruzan los anillos de lado: si saltas a través de un filamento, mueres; por un hueco, pasas.
