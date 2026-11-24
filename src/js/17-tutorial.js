@@ -1,4 +1,14 @@
-// ---------- el tutorial: reaparecer sin perder, terminarlo y empezarlo ----------
+/**
+ * El tutorial: empezarlo, reaparecer al chocar sin perder la partida y terminarlo.
+ */
+
+/**
+ * En el tutorial, un choque no termina la partida: el planeta estalla y reaparece en el mismo
+ * anillo tras 0,7 segundos, con el agujero negro un poco más atrás.
+ *
+ * @param {number} x Posición horizontal del choque, en unidades del mundo.
+ * @param {number} y Posición vertical del choque, en unidades del mundo.
+ */
 function tutRespawn(x, y) {
   state = 'dead';
   flash = 0.4;
@@ -26,6 +36,7 @@ function tutRespawn(x, y) {
     pLevel = level;
     pending = false;
     gest = null;
+    // aleja el agujero negro para que no vuelva a atrapar al jugador enseguida
     sunLevel = Math.min(sunLevel, level - 1.6);
     lastEaten = Math.floor(sunLevel);
     swallow = null;
@@ -36,6 +47,7 @@ function tutRespawn(x, y) {
     }
   }, 700);
 }
+/** Termina el tutorial: lo marca como hecho y ofrece jugar el Sistema solar o ver los niveles. */
 function tutorialWin() {
   state = 'win';
   winT = 0;
@@ -65,6 +77,7 @@ function tutorialWin() {
     }, 600);
   }, 2200);
 }
+/** Empieza el tutorial con la partida limpia y la música. */
 function startTutorial() {
   homeAmbience(false);
   if (elLv) {
