@@ -150,7 +150,6 @@ import {
 import { setWh, setWhShock, wh, whStartOut } from './13-agujero-de-gusano.js';
 import { WH_EXIT, setBend, setWhRip } from './14-lente-gravitacional.js';
 import { hazardsOnLand, hazardsReset, setWaveBeepT, setWaveProx } from './15-peligros.js';
-import { tutRespawn, tutorialWin } from './17-tutorial.js';
 
 import { COIN_RINGS, LEVELS } from './data/levels.js';
 import { TYPE_INFO } from './data/courses.js';
@@ -163,6 +162,7 @@ import { zoneOf } from './game/zones.js';
 import { rr } from './core/geometry.js';
 import { rescuedCards } from './render/planets.js';
 import { ensureRings, setGapC } from './game/rings.js';
+import { emit } from './core/events.js';
 
 /** Deja todo el estado de la partida como al principio y crea los primeros anillos. */
 function setup() {
@@ -348,7 +348,7 @@ function upgradeToDouble() {
  */
 function win() {
   if (tutorial) {
-    tutorialWin();
+    emit('tutorialWin');
     return;
   }
   const before = unlockedIds();
@@ -841,7 +841,7 @@ function eatRings() {
  */
 function die(x, y, cause, who) {
   if (tutorial) {
-    tutRespawn(x, y);
+    emit('tutorialRespawn', x, y);
     return;
   }
   setState('dead');

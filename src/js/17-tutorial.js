@@ -42,6 +42,7 @@ import { setup } from './16-partida.js';
 import { homeAmbience } from './audio/ui-sounds.js';
 import { elLv } from './core/dom.js';
 import { winSound } from './audio/sfx.js';
+import { on } from './core/events.js';
 
 /**
  * En el tutorial, un choque no termina la partida: el planeta estalla y reaparece en el mismo
@@ -144,4 +145,11 @@ function startTutorial() {
   startMusic();
 }
 
-export { startTutorial, tutRespawn, tutorialWin };
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initTutorial() {
+  // la partida avisa cuando, en el tutorial, se gana o se choca
+  on('tutorialWin', tutorialWin);
+  on('tutorialRespawn', tutRespawn);
+}
+
+export { startTutorial };
