@@ -1,9 +1,22 @@
-// ---------- dentro de Andrómeda: toda la pantalla es la galaxia (colores reales) ----------
-// núcleo amarillo-blanco de estrellas viejas, brazos espirales azules de estrellas jóvenes,
+/**
+ * Fondos de galaxias dibujados en 2D (canvas), de respaldo cuando el fondo WebGL no está
+ * disponible: Gran Nube de Magallanes, Andrómeda y los fondos de los niveles 4 a 8.
+ * Cada fondo se pinta una vez en un canvas aparte por tamaño de pantalla y luego solo se copia,
+ * con un giro muy lento y estrellas que titilan encima. Los colores siguen las fotos reales.
+ */
+
+// ---- Dentro de Andrómeda: toda la pantalla es la galaxia (colores reales) ----
+// Núcleo amarillo-blanco de estrellas viejas, brazos espirales azules de estrellas jóvenes,
 // franjas de polvo café, nebulosas rosadas de hidrógeno donde nacen estrellas, y sus satélites M32
-// y M110
+// y M110.
 let andCanvas = null,
   andKey = '';
+/**
+ * Pinta Andrómeda en un canvas del tamaño de la pantalla (con semilla fija, así sale igual cada
+ * vez) y lo guarda hasta que cambie el tamaño.
+ *
+ * @returns {HTMLCanvasElement|null} El canvas, o null si el navegador no puede crearlo.
+ */
 function buildAndromeda() {
   const key = Math.round(W) + 'x' + Math.round(H);
   if (andCanvas && andKey === key) {
@@ -144,11 +157,14 @@ function buildAndromeda() {
   andKey = key;
   return c;
 }
+// Estrellas que titilan sobre los fondos 2D: posiciones repartidas con la razón áurea (de 0 a 1
+// del ancho y del alto) y fase propia.
 const AND_TW = Array.from({ length: 26 }, (_, i) => ({
   x: (i * 0.6180339) % 1,
   y: (i * 0.7548776) % 1,
   p: i * 1.7,
 }));
+/** Dibuja el fondo de Andrómeda en toda la pantalla (respaldo 2D del fondo WebGL). */
 function drawAndromeda() {
   const c = buildAndromeda();
   ctx.save();
@@ -172,13 +188,18 @@ function drawAndromeda() {
   ctx.globalAlpha = 1;
 }
 
-// ---------- dentro de la Gran Nube de Magallanes (como la muestran los telescopios) ----------
-// barra central de estrellas viejas anaranjadas, nubes irregulares de estrellas azuladas, la
-// nebulosa de la Tarántula (rosada, con su cúmulo R136),
-// polvo oscuro, la Pequeña Nube a lo lejos con un puente tenue de estrellas, y los tres anillos de
-// la supernova 1987A
+// ---- Dentro de la Gran Nube de Magallanes (como la muestran los telescopios) ----
+// Barra central de estrellas viejas anaranjadas, nubes irregulares de estrellas azuladas, la
+// nebulosa de la Tarántula (rosada, con su cúmulo R136), polvo oscuro, la Pequeña Nube a lo lejos
+// con un puente tenue de estrellas, y los tres anillos de la supernova 1987A.
 let magCanvas = null,
   magKey = '';
+/**
+ * Pinta la Gran Nube de Magallanes en un canvas del tamaño de la pantalla y lo guarda hasta que
+ * cambie el tamaño.
+ *
+ * @returns {HTMLCanvasElement|null} El canvas, o null si el navegador no puede crearlo.
+ */
 function buildMagallanes() {
   const key = Math.round(W) + 'x' + Math.round(H);
   if (magCanvas && magKey === key) {
@@ -352,6 +373,7 @@ function buildMagallanes() {
   magKey = key;
   return c;
 }
+/** Dibuja el fondo de la Gran Nube de Magallanes en toda la pantalla (respaldo 2D). */
 function drawMagallanes() {
   const c = buildMagallanes();
   ctx.save();
@@ -375,8 +397,19 @@ function drawMagallanes() {
   ctx.globalAlpha = 1;
 }
 
-// ---------- fondos de los niveles 4 a 8, como los muestran los telescopios ----------
+// ---- Fondos de los niveles 4 a 8, como los muestran los telescopios ----
+// Canvas ya pintados, por nivel y tamaño de pantalla ('nivel:anchoxalto').
 const bgCache = {};
+/**
+ * Pinta una mancha de luz redonda con degradado radial.
+ *
+ * @param {CanvasRenderingContext2D} g Contexto donde pintar.
+ * @param {number} x Centro horizontal, en píxeles de pantalla.
+ * @param {number} y Centro vertical, en píxeles de pantalla.
+ * @param {number} r Radio, en píxeles de pantalla.
+ * @param {string} c0 Color del centro, en CSS.
+ * @param {string} c1 Color del borde, en CSS.
+ */
 function blob(g, x, y, r, c0, c1) {
   const gr = g.createRadialGradient(x, y, 0, x, y, r);
   gr.addColorStop(0, c0);
@@ -384,6 +417,8 @@ function blob(g, x, y, r, c0, c1) {
   g.fillStyle = gr;
   g.fillRect(x - r, y - r, r * 2, r * 2);
 }
+// Pintores de cada fondo, por índice de nivel (3 a 7). Reciben el contexto, el ancho y alto y la
+// diagonal de la pantalla (en píxeles) y un generador pseudoaleatorio con semilla fija.
 const BG_BUILD = {
   // Centaurus A: elíptica gigante y cálida, cruzada por una franja de polvo torcida con estrellas
   // jóvenes; chorros y lóbulos perpendiculares
@@ -650,6 +685,12 @@ const BG_BUILD = {
     g.stroke();
   },
 };
+/**
+ * Dibuja en toda la pantalla el fondo 2D de un nivel lejano; la primera vez lo pinta (con 420
+ * estrellas encima) y lo guarda en `bgCache`.
+ *
+ * @param {number} i Índice del nivel, de 3 a 7 (una clave de `BG_BUILD`).
+ */
 function drawGalBG(i) {
   const key = i + ':' + Math.round(W) + 'x' + Math.round(H);
   if (!bgCache[key] && document.createElement) {

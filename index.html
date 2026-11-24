@@ -4767,6 +4767,11 @@ document.addEventListener(
 const CHEV_R =
   '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9.5 5.5 16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 (() => {
+/**
+ * Base de todo el juego: el lienzo y su contexto 2D, los elementos del HUD, las medidas de pantalla
+ * (W, H, centro CX/CY y escala S de unidades del mundo a píxeles), los colores de cada zona, el
+ * cielo de estrellas y utilidades pequeñas (frac, clamp, buzz, rgba).
+ */
 const cvs = document.getElementById('c'),
   ctx = cvs.getContext('2d');
 const elScore = document.getElementById('score'),
@@ -4777,15 +4782,22 @@ const elWrap = document.getElementById('scorewrap'),
   elArcFg = document.querySelector('#arc .fg');
 let hudMode = 'faltan';
 let musicStyle = 'espacial';
+/**
+ * HTML de los botones de modo del HUD. Queda vacío: el indicador siempre muestra "Faltan N" y la
+ * música cambia sola.
+ *
+ * @returns {string} HTML.
+ */
 function chipsHTML() {
   return '';
-} // indicador fijo en "Faltan N"; la música cambia sola
+}
 {
   const c0 = document.getElementById('chips0');
   if (c0) {
     c0.innerHTML = chipsHTML();
   }
 }
+/** Marca como activo el botón (.chip) que corresponde a `hudMode` o a `musicStyle`. */
 function refreshChips() {
   document
     .querySelectorAll('.chip')
@@ -4801,12 +4813,20 @@ const elHud = document.getElementById('hud'),
 const reduceMotion =
   window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// ---------- medidas ----------
+// ---- Medidas ----
+// W y H: tamaño del lienzo, en píxeles CSS; DPR: densidad de píxeles (hasta 2); S: píxeles por
+// unidad del mundo; CX y CY: centro del agujero negro en pantalla.
 let W, H, DPR, S, CX, CY;
+// En unidades del mundo: radio del primer anillo, distancia entre anillos, radio del planeta y
+// radio mínimo del agujero negro.
 const R0 = 96,
   GAP = 34,
   PR = 8,
   SUN = 16;
+/**
+ * Ajusta el lienzo al tamaño de la ventana y recalcula la escala para que quepa un área de
+ * 340 × 500 unidades del mundo, con el agujero negro un poco por debajo del centro.
+ */
 function resize() {
   DPR = Math.min(window.devicePixelRatio || 1, 2);
   const r = cvs.getBoundingClientRect();
@@ -4822,7 +4842,8 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-// ---------- zonas (cambian cada 25 anillos) ----------
+// ---- Zonas: colores de anillos, asteroides, agujero negro y fondo (cambian cada 25 anillos) ----
+// Color hueso de la interfaz y de los anillos.
 const BONE = '#ece6d8';
 const ZONES = [
   { ring: BONE, ast: BONE, s1: '#ffe2b0', s2: '#ff5a1f', bg: '#0d1220' },
@@ -4830,6 +4851,13 @@ const ZONES = [
   { ring: BONE, ast: BONE, s1: '#ffe2b0', s2: '#ff5a1f', bg: '#0f1220' },
   { ring: BONE, ast: BONE, s1: '#ffe2b0', s2: '#ff5a1f', bg: '#120c22' },
 ];
+/**
+ * Convierte un color '#rrggbb' en 'rgba(…)' con la opacidad dada.
+ *
+ * @param {string} hex Color en formato '#rrggbb'.
+ * @param {number} a Opacidad, de 0 a 1.
+ * @returns {string} Color CSS rgba.
+ */
 function rgba(hex, a) {
   const n = parseInt(hex.slice(1), 16);
   return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
@@ -4843,6 +4871,13 @@ const ZONE_LV = {
   6: { ring: '#ece6d8', ast: '#ece6d8', s1: '#ffe2b0', s2: '#ff5a1f', bg: '#07050a' },
   7: { ring: '#ece6d8', ast: '#ece6d8', s1: '#ffe2b0', s2: '#ff5a1f', bg: '#0a0607' },
 };
+/**
+ * Colores de la zona de un anillo: cada nivel lejano tiene los suyos; en el Sistema solar y el
+ * tutorial cambian cada 25 anillos.
+ *
+ * @param {number} k Nivel de anillo.
+ * @returns {object} Zona {ring, ast, s1, s2, bg}.
+ */
 const zoneOf = k =>
   lvl >= 3 && !tutorial
     ? ZONE_LV[lvl]
@@ -4852,7 +4887,8 @@ const zoneOf = k =>
         ? ZONE_AND
         : ZONES[Math.floor(k / 25) % ZONES.length];
 
-// ---------- estrellas ----------
+// ---- Estrellas del cielo: ángulo (rad), distancia al centro (de 0 a 1,2 del radio del cielo),
+// tamaño (px) y fase del titileo ----
 const stars = Array.from({ length: 140 }, () => ({
   a: Math.random() * Math.PI * 2,
   r: Math.sqrt(Math.random()) * 1.2,
@@ -4860,9 +4896,16 @@ const stars = Array.from({ length: 140 }, () => ({
   tw: Math.random() * 6,
 }));
 
-// utilidades
+// ---- Utilidades ----
+/** Parte fraccionaria de x, de 0 a 1 (también para negativos). */
 const frac = x => x - Math.floor(x);
+/** Limita v al intervalo de a a b. */
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+/**
+ * Hace vibrar el teléfono, si el navegador lo permite.
+ *
+ * @param {number|number[]} p Duración en milisegundos, o patrón [vibra, pausa, vibra…].
+ */
 const buzz = p => {
   try {
     if (navigator.vibrate) {
@@ -4870,7 +4913,12 @@ const buzz = p => {
     }
   } catch (e) {}
 };
-// ---------- audio ----------
+/**
+ * Base del sonido con Web Audio: el contexto `AC`, los buses (efectos en `master`, música en
+ * `musicBus` → `musVol`, todo a `outBus` y un compresor), el volumen guardado y efectos simples.
+ * `AC` es null hasta el primer toque (`initAudio`) o si el navegador no tiene audio: todo lo que
+ * suena debe comprobarlo.
+ */
 let AC = null,
   master = null,
   musicBus = null,
@@ -4878,8 +4926,7 @@ let AC = null,
   shaper = null,
   outBus = null,
   musVol = null;
-// volumen de la música y de los efectos (0–100), se guardan; la curva es cuadrática para que el
-// control se sienta parejo
+// Volumen de la música y de los efectos (de 0 a 100), guardados en el navegador.
 let volMus = 100,
   volSfx = 100;
 try {
@@ -4892,7 +4939,15 @@ try {
     volSfx = Math.max(0, Math.min(100, +b || 0));
   }
 } catch (e) {}
+/**
+ * Convierte el volumen del control en ganancia; la curva es cuadrática para que el control se
+ * sienta parejo al oído.
+ *
+ * @param {number} v Volumen, de 0 a 100.
+ * @returns {number} Ganancia, de 0 a 1.
+ */
 const volGain = v => Math.pow(v / 100, 2);
+/** Aplica `volMus` y `volSfx` a los buses con una transición corta (sin chasquidos). */
 function applyVolumes() {
   if (!AC || !master || !musVol) {
     return;
@@ -4903,12 +4958,18 @@ function applyVolumes() {
     musVol.gain.setTargetAtTime(volGain(volMus), n, 0.03);
   } catch (e) {}
 }
+/** Guarda `volMus` y `volSfx` en el navegador. */
 function saveVolumes() {
   try {
     localStorage.setItem('orbita_vol_mus', String(Math.round(volMus)));
     localStorage.setItem('orbita_vol_sfx', String(Math.round(volSfx)));
   } catch (e) {}
 }
+/**
+ * Crea el contexto de audio y los buses, y prepara 2 s de ruido blanco (`NOISE`) para los
+ * efectos. Debe llamarse tras un toque del usuario (los navegadores bloquean el audio antes).
+ * Llamarla otra vez no hace nada.
+ */
 function initAudio() {
   if (AC) {
     return;
@@ -4939,8 +5000,14 @@ function initAudio() {
     AC = null;
   }
 }
-const ROOT = 415.3; // tonalidad: Sol# menor
+const ROOT = 415.3; // tonalidad: Sol# menor (Sol#4 = 415,3 Hz)
+// Escala pentatónica menor, en semitonos sobre ROOT.
 const SCALE = [0, 3, 5, 7, 10, 12, 15, 17];
+/**
+ * Toca un cencerro: dos ondas cuadradas desafinadas por un filtro de banda.
+ *
+ * @param {number} semi Altura, en semitonos sobre ROOT.
+ */
 function cowbell(semi) {
   if (!AC) {
     return;
@@ -4971,6 +5038,18 @@ function cowbell(semi) {
     o2.stop(t0 + 0.3);
   } catch (e) {}
 }
+/**
+ * Programa un golpe de ruido filtrado que se apaga; empieza en un punto al azar del ruido para que
+ * dos golpes seguidos no suenen idénticos. No comprueba `AC`.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio.
+ * @param {number} dur Duración, en segundos.
+ * @param {string} type Tipo de filtro ('lowpass', 'highpass', 'bandpass'…).
+ * @param {number} freq Frecuencia inicial del filtro, en Hz.
+ * @param {number} gain Volumen inicial, de 0 a 1.
+ * @param {AudioNode} dest Nodo de destino.
+ * @param {number} [f1] Frecuencia final del filtro, en Hz (sin ella, el filtro no se mueve).
+ */
 function noiseHit(t0, dur, type, freq, gain, dest, f1) {
   const src = AC.createBufferSource();
   src.buffer = NOISE;
@@ -4990,6 +5069,15 @@ function noiseHit(t0, dur, type, freq, gain, dest, f1) {
   src.start(t0, Math.random() * 0.8);
   src.stop(t0 + dur + 0.02);
 }
+/**
+ * Toca ya un golpe de ruido filtrado por el bus de efectos.
+ *
+ * @param {number} dur Duración, en segundos.
+ * @param {number} f0 Frecuencia inicial del filtro, en Hz.
+ * @param {number} f1 Frecuencia final del filtro, en Hz.
+ * @param {number} gain Volumen inicial, de 0 a 1.
+ * @param {string} type Tipo de filtro ('lowpass', 'highpass', 'bandpass'…).
+ */
 function noise(dur, f0, f1, gain, type) {
   if (!AC) {
     return;
@@ -4998,6 +5086,7 @@ function noise(dur, f0, f1, gain, type) {
     noiseHit(AC.currentTime, dur, type, f0, gain, master, f1);
   } catch (e) {}
 }
+/** Golpe grave y corto (de 110 a 55 Hz en 0,1 s). */
 function thump() {
   if (!AC) {
     return;
@@ -5017,6 +5106,7 @@ function thump() {
     o.stop(t0 + 0.17);
   } catch (e) {}
 }
+/** Sonido de ser tragado por el agujero negro: un tono y un ruido que caen durante 1,8 s. */
 function suck() {
   if (!AC) {
     return;
@@ -5038,6 +5128,7 @@ function suck() {
     noiseHit(t0, 1.8, 'lowpass', 2200, 0.45, master, 70);
   } catch (e) {}
 }
+/** Bajo profundo que cae (de 110 a 28 Hz en 0,9 s), para golpes grandes. */
 function sub() {
   if (!AC) {
     return;
@@ -8581,9 +8672,12 @@ let waves = [],
 // centro lanza, al ritmo de la música, cáscaras de gas verde esmeralda (oxígeno). Las cáscaras
 // cruzan los anillos de lado: si saltas a través de un filamento, mueres; por un hueco, pasas.
 let novaSrc = [];
-// ---- los poderes de cada planeta (se cargan con Perfectos y se usan deslizando hacia arriba, o
-// con la tecla D) ----
-// Cada uno nace de un dato real del planeta y tiene su propio efecto visual.
+/**
+ * Poderes de cada planeta: se cargan con saltos Perfectos y se usan deslizando hacia arriba o con
+ * la tecla D. Cada uno nace de un dato real del planeta y tiene su propio efecto visual y sonido.
+ * Los efectos en curso viven en `pfx` ({k: tipo, t: segundos desde que empezó}); `powerUpdate` los
+ * avanza y `drawPowerFx`, `drawPowerScene` y `drawRingPower` los dibujan.
+ */
 let ghostT = 0,
   shieldT = 0,
   eclipseT = 0,
@@ -8594,6 +8688,12 @@ let ghostT = 0,
   strainK = 0,
   burnT = 0,
   ringBoostNow = 0;
+/**
+ * Cuánto se estira el planeta por la marea del agujero negro: crece al acercarse a él y con la
+ * fragilidad del planeta (resistencia negativa).
+ *
+ * @returns {number} Estiramiento, de 0 a 1 (0 fuera de partida o en el tutorial).
+ */
 function strainNow() {
   if (tutorial || state !== 'play') {
     return 0;
@@ -8608,6 +8708,11 @@ function powerName() {
 }
 let bhWob = 0,
   BURN_DUR = 1.5;
+/**
+ * Anuncia un poder: destello de encendido, acorde propio del planeta y su nombre en pantalla.
+ *
+ * @param {string} [col] Color del destello y del texto, en CSS.
+ */
 function powerShout(col) {
   pfx.push({ k: 'ignite', t: 0, col: col || '#ffd36b' });
   pulse = 1;
@@ -8652,6 +8757,12 @@ function powerShout(col) {
     key: 'pow',
   });
 }
+/**
+ * Usa el poder del planeta actual y gasta la carga. Plutón no tiene poder activo: Caronte lo
+ * salva solo (ver `caronteSaves`), así que aquí solo avisa si está listo.
+ *
+ * @param {boolean} mid Verdadero si se usa a mitad de un salto (Marte y Mercurio lo aprovechan).
+ */
 function usePower(mid) {
   const id = curPlanet;
   if (id === 'pluton') {
@@ -8737,21 +8848,20 @@ function usePower(mid) {
     // Empujón gravitacional: aleja al agujero negro
     sunLevel = Math.max(-1.6, sunLevel - 0.4);
     lastEaten = Math.min(lastEaten, Math.floor(sunLevel));
-    // el resto del empujón llega con la onda shake = reduceMotion ? 0 : 6; // el agujero negro
-    // tiembla cuando le llega la onda (ver powerUpdate)
+    // El resto del empujón y el temblor del agujero negro llegan con la onda (ver powerUpdate).
     pfx.push({ k: 'empujon', t: 0, a: pAng, l: pLevel, left: 0.8 });
     sub();
     noise(0.8, 2500, 120, 0.4, 'lowpass');
     powerShout('#f0c08a');
   } else if (id === 'saturno') {
-    // Anillos protectores: 3 segundos sin choques
+    // Anillos protectores: un rato sin choques (shieldT, en segundos)
     shieldT = 1.5;
     pfx.push({ k: 'anillos', t: 0 });
     noise(0.5, 500, 4000, 0.2, 'bandpass');
     cowbell(SCALE[4] + 12);
     powerShout('#f3dfa6');
   } else if (id === 'urano') {
-    // Congelar: el anillo de arriba se detiene
+    // Congelar: los dos anillos de arriba se detienen (el segundo, un poco más)
     if (nr) {
       nr.frozenT = 3;
       nr.frz0 = 3;
@@ -8769,7 +8879,7 @@ function usePower(mid) {
     }
     pfx.push({ k: 'hielo', t: 0 });
     noise(0.5, 7000, 2500, 0.18, 'highpass');
-    powerShout('#bff0ff'); // congela los dos anillos de arriba
+    powerShout('#bff0ff');
   } else if (id === 'neptuno') {
     // Predicción: ves dónde estarán los asteroides cuando caigas
     predT = 3;
@@ -8794,7 +8904,15 @@ function usePower(mid) {
     powerShout('#ffb347');
   }
 }
-// Sol: un asteroide que tocas mientras ardes se vaporiza
+/**
+ * Sol: vaporiza un asteroide que el planeta toca mientras arde (lo marca como fundido, con
+ * chispas de plasma, temblor y sonido).
+ *
+ * @param {object} ring Anillo del asteroide.
+ * @param {object} o Asteroide.
+ * @param {number} x Posición horizontal del choque, en píxeles de pantalla.
+ * @param {number} y Posición vertical del choque, en píxeles de pantalla.
+ */
 function vaporize(ring, o, x, y) {
   o.melt = t;
   o.burn = 1;
@@ -8819,7 +8937,17 @@ function vaporize(ring, o, x, y) {
   }
   noise(0.35, 5000, 400, 0.3, 'lowpass');
 }
-// Caronte (Plutón): si algo te iba a destruir, tu luna se interpone una vez
+/**
+ * Caronte (Plutón): si algo iba a destruir al planeta con la carga llena, su luna se interpone
+ * una sola vez, se rompe en pedazos de hielo y el choque frena al planeta (el agujero negro se
+ * acerca).
+ *
+ * @param {number} x Posición horizontal del planeta, en unidades del mundo (centro en el agujero).
+ * @param {number} y Posición vertical del planeta, en unidades del mundo.
+ * @param {number} [tx] Posición horizontal de lo que golpea; sin ella, el golpe viene del centro.
+ * @param {number} [ty] Posición vertical de lo que golpea, en unidades del mundo.
+ * @returns {boolean} Verdadero si Caronte salvó al planeta.
+ */
 function caronteSaves(x, y, tx, ty) {
   if (tutorial || curPlanet !== 'pluton' || shieldLeft <= 0 || charge < chargeMax()) {
     return false;
@@ -8863,9 +8991,16 @@ function caronteSaves(x, y, tx, ty) {
   });
   return true;
 }
+/** Ángulo de Caronte en su órbita alrededor de Plutón, en radianes. */
 const caronteAng = () => t * 2.2;
+/**
+ * Saturno: con los anillos protectores, la roca que toca al planeta rebota en el disco de hielo y
+ * salta en chispas.
+ *
+ * @param {number} x Posición horizontal del choque, en unidades del mundo.
+ * @param {number} y Posición vertical del choque, en unidades del mundo.
+ */
 function ringSpark(x, y) {
-  // Saturno: la roca rebota en el disco de hielo y salta en chispas
   for (let i = 0; i < 26; i++) {
     const a = Math.random() * Math.PI * 2,
       v = 40 + Math.random() * 150;
@@ -8887,6 +9022,14 @@ function ringSpark(x, y) {
     }
   } catch (e) {}
 }
+/**
+ * Avanza un cuadro los poderes: descuenta sus tiempos, funde los asteroides derretidos, gira los
+ * anillos empujados, aplica la onda de Júpiter cuando llega al agujero negro y suelta el polvo
+ * del salto triple de Marte.
+ *
+ * @param {number} dt Tiempo real del cuadro, en segundos (sin la cámara lenta).
+ * @param {number} d Tiempo de juego del cuadro, en segundos (no se usa aquí).
+ */
 function powerUpdate(dt, d) {
   ghostT = Math.max(0, ghostT - dt);
   shieldT = Math.max(0, shieldT - dt);
@@ -8914,6 +9057,7 @@ function powerUpdate(dt, d) {
         }
         const R = rr(r.k !== undefined ? r.k : level + 1),
           oa = obsAng(r, o);
+        // Gotas de roca fundida que caen hacia el agujero negro.
         for (let i = 0; i < 30; i++) {
           const a = Math.random() * Math.PI * 2,
             v = 15 + Math.random() * 70;
@@ -8928,7 +9072,7 @@ function powerUpdate(dt, d) {
           });
         }
       }
-    } // gotas de roca fundida: caen hacia el agujero negro
+    }
     if (r.spin) {
       r.spin.t += dt / 0.4;
       const u = Math.min(1, r.spin.t),
@@ -8980,17 +9124,34 @@ function powerUpdate(dt, d) {
     });
   }
 }
-// efectos de los poderes sobre el planeta
+// ---- Efectos de los poderes sobre el planeta ----
+
+/**
+ * Número pseudoaleatorio fijo para cada par (i, k): da variaciones estables entre cuadros.
+ *
+ * @param {number} i Índice del elemento.
+ * @param {number} k Canal (otro valor distinto para el mismo elemento).
+ * @returns {number} Valor de 0 a 1.
+ */
 const hsh = (i, k) => frac(Math.sin(i * 12.9898 + k * 78.233) * 43758.5453);
+/** Transición suave (smoothstep) de 0 a 1 cuando x va de a a b. */
 const smst = (a, b, x) => {
   const u = clamp((x - a) / (b - a), 0, 1);
   return u * u * (3 - 2 * u);
 };
+/** @returns {number[]} Posición [x, y] del planeta, en píxeles de pantalla. */
 function plPos() {
   const pr = rr(pLevel) * S;
   return [CX + Math.cos(pAng) * pr, CY + Math.sin(pAng) * pr];
 }
-// estrella de seis puntas (copo de hielo)
+/**
+ * Traza un copo de hielo: estrella de seis puntas con el trazo actual.
+ *
+ * @param {number} x Centro horizontal, en píxeles de pantalla.
+ * @param {number} y Centro vertical, en píxeles de pantalla.
+ * @param {number} s Largo de cada brazo, en píxeles de pantalla.
+ * @param {number} rot Giro, en radianes.
+ */
 function flake(x, y, s, rot) {
   ctx.beginPath();
   for (let i = 0; i < 3; i++) {
@@ -9002,7 +9163,15 @@ function flake(x, y, s, rot) {
   }
   ctx.stroke();
 }
-// aire que tiembla por el calor alrededor del planeta
+/**
+ * Dibuja el aire que tiembla por el calor alrededor del planeta (tres contornos ondulados).
+ *
+ * @param {number} px Centro horizontal del planeta, en píxeles de pantalla.
+ * @param {number} py Centro vertical del planeta, en píxeles de pantalla.
+ * @param {number} r Radio del planeta, en píxeles de pantalla.
+ * @param {string} col Color del trazo, en CSS.
+ * @param {number} k Intensidad, de 0 a 1.
+ */
 function heatHaze(px, py, r, col, k) {
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
@@ -9026,8 +9195,15 @@ function heatHaze(px, py, r, col, k) {
   }
   ctx.restore();
 }
-// Júpiter: auroras en sus dos polos (las más potentes del sistema solar, que Hubble ve en
-// ultravioleta)
+/**
+ * Júpiter: auroras en sus dos polos (las más potentes del sistema solar, que Hubble ve en
+ * ultravioleta), con la huella de Ío.
+ *
+ * @param {number} px Centro horizontal del planeta, en píxeles de pantalla.
+ * @param {number} py Centro vertical del planeta, en píxeles de pantalla.
+ * @param {number} r Radio del planeta, en píxeles de pantalla.
+ * @param {number} tt Tiempo desde que se usó el poder, en segundos.
+ */
 function drawAurora(px, py, r, tt) {
   const k = Math.min(1, tt / 0.12) * Math.min(1, (1.4 - tt) / 0.5);
   if (k <= 0) {
@@ -9082,12 +9258,19 @@ function drawAurora(px, py, r, tt) {
   }
   ctx.restore();
 }
-// Sol: corona, protuberancias y viento solar mientras arde
+/**
+ * Sol: corona, protuberancias y viento solar mientras arde.
+ *
+ * @param {number} px Centro horizontal del planeta, en píxeles de pantalla.
+ * @param {number} py Centro vertical del planeta, en píxeles de pantalla.
+ * @param {number} r Radio del planeta, en píxeles de pantalla.
+ */
 function drawSolarFire(px, py, r) {
   let k = Math.min(1, (BURN_DUR - burnT) / 0.2, 0.3 + burnT / 0.6);
+  // Parpadea cuando se va a apagar.
   if (burnT < 0.45) {
     k *= 0.72 + 0.28 * Math.sin(t * 28);
-  } // parpadea cuando se va a apagar
+  }
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   ctx.lineCap = 'round';
@@ -9166,7 +9349,14 @@ function drawSolarFire(px, py, r) {
     });
   }
 }
-// Mercurio: su cola de sodio real (amarillo anaranjado, a 589 nm), más larga que la Tierra
+/**
+ * Mercurio: su cola de sodio real (amarillo anaranjado, a 589 nm), más larga que la Tierra,
+ * apuntando lejos del agujero negro, con un punto de luz por cada salto instantáneo que queda.
+ *
+ * @param {number} px Centro horizontal del planeta, en píxeles de pantalla.
+ * @param {number} py Centro vertical del planeta, en píxeles de pantalla.
+ * @param {number} r0 Radio del planeta, en píxeles de pantalla (se usa al menos 7 unidades).
+ */
 function drawSodiumTail(px, py, r0) {
   const r = Math.max(r0, 7 * S),
     a = Math.atan2(py - CY, px - CX),
@@ -9239,7 +9429,17 @@ function drawSodiumTail(px, py, r0) {
   }
   ctx.restore();
 }
-// Caronte: la luna gris de Plutón, con su polo rojizo (Mordor Macula); mide la mitad que Plutón
+// ---- Caronte: la luna gris de Plutón, con su polo rojizo (Mordor Macula); mide la mitad que
+// Plutón ----
+
+/**
+ * Posición de Caronte en su órbita inclinada alrededor de Plutón.
+ *
+ * @param {number} px Centro horizontal de Plutón, en píxeles de pantalla.
+ * @param {number} py Centro vertical de Plutón, en píxeles de pantalla.
+ * @param {number} r Radio de la órbita, en píxeles de pantalla.
+ * @returns {number[]} [x, y, z]: posición en píxeles y profundidad (z < 0: detrás de Plutón).
+ */
 function caronteXY(px, py, r) {
   const a = caronteAng(),
     x = Math.cos(a) * r * 2.4,
@@ -9250,6 +9450,15 @@ function caronteXY(px, py, r) {
     Math.sin(a),
   ];
 }
+/**
+ * Dibuja Caronte con el planeta en WebGL (textura de la Luna) o un círculo si no hay WebGL, y le
+ * pinta encima su polo rojizo.
+ *
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} cr Radio, en píxeles de pantalla.
+ * @param {number} al Opacidad, de 0 a 1.
+ */
 function drawCaronte(cx, cy, cr, al) {
   ctx.save();
   ctx.globalAlpha = al;
@@ -9289,6 +9498,7 @@ function drawCaronte(cx, cy, cr, al) {
   ctx.fillRect(cx - cr, cy - cr, cr * 2, cr * 2);
   ctx.restore();
 }
+/** @returns {boolean} Verdadero si Caronte está listo para salvar a Plutón y debe verse. */
 function caronteOn() {
   return (
     curPlanet === 'pluton' &&
@@ -9298,8 +9508,14 @@ function caronteOn() {
     state === 'play'
   );
 }
+/**
+ * Dibuja la órbita de Caronte y, si está en la mitad que pasa detrás de Plutón, la luna. Se
+ * llama antes de dibujar el planeta; la mitad de delante la dibuja `drawPowerFx`.
+ *
+ * @param {number} px Centro horizontal de Plutón, en píxeles de pantalla.
+ * @param {number} py Centro vertical de Plutón, en píxeles de pantalla.
+ */
 function drawCaronteBack(px, py) {
-  // la mitad de la órbita que pasa detrás de Plutón
   if (!caronteOn()) {
     return;
   }
@@ -9317,6 +9533,14 @@ function drawCaronteBack(px, py) {
     drawCaronte(cx, cy, r * 0.62, 1);
   }
 }
+/**
+ * Dibuja los efectos de los poderes sobre el planeta y a su alrededor (encendido, hielo, erupción,
+ * auroras, fuego, cola de sodio, Caronte por delante…), después de dibujar el planeta.
+ *
+ * @param {number} px Centro horizontal del planeta, en píxeles de pantalla.
+ * @param {number} py Centro vertical del planeta, en píxeles de pantalla.
+ * @param {number} rad Radio base del planeta, en píxeles de pantalla (sin su factor de tamaño).
+ */
 function drawPowerFx(px, py, rad) {
   const r = rad * sizeK();
   for (const f of pfx) {
@@ -9524,7 +9748,11 @@ function drawPowerFx(px, py, rad) {
     }
   }
 }
-// efectos en el escenario (anillos, agujero negro, pantalla)
+/**
+ * Dibuja los efectos de los poderes en el escenario: magnetosfera de Júpiter, salto de Mercurio,
+ * polvo de Marte, plasma del Sol, Caronte roto, nubes de Venus, vientos de Neptuno y el eclipse
+ * de la Luna sobre el agujero negro.
+ */
 function drawPowerScene() {
   const sunW = Math.max(rr(sunLevel), SUN) * S;
   for (const f of pfx) {
@@ -10232,7 +10460,14 @@ function drawPowerScene() {
     ctx.restore();
   }
 }
-// los anillos afectados por un poder se ven distintos
+/**
+ * Dibuja cómo se ve un anillo afectado por un poder: escarcha de Urano, flechas de Venus o
+ * ráfagas de Neptuno.
+ *
+ * @param {object} ring Anillo (usa frozenT, revT y windT).
+ * @param {number} R Radio del anillo, en unidades del mundo.
+ * @param {number} alpha Opacidad del anillo, de 0 a 1.
+ */
 function drawRingPower(ring, R, alpha) {
   const Rs = R * S;
   if (ring.frozenT > 0) {
@@ -10448,16 +10683,21 @@ function drawRingPower(ring, R, alpha) {
     ctx.restore();
   }
 }
-// ---- dentro del agujero de gusano: modo ÓRBITA (anillos 30–41) ----
-// La corriente del gusano te lanza sola al siguiente anillo cada dos golpes de la música.
-// Tú ya no saltas: tocas para cambiar el sentido en que la Tierra gira sobre su anillo y te colocas
-// bajo el hueco.
-// Entrada y salida: un portal corto (menos de un segundo), como en Geometry Dash, pero hecho con la
-// lente real:
-// el mundo de afuera se estira y se abre en un círculo de luz con los colores separados (aberración
-// cromática).
-// los primeros cuatro, cada cuatro golpes (para aprender); luego cada tres
+/**
+ * Dentro del agujero de gusano, modo ÓRBITA (anillos 30 a 41): la corriente lanza sola al planeta
+ * al siguiente anillo cada pocos golpes de la música; tocar cambia el sentido en que gira sobre su
+ * anillo, para quedar bajo el hueco. Entrada y salida son un portal corto (menos de un segundo)
+ * hecho con la lente real: el mundo se estira y se abre en un círculo de luz con aberración
+ * cromática. `wh` guarda el estado (ph: 'in', 'orb' u 'out'); null fuera del gusano.
+ */
+/**
+ * Golpes de música entre lanzamientos: cuatro en los primeros anillos (para aprender), luego tres.
+ *
+ * @returns {number} Golpes de música.
+ */
 const whGap = () => (level + 1 < 34 ? 4 : 3);
+// ORB_W: velocidad de giro sobre el anillo, en radianes por segundo; WH_IN y WH_OUT: duración
+// del portal de entrada y de salida, en segundos.
 const ORB_W = 1.75,
   WH_IN = 0.78,
   WH_OUT = 0.7;
@@ -10466,8 +10706,12 @@ let wh = null,
   gapC = {},
   viewInside = false,
   hideEarth = false;
+/**
+ * Sonido de entrada: un tirón grave que sube, con el aire que se arrastra hacia la boca.
+ *
+ * @param {number} dur Duración, en segundos.
+ */
 function whPull(dur) {
-  // tirón grave que sube, con el aire que se arrastra hacia la boca
   if (!AC || muted) {
     return;
   }
@@ -10500,8 +10744,8 @@ function whPull(dur) {
     noiseHit(n, dur + 0.1, 'bandpass', 300, 0.32, master, 7000);
   } catch (e) {}
 }
+/** Sonido de salida: un golpe con eco. */
 function whBoom() {
-  // golpe con eco al salir
   if (!AC || muted) {
     return;
   }
@@ -10527,6 +10771,10 @@ function whBoom() {
   } catch (e) {}
 }
 const WH_G = 46; // cuánto crece la boca al entrar (hasta cubrir toda la pantalla)
+/**
+ * Empieza la entrada al gusano desde la posición actual del planeta: fija la lente al máximo y
+ * corta el salto en curso.
+ */
 function whEnter() {
   const [wx, wy] = bendW(),
     pr = rr(pLevel);
@@ -10550,6 +10798,7 @@ function whEnter() {
   buzz([20, 30, 50]);
   whPull(WH_IN * 0.85);
 }
+/** Termina la entrada: el planeta aparece dentro, sobre el anillo WH_K, y empieza ÓRBITA. */
 function whInDone() {
   wh.ph = 'orb';
   bend = { str: 0, a: -Math.PI / 2, L: 0, on: false, grow: 1, fixed: false };
@@ -10557,7 +10806,7 @@ function whInDone() {
   pLevel = WH_K;
   pAng = -Math.PI / 2;
   jumpTarget = 1;
-  trail = []; // del otro lado apareces sobre el anillo 29
+  trail = []; // del otro lado el planeta aparece sobre el anillo WH_K, sin estela
   score += 1;
   if (!tutorial) {
     misEvent('ring');
@@ -10581,6 +10830,7 @@ function whInDone() {
   thump();
   hazardTip('orbVisto', 'Órbita', 'Toca para cambiar de sentido', WORM_COL);
 }
+/** Empieza la salida del gusano: la otra boca se abre detrás del planeta y lo escupe. */
 function whStartOut() {
   wh.ph = 'out';
   wh.t = 0;
@@ -10590,6 +10840,10 @@ function whStartOut() {
   buzz([30, 40, 60]);
   whBoom();
 }
+/**
+ * Termina la salida: apaga la lente, lanza las ondas por los anillos y la onda de choque, aleja
+ * el agujero negro y, la primera vez, muestra el dato real sobre los agujeros de gusano.
+ */
 function whOutDone() {
   const [wx, wy] = bendW();
   wh = null;
@@ -10650,6 +10904,7 @@ function whOutDone() {
     });
   }
 }
+/** Toque en modo ÓRBITA: invierte el sentido de giro sobre el anillo. */
 function whTap() {
   if (!wh || wh.ph !== 'orb') {
     return;
@@ -10659,6 +10914,12 @@ function whTap() {
   noise(0.06, 2500, 7000, 0.07, 'highpass');
   buzz(8);
 }
+/**
+ * Avanza un cuadro el portal de entrada o de salida: hace crecer o encoger la boca y mueve el
+ * planeta hacia su centro.
+ *
+ * @param {number} dt Tiempo del cuadro, en segundos.
+ */
 function whTrans(dt) {
   wh.t += dt;
   GLBG.advance(dt, 1.5 + 3 * clamp(wh.t / WH_IN, 0, 1), Math.min(1, level / GOAL));
@@ -10699,7 +10960,16 @@ function whTrans(dt) {
     }
   }
 }
-// el anillo de luz del portal, con los colores separados como en una lente real
+/**
+ * Dibuja el anillo de luz del portal con los colores separados, como en una lente real
+ * (aberración cromática).
+ *
+ * @param {number} x Centro horizontal, en píxeles de pantalla.
+ * @param {number} y Centro vertical, en píxeles de pantalla.
+ * @param {number} R Radio, en píxeles de pantalla.
+ * @param {number} al Opacidad, de 0 a 1.
+ * @param {number} w Grosor base, en píxeles de pantalla.
+ */
 function chromaRing(x, y, R, al, w) {
   if (R < 1 || al <= 0.01) {
     return;
@@ -10727,8 +10997,13 @@ function chromaRing(x, y, R, al, w) {
   });
   ctx.restore();
 }
-// cómo se ve todo estando dentro: el mismo cielo y los mismos anillos, vistos a través de la
-// garganta del gusano
+/**
+ * Dibuja cómo se ve todo estando dentro: el mismo cielo y los mismos anillos vistos a través de
+ * la garganta del gusano, la corriente, hacia dónde gira el planeta y cuánto falta para el
+ * siguiente lanzamiento.
+ *
+ * @param {number} al Opacidad del efecto, de 0 a 1.
+ */
 function drawInside(al) {
   if (al <= 0.01) {
     return;
@@ -10824,7 +11099,6 @@ function drawInside(al) {
   ctx.stroke();
   ctx.restore();
 }
-// al salir: ondas que recorren los anillos
 /**
  * Espacio doblado: un agujero de gusano flota delante del jugador y actúa como lente gravitacional.
  * Lo que pasa cerca (anillos, asteroides, el planeta) se ve empujado hacia afuera de la esfera, se
@@ -16867,11 +17141,19 @@ function renderIntro() {
     ctx.globalAlpha = 1;
   }
 }
-// ---------- presentación de marca: el agujero negro y el logotipo de Órbita (10 s) ----------
+/**
+ * Presentación de marca (10 s): el agujero negro se encoge hasta ser la Ó del logotipo de Órbita y
+ * la Tierra escapa para ser su acento. También da el dibujo del agujero negro de la marca
+ * (`bhDiskK`, `bhCore`, `brandHole`, `drawLogo`), que usan otras pantallas, con versión WebGL
+ * (`BHGL`) y respaldo 2D con degradados cónicos.
+ */
+// SK: aplastamiento del disco visto a 37°; BR0 y BR1: radios interior y exterior del disco, en
+// radios del horizonte.
 const SPLASH_END = 10,
   SK = Math.sin((37 * Math.PI) / 180),
   BR0 = 1.35,
   BR1 = 2.05;
+// Colores del disco según su brillo (de 0 a 1): de rojo oscuro a blanco cálido.
 const BST = [
   [0, [50, 10, 4]],
   [0.35, [150, 38, 8]],
@@ -16894,7 +17176,15 @@ try {
     );
   }
 } catch (e) {}
+/** Aceleración y frenado suaves (cuadrática): de 0 a 1 en v de 0 a 1. */
 const easeIO2 = v => (v < 0.5 ? 2 * v * v : 1 - Math.pow(-2 * v + 2, 2) / 2);
+/**
+ * Color del disco para un brillo dado, interpolado en la paleta `BST`.
+ *
+ * @param {number} b Brillo, de 0 a 1.
+ * @param {number} a Opacidad, de 0 a 1.
+ * @returns {string} Color CSS rgba.
+ */
 function bcol(b, a) {
   b = Math.max(0, Math.min(1, b));
   for (let i = 1; i < BST.length; i++) {
@@ -16907,12 +17197,37 @@ function bcol(b, a) {
   }
   return 'rgba(255,246,222,' + a + ')';
 }
+/**
+ * Brillo del disco en un punto: más brillante por dentro, más del lado que se acerca (efecto
+ * Doppler) y con vetas que giran más rápido cerca del centro (como una órbita de Kepler).
+ *
+ * @param {number} th Ángulo en el disco, en radianes.
+ * @param {number} r Distancia al centro, en píxeles de pantalla.
+ * @param {number} r0 Radio interior del disco, en píxeles de pantalla.
+ * @param {number} r1 Radio exterior del disco, en píxeles de pantalla.
+ * @returns {number} Brillo, de 0 a 1 aproximadamente.
+ */
 function bbright(th, r, r0, r1) {
   const rad = 1 - (r - r0) / (r1 - r0),
     dop = 0.5 - 0.5 * Math.cos(th),
     s = 0.82 + 0.18 * Math.sin(th * 5 + (r / r0) * 10 - t * 2.4 * Math.pow(r0 / r, 1.5));
   return (0.25 + 0.75 * Math.pow(rad, 0.8)) * (0.4 + 0.6 * dop) * s;
 }
+/**
+ * Degradado cónico con el brillo del disco alrededor de un anillo; sin degradados cónicos en el
+ * navegador, un solo color.
+ *
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} r Radio del anillo, en píxeles de pantalla.
+ * @param {number} k Aplastamiento vertical del disco (1: visto de frente).
+ * @param {number} r0 Radio interior del disco, en píxeles de pantalla.
+ * @param {number} r1 Radio exterior del disco, en píxeles de pantalla.
+ * @param {number} a Opacidad, de 0 a 1.
+ * @param {boolean} lensMode Verdadero para usar el ángulo de pantalla sin corregir la inclinación.
+ * @param {number} [nStops] Cantidad de paradas de color (28 si se omite).
+ * @returns {CanvasGradient|string} Estilo de trazo.
+ */
 function bstyle(cx, cy, r, k, r0, r1, a, lensMode, nStops) {
   const g = ctx.createConicGradient ? ctx.createConicGradient(0, cx, cy) : null;
   if (!g) {
@@ -16926,6 +17241,18 @@ function bstyle(cx, cy, r, k, r0, r1, a, lensMode, nStops) {
   }
   return g;
 }
+/**
+ * Dibuja media parte del disco inclinado a 37° (la de atrás si `from` > 1, si no la de delante),
+ * en WebGL o, si no hay, con anillos 2D.
+ *
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} R Radio del horizonte, en píxeles de pantalla.
+ * @param {number} from Ángulo inicial del arco, en radianes.
+ * @param {number} to Ángulo final del arco, en radianes.
+ * @param {number} alpha Opacidad, de 0 a 1.
+ * @param {number} [f1] Radio exterior del disco, en radios del horizonte (BR1 si se omite).
+ */
 function bhDisk(cx, cy, R, from, to, alpha, f1) {
   if (BHGL.draw(from > 1 ? 0 : 1, cx, cy, R, SK, BR0, f1 || BR1, alpha)) {
     return;
@@ -16943,6 +17270,20 @@ function bhDisk(cx, cy, R, from, to, alpha, f1) {
     ctx.stroke();
   }
 }
+/**
+ * Dibuja el disco con cualquier inclinación y radios; un arco completo (de 0 a 2π) dibuja las dos
+ * mitades.
+ *
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} R Radio del horizonte, en píxeles de pantalla.
+ * @param {number} k Aplastamiento vertical del disco (1: visto de frente).
+ * @param {number} f0 Radio interior del disco, en radios del horizonte.
+ * @param {number} f1 Radio exterior del disco, en radios del horizonte.
+ * @param {number} from Ángulo inicial del arco, en radianes.
+ * @param {number} to Ángulo final del arco, en radianes.
+ * @param {number} alpha Opacidad, de 0 a 1.
+ */
 function bhDiskK(cx, cy, R, k, f0, f1, from, to, alpha) {
   if (from === 0 && to > 6) {
     if (BHGL.draw(0, cx, cy, R, k, f0, f1, alpha)) {
@@ -16965,8 +17306,8 @@ function bhDiskK(cx, cy, R, k, f0, f1, from, to, alpha) {
   }
 }
 
-// agujero negro en alta calidad: el mismo diseño (mismos colores, misma forma, mismo giro),
-// dibujado píxel a píxel en la GPU
+// Agujero negro en alta calidad: el mismo diseño (mismos colores, misma forma, mismo giro),
+// dibujado píxel a píxel en la GPU en un canvas aparte y copiado al lienzo principal.
 const BHGL = (() => {
   let cv = null,
     gl = null,
@@ -17061,7 +17402,20 @@ const BHGL = (() => {
     }
     return ok;
   }
-  // dibuja una parte del agujero negro centrada en (cx, cy) del lienzo principal
+  /**
+   * Dibuja una parte del agujero negro centrada en (cx, cy) del lienzo principal, a la resolución
+   * real de la pantalla.
+   *
+   * @param {number} part 0: mitad de atrás del disco; 1: mitad de delante; 2: anillo de luz.
+   * @param {number} cx Centro horizontal, en píxeles de pantalla.
+   * @param {number} cy Centro vertical, en píxeles de pantalla.
+   * @param {number} R Radio del horizonte, en píxeles de pantalla.
+   * @param {number} k Aplastamiento vertical del disco (1: visto de frente).
+   * @param {number} f0 Radio interior del disco, en radios del horizonte.
+   * @param {number} f1 Radio exterior del disco, en radios del horizonte.
+   * @param {number} alpha Opacidad, de 0 a 1.
+   * @returns {boolean} Falso si no hay WebGL (quien llama dibuja el respaldo 2D).
+   */
   function draw(part, cx, cy, R, k, f0, f1, alpha) {
     if (!init() || !(R > 2)) {
       return false;
@@ -17100,7 +17454,15 @@ const BHGL = (() => {
   return { draw };
 })();
 
-// el agujero negro de la marca, visto casi desde arriba (como en el juego)
+/**
+ * Dibuja el agujero negro de la marca visto casi desde arriba (como en el juego).
+ *
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} R Radio del horizonte, en píxeles de pantalla.
+ * @param {number} alpha Opacidad, de 0 a 1.
+ * @param {number} flare Destello del borde, de 0 a 1.
+ */
 function brandHole(cx, cy, R, alpha, flare) {
   bhDiskK(cx, cy, R, 0.96, 1.06, 1.6, 0, Math.PI * 2, alpha);
   ctx.globalAlpha = alpha;
@@ -17118,10 +17480,17 @@ function brandHole(cx, cy, R, alpha, flare) {
   ctx.shadowBlur = 0;
   ctx.globalAlpha = 1;
 }
-// el logotipo: la Ó es el agujero negro a 37° y su acento es la Tierra
-// proporciones del logotipo
+// ---- El logotipo: la Ó es el agujero negro a 37° y su acento es la Tierra ----
+// Proporciones del logotipo, en tamaños de letra (r) y en radios del agujero (disk, txt).
 const LOGO = { r: 0.42, disk: 1.8, txt: 1.55, track: 0.2, weight: 400 };
-// el acento de la Ó: la Tierra escapando, con una estela inclinada como un acento agudo
+/**
+ * Dibuja el acento de la Ó: la Tierra escapando, con una estela inclinada como un acento agudo.
+ *
+ * @param {number} cx Centro horizontal de la Ó, en píxeles de pantalla.
+ * @param {number} cy Centro vertical de la Ó, en píxeles de pantalla.
+ * @param {number} R Radio del agujero de la Ó, en píxeles de pantalla.
+ * @param {number} p Avance del vuelo de la Tierra, de 0 (en el agujero) a 1 (en su lugar).
+ */
 function drawAccent(cx, cy, R, p) {
   const dx = 0.574,
     dy = -0.819,
@@ -17149,6 +17518,14 @@ function drawAccent(cx, cy, R, p) {
   ctx.fill();
   splashEarth(ex, ey, re);
 }
+/**
+ * Dibuja el logotipo ÓRBITA centrado, con su animación de entrada.
+ *
+ * @param {number} midX Centro horizontal del logotipo, en píxeles de pantalla.
+ * @param {number} cy Línea central vertical, en píxeles de pantalla.
+ * @param {number} fs Tamaño de letra, en píxeles de pantalla.
+ * @param {number} [p] Tiempo de la animación, en segundos (sin él, el logotipo completo).
+ */
 function drawLogo(midX, cy, fs, p) {
   if (p === undefined) {
     p = 99;
@@ -17201,6 +17578,15 @@ function drawLogo(midX, cy, fs, p) {
   }
   ctx.restore();
 }
+/**
+ * Dibuja el horizonte negro y el anillo de luz curvada a su alrededor; va entre las dos mitades
+ * del disco.
+ *
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} R Radio del horizonte, en píxeles de pantalla.
+ * @param {number} alpha Opacidad del anillo, de 0 a 1.
+ */
 function bhCore(cx, cy, R, alpha) {
   ctx.globalAlpha = 1;
   ctx.fillStyle = '#000';
@@ -17213,7 +17599,7 @@ function bhCore(cx, cy, R, alpha) {
     N = 120,
     ns = R > 30 ? 48 : 28;
   if (BHGL.draw(2, cx, cy, R, 1, 1, 1, alpha)) {
-    /* anillo de luz en alta calidad */
+    /* Con WebGL el anillo ya está dibujado. */
   } else {
     for (let q = 0; q <= 1.0001; q += dq) {
       const rd = R * BR0 + q * R * (BR1 - BR0),
@@ -17254,6 +17640,13 @@ function bhCore(cx, cy, R, alpha) {
   ctx.shadowBlur = 0;
   ctx.globalAlpha = 1;
 }
+/**
+ * Dibuja la Tierra pequeña del acento: océano, un continente y su lado de noche.
+ *
+ * @param {number} ex Centro horizontal, en píxeles de pantalla.
+ * @param {number} ey Centro vertical, en píxeles de pantalla.
+ * @param {number} r Radio, en píxeles de pantalla.
+ */
 function splashEarth(ex, ey, r) {
   ctx.fillStyle = '#3d8bff';
   ctx.beginPath();
@@ -17273,8 +17666,10 @@ function splashEarth(ex, ey, r) {
   ctx.fill();
   ctx.restore();
 }
-// el sonido de la marca: un rumor que crece, las letras como notas, la Tierra que cae y un golpe
-// final
+/**
+ * Programa todo el sonido de la presentación de una vez: un rumor que crece, las letras como
+ * notas, la Tierra que cae y un golpe final. Va por `splashBus` para poder apagarlo al saltarla.
+ */
 function splashSounds() {
   if (!AC) {
     return;
@@ -17302,6 +17697,7 @@ function splashSounds() {
       return o;
     };
     osc('sine', 38, 58, n, 6, 0.35, 2.5); // rumor grave
+    // Barrido de ruido que sube.
     const src = AC.createBufferSource();
     src.buffer = NOISE;
     const f = AC.createBiquadFilter();
@@ -17317,17 +17713,18 @@ function splashSounds() {
     f.connect(g);
     g.connect(splashBus);
     src.start(n + 3);
-    src.stop(n + 5.7); // barrido que sube
+    src.stop(n + 5.7);
+    // Una nota por letra (escala pentatónica menor).
     [0, 3, 5, 7, 10].forEach((s, i) =>
       osc('triangle', ROOT * Math.pow(2, s / 12), 0, n + 4 + i * 0.22, 0.7, 0.12, 0.005),
-    ); // una nota por letra
+    );
     // la Tierra cae en el acento
     osc('sine', ROOT * 2 * Math.pow(2, 7 / 12), 0, n + 5.3, 1.4, 0.1, 0.004);
     osc('sine', 72, 38, n + 5.5, 1.6, 0.9, 0.005); // golpe
     noiseHit(n + 5.5, 1.6, 'highpass', 3000, 0.35, splashBus);
+    // Acorde final: cada nota con dos osciladores desafinados para que suene ancho.
     for (const s of [0, 3, 7, 12]) {
       for (const det of [-7, 7]) {
-        // acorde final
         const o = AC.createOscillator(),
           gg = AC.createGain(),
           lp = AC.createBiquadFilter();
@@ -17346,10 +17743,12 @@ function splashSounds() {
         o.stop(n + 9.6);
       }
     }
+    // Campanas.
     osc('sine', ROOT * 4, 0, n + 5.55, 2.8, 0.07, 0.005);
-    osc('sine', ROOT * 4 * Math.pow(2, 7 / 12), 0, n + 5.6, 2.6, 0.05, 0.005); // campanas
+    osc('sine', ROOT * 4 * Math.pow(2, 7 / 12), 0, n + 5.6, 2.6, 0.05, 0.005);
   } catch (e) {}
 }
+/** Empieza la presentación: oculta el panel y el HUD y lanza su sonido. */
 function startSplash() {
   state = 'splash';
   splashT = 0;
@@ -17359,6 +17758,7 @@ function startSplash() {
   elHud.style.opacity = 0;
   splashSounds();
 }
+/** Salta la presentación: apaga su sonido en 0,25 s y pasa a lo que sigue. */
 function skipSplash() {
   if (splashBus && AC) {
     try {
@@ -17370,6 +17770,11 @@ function skipSplash() {
   }
   afterSplash();
 }
+/**
+ * Avanza la presentación: destello cuando la Tierra cae en el acento (a 5,5 s) y fin a los 10 s.
+ *
+ * @param {number} dt Tiempo del cuadro, en segundos.
+ */
 function updateSplash(dt) {
   t += dt;
   if (state === 'splash') {
@@ -17387,6 +17792,10 @@ function updateSplash(dt) {
     afterSplash();
   }
 }
+/**
+ * Dibuja un cuadro de la presentación: el agujero negro grande viaja a su lugar en el logotipo y
+ * se encoge hasta la Ó, salen las letras y la Tierra, y al final todo se funde a negro.
+ */
 function renderSplash() {
   const T = splashT;
   ctx.save();
@@ -18259,9 +18668,18 @@ function openHome(withIntro) {
   applyMute();
   homeAmbience(true);
 }
-// ---------- entrada a la pantalla de inicio: un agujero negro enorme que se aleja ----------
-// música de misterio: un zumbido profundo que respira, notas de cristal flotando y un viento
-// cósmico
+/**
+ * Entrada a la pantalla de inicio: un agujero negro enorme dobla la luz, se come rocas y destroza
+ * una estrella; luego se aleja hasta su tamaño de juego mientras se forma el logotipo.
+ * Incluye la música de misterio de los menús. El reloj de la animación es `homeT`, en segundos.
+ */
+
+/**
+ * Enciende o apaga la música de misterio de los menús: un zumbido profundo que respira, notas de
+ * cristal flotando y un viento cósmico. Encenderla dos veces no la duplica.
+ *
+ * @param {boolean} on Verdadero para encenderla (sube en 2,5 s); falso para apagarla (en 0,8 s).
+ */
 function homeAmbience(on) {
   if (!AC) {
     return;
@@ -18344,8 +18762,9 @@ function homeAmbience(on) {
     }
   } catch (e) {}
 }
-// ---------- la demostración: el agujero negro dobla la luz, se come rocas y destroza una estrella
-// ----------
+// ---- La demostración: el agujero negro dobla la luz, se come rocas y destroza una estrella ----
+// HOME_BIG: segundo en que el agujero empieza a alejarse; HOME_IN: segundo en que llega a su
+// tamaño de juego (fin de la entrada).
 const HOME_BIG = 6.4,
   HOME_IN = 8.0;
 let logoT0 = -99;
@@ -18365,8 +18784,18 @@ const ROCKS = [
   [2.0, 5.3, 1.8, 1],
   [3.7, 1.2, 2.0, -1],
   [4.1, 3.4, 1.9, 1],
-]; // [nace, ángulo, duración, sentido]
-const TDE = { t0: 2.3, dur: 2.7, a0: -0.25 }; // la estrella que es destrozada
+]; // [nace (s), ángulo (rad), duración de la caída (s), sentido del giro]
+// La estrella destrozada por la marea (evento de disrupción de marea, TDE): empieza (s), dura (s)
+// y ángulo inicial (rad).
+const TDE = { t0: 2.3, dur: 2.7, a0: -0.25 };
+/**
+ * Toca un golpe grave que baja de tono, por la salida de sonido de la demostración.
+ *
+ * @param {number} f0 Frecuencia inicial, en Hz.
+ * @param {number} f1 Frecuencia final, en Hz.
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Volumen máximo, de 0 a 1.
+ */
 function hsLow(f0, f1, dur, gain) {
   const n = AC.currentTime,
     o = AC.createOscillator(),
@@ -18382,6 +18811,12 @@ function hsLow(f0, f1, dur, gain) {
   o.start(n);
   o.stop(n + dur + 0.05);
 }
+/**
+ * Sonido de un momento de la demostración.
+ *
+ * @param {string} kind 'rock' (una roca cae), 'tear' (la estrella se estira) o 'feed' (se la
+ *   traga).
+ */
 function hsSound(kind) {
   if (!AC || muted) {
     return;
@@ -18449,7 +18884,14 @@ function hsSound(kind) {
     }
   } catch (e) {}
 }
-// sonidos del logotipo al formarse: una nota por letra, y la Tierra cayendo en el acento
+/**
+ * Toca una nota de cristal (con un armónico breve) con eco.
+ *
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio.
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Volumen máximo, de 0 a 1.
+ */
 function glassNote(f, t0, dur, gain) {
   const o = AC.createOscillator(),
     o2 = AC.createOscillator(),
@@ -18475,7 +18917,11 @@ function glassNote(f, t0, dur, gain) {
   o.stop(t0 + dur + 0.05);
   o2.stop(t0 + dur + 0.05);
 }
-// sonidos del logotipo al formarse, en la misma tonalidad de la música de misterio
+/**
+ * Sonidos del logotipo al formarse, en la misma tonalidad de la música de misterio: un respiro
+ * grave cuando aparece la Ó, una nota por letra y la Tierra cayendo en el acento. Se llama cada
+ * cuadro; `hsEvents` evita repetir cada sonido.
+ */
 function logoSounds() {
   if (!(logoT0 > 0) || !AC || muted) {
     return;
@@ -18511,6 +18957,12 @@ function logoSounds() {
     }
   } catch (e) {}
 }
+/**
+ * Avanza un cuadro la demostración: lanza a su hora cada sonido y golpe (rocas, estrella, onda
+ * gravitacional) una sola vez, y apaga los destellos y temblores.
+ *
+ * @param {number} dt Tiempo del cuadro, en segundos.
+ */
 function updateHomeShow(dt) {
   hsFlare = Math.max(0, hsFlare - dt * 1.6);
   hsBoost = Math.max(0, hsBoost - dt * 0.5);
@@ -18563,12 +19015,27 @@ function updateHomeShow(dt) {
     hsSound('feed');
   }
 }
-// trayectoria en espiral hacia el horizonte (u: 0 a 1)
+/**
+ * Punto de una trayectoria en espiral hacia el horizonte, cada vez más rápida al acercarse.
+ *
+ * @param {number} cx Centro horizontal del agujero, en píxeles de pantalla.
+ * @param {number} cy Centro vertical del agujero, en píxeles de pantalla.
+ * @param {number} R Radio del horizonte, en píxeles de pantalla.
+ * @param {number} r0 Radio inicial, en píxeles de pantalla.
+ * @param {number} a0 Ángulo inicial, en radianes.
+ * @param {number} u Avance de la caída, de 0 a 1.
+ * @param {number} dir Sentido del giro (1 o -1).
+ * @returns {number[]} [x, y, r]: posición y distancia al centro, en píxeles de pantalla.
+ */
 function spiralPos(cx, cy, R, r0, a0, u, dir) {
   const r = r0 + (R * 0.92 - r0) * Math.pow(u, 1.7),
     a = a0 + dir * (u * 1.6 + u * u * u * 4.2);
   return [cx + Math.cos(a) * r, cy + Math.sin(a) * r * 0.82, r];
 }
+/**
+ * Dibuja un cuadro de la entrada: el agujero negro grande (lente de estrellas, chorros, rocas en
+ * espiral y la estrella destrozada) que se aleja hasta su lugar de juego.
+ */
 function renderHomeIntro() {
   const T = homeT,
     p = easeIO(clamp((T - HOME_BIG) / (HOME_IN - HOME_BIG), 0, 1));
@@ -18583,7 +19050,8 @@ function renderHomeIntro() {
   const R = Rbig + (Rg - Rbig) * p,
     cx = W / 2 + (CX - W / 2) * p,
     cy = H * 0.47 + (CY - H * 0.47) * p;
-  // la luz de las estrellas se dobla alrededor del agujero negro
+  // La luz de las estrellas se dobla alrededor del agujero negro: cada estrella se aparta del
+  // centro como RE²/d (RE hace de radio de Einstein) y cerca del anillo se estira en un arco.
   const sr = Math.max(W, H) * 0.62,
     RE = R * 1.7;
   for (const s of stars) {
@@ -21082,12 +21550,25 @@ function setScan(on) {
     scanApplyAt = performance.now() + 650;
   }
 }
-// ---------- dentro de Andrómeda: toda la pantalla es la galaxia (colores reales) ----------
-// núcleo amarillo-blanco de estrellas viejas, brazos espirales azules de estrellas jóvenes,
+/**
+ * Fondos de galaxias dibujados en 2D (canvas), de respaldo cuando el fondo WebGL no está
+ * disponible: Gran Nube de Magallanes, Andrómeda y los fondos de los niveles 4 a 8.
+ * Cada fondo se pinta una vez en un canvas aparte por tamaño de pantalla y luego solo se copia,
+ * con un giro muy lento y estrellas que titilan encima. Los colores siguen las fotos reales.
+ */
+
+// ---- Dentro de Andrómeda: toda la pantalla es la galaxia (colores reales) ----
+// Núcleo amarillo-blanco de estrellas viejas, brazos espirales azules de estrellas jóvenes,
 // franjas de polvo café, nebulosas rosadas de hidrógeno donde nacen estrellas, y sus satélites M32
-// y M110
+// y M110.
 let andCanvas = null,
   andKey = '';
+/**
+ * Pinta Andrómeda en un canvas del tamaño de la pantalla (con semilla fija, así sale igual cada
+ * vez) y lo guarda hasta que cambie el tamaño.
+ *
+ * @returns {HTMLCanvasElement|null} El canvas, o null si el navegador no puede crearlo.
+ */
 function buildAndromeda() {
   const key = Math.round(W) + 'x' + Math.round(H);
   if (andCanvas && andKey === key) {
@@ -21228,11 +21709,14 @@ function buildAndromeda() {
   andKey = key;
   return c;
 }
+// Estrellas que titilan sobre los fondos 2D: posiciones repartidas con la razón áurea (de 0 a 1
+// del ancho y del alto) y fase propia.
 const AND_TW = Array.from({ length: 26 }, (_, i) => ({
   x: (i * 0.6180339) % 1,
   y: (i * 0.7548776) % 1,
   p: i * 1.7,
 }));
+/** Dibuja el fondo de Andrómeda en toda la pantalla (respaldo 2D del fondo WebGL). */
 function drawAndromeda() {
   const c = buildAndromeda();
   ctx.save();
@@ -21256,13 +21740,18 @@ function drawAndromeda() {
   ctx.globalAlpha = 1;
 }
 
-// ---------- dentro de la Gran Nube de Magallanes (como la muestran los telescopios) ----------
-// barra central de estrellas viejas anaranjadas, nubes irregulares de estrellas azuladas, la
-// nebulosa de la Tarántula (rosada, con su cúmulo R136),
-// polvo oscuro, la Pequeña Nube a lo lejos con un puente tenue de estrellas, y los tres anillos de
-// la supernova 1987A
+// ---- Dentro de la Gran Nube de Magallanes (como la muestran los telescopios) ----
+// Barra central de estrellas viejas anaranjadas, nubes irregulares de estrellas azuladas, la
+// nebulosa de la Tarántula (rosada, con su cúmulo R136), polvo oscuro, la Pequeña Nube a lo lejos
+// con un puente tenue de estrellas, y los tres anillos de la supernova 1987A.
 let magCanvas = null,
   magKey = '';
+/**
+ * Pinta la Gran Nube de Magallanes en un canvas del tamaño de la pantalla y lo guarda hasta que
+ * cambie el tamaño.
+ *
+ * @returns {HTMLCanvasElement|null} El canvas, o null si el navegador no puede crearlo.
+ */
 function buildMagallanes() {
   const key = Math.round(W) + 'x' + Math.round(H);
   if (magCanvas && magKey === key) {
@@ -21436,6 +21925,7 @@ function buildMagallanes() {
   magKey = key;
   return c;
 }
+/** Dibuja el fondo de la Gran Nube de Magallanes en toda la pantalla (respaldo 2D). */
 function drawMagallanes() {
   const c = buildMagallanes();
   ctx.save();
@@ -21459,8 +21949,19 @@ function drawMagallanes() {
   ctx.globalAlpha = 1;
 }
 
-// ---------- fondos de los niveles 4 a 8, como los muestran los telescopios ----------
+// ---- Fondos de los niveles 4 a 8, como los muestran los telescopios ----
+// Canvas ya pintados, por nivel y tamaño de pantalla ('nivel:anchoxalto').
 const bgCache = {};
+/**
+ * Pinta una mancha de luz redonda con degradado radial.
+ *
+ * @param {CanvasRenderingContext2D} g Contexto donde pintar.
+ * @param {number} x Centro horizontal, en píxeles de pantalla.
+ * @param {number} y Centro vertical, en píxeles de pantalla.
+ * @param {number} r Radio, en píxeles de pantalla.
+ * @param {string} c0 Color del centro, en CSS.
+ * @param {string} c1 Color del borde, en CSS.
+ */
 function blob(g, x, y, r, c0, c1) {
   const gr = g.createRadialGradient(x, y, 0, x, y, r);
   gr.addColorStop(0, c0);
@@ -21468,6 +21969,8 @@ function blob(g, x, y, r, c0, c1) {
   g.fillStyle = gr;
   g.fillRect(x - r, y - r, r * 2, r * 2);
 }
+// Pintores de cada fondo, por índice de nivel (3 a 7). Reciben el contexto, el ancho y alto y la
+// diagonal de la pantalla (en píxeles) y un generador pseudoaleatorio con semilla fija.
 const BG_BUILD = {
   // Centaurus A: elíptica gigante y cálida, cruzada por una franja de polvo torcida con estrellas
   // jóvenes; chorros y lóbulos perpendiculares
@@ -21734,6 +22237,12 @@ const BG_BUILD = {
     g.stroke();
   },
 };
+/**
+ * Dibuja en toda la pantalla el fondo 2D de un nivel lejano; la primera vez lo pinta (con 420
+ * estrellas encima) y lo guarda en `bgCache`.
+ *
+ * @param {number} i Índice del nivel, de 3 a 7 (una clave de `BG_BUILD`).
+ */
 function drawGalBG(i) {
   const key = i + ':' + Math.round(W) + 'x' + Math.round(H);
   if (!bgCache[key] && document.createElement) {
@@ -22105,11 +22614,12 @@ void main(){
   col = col/(1. + col*.5);
   gl_FragColor = vec4(col, 1.);
 }`;
-// Vía Láctea / Sistema solar (nivel 1)
-// fondo con fotografía: la foto real en capas, con la luz doblada por el agujero negro
-// Sistema solar: la Vía Láctea como en una foto de cielo profundo (muchísimas estrellas, polvo
-// oscuro, nebulosas rojizas)
-// y, al salir del sistema solar, la galaxia vista desde fuera con sus brazos espirales
+/**
+ * Shader del fondo WebGL del Sistema solar (nivel 1): la Vía Láctea como en una foto de cielo
+ * profundo (muchísimas estrellas, polvo oscuro, nebulosas rojizas) y, al salir del sistema solar,
+ * la galaxia vista desde fuera con sus brazos espirales.
+ * Todo `FS_MW` es texto GLSL (tras `BG_COMMON`): sus comentarios son parte del programa.
+ */
 const FS_MW =
   BG_COMMON +
   `
@@ -22733,7 +23243,11 @@ vec3 cenLobes(vec2 q){
   return col;
 }
 `;
-// El Remolino, M51 (nivel 5): el viaje por dentro de la galaxia
+/**
+ * Trozo de shader GLSL de la galaxia del Remolino, M51 (nivel 5): el viaje por dentro de la
+ * galaxia, con los colores de la foto del Hubble. `32-fondos-56-final` lo une al shader de fondo.
+ * Todo `GX_REMOLINO` es texto GLSL: sus comentarios son parte del programa.
+ */
 const GX_REMOLINO = `// ===================== REMOLINO M51 =====================
 // Hubble: brazos azul-grisáceos #8aa0b8, núcleo amarillo #e8d0a8, regiones HII rojo-rosa muy marcadas, polvo café #5f4f49,
 // la compañera NGC 5195 amarillo-café con polvo cruzándola
@@ -22897,7 +23411,11 @@ vec3 m51Pair(vec2 q){
   return col;
 }
 `;
-// El Sombrero, M104 (nivel 6): bulbo, anillo de polvo y cúmulos globulares
+/**
+ * Trozo de shader GLSL de la galaxia del Sombrero, M104 (nivel 6): bulbo, anillo de polvo y
+ * cúmulos globulares, con los colores de la foto del Hubble. `32-fondos-56-final` lo une al
+ * shader de fondo. Todo `GX_SOMBRERO` es texto GLSL: sus comentarios son parte del programa.
+ */
 const GX_SOMBRERO = `// ===================== SOMBRERO M104 =====================
 // Hubble: bulbo plateado con un toque lavanda #d1ccdc, halo gris #8c8687, anillo de polvo café oscuro #2a1e18 con borde
 // cálido #6f5848, y cientos de cúmulos globulares alrededor
@@ -22945,7 +23463,11 @@ vec3 sombCore(vec2 q){
   return col + vec3(1., .95, .9)*starsD(q, 2.2, .8*exp(-r*5.), 1.) + globs(q*1.3 + 20., .25, .06)*.5;
 }
 `;
-// M87 (nivel 7): halo, chorro, gas y el anillo del Event Horizon Telescope
+/**
+ * Trozo de shader GLSL de la galaxia M87 (nivel 7): halo, chorro, gas y el anillo de su agujero
+ * negro como lo fotografió el Event Horizon Telescope. `32-fondos-56-final` lo une al shader de
+ * fondo. Todo `GX_M87` es texto GLSL: sus comentarios son parte del programa.
+ */
 const GX_M87 = `// ===================== M87 =====================
 // Hubble: halo crema-amarillo #ca9f72 → #d5c7b8 muy suave, el chorro azul-violeta con nudos, miles de cúmulos globulares;
 // el Event Horizon Telescope: anillo naranja #f38f14 / amarillo #fcd05b / rojo #911c01, más brillante abajo
@@ -25897,15 +26419,12 @@ function misCanvasDraw(c) {
     glow(cx, cy, R * 0.4, 'rgba(255,194,218,A)', 0.9);
   }
 }
-// ---------- medidor de rendimiento (pruebas) ----------
-// Se enciende en Ajustes ("Medidor de rendimiento") o agregando ?medir al enlace. Apagado no hace
-// nada.
-// Muestra, de los últimos 2 segundos: cuadros por segundo, ms entre cuadros (mediana y peor 5 %),
-// cuánto de cada cuadro
-// es nuestro código (lógica y dibujo) y cuántos "tirones" hubo (cuadros de más de 25 ms) en los
-// últimos 10 segundos.
-// Si los ms entre cuadros son altos pero nuestro código tarda poco, el que no da abasto es la
-// tarjeta gráfica.
+/**
+ * Medidor de rendimiento para pruebas: se enciende en Ajustes o con ?medir en el enlace; apagado
+ * no hace nada. Muestra cuadros por segundo, ms entre cuadros (mediana y peor 5 %), cuánto tarda
+ * el código (lógica y dibujo) y los tirones (cuadros de más de 25 ms) de los últimos 10 s.
+ * Si los ms entre cuadros son altos pero el código tarda poco, el límite es la tarjeta gráfica.
+ */
 let MEDIR = false;
 try {
   MEDIR =
@@ -25916,10 +26435,19 @@ let medEl = null,
   medPrev = 0,
   medMid = 0,
   medShow = 0;
+// Últimos 120 cuadros: tiempo entre cuadros, tiempo de código y tiempo de lógica (en ms); y
+// momentos de los tirones de los últimos 10 s.
 const medInt = [],
   medJs = [],
   medUpd = [],
   medJank = [];
+/**
+ * Registra un cuadro al final del bucle principal y, cada 0,5 s, actualiza el recuadro del
+ * medidor. `medMid` lo marca el bucle al terminar la lógica, para separar lógica y dibujo.
+ *
+ * @param {number} now Momento del cuadro que da requestAnimationFrame, en ms.
+ * @param {number} t0 Momento en que empezó el código del cuadro (performance.now()), en ms.
+ */
 function medFrame(now, t0) {
   const t1 = performance.now();
   if (medPrev) {

@@ -1,6 +1,9 @@
-// ---- los poderes de cada planeta (se cargan con Perfectos y se usan deslizando hacia arriba, o
-// con la tecla D) ----
-// Cada uno nace de un dato real del planeta y tiene su propio efecto visual.
+/**
+ * Poderes de cada planeta: se cargan con saltos Perfectos y se usan deslizando hacia arriba o con
+ * la tecla D. Cada uno nace de un dato real del planeta y tiene su propio efecto visual y sonido.
+ * Los efectos en curso viven en `pfx` ({k: tipo, t: segundos desde que empezó}); `powerUpdate` los
+ * avanza y `drawPowerFx`, `drawPowerScene` y `drawRingPower` los dibujan.
+ */
 let ghostT = 0,
   shieldT = 0,
   eclipseT = 0,
@@ -11,6 +14,12 @@ let ghostT = 0,
   strainK = 0,
   burnT = 0,
   ringBoostNow = 0;
+/**
+ * Cuánto se estira el planeta por la marea del agujero negro: crece al acercarse a él y con la
+ * fragilidad del planeta (resistencia negativa).
+ *
+ * @returns {number} Estiramiento, de 0 a 1 (0 fuera de partida o en el tutorial).
+ */
 function strainNow() {
   if (tutorial || state !== 'play') {
     return 0;
@@ -25,6 +34,11 @@ function powerName() {
 }
 let bhWob = 0,
   BURN_DUR = 1.5;
+/**
+ * Anuncia un poder: destello de encendido, acorde propio del planeta y su nombre en pantalla.
+ *
+ * @param {string} [col] Color del destello y del texto, en CSS.
+ */
 function powerShout(col) {
   pfx.push({ k: 'ignite', t: 0, col: col || '#ffd36b' });
   pulse = 1;
@@ -69,6 +83,12 @@ function powerShout(col) {
     key: 'pow',
   });
 }
+/**
+ * Usa el poder del planeta actual y gasta la carga. Plutón no tiene poder activo: Caronte lo
+ * salva solo (ver `caronteSaves`), así que aquí solo avisa si está listo.
+ *
+ * @param {boolean} mid Verdadero si se usa a mitad de un salto (Marte y Mercurio lo aprovechan).
+ */
 function usePower(mid) {
   const id = curPlanet;
   if (id === 'pluton') {
@@ -154,21 +174,20 @@ function usePower(mid) {
     // Empujón gravitacional: aleja al agujero negro
     sunLevel = Math.max(-1.6, sunLevel - 0.4);
     lastEaten = Math.min(lastEaten, Math.floor(sunLevel));
-    // el resto del empujón llega con la onda shake = reduceMotion ? 0 : 6; // el agujero negro
-    // tiembla cuando le llega la onda (ver powerUpdate)
+    // El resto del empujón y el temblor del agujero negro llegan con la onda (ver powerUpdate).
     pfx.push({ k: 'empujon', t: 0, a: pAng, l: pLevel, left: 0.8 });
     sub();
     noise(0.8, 2500, 120, 0.4, 'lowpass');
     powerShout('#f0c08a');
   } else if (id === 'saturno') {
-    // Anillos protectores: 3 segundos sin choques
+    // Anillos protectores: un rato sin choques (shieldT, en segundos)
     shieldT = 1.5;
     pfx.push({ k: 'anillos', t: 0 });
     noise(0.5, 500, 4000, 0.2, 'bandpass');
     cowbell(SCALE[4] + 12);
     powerShout('#f3dfa6');
   } else if (id === 'urano') {
-    // Congelar: el anillo de arriba se detiene
+    // Congelar: los dos anillos de arriba se detienen (el segundo, un poco más)
     if (nr) {
       nr.frozenT = 3;
       nr.frz0 = 3;
@@ -186,7 +205,7 @@ function usePower(mid) {
     }
     pfx.push({ k: 'hielo', t: 0 });
     noise(0.5, 7000, 2500, 0.18, 'highpass');
-    powerShout('#bff0ff'); // congela los dos anillos de arriba
+    powerShout('#bff0ff');
   } else if (id === 'neptuno') {
     // Predicción: ves dónde estarán los asteroides cuando caigas
     predT = 3;
@@ -211,7 +230,15 @@ function usePower(mid) {
     powerShout('#ffb347');
   }
 }
-// Sol: un asteroide que tocas mientras ardes se vaporiza
+/**
+ * Sol: vaporiza un asteroide que el planeta toca mientras arde (lo marca como fundido, con
+ * chispas de plasma, temblor y sonido).
+ *
+ * @param {object} ring Anillo del asteroide.
+ * @param {object} o Asteroide.
+ * @param {number} x Posición horizontal del choque, en píxeles de pantalla.
+ * @param {number} y Posición vertical del choque, en píxeles de pantalla.
+ */
 function vaporize(ring, o, x, y) {
   o.melt = t;
   o.burn = 1;
@@ -236,7 +263,17 @@ function vaporize(ring, o, x, y) {
   }
   noise(0.35, 5000, 400, 0.3, 'lowpass');
 }
-// Caronte (Plutón): si algo te iba a destruir, tu luna se interpone una vez
+/**
+ * Caronte (Plutón): si algo iba a destruir al planeta con la carga llena, su luna se interpone
+ * una sola vez, se rompe en pedazos de hielo y el choque frena al planeta (el agujero negro se
+ * acerca).
+ *
+ * @param {number} x Posición horizontal del planeta, en unidades del mundo (centro en el agujero).
+ * @param {number} y Posición vertical del planeta, en unidades del mundo.
+ * @param {number} [tx] Posición horizontal de lo que golpea; sin ella, el golpe viene del centro.
+ * @param {number} [ty] Posición vertical de lo que golpea, en unidades del mundo.
+ * @returns {boolean} Verdadero si Caronte salvó al planeta.
+ */
 function caronteSaves(x, y, tx, ty) {
   if (tutorial || curPlanet !== 'pluton' || shieldLeft <= 0 || charge < chargeMax()) {
     return false;
@@ -280,9 +317,16 @@ function caronteSaves(x, y, tx, ty) {
   });
   return true;
 }
+/** Ángulo de Caronte en su órbita alrededor de Plutón, en radianes. */
 const caronteAng = () => t * 2.2;
+/**
+ * Saturno: con los anillos protectores, la roca que toca al planeta rebota en el disco de hielo y
+ * salta en chispas.
+ *
+ * @param {number} x Posición horizontal del choque, en unidades del mundo.
+ * @param {number} y Posición vertical del choque, en unidades del mundo.
+ */
 function ringSpark(x, y) {
-  // Saturno: la roca rebota en el disco de hielo y salta en chispas
   for (let i = 0; i < 26; i++) {
     const a = Math.random() * Math.PI * 2,
       v = 40 + Math.random() * 150;
@@ -304,6 +348,14 @@ function ringSpark(x, y) {
     }
   } catch (e) {}
 }
+/**
+ * Avanza un cuadro los poderes: descuenta sus tiempos, funde los asteroides derretidos, gira los
+ * anillos empujados, aplica la onda de Júpiter cuando llega al agujero negro y suelta el polvo
+ * del salto triple de Marte.
+ *
+ * @param {number} dt Tiempo real del cuadro, en segundos (sin la cámara lenta).
+ * @param {number} d Tiempo de juego del cuadro, en segundos (no se usa aquí).
+ */
 function powerUpdate(dt, d) {
   ghostT = Math.max(0, ghostT - dt);
   shieldT = Math.max(0, shieldT - dt);
@@ -331,6 +383,7 @@ function powerUpdate(dt, d) {
         }
         const R = rr(r.k !== undefined ? r.k : level + 1),
           oa = obsAng(r, o);
+        // Gotas de roca fundida que caen hacia el agujero negro.
         for (let i = 0; i < 30; i++) {
           const a = Math.random() * Math.PI * 2,
             v = 15 + Math.random() * 70;
@@ -345,7 +398,7 @@ function powerUpdate(dt, d) {
           });
         }
       }
-    } // gotas de roca fundida: caen hacia el agujero negro
+    }
     if (r.spin) {
       r.spin.t += dt / 0.4;
       const u = Math.min(1, r.spin.t),
@@ -397,17 +450,34 @@ function powerUpdate(dt, d) {
     });
   }
 }
-// efectos de los poderes sobre el planeta
+// ---- Efectos de los poderes sobre el planeta ----
+
+/**
+ * Número pseudoaleatorio fijo para cada par (i, k): da variaciones estables entre cuadros.
+ *
+ * @param {number} i Índice del elemento.
+ * @param {number} k Canal (otro valor distinto para el mismo elemento).
+ * @returns {number} Valor de 0 a 1.
+ */
 const hsh = (i, k) => frac(Math.sin(i * 12.9898 + k * 78.233) * 43758.5453);
+/** Transición suave (smoothstep) de 0 a 1 cuando x va de a a b. */
 const smst = (a, b, x) => {
   const u = clamp((x - a) / (b - a), 0, 1);
   return u * u * (3 - 2 * u);
 };
+/** @returns {number[]} Posición [x, y] del planeta, en píxeles de pantalla. */
 function plPos() {
   const pr = rr(pLevel) * S;
   return [CX + Math.cos(pAng) * pr, CY + Math.sin(pAng) * pr];
 }
-// estrella de seis puntas (copo de hielo)
+/**
+ * Traza un copo de hielo: estrella de seis puntas con el trazo actual.
+ *
+ * @param {number} x Centro horizontal, en píxeles de pantalla.
+ * @param {number} y Centro vertical, en píxeles de pantalla.
+ * @param {number} s Largo de cada brazo, en píxeles de pantalla.
+ * @param {number} rot Giro, en radianes.
+ */
 function flake(x, y, s, rot) {
   ctx.beginPath();
   for (let i = 0; i < 3; i++) {
@@ -419,7 +489,15 @@ function flake(x, y, s, rot) {
   }
   ctx.stroke();
 }
-// aire que tiembla por el calor alrededor del planeta
+/**
+ * Dibuja el aire que tiembla por el calor alrededor del planeta (tres contornos ondulados).
+ *
+ * @param {number} px Centro horizontal del planeta, en píxeles de pantalla.
+ * @param {number} py Centro vertical del planeta, en píxeles de pantalla.
+ * @param {number} r Radio del planeta, en píxeles de pantalla.
+ * @param {string} col Color del trazo, en CSS.
+ * @param {number} k Intensidad, de 0 a 1.
+ */
 function heatHaze(px, py, r, col, k) {
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
@@ -443,8 +521,15 @@ function heatHaze(px, py, r, col, k) {
   }
   ctx.restore();
 }
-// Júpiter: auroras en sus dos polos (las más potentes del sistema solar, que Hubble ve en
-// ultravioleta)
+/**
+ * Júpiter: auroras en sus dos polos (las más potentes del sistema solar, que Hubble ve en
+ * ultravioleta), con la huella de Ío.
+ *
+ * @param {number} px Centro horizontal del planeta, en píxeles de pantalla.
+ * @param {number} py Centro vertical del planeta, en píxeles de pantalla.
+ * @param {number} r Radio del planeta, en píxeles de pantalla.
+ * @param {number} tt Tiempo desde que se usó el poder, en segundos.
+ */
 function drawAurora(px, py, r, tt) {
   const k = Math.min(1, tt / 0.12) * Math.min(1, (1.4 - tt) / 0.5);
   if (k <= 0) {
@@ -499,12 +584,19 @@ function drawAurora(px, py, r, tt) {
   }
   ctx.restore();
 }
-// Sol: corona, protuberancias y viento solar mientras arde
+/**
+ * Sol: corona, protuberancias y viento solar mientras arde.
+ *
+ * @param {number} px Centro horizontal del planeta, en píxeles de pantalla.
+ * @param {number} py Centro vertical del planeta, en píxeles de pantalla.
+ * @param {number} r Radio del planeta, en píxeles de pantalla.
+ */
 function drawSolarFire(px, py, r) {
   let k = Math.min(1, (BURN_DUR - burnT) / 0.2, 0.3 + burnT / 0.6);
+  // Parpadea cuando se va a apagar.
   if (burnT < 0.45) {
     k *= 0.72 + 0.28 * Math.sin(t * 28);
-  } // parpadea cuando se va a apagar
+  }
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   ctx.lineCap = 'round';
@@ -583,7 +675,14 @@ function drawSolarFire(px, py, r) {
     });
   }
 }
-// Mercurio: su cola de sodio real (amarillo anaranjado, a 589 nm), más larga que la Tierra
+/**
+ * Mercurio: su cola de sodio real (amarillo anaranjado, a 589 nm), más larga que la Tierra,
+ * apuntando lejos del agujero negro, con un punto de luz por cada salto instantáneo que queda.
+ *
+ * @param {number} px Centro horizontal del planeta, en píxeles de pantalla.
+ * @param {number} py Centro vertical del planeta, en píxeles de pantalla.
+ * @param {number} r0 Radio del planeta, en píxeles de pantalla (se usa al menos 7 unidades).
+ */
 function drawSodiumTail(px, py, r0) {
   const r = Math.max(r0, 7 * S),
     a = Math.atan2(py - CY, px - CX),
@@ -656,7 +755,17 @@ function drawSodiumTail(px, py, r0) {
   }
   ctx.restore();
 }
-// Caronte: la luna gris de Plutón, con su polo rojizo (Mordor Macula); mide la mitad que Plutón
+// ---- Caronte: la luna gris de Plutón, con su polo rojizo (Mordor Macula); mide la mitad que
+// Plutón ----
+
+/**
+ * Posición de Caronte en su órbita inclinada alrededor de Plutón.
+ *
+ * @param {number} px Centro horizontal de Plutón, en píxeles de pantalla.
+ * @param {number} py Centro vertical de Plutón, en píxeles de pantalla.
+ * @param {number} r Radio de la órbita, en píxeles de pantalla.
+ * @returns {number[]} [x, y, z]: posición en píxeles y profundidad (z < 0: detrás de Plutón).
+ */
 function caronteXY(px, py, r) {
   const a = caronteAng(),
     x = Math.cos(a) * r * 2.4,
@@ -667,6 +776,15 @@ function caronteXY(px, py, r) {
     Math.sin(a),
   ];
 }
+/**
+ * Dibuja Caronte con el planeta en WebGL (textura de la Luna) o un círculo si no hay WebGL, y le
+ * pinta encima su polo rojizo.
+ *
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} cr Radio, en píxeles de pantalla.
+ * @param {number} al Opacidad, de 0 a 1.
+ */
 function drawCaronte(cx, cy, cr, al) {
   ctx.save();
   ctx.globalAlpha = al;
@@ -706,6 +824,7 @@ function drawCaronte(cx, cy, cr, al) {
   ctx.fillRect(cx - cr, cy - cr, cr * 2, cr * 2);
   ctx.restore();
 }
+/** @returns {boolean} Verdadero si Caronte está listo para salvar a Plutón y debe verse. */
 function caronteOn() {
   return (
     curPlanet === 'pluton' &&
@@ -715,8 +834,14 @@ function caronteOn() {
     state === 'play'
   );
 }
+/**
+ * Dibuja la órbita de Caronte y, si está en la mitad que pasa detrás de Plutón, la luna. Se
+ * llama antes de dibujar el planeta; la mitad de delante la dibuja `drawPowerFx`.
+ *
+ * @param {number} px Centro horizontal de Plutón, en píxeles de pantalla.
+ * @param {number} py Centro vertical de Plutón, en píxeles de pantalla.
+ */
 function drawCaronteBack(px, py) {
-  // la mitad de la órbita que pasa detrás de Plutón
   if (!caronteOn()) {
     return;
   }
@@ -734,6 +859,14 @@ function drawCaronteBack(px, py) {
     drawCaronte(cx, cy, r * 0.62, 1);
   }
 }
+/**
+ * Dibuja los efectos de los poderes sobre el planeta y a su alrededor (encendido, hielo, erupción,
+ * auroras, fuego, cola de sodio, Caronte por delante…), después de dibujar el planeta.
+ *
+ * @param {number} px Centro horizontal del planeta, en píxeles de pantalla.
+ * @param {number} py Centro vertical del planeta, en píxeles de pantalla.
+ * @param {number} rad Radio base del planeta, en píxeles de pantalla (sin su factor de tamaño).
+ */
 function drawPowerFx(px, py, rad) {
   const r = rad * sizeK();
   for (const f of pfx) {
@@ -941,7 +1074,11 @@ function drawPowerFx(px, py, rad) {
     }
   }
 }
-// efectos en el escenario (anillos, agujero negro, pantalla)
+/**
+ * Dibuja los efectos de los poderes en el escenario: magnetosfera de Júpiter, salto de Mercurio,
+ * polvo de Marte, plasma del Sol, Caronte roto, nubes de Venus, vientos de Neptuno y el eclipse
+ * de la Luna sobre el agujero negro.
+ */
 function drawPowerScene() {
   const sunW = Math.max(rr(sunLevel), SUN) * S;
   for (const f of pfx) {
@@ -1649,7 +1786,14 @@ function drawPowerScene() {
     ctx.restore();
   }
 }
-// los anillos afectados por un poder se ven distintos
+/**
+ * Dibuja cómo se ve un anillo afectado por un poder: escarcha de Urano, flechas de Venus o
+ * ráfagas de Neptuno.
+ *
+ * @param {object} ring Anillo (usa frozenT, revT y windT).
+ * @param {number} R Radio del anillo, en unidades del mundo.
+ * @param {number} alpha Opacidad del anillo, de 0 a 1.
+ */
 function drawRingPower(ring, R, alpha) {
   const Rs = R * S;
   if (ring.frozenT > 0) {

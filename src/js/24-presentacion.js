@@ -1,8 +1,16 @@
-// ---------- presentación de marca: el agujero negro y el logotipo de Órbita (10 s) ----------
+/**
+ * Presentación de marca (10 s): el agujero negro se encoge hasta ser la Ó del logotipo de Órbita y
+ * la Tierra escapa para ser su acento. También da el dibujo del agujero negro de la marca
+ * (`bhDiskK`, `bhCore`, `brandHole`, `drawLogo`), que usan otras pantallas, con versión WebGL
+ * (`BHGL`) y respaldo 2D con degradados cónicos.
+ */
+// SK: aplastamiento del disco visto a 37°; BR0 y BR1: radios interior y exterior del disco, en
+// radios del horizonte.
 const SPLASH_END = 10,
   SK = Math.sin((37 * Math.PI) / 180),
   BR0 = 1.35,
   BR1 = 2.05;
+// Colores del disco según su brillo (de 0 a 1): de rojo oscuro a blanco cálido.
 const BST = [
   [0, [50, 10, 4]],
   [0.35, [150, 38, 8]],
@@ -25,7 +33,15 @@ try {
     );
   }
 } catch (e) {}
+/** Aceleración y frenado suaves (cuadrática): de 0 a 1 en v de 0 a 1. */
 const easeIO2 = v => (v < 0.5 ? 2 * v * v : 1 - Math.pow(-2 * v + 2, 2) / 2);
+/**
+ * Color del disco para un brillo dado, interpolado en la paleta `BST`.
+ *
+ * @param {number} b Brillo, de 0 a 1.
+ * @param {number} a Opacidad, de 0 a 1.
+ * @returns {string} Color CSS rgba.
+ */
 function bcol(b, a) {
   b = Math.max(0, Math.min(1, b));
   for (let i = 1; i < BST.length; i++) {
@@ -38,12 +54,37 @@ function bcol(b, a) {
   }
   return 'rgba(255,246,222,' + a + ')';
 }
+/**
+ * Brillo del disco en un punto: más brillante por dentro, más del lado que se acerca (efecto
+ * Doppler) y con vetas que giran más rápido cerca del centro (como una órbita de Kepler).
+ *
+ * @param {number} th Ángulo en el disco, en radianes.
+ * @param {number} r Distancia al centro, en píxeles de pantalla.
+ * @param {number} r0 Radio interior del disco, en píxeles de pantalla.
+ * @param {number} r1 Radio exterior del disco, en píxeles de pantalla.
+ * @returns {number} Brillo, de 0 a 1 aproximadamente.
+ */
 function bbright(th, r, r0, r1) {
   const rad = 1 - (r - r0) / (r1 - r0),
     dop = 0.5 - 0.5 * Math.cos(th),
     s = 0.82 + 0.18 * Math.sin(th * 5 + (r / r0) * 10 - t * 2.4 * Math.pow(r0 / r, 1.5));
   return (0.25 + 0.75 * Math.pow(rad, 0.8)) * (0.4 + 0.6 * dop) * s;
 }
+/**
+ * Degradado cónico con el brillo del disco alrededor de un anillo; sin degradados cónicos en el
+ * navegador, un solo color.
+ *
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} r Radio del anillo, en píxeles de pantalla.
+ * @param {number} k Aplastamiento vertical del disco (1: visto de frente).
+ * @param {number} r0 Radio interior del disco, en píxeles de pantalla.
+ * @param {number} r1 Radio exterior del disco, en píxeles de pantalla.
+ * @param {number} a Opacidad, de 0 a 1.
+ * @param {boolean} lensMode Verdadero para usar el ángulo de pantalla sin corregir la inclinación.
+ * @param {number} [nStops] Cantidad de paradas de color (28 si se omite).
+ * @returns {CanvasGradient|string} Estilo de trazo.
+ */
 function bstyle(cx, cy, r, k, r0, r1, a, lensMode, nStops) {
   const g = ctx.createConicGradient ? ctx.createConicGradient(0, cx, cy) : null;
   if (!g) {
@@ -57,6 +98,18 @@ function bstyle(cx, cy, r, k, r0, r1, a, lensMode, nStops) {
   }
   return g;
 }
+/**
+ * Dibuja media parte del disco inclinado a 37° (la de atrás si `from` > 1, si no la de delante),
+ * en WebGL o, si no hay, con anillos 2D.
+ *
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} R Radio del horizonte, en píxeles de pantalla.
+ * @param {number} from Ángulo inicial del arco, en radianes.
+ * @param {number} to Ángulo final del arco, en radianes.
+ * @param {number} alpha Opacidad, de 0 a 1.
+ * @param {number} [f1] Radio exterior del disco, en radios del horizonte (BR1 si se omite).
+ */
 function bhDisk(cx, cy, R, from, to, alpha, f1) {
   if (BHGL.draw(from > 1 ? 0 : 1, cx, cy, R, SK, BR0, f1 || BR1, alpha)) {
     return;
@@ -74,6 +127,20 @@ function bhDisk(cx, cy, R, from, to, alpha, f1) {
     ctx.stroke();
   }
 }
+/**
+ * Dibuja el disco con cualquier inclinación y radios; un arco completo (de 0 a 2π) dibuja las dos
+ * mitades.
+ *
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} R Radio del horizonte, en píxeles de pantalla.
+ * @param {number} k Aplastamiento vertical del disco (1: visto de frente).
+ * @param {number} f0 Radio interior del disco, en radios del horizonte.
+ * @param {number} f1 Radio exterior del disco, en radios del horizonte.
+ * @param {number} from Ángulo inicial del arco, en radianes.
+ * @param {number} to Ángulo final del arco, en radianes.
+ * @param {number} alpha Opacidad, de 0 a 1.
+ */
 function bhDiskK(cx, cy, R, k, f0, f1, from, to, alpha) {
   if (from === 0 && to > 6) {
     if (BHGL.draw(0, cx, cy, R, k, f0, f1, alpha)) {
@@ -96,8 +163,8 @@ function bhDiskK(cx, cy, R, k, f0, f1, from, to, alpha) {
   }
 }
 
-// agujero negro en alta calidad: el mismo diseño (mismos colores, misma forma, mismo giro),
-// dibujado píxel a píxel en la GPU
+// Agujero negro en alta calidad: el mismo diseño (mismos colores, misma forma, mismo giro),
+// dibujado píxel a píxel en la GPU en un canvas aparte y copiado al lienzo principal.
 const BHGL = (() => {
   let cv = null,
     gl = null,
@@ -192,7 +259,20 @@ const BHGL = (() => {
     }
     return ok;
   }
-  // dibuja una parte del agujero negro centrada en (cx, cy) del lienzo principal
+  /**
+   * Dibuja una parte del agujero negro centrada en (cx, cy) del lienzo principal, a la resolución
+   * real de la pantalla.
+   *
+   * @param {number} part 0: mitad de atrás del disco; 1: mitad de delante; 2: anillo de luz.
+   * @param {number} cx Centro horizontal, en píxeles de pantalla.
+   * @param {number} cy Centro vertical, en píxeles de pantalla.
+   * @param {number} R Radio del horizonte, en píxeles de pantalla.
+   * @param {number} k Aplastamiento vertical del disco (1: visto de frente).
+   * @param {number} f0 Radio interior del disco, en radios del horizonte.
+   * @param {number} f1 Radio exterior del disco, en radios del horizonte.
+   * @param {number} alpha Opacidad, de 0 a 1.
+   * @returns {boolean} Falso si no hay WebGL (quien llama dibuja el respaldo 2D).
+   */
   function draw(part, cx, cy, R, k, f0, f1, alpha) {
     if (!init() || !(R > 2)) {
       return false;
@@ -231,7 +311,15 @@ const BHGL = (() => {
   return { draw };
 })();
 
-// el agujero negro de la marca, visto casi desde arriba (como en el juego)
+/**
+ * Dibuja el agujero negro de la marca visto casi desde arriba (como en el juego).
+ *
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} R Radio del horizonte, en píxeles de pantalla.
+ * @param {number} alpha Opacidad, de 0 a 1.
+ * @param {number} flare Destello del borde, de 0 a 1.
+ */
 function brandHole(cx, cy, R, alpha, flare) {
   bhDiskK(cx, cy, R, 0.96, 1.06, 1.6, 0, Math.PI * 2, alpha);
   ctx.globalAlpha = alpha;
@@ -249,10 +337,17 @@ function brandHole(cx, cy, R, alpha, flare) {
   ctx.shadowBlur = 0;
   ctx.globalAlpha = 1;
 }
-// el logotipo: la Ó es el agujero negro a 37° y su acento es la Tierra
-// proporciones del logotipo
+// ---- El logotipo: la Ó es el agujero negro a 37° y su acento es la Tierra ----
+// Proporciones del logotipo, en tamaños de letra (r) y en radios del agujero (disk, txt).
 const LOGO = { r: 0.42, disk: 1.8, txt: 1.55, track: 0.2, weight: 400 };
-// el acento de la Ó: la Tierra escapando, con una estela inclinada como un acento agudo
+/**
+ * Dibuja el acento de la Ó: la Tierra escapando, con una estela inclinada como un acento agudo.
+ *
+ * @param {number} cx Centro horizontal de la Ó, en píxeles de pantalla.
+ * @param {number} cy Centro vertical de la Ó, en píxeles de pantalla.
+ * @param {number} R Radio del agujero de la Ó, en píxeles de pantalla.
+ * @param {number} p Avance del vuelo de la Tierra, de 0 (en el agujero) a 1 (en su lugar).
+ */
 function drawAccent(cx, cy, R, p) {
   const dx = 0.574,
     dy = -0.819,
@@ -280,6 +375,14 @@ function drawAccent(cx, cy, R, p) {
   ctx.fill();
   splashEarth(ex, ey, re);
 }
+/**
+ * Dibuja el logotipo ÓRBITA centrado, con su animación de entrada.
+ *
+ * @param {number} midX Centro horizontal del logotipo, en píxeles de pantalla.
+ * @param {number} cy Línea central vertical, en píxeles de pantalla.
+ * @param {number} fs Tamaño de letra, en píxeles de pantalla.
+ * @param {number} [p] Tiempo de la animación, en segundos (sin él, el logotipo completo).
+ */
 function drawLogo(midX, cy, fs, p) {
   if (p === undefined) {
     p = 99;
@@ -332,6 +435,15 @@ function drawLogo(midX, cy, fs, p) {
   }
   ctx.restore();
 }
+/**
+ * Dibuja el horizonte negro y el anillo de luz curvada a su alrededor; va entre las dos mitades
+ * del disco.
+ *
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} R Radio del horizonte, en píxeles de pantalla.
+ * @param {number} alpha Opacidad del anillo, de 0 a 1.
+ */
 function bhCore(cx, cy, R, alpha) {
   ctx.globalAlpha = 1;
   ctx.fillStyle = '#000';
@@ -344,7 +456,7 @@ function bhCore(cx, cy, R, alpha) {
     N = 120,
     ns = R > 30 ? 48 : 28;
   if (BHGL.draw(2, cx, cy, R, 1, 1, 1, alpha)) {
-    /* anillo de luz en alta calidad */
+    /* Con WebGL el anillo ya está dibujado. */
   } else {
     for (let q = 0; q <= 1.0001; q += dq) {
       const rd = R * BR0 + q * R * (BR1 - BR0),
@@ -385,6 +497,13 @@ function bhCore(cx, cy, R, alpha) {
   ctx.shadowBlur = 0;
   ctx.globalAlpha = 1;
 }
+/**
+ * Dibuja la Tierra pequeña del acento: océano, un continente y su lado de noche.
+ *
+ * @param {number} ex Centro horizontal, en píxeles de pantalla.
+ * @param {number} ey Centro vertical, en píxeles de pantalla.
+ * @param {number} r Radio, en píxeles de pantalla.
+ */
 function splashEarth(ex, ey, r) {
   ctx.fillStyle = '#3d8bff';
   ctx.beginPath();
@@ -404,8 +523,10 @@ function splashEarth(ex, ey, r) {
   ctx.fill();
   ctx.restore();
 }
-// el sonido de la marca: un rumor que crece, las letras como notas, la Tierra que cae y un golpe
-// final
+/**
+ * Programa todo el sonido de la presentación de una vez: un rumor que crece, las letras como
+ * notas, la Tierra que cae y un golpe final. Va por `splashBus` para poder apagarlo al saltarla.
+ */
 function splashSounds() {
   if (!AC) {
     return;
@@ -433,6 +554,7 @@ function splashSounds() {
       return o;
     };
     osc('sine', 38, 58, n, 6, 0.35, 2.5); // rumor grave
+    // Barrido de ruido que sube.
     const src = AC.createBufferSource();
     src.buffer = NOISE;
     const f = AC.createBiquadFilter();
@@ -448,17 +570,18 @@ function splashSounds() {
     f.connect(g);
     g.connect(splashBus);
     src.start(n + 3);
-    src.stop(n + 5.7); // barrido que sube
+    src.stop(n + 5.7);
+    // Una nota por letra (escala pentatónica menor).
     [0, 3, 5, 7, 10].forEach((s, i) =>
       osc('triangle', ROOT * Math.pow(2, s / 12), 0, n + 4 + i * 0.22, 0.7, 0.12, 0.005),
-    ); // una nota por letra
+    );
     // la Tierra cae en el acento
     osc('sine', ROOT * 2 * Math.pow(2, 7 / 12), 0, n + 5.3, 1.4, 0.1, 0.004);
     osc('sine', 72, 38, n + 5.5, 1.6, 0.9, 0.005); // golpe
     noiseHit(n + 5.5, 1.6, 'highpass', 3000, 0.35, splashBus);
+    // Acorde final: cada nota con dos osciladores desafinados para que suene ancho.
     for (const s of [0, 3, 7, 12]) {
       for (const det of [-7, 7]) {
-        // acorde final
         const o = AC.createOscillator(),
           gg = AC.createGain(),
           lp = AC.createBiquadFilter();
@@ -477,10 +600,12 @@ function splashSounds() {
         o.stop(n + 9.6);
       }
     }
+    // Campanas.
     osc('sine', ROOT * 4, 0, n + 5.55, 2.8, 0.07, 0.005);
-    osc('sine', ROOT * 4 * Math.pow(2, 7 / 12), 0, n + 5.6, 2.6, 0.05, 0.005); // campanas
+    osc('sine', ROOT * 4 * Math.pow(2, 7 / 12), 0, n + 5.6, 2.6, 0.05, 0.005);
   } catch (e) {}
 }
+/** Empieza la presentación: oculta el panel y el HUD y lanza su sonido. */
 function startSplash() {
   state = 'splash';
   splashT = 0;
@@ -490,6 +615,7 @@ function startSplash() {
   elHud.style.opacity = 0;
   splashSounds();
 }
+/** Salta la presentación: apaga su sonido en 0,25 s y pasa a lo que sigue. */
 function skipSplash() {
   if (splashBus && AC) {
     try {
@@ -501,6 +627,11 @@ function skipSplash() {
   }
   afterSplash();
 }
+/**
+ * Avanza la presentación: destello cuando la Tierra cae en el acento (a 5,5 s) y fin a los 10 s.
+ *
+ * @param {number} dt Tiempo del cuadro, en segundos.
+ */
 function updateSplash(dt) {
   t += dt;
   if (state === 'splash') {
@@ -518,6 +649,10 @@ function updateSplash(dt) {
     afterSplash();
   }
 }
+/**
+ * Dibuja un cuadro de la presentación: el agujero negro grande viaja a su lugar en el logotipo y
+ * se encoge hasta la Ó, salen las letras y la Tierra, y al final todo se funde a negro.
+ */
 function renderSplash() {
   const T = splashT;
   ctx.save();
