@@ -86,12 +86,6 @@
     sans-serif;
   letter-spacing: 0.04em;
 }
-#wallet .wring {
-  width: 28px;
-  height: 28px;
-  display: block;
-  overflow: visible;
-}
 #wallet .wb {
   fill: none;
   stroke: rgba(255, 211, 107, 0.18);
@@ -114,9 +108,6 @@
 #wallet i {
   font-style: normal;
   text-shadow: none;
-}
-#wallet.full .wring {
-  animation: wfull 2.6s ease-in-out infinite;
 }
 /* contador de estrellas: texto limpio */
 #wallet {

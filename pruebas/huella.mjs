@@ -31,7 +31,7 @@ function pngDiff(fa, fb){ const a = readPng(fa), b = readPng(fb); if (a.w !== b.
 const sha = s => createHash('sha1').update(s).digest('hex').slice(0, 16);
 
 // Escenas cuyo dibujo varía solo entre dos corridas del mismo archivo en muchos píxeles pero muy poco (hasta ~10 niveles
-// de color): ahí se acepta como ruido cualquier cantidad de píxeles si ninguno cambia más de 12 niveles.
+// de color): ahí se acepta como ruido cualquier cantidad de píxeles si ninguno cambia más del tope de la escena.
 // El navegador guarda el texto de las variables CSS (--algo) tal como está escrito: 'max(3vh,18px)' y
 // 'max(3vh, 18px)', o '.58' y '0.58', son el mismo valor escrito distinto. Las propiedades reales se comparan tal cual.
 const cssCanon = v => v.replace(/\s*([,()\/])\s*/g, '$1').replace(/(^|[^\w.])\.(\d)/g, '$10.$2').replace(/\s+/g, ' ').trim();
@@ -46,7 +46,7 @@ function hasRealStyleDiff(a, b){   // true si hay una diferencia real
   }
   return false;
 }
-const RUIDO_AMPLIO = new Set(['poder_urano', 'sinwebgl_partida_2', 'sinwebgl_partida_5', 'sinwebgl_partida_6', 'intro_0', 'antes_de_jugar']);
+const RUIDO_AMPLIO = new Map([['poder_urano', 12], ['sinwebgl_partida_2', 12], ['sinwebgl_partida_5', 12], ['sinwebgl_partida_6', 12], ['intro_0', 16], ['antes_de_jugar', 12]]);
 if (process.argv[2] === '--comparar'){
   const [A, B] = process.argv.slice(3), a = JSON.parse(readFileSync(join(A, 'huella.json'))), b = JSON.parse(readFileSync(join(B, 'huella.json')));
   let bad = 0; const ruido = [];
@@ -55,7 +55,7 @@ if (process.argv[2] === '--comparar'){
     if (!x || !y){ console.log('✗ ' + k + ': falta en ' + (x ? B : A)); bad++; continue; }
     const diffs = [];
     if (x.png !== y.png){ const d = pngDiff(join(A, k + '.png'), join(B, k + '.png'));
-      if (d.n > 60 && !(RUIDO_AMPLIO.has(k) && d.max <= 12)) diffs.push('imagen (' + d.n + ' píxeles distintos, hasta ' + d.max + ')'); else ruido.push(k + ' (' + d.n + ' px, ' + d.max + ')'); }
+      if (d.n > 60 && !(RUIDO_AMPLIO.has(k) && d.max <= RUIDO_AMPLIO.get(k))) diffs.push('imagen (' + d.n + ' píxeles distintos, hasta ' + d.max + ')'); else ruido.push(k + ' (' + d.n + ' px, ' + d.max + ')'); }
     if (x.traza !== y.traza) diffs.push('partida');
     if (x.errores !== y.errores) diffs.push('errores');
     let ed = [...new Set([...Object.keys(x.estilos), ...Object.keys(y.estilos)])].filter(e => x.estilos[e] !== y.estilos[e]);

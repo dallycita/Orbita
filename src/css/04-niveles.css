@@ -114,29 +114,12 @@
   color: var(--fg);
   line-height: 1.1;
 }
-#levels .badge {
-  position: relative;
-  display: inline-block;
-  margin-top: 12px;
-  padding: 5px 14px;
-  border-radius: 999px;
-  border: 1.5px solid currentColor;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-}
 #levels .fact {
   position: relative;
   max-width: 30ch;
   line-height: 1.6;
   color: var(--fg);
   font-weight: 400;
-}
-#levels .stats {
-  position: relative;
-  margin-top: 20px;
-  width: 100%;
-  max-width: 300px;
 }
 #levels .row {
   display: flex;
@@ -227,17 +210,6 @@
 #levels .dots i.on {
   background: var(--fg);
   transform: scale(1.15);
-}
-#levels .lv-foot {
-  font:
-    400 12px 'Unbounded',
-    system-ui,
-    sans-serif;
-  color: var(--muted);
-  background: none;
-  border: 0;
-  text-decoration: underline;
-  cursor: pointer;
 }
 #levels button:focus-visible {
   outline: 2px solid var(--fg);
@@ -386,9 +358,6 @@
   text-align: right;
   white-space: nowrap;
 }
-#levels .crown {
-  color: #ffd36b;
-}
 #levels .lvst {
   position: relative;
   display: flex;
@@ -464,11 +433,6 @@
     opacity 0.35s ease,
     margin 0.35s ease;
   font-size: 13px;
-}
-#levels .page.showfact .fact {
-  max-height: 160px;
-  opacity: 0.85;
-  margin-top: 12px;
 }
 #levels .lvshade {
   background: linear-gradient(
@@ -697,34 +661,6 @@
   text-align: left;
   overflow: hidden;
 }
-#levels .crow {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 11px 14px;
-  font-size: 12px;
-  line-height: 1.45;
-  color: #e4ecff;
-}
-#levels .crow + .crow {
-  border-top: 1px solid rgba(160, 205, 255, 0.1);
-}
-#levels .crow svg {
-  flex: 0 0 auto;
-  margin-top: 1px;
-  color: #bfe0ff;
-}
-#levels .crow small {
-  display: block;
-  font-size: 9px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 3px;
-}
-#levels .crow.dato span {
-  color: #cfdcf5;
-}
 #levels .nuevo,
 #levels .tries,
 #levels .fact,
@@ -762,10 +698,6 @@
   }
   #levels .card {
     margin-top: 10px;
-  }
-  #levels .crow {
-    padding: 8px 14px;
-    font-size: 11.5px;
   }
 }
 /* botón Escapar */
@@ -988,7 +920,6 @@
 /* paleta: neutros + un color de marca (disco de acreción); la dificultad solo en su pastilla */
 #levels {
   --brand: #ffa155;
-  --soft: rgba(226, 232, 246, 0.58);
 }
 #levels .page::before {
   display: none;
@@ -1014,36 +945,6 @@
 }
 #levels .sigtxt {
   text-shadow: none;
-}
-#levels .trip .tstar {
-  position: absolute;
-  top: 50%;
-  width: 13px;
-  height: 13px;
-  margin: -6.5px 0 0 -6.5px;
-  z-index: 1;
-}
-#levels .trip .tstar svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-#levels .trip .tstar path {
-  fill: #070912;
-  stroke: rgba(236, 230, 216, 0.5);
-  stroke-width: 1.8;
-  stroke-linejoin: round;
-}
-#levels .trip .tstar.on path {
-  fill: #ffd36b;
-  stroke: #ffe7a8;
-}
-#levels .trip .tstar.on {
-  filter: drop-shadow(0 0 4px rgba(255, 211, 107, 0.85));
-}
-#levels .page.perfect .trip .tstar.on {
-  animation: tstarGlow 2.4s ease-in-out infinite;
 }
 #levels .trip .me {
   z-index: 2;

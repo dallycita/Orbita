@@ -184,85 +184,6 @@
   background: #ff8a3d;
   vertical-align: 2px;
 }
-#missions .msub {
-  margin-top: 14px;
-  text-align: center;
-  font:
-    400 10.5px 'Space Mono',
-    ui-monospace,
-    monospace;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(236, 230, 216, 0.45);
-}
-#missions .mdeco {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font:
-    400 10.5px 'Space Mono',
-    ui-monospace,
-    monospace;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #9ff0e4;
-}
-#missions .mdeco::before,
-#missions .mdeco::after {
-  content: '';
-  width: 22px;
-  height: 1px;
-  background: linear-gradient(90deg, rgba(159, 240, 228, 0), rgba(159, 240, 228, 0.55));
-}
-#missions .mdeco::after {
-  transform: scaleX(-1);
-}
-#missions .mamt {
-  margin-top: 14px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font:
-    600 44px/1 'Unbounded',
-    system-ui,
-    sans-serif;
-  color: #ece6d8;
-}
-#missions .mamt .cr {
-  width: 30px;
-  height: 30px;
-  filter: drop-shadow(0 0 10px rgba(63, 199, 184, 0.55));
-}
-#missions .mpips {
-  margin-top: 18px;
-  display: flex;
-  gap: 6px;
-}
-#missions .mpips b {
-  width: 26px;
-  height: 3px;
-  border-radius: 3px;
-  background: rgba(236, 230, 216, 0.14);
-}
-#missions .mpips b.on {
-  background: #9ff0e4;
-  box-shadow: 0 0 8px rgba(63, 199, 184, 0.8);
-}
-#missions .mhb {
-  margin-top: 16px;
-}
-#missions .mmeta {
-  margin-top: 12px;
-  font:
-    400 11px 'Space Mono',
-    ui-monospace,
-    monospace;
-  letter-spacing: 0.06em;
-  color: rgba(236, 230, 216, 0.5);
-}
-#missions .mlist {
-  border-top: 1px solid rgba(236, 230, 216, 0.08);
-}
 #missions .mr {
   display: flex;
   align-items: center;
@@ -388,21 +309,6 @@
     sans-serif;
   color: #9ff0e4;
 }
-#missions .mhint {
-  font:
-    400 10px/1.6 'Space Mono',
-    ui-monospace,
-    monospace;
-  color: rgba(236, 230, 216, 0.35);
-  text-align: center;
-  max-width: 30ch;
-}
-#missions .mfeat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 10px;
-}
 #missions .mplanet {
   display: block;
   width: 100%;
@@ -481,46 +387,6 @@
     letter-spacing: 0.14em;
   }
 }
-#missions .mnew {
-  margin-top: 16px;
-  text-align: center;
-  font:
-    400 10.5px 'Space Mono',
-    ui-monospace,
-    monospace;
-  letter-spacing: 0.12em;
-  color: rgba(236, 230, 216, 0.45);
-}
-#missions .mnew .mtime {
-  color: rgba(236, 230, 216, 0.75);
-}
-#missions .mlist {
-  margin-top: 18px;
-}
-#missions .mbonus {
-  justify-content: space-between;
-}
-#missions .mbonus .mdeco {
-  justify-content: flex-start;
-}
-#missions .mbonus .mdeco::before {
-  display: none;
-}
-#missions .mbonus .mamt {
-  margin-top: 8px;
-  gap: 8px;
-  font-size: 22px;
-}
-#missions .mbonus .mamt .cr {
-  width: 18px;
-  height: 18px;
-}
-#missions .mbonus .mpips {
-  margin-top: 0;
-}
-#missions .mbonus.got {
-  opacity: 0.4;
-}
 #missions .fd {
   margin-top: 8px;
   font:
@@ -537,9 +403,7 @@
   background: rgba(236, 230, 216, 0.22);
   margin: 10px auto 0;
 }
-#missions .mr.flash,
-#missions .mbonus.flash,
-#missions .mfeat.flash {
+#missions .mr.flash {
   animation: misFlash 0.9s ease-out;
 }
 #missions .mfly {
@@ -751,73 +615,6 @@
   height: 18px;
   object-fit: contain;
 }
-#missions .mbonus {
-  margin-top: 14px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 16px;
-  border-radius: 18px;
-  border: 1px dashed rgba(255, 211, 107, 0.38);
-  background: none;
-}
-#missions .mbonus .pips {
-  display: flex;
-  gap: 6px;
-}
-#missions .mbonus .pips b {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255, 211, 107, 0.55);
-}
-#missions .mbonus .pips b.on {
-  background: #ffd36b;
-  border-color: #ffd36b;
-  box-shadow: 0 0 8px #ffd36b;
-}
-#missions .mbonus p {
-  flex: 1;
-  font:
-    400 10px/1.5 'Space Mono',
-    ui-monospace,
-    monospace;
-  color: rgba(236, 230, 216, 0.62);
-}
-#missions .mbonus p b {
-  font-weight: 400;
-  color: #ece6d8;
-}
-#missions .mbonus .rw {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  font:
-    500 13px 'Unbounded',
-    system-ui,
-    sans-serif;
-  color: #9ff0e4;
-}
-#missions .mbonus .rw span {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-#missions .mbonus .rw small {
-  font:
-    400 8.5px 'Space Mono',
-    ui-monospace,
-    monospace;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(236, 230, 216, 0.4);
-}
-#missions .mbonus .claim {
-  padding: 10px 14px;
-  letter-spacing: 0.16em;
-  font-size: 9.5px;
-}
 #missions .mstreak {
   display: flex;
   flex-direction: row;
@@ -848,22 +645,7 @@
   background: #ff8a3d;
   box-shadow: 0 0 6px #ff8a3d;
 }
-#missions .mseven {
-  margin-top: 18px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  font:
-    400 10px 'Space Mono',
-    ui-monospace,
-    monospace;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(236, 230, 216, 0.4);
-}
-#missions .mc.flash,
-#missions .mbonus.flash {
+#missions .mc.flash {
   animation: misFlash 0.9s ease-out;
 }
 #missions .mwrap {

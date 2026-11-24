@@ -41,15 +41,6 @@
   top: max(3vh, 18px);
   font-size: 13px;
 }
-#planets .pcount {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(max(3vh, 18px) + 36px);
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: 0.08em;
-}
 #planets .arrow {
   position: absolute;
   top: 38%;
@@ -81,15 +72,6 @@
   font-weight: 500;
   color: #fff;
   line-height: 1.1;
-}
-#planets .pchip {
-  margin-top: 10px;
-  padding: 4px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: #fff;
 }
 #planets .pdesc {
   margin: 14px 0 0;
@@ -141,56 +123,6 @@
 }
 #planets.scanning .pinfo * {
   pointer-events: none !important;
-}
-#planets .pstats {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 31%;
-  padding: 0 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  opacity: 0;
-  transition: opacity 0.4s;
-}
-#planets.scanning .pstats {
-  opacity: 1;
-}
-#planets:not(.scanning) .pstats * {
-  pointer-events: none !important;
-}
-#planets .sname {
-  font-size: 22px;
-  font-weight: 500;
-  color: #fff;
-}
-#planets .srow {
-  width: 100%;
-  max-width: 340px;
-  margin-top: 12px;
-  text-align: left;
-}
-#planets .shead {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-size: 12px;
-  color: #fff;
-}
-#planets .shead small {
-  font-size: 10px;
-  color: var(--muted);
-  margin-left: 6px;
-  font-weight: 400;
-}
-#planets .sval {
-  font-weight: 500;
-}
-#planets .sdat {
-  font-size: 10.5px;
-  color: var(--muted);
-  margin-top: 3px;
 }
 #planets .sbar {
   position: relative;
@@ -255,17 +187,6 @@
   opacity: 1;
   transform: none;
 }
-#planets .spk {
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  color: var(--muted);
-}
-#planets .spn {
-  margin-top: 4px;
-  font-size: 15px;
-  font-weight: 500;
-  color: #fff;
-}
 #planets .spd {
   margin-top: 4px;
   font-size: 12px;
@@ -273,19 +194,6 @@
   color: #fff;
   opacity: 0.9;
   font-weight: 400;
-}
-#planets .spf {
-  margin-top: 6px;
-  font-size: 11px;
-  line-height: 1.5;
-  color: #8fd0ff;
-  font-weight: 400;
-}
-#planets .spsoon {
-  margin-top: 6px;
-  font-size: 10.5px;
-  line-height: 1.4;
-  color: var(--muted);
 }
 #planets .sclose {
   margin-top: 14px;
@@ -473,9 +381,7 @@
   cursor: grab;
 }
 #planets .arrow,
-#planets .pcount,
-#planets .scanbtn,
-#planets .pchip {
+#planets .scanbtn {
   display: none !important;
 }
 #planets .ptop {
@@ -613,28 +519,6 @@
 }
 #planets .pscan.on span {
   color: rgba(255, 161, 85, 0.9);
-}
-#planets .plines {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 2;
-}
-#planets .plines path {
-  fill: none;
-  stroke: #8fd0ff;
-  stroke-opacity: 0.55;
-  stroke-width: 1;
-  stroke-dasharray: 400;
-  stroke-dashoffset: 400;
-  animation: plDraw 0.5s ease-out forwards;
-}
-#planets .plines circle {
-  fill: #8fd0ff;
-  opacity: 0;
-  animation: plFade 0.3s forwards;
 }
 #planets .pdat {
   position: absolute;

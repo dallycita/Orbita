@@ -51,13 +51,3 @@ canvas {
   height: 100%;
   touch-action: none;
 }
-@keyframes misRot {
-  to {
-    transform: rotate(360deg);
-  }
-}
-@keyframes misCore {
-  50% {
-    opacity: 0.7;
-  }
-}
