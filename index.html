@@ -5105,7 +5105,13 @@ function sub() {
     o.stop(t0 + 1.05);
   } catch (e) {}
 }
-// ---------- beat (se van sumando capas al subir) ----------
+/**
+ * Música sintetizada en vivo con Web Audio: instrumentos, estilos de cada galaxia y la alarma del
+ * agujero negro. Todo va a 140 pulsos por minuto (para que la Respiración siga sincronizada) y
+ * se suman capas a medida que se sube de anillo (`lv()`).
+ * Cada `stepX(s, t0)` programa una semicorchea; el reproductor (05) las llama por adelantado.
+ */
+// Tempo: STEP es una semicorchea y TB un pulso, en segundos.
 const BPM = 140,
   STEP = 60 / BPM / 4,
   TB = 60 / BPM;
@@ -5123,6 +5129,11 @@ const BASS = {
   22: [3, 0.28],
   26: [-2, 0.42],
 };
+/**
+ * Bombo de phonk; anota su momento en `kickQueue` para que el juego reaccione al golpe.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ */
 function dKick(t0) {
   const o = AC.createOscillator(),
     g = AC.createGain();
@@ -5145,6 +5156,13 @@ function dClap(t0) {
 function dHat(t0, open) {
   noiseHit(t0, open ? 0.17 : 0.035, 'highpass', 8000, open ? 0.16 : 0.2, musicBus);
 }
+/**
+ * Bajo 808 saturado (con una curva tanh compartida en `shaper`).
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} semi Semitonos sobre la nota base.
+ * @param {number} dur Duración, en segundos.
+ */
 function d808(t0, semi, dur) {
   const f = (ROOT / 8) * Math.pow(2, semi / 12);
   if (!shaper) {
@@ -5174,10 +5192,10 @@ function d808(t0, semi, dur) {
   o.start(t0);
   o.stop(t0 + dur + 0.02);
 }
-// ---------- estilos de música (mismo tempo: 140, para que la Respiración siga sincronizada)
-// ----------
-const lv = () => (state === 'play' ? level : 30); // en el menú se escucha completa
-// progresión en Sol# menor: i – VI – III – VII (Sol#m, Mi, Si, Fa#), dos compases cada acorde
+// Estilos de música, todos al mismo tempo de 140.
+// Anillo que decide cuántas capas suenan; en el menú se escucha completa.
+const lv = () => (state === 'play' ? level : 30);
+// Progresión en Sol# menor: i – VI – III – VII (Sol#m, Mi, Si, Fa#), dos compases cada acorde
 const PROG = [
   [0, [0, 3, 7]],
   [-4, [0, 4, 7]],
@@ -5186,6 +5204,11 @@ const PROG = [
 ];
 const hz = semi => (ROOT / 2) * Math.pow(2, semi / 12); // Sol#3 como referencia
 let echoIn = null;
+/**
+ * Eco compartido (retardo de tres cuartos de pulso con realimentación); se crea al primer uso.
+ *
+ * @returns {GainNode} Entrada del eco.
+ */
 function echoBus() {
   if (echoIn) {
     return echoIn;
@@ -5204,11 +5227,29 @@ function echoBus() {
   wet.connect(musicBus);
   return echoIn;
 }
+/**
+ * Envolvente exponencial de ataque y caída sobre la ganancia de un nodo.
+ *
+ * @param {GainNode} g Nodo de ganancia.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} a Ataque, en segundos.
+ * @param {number} peak Ganancia máxima.
+ * @param {number} d Caída, en segundos.
+ */
 function env(g, t0, a, peak, d) {
   g.gain.setValueAtTime(0.0001, t0);
   g.gain.exponentialRampToValueAtTime(peak, t0 + a);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
 }
+/**
+ * Colchón de acorde con sierras desafinadas en ±6 centésimas y filtro pasa bajos.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number[]} freqs Frecuencias del acorde, en Hz.
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Ganancia máxima.
+ * @param {number} cutoff Corte del filtro, en Hz.
+ */
 function pad(t0, freqs, dur, gain, cutoff) {
   const lp = AC.createBiquadFilter(),
     g = AC.createGain();
@@ -5233,6 +5274,15 @@ function pad(t0, freqs, dur, gain, cutoff) {
     }
   }
 }
+/**
+ * Nota corta punteada.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} gain Ganancia máxima.
+ * @param {string} [type] Forma de onda; por defecto 'triangle'.
+ * @param {boolean} [echo] true para mandarla también al eco.
+ */
 function pluck(t0, f, gain, type, echo) {
   const o = AC.createOscillator(),
     g = AC.createGain(),
@@ -5251,6 +5301,16 @@ function pluck(t0, f, gain, type, echo) {
   o.start(t0);
   o.stop(t0 + 0.32);
 }
+/**
+ * Nota de bajo con filtro que se cierra hasta `cutoff`.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Ganancia máxima.
+ * @param {string} type Forma de onda.
+ * @param {number} cutoff Corte final del filtro, en Hz.
+ */
 function bassNote(t0, f, dur, gain, type, cutoff) {
   const o = AC.createOscillator(),
     g = AC.createGain(),
@@ -5270,6 +5330,12 @@ function bassNote(t0, f, dur, gain, type, cutoff) {
   o.start(t0);
   o.stop(t0 + dur + 0.02);
 }
+/**
+ * Bombo suave y grave; también se anota en `kickQueue`.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} gain Ganancia inicial.
+ */
 function softKick(t0, gain) {
   const o = AC.createOscillator(),
     g = AC.createGain();
@@ -5297,14 +5363,20 @@ function snareSW(t0) {
   o.start(t0);
   o.stop(t0 + 0.15);
 }
-// Espacial: oscuro y cinematográfico, en medio tiempo
-// qué tan cerca está el agujero negro de la Tierra: 0 = lejos, 1 = a punto de tragarla
+/**
+ * Qué tan cerca está el agujero negro del planeta, según la distancia en anillos.
+ *
+ * @returns {number} De 0 (lejos o fuera de partida) a 1 (a punto de tragarlo).
+ */
 function dangerNow() {
   return state === 'play' ? clamp((1.7 - (pLevel - sunLevel)) / 1.3, 0, 1) : 0;
 }
-// un zumbido disonante que tiembla, sube de tono y se acelera con el peligro
+// Zumbido disonante que tiembla, sube de tono y se acelera con el peligro.
 let tens = null,
   tensT = 0;
+/**
+ * Enciende el zumbido de tensión, si no está sonando.
+ */
 function tensionOn() {
   if (!AC || tens) {
     return;
@@ -5340,6 +5412,11 @@ function tensionOn() {
     tens = { g, lfo, o1, o2, bp };
   } catch (e) {}
 }
+/**
+ * Ajusta el zumbido de tensión al peligro actual: volumen, temblor y tono suben con él.
+ *
+ * @param {number} d Peligro, de 0 a 1 (ver `dangerNow`).
+ */
 function tensionSet(d) {
   if (!tens) {
     return;
@@ -5354,11 +5431,17 @@ function tensionSet(d) {
     tens.bp.frequency.setTargetAtTime(700 + 1600 * d, n, 0.2);
   } catch (e) {}
 }
-// alarma del agujero negro: cuanto más cerca, más rápido y más fuerte late (golpe grave + sirena +
-// latido)
+// Alarma del agujero negro: cuanto más cerca, más rápido y más fuerte late (golpe grave, sirena y
+// latido). dangerFlash es la intensidad del destello rojo en pantalla.
 let alarmT = 0,
   alarmWas = 0,
   dangerFlash = 0;
+/**
+ * Avanza la alarma cada cuadro: suena al entrar en peligro (más de 0,18) y luego se repite
+ * cada 1,2 a 0,3 segundos según lo cerca que esté el agujero negro.
+ *
+ * @param {number} dt Tiempo desde el cuadro anterior, en segundos.
+ */
 function alarmTick(dt) {
   if (!AC || muted || state !== 'play' || tutorial) {
     alarmT = 0;
@@ -5368,7 +5451,7 @@ function alarmTick(dt) {
   const d = dangerNow();
   if (d > 0.18 && alarmWas <= 0.18) {
     alarmHit(AC.currentTime + 0.01, d, true);
-  } // aviso al entrar en peligro
+  } // Aviso al entrar en peligro.
   alarmWas = d;
   if (d <= 0.18) {
     alarmT = 0;
@@ -5380,6 +5463,13 @@ function alarmTick(dt) {
     alarmHit(AC.currentTime + 0.01, d, false);
   }
 }
+/**
+ * Un golpe de alarma: golpe grave, segundo latido, sirena, succión, vibración y destello.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} d Peligro, de 0 a 1.
+ * @param {boolean} first true en el aviso de entrada (vibración más larga).
+ */
 function alarmHit(t0, d, first) {
   try {
     const k = Math.max(0, Math.min(1, (d - 0.18) / 0.72)),
@@ -5465,6 +5555,12 @@ function alarmHit(t0, d, first) {
     dangerFlash = 0.25 + 0.45 * k;
   } catch (e) {}
 }
+/**
+ * Estilo Espacial: oscuro y cinematográfico, en medio tiempo.
+ *
+ * @param {number} s Paso de la música, en semicorcheas desde el inicio.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ */
 function stepEspacial(s, t0) {
   const bar = Math.floor(s / 16),
     [root, tones] = PROG[Math.floor(bar / 2) % 4],
@@ -5509,7 +5605,12 @@ function stepEspacial(s, t0) {
     noiseHit(t0, 0.03, 'highpass', 9000, 0.04, musicBus);
   }
 }
-// Synthwave: retro, con energía de persecución
+/**
+ * Estilo Synthwave: retro, con energía de persecución.
+ *
+ * @param {number} s Paso de la música, en semicorcheas desde el inicio.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ */
 function stepSynthwave(s, t0) {
   const bar = Math.floor(s / 16),
     [root, tones] = PROG[Math.floor(bar / 2) % 4],
@@ -5551,6 +5652,12 @@ function stepSynthwave(s, t0) {
     pluck(t0, hz(root + tn + 12), 0.055, 'square', true);
   }
 }
+/**
+ * Estilo Phonk: bombo, palmas, platillos y bajo 808 en un ciclo de dos compases.
+ *
+ * @param {number} s Paso de la música, en semicorcheas desde el inicio.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ */
 function stepPhonk(s, t0) {
   s = s % 32;
   const b = s % 16,
@@ -5576,9 +5683,15 @@ function stepPhonk(s, t0) {
     }
   }
 }
-const SW_AT = 30; // anillo donde la música se vuelve Synthwave
+const SW_AT = 30; // Anillo donde la música se vuelve Synthwave.
 let riserOn = false,
   switchAt = 0;
+/**
+ * Barrido de ruido que sube antes de un cambio de estilo.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} dur Duración, en segundos.
+ */
 function riser(t0, dur) {
   const src = AC.createBufferSource();
   src.buffer = NOISE;
@@ -5597,11 +5710,16 @@ function riser(t0, dur) {
   src.start(t0);
   src.stop(t0 + dur + 0.1);
 }
+/**
+ * Golpe de llegada tras el barrido: ruido brillante y bombo.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ */
 function impact(t0) {
   noiseHit(t0, 1.4, 'highpass', 2500, 0.5, musicBus);
   dKick(t0);
 }
-// ---------- música de Andrómeda: otra galaxia, otra escala ----------
+// Música de Andrómeda: otra galaxia, otra escala.
 // Re# frigio (la 2ª menor le da un aire extraño y lejano), campanas metálicas, bajo ondulante y un
 // ritmo sincopado 3-3-4
 const ROOT_A = 311.13;
@@ -5615,6 +5733,14 @@ const PHRY = [0, 1, 3, 7, 8, 10, 12, 13];
 const hzA = sm => (ROOT_A / 2) * Math.pow(2, sm / 12);
 let andFast = false,
   switchMsg = '¡A toda velocidad!';
+/**
+ * Campana metálica por modulación de frecuencia.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} gain Ganancia máxima.
+ * @param {number} dur Duración, en segundos.
+ */
 function fmBell(t0, f, gain, dur) {
   const c = AC.createOscillator(),
     m = AC.createOscillator(),
@@ -5639,6 +5765,14 @@ function fmBell(t0, f, gain, dur) {
   c.stop(t0 + dur + 0.05);
   m.stop(t0 + dur + 0.05);
 }
+/**
+ * Bajo «reese»: osciladores desafinados con un filtro que se abre y se cierra.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Ganancia máxima.
+ */
 function reese(t0, f, dur, gain) {
   const lp = AC.createBiquadFilter(),
     g = AC.createGain();
@@ -5663,6 +5797,12 @@ function reese(t0, f, dur, gain) {
     o.stop(t0 + dur + 0.05);
   }
 }
+/**
+ * Música de Andrómeda (Re# frigio). Con `andFast` todo va al doble en la recta final.
+ *
+ * @param {number} s Paso de la música, en semicorcheas desde el inicio.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ */
 function stepAndromeda(s, t0) {
   const bar = Math.floor(s / 16),
     [root, tones] = PROG_A[Math.floor(bar / 2) % 4],
@@ -5710,7 +5850,7 @@ function stepAndromeda(s, t0) {
   }
 }
 
-// ---------- música de las Nubes de Magallanes: luminosa y aireada ----------
+// Música de las Nubes de Magallanes: luminosa y aireada.
 // Fa# lidio (la 4ª aumentada suena a asombro), notas de kalimba, un coro lejano y un bajo saltarín
 // a contratiempo
 const ROOT_M = 369.99;
@@ -5722,6 +5862,14 @@ const PROG_M = [
 ]; // I – II – vi – V
 const LYD = [0, 2, 4, 6, 7, 9, 11, 12];
 const hzM = sm => (ROOT_M / 2) * Math.pow(2, sm / 12);
+/**
+ * Nota de kalimba.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} gain Ganancia máxima.
+ * @param {number} dur Duración, en segundos.
+ */
 function kalimba(t0, f, gain, dur) {
   const o = AC.createOscillator(),
     o2 = AC.createOscillator(),
@@ -5747,6 +5895,14 @@ function kalimba(t0, f, gain, dur) {
   o.stop(t0 + dur + 0.05);
   o2.stop(t0 + 0.15);
 }
+/**
+ * Coro lejano: el acorde pasa por dos filtros de formante de vocal.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number[]} freqs Frecuencias del acorde, en Hz.
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Ganancia máxima.
+ */
 function choir(t0, freqs, dur, gain) {
   const f1 = AC.createBiquadFilter(),
     f2 = AC.createBiquadFilter(),
@@ -5781,6 +5937,13 @@ function choir(t0, freqs, dur, gain) {
     v.stop(t0 + dur + 0.35);
   }
 }
+/**
+ * Bajo saltarín corto.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} gain Ganancia máxima.
+ */
 function bounceBass(t0, f, gain) {
   const o = AC.createOscillator(),
     g = AC.createGain(),
@@ -5811,6 +5974,12 @@ function bounceBass(t0, f, gain) {
   s.start(t0);
   s.stop(t0 + 0.28);
 }
+/**
+ * Música de las Nubes de Magallanes (Fa# lidio).
+ *
+ * @param {number} s Paso de la música, en semicorcheas desde el inicio.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ */
 function stepMagallanes(s, t0) {
   const bar = Math.floor(s / 16),
     [root, tones] = PROG_M[Math.floor(bar / 2) % 4],
@@ -5864,7 +6033,8 @@ function stepMagallanes(s, t0) {
   }
 }
 
-// ---------- música de los niveles 4 a 8: misma energía, identidad propia ----------
+// Música de los niveles 4 a 8: misma energía, identidad propia. Cada entrada (por índice de
+// nivel) elige nota base, escala, progresión, instrumento principal, bajo, colchón y percusión.
 const GAL_CFG = {
   3: {
     root: 220.0,
@@ -5942,6 +6112,14 @@ const GAL_CFG = {
     perc: 'tribal',
   }, // Sagitario A*: Sol# menor, épico
 };
+/**
+ * Nota punteada de sierra filtrada.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} gain Ganancia máxima.
+ * @param {number} dur Duración, en segundos.
+ */
 function pluckSaw(t0, f, gain, dur) {
   const o = AC.createOscillator(),
     lp = AC.createBiquadFilter(),
@@ -5962,6 +6140,13 @@ function pluckSaw(t0, f, gain, dur) {
   o.start(t0);
   o.stop(t0 + dur + 0.05);
 }
+/**
+ * Tambor tom: baja rápido de tono hasta `f`.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia final, en Hz.
+ * @param {number} gain Ganancia máxima.
+ */
 function tom(t0, f, gain) {
   const o = AC.createOscillator(),
     g = AC.createGain();
@@ -5976,6 +6161,13 @@ function tom(t0, f, gain) {
   o.start(t0);
   o.stop(t0 + 0.35);
 }
+/**
+ * Pulso sub grave.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} gain Ganancia máxima.
+ */
 function subPulse(t0, f, gain) {
   const o = AC.createOscillator(),
     g = AC.createGain();
@@ -5989,6 +6181,13 @@ function subPulse(t0, f, gain) {
   o.start(t0);
   o.stop(t0 + 0.32);
 }
+/**
+ * Música genérica de los niveles 4 a 8, según su configuración en `GAL_CFG`.
+ *
+ * @param {number} s Paso de la música, en semicorcheas desde el inicio.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {object} c Configuración del nivel (de `GAL_CFG`).
+ */
 function stepGalaxy(s, t0, c) {
   const bar = Math.floor(s / 16),
     [root, tones] = c.prog[Math.floor(bar / 2) % 4],
@@ -6067,6 +6266,15 @@ function stepGalaxy(s, t0, c) {
   }
 }
 
+/**
+ * Órgano de tubos con trémolo y eco.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number[]} freqs Frecuencias del acorde, en Hz.
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Ganancia máxima.
+ * @param {number} [bright] Brillo del filtro, de 0 a 1.
+ */
 function organ(t0, freqs, dur, gain, bright) {
   const lp = AC.createBiquadFilter(),
     g = AC.createGain(),
@@ -7122,7 +7330,11 @@ function stopMusic(quick) {
     musicBus.gain.exponentialRampToValueAtTime(0.0001, n + (quick ? 0.06 : 0.35));
   } catch (e) {}
 }
-// ---------- récord ----------
+/**
+ * Récords guardados (mejor anillo e intentos de cada nivel) y el estado principal de la partida:
+ * pantalla actual (`state`), anillos, nivel de anillo del planeta y de la cámara, salto y carga.
+ * Los récords viven en localStorage con claves `orbita_pN_anillo` y `orbita_pN_intentos`.
+ */
 let best = 0;
 try {
   best = parseInt(localStorage.getItem('orbita_best_v2') || '0', 10) || 0;
@@ -7147,9 +7359,12 @@ const saveBestRing = () => {
 };
 let runRecord = 0,
   newRec = false;
+/**
+ * Actualiza el marcador de anillos: la barra de viaje de arriba (como en Geometry Dash, el
+ * planeta avanza del agujero negro a la salida y la marca dorada es el récord), el número y el
+ * arco de progreso.
+ */
 function updateRingHUD() {
-  // barra de viaje arriba, como en Geometry Dash: tu planeta avanza del agujero negro a la salida;
-  // la marca dorada es tu récord
   if (elPbar && elPbar.style) {
     const g = curGoal(),
       v = Math.min(level, g),
@@ -7177,7 +7392,8 @@ function updateRingHUD() {
   }
 }
 
-// ---------- estado ----------
+// Pantalla actual: 'pretitle', 'splash', 'intro', 'home', 'planets', 'levels', 'menu',
+// 'play', 'dead' o 'win'.
 let state = 'pretitle';
 let rings, level, pLevel, camLevel, pAng, jumping, jumpT, combo, lastLand, score;
 let astFade = 0,
@@ -7185,8 +7401,9 @@ let astFade = 0,
 let charge = 0,
   jumpTarget = 1,
   crossed = false;
+// Anillo de la salida.
 const GOAL = 50;
-let lvl = 0; // 0: Sistema solar · 1: Andrómeda
+let lvl = 0; // Índice en LEVELS: 0 Sistema solar, 1 Nubes de Magallanes, 2 Andrómeda…
 let best2 = 0,
   attempts2 = 0,
   best3 = 0,
@@ -7210,7 +7427,19 @@ for (let i = 3; i < 8; i++) {
     attX[i] = 0;
   }
 }
+/**
+ * Mejor anillo alcanzado en un nivel.
+ *
+ * @param {number} i Índice del nivel.
+ * @returns {number} Nivel de anillo.
+ */
 const bestOf = i => (i >= 3 ? bestX[i] || 0 : i === 2 ? best3 : i === 1 ? best2 : bestRing);
+/**
+ * Guarda el mejor anillo de un nivel.
+ *
+ * @param {number} i Índice del nivel.
+ * @param {number} v Nivel de anillo.
+ */
 function setBestOf(i, v) {
   if (i >= 3) {
     bestX[i] = v;
@@ -7232,6 +7461,12 @@ function setBestOf(i, v) {
     saveBestRing();
   }
 }
+/**
+ * Intentos hechos en un nivel.
+ *
+ * @param {number} i Índice del nivel.
+ * @returns {number} Cantidad de intentos.
+ */
 const attemptsOf = i =>
   i >= 3 ? attX[i] || 0 : i === 2 ? attempts3 : i === 1 ? attempts2 : attempts;
 // ---------- planetas para rescatar y jugar ----------
@@ -7624,9 +7859,18 @@ const debris = Array.from({ length: 60 }, () => ({
 }));
 // duración base de un salto entre anillos, en segundos (jumpDur la ajusta según el planeta)
 const JUMP_DUR = 0.12;
-// generador con semilla fija: el recorrido es siempre el mismo, como un nivel de Geometry Dash
+/**
+ * Recorridos fijos de los niveles 1 a 3: qué tipo de anillo hay en cada posición, y el generador
+ * aleatorio con semilla fija que hace que cada partida sea igual.
+ */
+// Generador con semilla fija: el recorrido es siempre el mismo, como un nivel de Geometry Dash.
 const SEED = 20261007;
 let rngState = SEED;
+/**
+ * Número aleatorio repetible (algoritmo mulberry32) a partir de `rngState`.
+ *
+ * @returns {number} Número entre 0 (incluido) y 1 (excluido).
+ */
 function rng() {
   rngState |= 0;
   rngState = (rngState + 0x6d2b79f5) | 0;
@@ -7634,7 +7878,8 @@ function rng() {
   x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
   return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
 }
-// tipos de anillo: se presentan uno por uno y luego se mezclan en bloques de 2 a 4 anillos
+// Tipos de anillo con su nombre y su consejo. Se presentan uno por uno y luego se mezclan en
+// bloques de 2 a 4 anillos.
 const TYPE_INFO = {
   muralla: ['Muralla', 'Espera el hueco'],
   respiracion: ['Respiración', 'Salta cuando se encojan'],
@@ -7646,6 +7891,7 @@ const TYPE_INFO = {
   nova: ['Nova', 'Salta cuando estalle'],
   arrastre: ['Arrastre del espacio', 'Te lleva consigo: salta cuando coincidas'],
 };
+// Recorridos como bloques [cantidad de anillos, tipo].
 const COURSE = [
   [6, 'clasico'],
   [2, 'muralla'],
@@ -7700,6 +7946,7 @@ const COURSE3 = [
   [5, 'clasico'],
   [3, 'escalera'],
 ]; // nivel 3: 49 anillos + la salida
+// Mapas anillo por anillo (el anillo 0 es el inicial), rellenados con clásicos hasta 60.
 const courseMap3 = ['clasico'];
 for (const [n, ty] of COURSE3) {
   for (let i = 0; i < n; i++) {
@@ -7729,6 +7976,12 @@ const courseMap = ['clasico'];
     courseMap.push('clasico');
   }
 })();
+/**
+ * Tipo del anillo `k` en el nivel actual (o en el tutorial); la salida (`GOAL`) es una muralla.
+ *
+ * @param {number} k Nivel de anillo.
+ * @returns {string} Tipo de anillo.
+ */
 const ringType = k =>
   tutorial
     ? TUT_TYPES[k] || 'vacio'
@@ -7737,6 +7990,7 @@ const ringType = k =>
       : (lvl >= 3 ? courseMaps[lvl] : lvl === 2 ? courseMap3 : lvl === 1 ? courseMap2 : courseMap)[
           Math.min(k, 59)
         ];
+// Tipos de anillo ya presentados al jugador, guardados en `orbita_p1_vistos`.
 let seenTypes = {};
 try {
   seenTypes = JSON.parse(localStorage.getItem('orbita_p1_vistos') || '{}') || {};
@@ -8268,17 +8522,19 @@ function novaPush(ring, ang, tt) {
   }
   return e * (32 + 24 * Math.exp(-d * 1.1));
 } // en el ángulo exacto de la estrella no hay empuje: ella se queda en su lugar
-// ---------- peligros que no son asteroides ----------
-// cometas (desde el Sombrero): cruzan entre tu anillo y el siguiente; su cola apunta lejos del
-// agujero negro
-// rayos de energía (desde M87): un anillo brilla como aviso y luego dispara
-// llamaradas y estrellas veloces (Sagitario A*)
+/**
+ * Datos y estado de los peligros que no son asteroides: en qué anillos aparece cada uno en cada
+ * nivel (las tablas `*_AT` van por índice de nivel y luego por nivel de anillo).
+ * Cometas (desde el Sombrero): cruzan entre tu anillo y el siguiente; su cola apunta lejos del
+ * agujero negro. Rayos de energía (desde M87): un anillo brilla como aviso y luego dispara.
+ * Llamaradas y estrellas veloces (Sagitario A*).
+ */
 const COMET_AT = {
   5: new Set([5, 9, 15, 21, 26, 31, 38, 44]),
   6: new Set([9, 13, 17, 22, 26, 30, 34, 38, 42, 46]),
   7: new Set([10, 16, 22, 29, 35, 43, 48]),
 };
-const COMET_TIME = { 5: 2.4, 6: 1.9, 7: 1.8 }; // segundos que tarda en alcanzarte
+const COMET_TIME = { 5: 2.4, 6: 1.9, 7: 1.8 }; // Segundos que tarda el cometa en alcanzarte.
 const BEAM_AT = {
   6: new Set([7, 11, 15, 19, 24, 28, 32, 36, 40, 44, 47]),
   7: new Set([8, 14, 20, 27, 33, 39, 44]),
@@ -8290,21 +8546,19 @@ let comets = [],
   flareWarn = 0,
   sstars = [],
   beamCount = 0;
-// Nubes de Magallanes · onda de supernova (como la 1987A)
-// Sale del centro al ritmo de la música y se apaga en un anillo límite (marcado en rosa). Si cruzas
-// ese anillo antes de
-// que llegue, estás a salvo. Si te alcanza, tu planeta se sobrecalienta y se queda así el resto del
-// intento; un segundo golpe te destruye.
-// sale justo antes de una muralla o un contragiro: o pasas el primer hueco o te alcanza
+// Nubes de Magallanes: onda de supernova (como la 1987A). Sale del centro al ritmo de la música y
+// se apaga en un anillo límite (marcado en rosa). Si cruzas ese anillo antes de que llegue, estás a
+// salvo. Si te alcanza, tu planeta se sobrecalienta y se queda así el resto del intento; un segundo
+// golpe te destruye. Sale justo antes de una muralla o un contragiro: o pasas el primer hueco o te
+// alcanza. El valor de cada anillo es a cuántos anillos queda el anillo límite.
 const SN_AT = { 1: { 5: 1, 19: 1, 27: 1, 32: 1, 35: 1, 40: 2 } };
 let waves = [],
   hot = 0,
   hotT = 0,
   skyFlash = 0;
-// Andrómeda · nova recurrente (como la M31N 2008-12a, que estalla cada año): una estrella fuera del
-// centro que, al ritmo de la música,
-// lanza cáscaras de gas verde esmeralda (oxígeno). Las cáscaras cruzan los anillos de lado: si
-// saltas a través de un filamento, mueres; por un hueco, pasas.
+// Andrómeda: nova recurrente (como la M31N 2008-12a, que estalla cada año). Una estrella fuera del
+// centro lanza, al ritmo de la música, cáscaras de gas verde esmeralda (oxígeno). Las cáscaras
+// cruzan los anillos de lado: si saltas a través de un filamento, mueres; por un hueco, pasas.
 let novaSrc = [];
 // ---- los poderes de cada planeta (se cargan con Perfectos y se usan deslizando hacia arriba, o
 // con la tecla D) ----
@@ -13096,11 +13350,12 @@ function startTutorial() {
   usedDouble = false;
   startMusic();
 }
-// ---------- pausa ----------
-// Todo se congela de verdad: el juego deja de avanzar y el sonido se suspende (la música sigue
-// justo donde quedó, al ritmo).
-// Se ve como la pantalla de "Escapaste": la misma letra, los mismos tres botones. Al seguir, una
-// cuenta 3·2·1 para no volver de golpe.
+/**
+ * Pausa: congela el juego y suspende el audio (la música sigue justo donde quedó, al ritmo).
+ * Se ve como la pantalla de "Escapaste", con controles de volumen; al seguir hay una cuenta
+ * 3·2·1 para no volver de golpe. Sus sonidos usan otro contexto de audio (`pzAC`), porque `AC`
+ * está suspendido mientras dura la pausa.
+ */
 let paused = false,
   pzCount = null,
   pzPanelCls = '',
@@ -13115,6 +13370,15 @@ const PZ_ICO = {
 };
 const STAR_PATH =
   '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>';
+/**
+ * HTML de una fila de volumen (ícono para silenciar, nombre, barra deslizable y valor).
+ *
+ * @param {string} k Canal: 'mus' (música) o 'sfx' (efectos).
+ * @param {string} ico Ícono SVG.
+ * @param {string} lb Nombre visible.
+ * @param {number} v Volumen, de 0 a 100.
+ * @returns {string} HTML de la fila.
+ */
 function pzVolHTML(k, ico, lb, v) {
   return (
     '<div class="pz-vol' +
@@ -13142,6 +13406,10 @@ function pzVolHTML(k, ico, lb, v) {
     '</span></div>'
   );
 }
+/**
+ * Pausa la partida en curso y muestra el panel con el avance del nivel, las estrellas y los
+ * botones. No hace nada si ya está en pausa o no se está jugando.
+ */
 function pauseGame() {
   if (paused || state !== 'play') {
     return;
@@ -13220,6 +13488,9 @@ function pauseGame() {
     document.body.classList.add('paused');
   }
 }
+/**
+ * Quita el panel de pausa y devuelve al panel las clases que tenía antes.
+ */
 function pzClose() {
   elPanel.className = pzPanelCls || 'hide';
   elPanel.innerHTML = '';
@@ -13231,6 +13502,12 @@ let pzBus = null,
   pzNoise = null,
   pzHoverT = 0,
   pzLastV = {};
+/**
+ * Prepara el contexto de audio propio de la pausa (con el mismo eco de los botones del juego
+ * y un búfer de ruido) y aplica el volumen de efectos.
+ *
+ * @returns {AudioContext} El contexto `pzAC`.
+ */
 function pzCtx() {
   if (!pzAC) {
     pzAC = new (window.AudioContext || window.webkitAudioContext)();
@@ -13242,7 +13519,7 @@ function pzCtx() {
     out.gain.value = 0.6;
     dl.delayTime.value = 0.27;
     fb.gain.value = 0.35;
-    wet.gain.value = 0.45; // el mismo eco de los botones del juego
+    wet.gain.value = 0.45;
     pzBus = pzAC.createGain();
     pzBus.connect(out);
     pzBus.connect(dl);
@@ -13265,8 +13542,16 @@ function pzCtx() {
   pzBus.gain.value = volGain(volSfx);
   return pzAC;
 }
+/**
+ * Nota de cristal, igual que `uiTone` pero en el contexto de la pausa.
+ *
+ * @param {number} semi Semitonos sobre la nota base `ROOT`.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de `pzAC`.
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Ganancia máxima.
+ * @param {string} [type] Forma de onda; por defecto 'sine'.
+ */
 function pzTone(semi, t0, dur, gain, type) {
-  // una nota de cristal (la misma que uiTone)
   const A = pzAC,
     o = A.createOscillator(),
     g = A.createGain(),
@@ -13284,8 +13569,17 @@ function pzTone(semi, t0, dur, gain, type) {
   o.start(t0);
   o.stop(t0 + dur + 0.05);
 }
+/**
+ * Soplo de aire: ruido con un filtro que barre de `f0` a `f1`.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de `pzAC`.
+ * @param {number} dur Duración, en segundos.
+ * @param {number} f0 Frecuencia inicial del filtro, en Hz.
+ * @param {number} f1 Frecuencia final del filtro, en Hz.
+ * @param {number} gain Ganancia máxima.
+ * @param {string} [type] Tipo de filtro; por defecto 'bandpass'.
+ */
 function pzAir(t0, dur, f0, f1, gain, type) {
-  // un soplo de aire filtrado
   const A = pzAC,
     src = A.createBufferSource(),
     f = A.createBiquadFilter(),
@@ -13305,6 +13599,15 @@ function pzAir(t0, dur, f0, f1, gain, type) {
   src.start(t0);
   src.stop(t0 + dur + 0.05);
 }
+/**
+ * Golpe grave que se desliza de `f0` a `f1`.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de `pzAC`.
+ * @param {number} f0 Frecuencia inicial, en Hz.
+ * @param {number} f1 Frecuencia final, en Hz.
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Ganancia máxima.
+ */
 function pzSub(t0, f0, f1, dur, gain) {
   const A = pzAC,
     o = A.createOscillator(),
@@ -13320,6 +13623,14 @@ function pzSub(t0, f0, f1, dur, gain) {
   o.start(t0);
   o.stop(t0 + dur + 0.05);
 }
+/**
+ * Sonidos de la pausa.
+ *
+ * @param {string} kind 'open', 'go', 'count', 'launch', 'again', 'levels', 'mute', 'unmute',
+ *   'slide' u 'hover'.
+ * @param {number} [v] Número de la cuenta (3, 2, 1) para 'count', o volumen de 0 a 100 para
+ *   'slide'.
+ */
 function pzSnd(kind, v) {
   if (muted) {
     return;
@@ -13328,7 +13639,7 @@ function pzSnd(kind, v) {
     pzCtx();
     const n = pzAC.currentTime + 0.005;
     if (kind === 'open') {
-      // el tiempo se detiene: el aire baja, tres notas de cristal que caen y un golpe grave
+      // El tiempo se detiene: el aire baja, tres notas de cristal que caen y un golpe grave.
       pzAir(n, 0.55, 3200, 260, 0.2, 'lowpass');
       pzSub(n, 140, 46, 0.5, 0.3);
       pzTone(19, n, 1.2, 0.06);
@@ -13336,31 +13647,29 @@ function pzSnd(kind, v) {
       pzTone(12, n + 0.14, 1.6, 0.055);
       pzTone(24, n + 0.14, 0.7, 0.012);
     } else if (kind === 'go') {
-      // seguir: notas que suben, con brillo
       pzTone(12, n, 1, 0.06);
       pzTone(19, n + 0.06, 1.1, 0.05);
       pzTone(24, n + 0.12, 1.3, 0.045);
       pzAir(n, 0.4, 400, 4200, 0.1);
     } else if (kind === 'count') {
-      // cada número de la cuenta (v = 3, 2, 1)
       const s = { 3: 12, 2: 15, 1: 19 }[v] || 12;
       pzTone(s, n, 0.55, 0.075);
       pzTone(s + 12, n, 0.3, 0.018);
       pzSub(n, 110, 70, 0.14, 0.14);
     } else if (kind === 'launch') {
-      // vuelve el juego: un destello y el grave que te lanza
+      // Vuelve el juego: un destello y el grave que te lanza.
       pzTone(24, n, 0.9, 0.05);
       pzTone(31, n + 0.03, 0.7, 0.02);
       pzAir(n, 0.35, 6000, 1200, 0.12, 'highpass');
       pzSub(n, 70, 140, 0.22, 0.2);
     } else if (kind === 'again') {
-      // reintentar: un rebobinado corto
+      // Reintentar: un rebobinado corto.
       pzAir(n, 0.32, 300, 3800, 0.16);
       pzTone(7, n, 0.5, 0.05);
       pzTone(12, n + 0.08, 0.7, 0.055);
       pzSub(n + 0.02, 60, 110, 0.2, 0.18);
     } else if (kind === 'levels') {
-      // niveles: el mismo cristal que las flechas del juego, de regreso
+      // Niveles: el mismo cristal que las flechas del juego, de regreso.
       pzTone(19, n, 1.1, 0.06);
       pzTone(12, n + 0.07, 1.3, 0.055);
       pzTone(24, n + 0.07, 0.7, 0.015);
@@ -13371,7 +13680,7 @@ function pzSnd(kind, v) {
       pzTone(5, n, 0.4, 0.04);
       pzTone(12, n + 0.06, 0.6, 0.05);
     } else if (kind === 'slide') {
-      // al arrastrar: una nota que sube con el volumen (en la escala del juego)
+      // Al arrastrar: una nota que sube con el volumen, en la escala del juego.
       const sc = [0, 3, 5, 7, 10, 12, 15, 17, 19, 22, 24],
         s = sc[Math.min(sc.length - 1, Math.round((v / 100) * (sc.length - 1)))];
       pzTone(s, n, 0.35, 0.02 + (0.045 * v) / 100);
@@ -13390,6 +13699,10 @@ function pzSnd(kind, v) {
 function pzTick(i) {
   pzSnd('count', i);
 }
+/**
+ * Sale de la pausa con una cuenta 3·2·1 (solo 1 con movimiento reducido) y luego reanuda el
+ * juego y el audio. Reinicia `last` para que el tiempo en pausa no cuente como un cuadro largo.
+ */
 function resumeGame() {
   if (!paused || pzCount || !document.body.classList.contains('paused')) {
     return;
@@ -13429,8 +13742,10 @@ function resumeGame() {
     } catch (e) {}
   }, 620);
 }
+/**
+ * Sale de la pausa sin cuenta, para reintentar o ir a los niveles.
+ */
 function pzLeave() {
-  // salir de la pausa sin cuenta (para reintentar o ir a los niveles)
   if (pzCount) {
     clearInterval(pzCount);
     pzCount = null;
@@ -13448,6 +13763,13 @@ function pzLeave() {
     }
   } catch (e) {}
 }
+/**
+ * Cambia un volumen, actualiza su fila y lo guarda. Al arrastrar, suena una nota cada 10.
+ *
+ * @param {string} k Canal: 'mus' o 'sfx'.
+ * @param {number} v Volumen, de 0 a 100 (se recorta a ese rango).
+ * @param {Element} [row] Fila de volumen a actualizar.
+ */
 function pzSetVol(k, v, row) {
   v = Math.max(0, Math.min(100, Math.round(v)));
   {
@@ -13477,7 +13799,14 @@ function pzSetVol(k, v, row) {
   applyVolumes();
   saveVolumes();
 }
+// Volumen de cada canal antes de silenciarlo, para restaurarlo.
 const pzPrev = { mus: 100, sfx: 100 };
+/**
+ * Atiende un toque en el panel de pausa: botones (seguir, reintentar, niveles, silenciar) o
+ * el inicio del arrastre de una barra de volumen.
+ *
+ * @param {PointerEvent} e Evento del toque.
+ */
 function pausePress(e) {
   if (pzCount) {
     return;
@@ -13550,13 +13879,22 @@ const pzEnd = () => {
 };
 window.addEventListener('pointerup', pzEnd);
 window.addEventListener('pointercancel', pzEnd);
-// si sales de la app o te llaman, el juego se pausa solo
+// Si se sale de la app o llega una llamada, el juego se pausa solo.
 document.addEventListener('visibilitychange', () => {
   if (document.hidden && state === 'play' && !paused) {
     pauseGame();
   }
 });
-// ---------- entrada ----------
+/**
+ * Controles: toques, gestos y teclado. Un toque hace algo distinto según la pantalla (`state`);
+ * en partida salta, y deslizar hacia arriba justo después convierte el salto en salto doble.
+ */
+/**
+ * Atiende un toque o la tecla de acción según la pantalla actual: pausa, botones de los paneles,
+ * opciones de música y modo, saltar pantallas, empezar la partida o saltar.
+ *
+ * @param {PointerEvent} [e] Evento del toque; sin evento, viene del teclado.
+ */
 function press(e) {
   if (paused) {
     pausePress(e);
@@ -13625,7 +13963,7 @@ function press(e) {
       try {
         localStorage.setItem('orbita_p1_musica', musicStyle);
       } catch (_) {}
-      startMusic(); // vista previa: se escucha completa mientras eliges
+      startMusic(); // Vista previa: se escucha completa mientras se elige.
     } else {
       hudMode = chip.dataset.mode;
       refreshChips();
@@ -13689,10 +14027,11 @@ function press(e) {
       if (charge >= chargeMax()) {
         pending = true;
         pendingT = 0;
-      } // espera un instante por si es un deslizamiento
+      } // Espera un instante por si es un deslizamiento hacia arriba (salto doble).
     }
   }
 }
+// Deslizar más de 22 píxeles hacia arriba durante el toque mejora el salto a salto doble.
 window.addEventListener('pointermove', e => {
   if (!gest || e.pointerId !== gest.id) {
     return;
@@ -13714,8 +14053,10 @@ const endGest = e => {
 window.addEventListener('pointerup', endGest);
 window.addEventListener('pointercancel', endGest);
 window.addEventListener('pointerdown', press, { passive: false });
-// tecla del poder: funciona antes de saltar y también en pleno salto; si no está cargado, avisa
-// cuánto falta
+/**
+ * Tecla del poder (D o Mayúsculas): funciona antes de saltar y también en pleno salto; si no
+ * está cargado, avisa cuántos Perfectos faltan.
+ */
 function powerKey() {
   if (state !== 'play' || wh) {
     return;
@@ -13742,6 +14083,8 @@ function powerKey() {
     doubleJump();
   }
 }
+// Teclado: Escape o P pausan; Espacio, Enter y flecha arriba actúan como un toque; las flechas
+// laterales recorren planetas y niveles.
 window.addEventListener('keydown', e => {
   if (e.code === 'Escape' || e.code === 'KeyP') {
     if (paused) {
@@ -15585,7 +15928,13 @@ function renderScene() {
   }
   drawFlare();
 }
-// ---------- intro: un agujero negro errante entra al sistema solar ----------
+/**
+ * Historia de introducción: un agujero negro errante entra al sistema solar, se traga el Sol y
+ * los planetas, y la cámara se acerca a la Tierra hasta la escala del juego.
+ * Todo se mide con `introT` (segundos desde el inicio) contra los tiempos `T_*`; las posiciones
+ * están en unidades de un sistema de 224 de radio que `SI` escala a la pantalla.
+ */
+// Planetas de la intro. r: radio de la órbita y s: tamaño, en unidades de la intro.
 const PLANETS = [
   { n: 'Mercurio', r: 38, s: 3.5, c: '#a9a6a0' },
   { n: 'Venus', r: 60, s: 5.5, c: '#e3c27a' },
@@ -15596,6 +15945,7 @@ const PLANETS = [
   { n: 'Urano', r: 186, s: 7, c: '#8fd3e0' },
   { n: 'Neptuno', r: 208, s: 7, c: '#3f6fd6' },
 ];
+// Segundo de la intro en que el agujero negro se traga cada planeta.
 const EAT_AT = {
   Mercurio: 6.6,
   Venus: 7.3,
@@ -15605,6 +15955,7 @@ const EAT_AT = {
   Urano: 10.1,
   Neptuno: 10.8,
 };
+// Tiempos de la intro, en segundos.
 const INTRO_END = 15.9,
   T_ZOOM = 13.9,
   ZOOM_DUR = 1.8,
@@ -15621,6 +15972,9 @@ let introT = 0,
   SI = 1,
   droneNodes = null,
   cues = {};
+/**
+ * Reinicia el reloj, las partículas y los planetas de la intro.
+ */
 function introSetup() {
   introT = 0;
   iparts = [];
@@ -15637,9 +15991,15 @@ function introSetup() {
   );
 }
 introSetup();
+// true solo la primera vez que se pide cada señal `k`, para disparar sonidos una vez.
 const once = k => (cues[k] ? false : (cues[k] = true));
 const easeIO = x => (x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
-// trayectoria del agujero negro: llega desde afuera y se instala donde estaba el Sol
+/**
+ * Posición del agujero negro: llega desde afuera por una curva de Bézier y se instala donde
+ * estaba el Sol.
+ *
+ * @returns {{x: number, y: number}} Posición relativa al centro, en unidades de la intro.
+ */
 function bhPos() {
   if (introT < T_ARRIVE) {
     const u = easeIO(clamp((introT - T_ENTER) / (T_ARRIVE - T_ENTER), 0, 1));
@@ -15651,17 +16011,21 @@ function bhPos() {
   const u = easeIO(clamp((introT - T_ARRIVE) / (T_SUN_END - T_ARRIVE), 0, 1));
   return { x: 42 * (1 - u), y: -14 * (1 - u) };
 }
-// crece al alimentarse
+// El agujero negro crece al alimentarse; diskK y sunK son el avance (de 0 a 1) del disco y de la
+// destrucción del Sol.
 const bhRadius = () => 8 + 12 * clamp((introT - T_ARRIVE) / (T_DISK_END - T_ARRIVE), 0, 1);
 const diskK = () => clamp((introT - 4.8) / (T_DISK_END - 4.8), 0, 1);
 const sunK = () => clamp((introT - T_ARRIVE) / (T_SUN_END - T_ARRIVE), 0, 1);
 
-// antes de jugar: solo dónde estás y "toca para escapar"; la ayuda con íconos aparece hasta que
-// dominas el salto doble
+// Antes de jugar solo se muestra dónde estás y "toca para escapar"; la ayuda con íconos se muestra
+// hasta que se domina el salto doble (cuenta guardada en `orbita_p1_dobles`).
 let doblesHechos = 0;
 try {
   doblesHechos = parseInt(localStorage.getItem('orbita_p1_dobles') || '0', 10) || 0;
 } catch (e) {}
+/**
+ * Cuenta un salto doble hecho (fuera del tutorial) y avanza la misión de poderes.
+ */
 function noteDouble() {
   if (tutorial) {
     return;
@@ -15672,6 +16036,7 @@ function noteDouble() {
     localStorage.setItem('orbita_p1_dobles', String(doblesHechos));
   } catch (e) {}
 }
+// Panel previo a jugar: nivel elegido, invitación a tocar y los avisos de ayuda.
 const MENU_HTML = () => {
   const L = LEVELS[lvl] || LEVELS[0];
   return (
@@ -15683,6 +16048,9 @@ const MENU_HTML = () => {
     chipsHTML()
   );
 };
+/**
+ * Empieza la historia de introducción desde el principio.
+ */
 function startIntro() {
   homeAmbience(false);
   state = 'intro';
@@ -15691,12 +16059,21 @@ function startIntro() {
   elHud.style.opacity = 0;
   introDrone(true);
 }
+// Acercamiento final de la cámara: introZoomK es su avance (de 0 a 1) y zoomZ el aumento que deja
+// la escena a la escala del juego. EARTH_W es la velocidad angular de la Tierra en la intro: con
+// la tercera ley de Kepler, proporcional a r^-1,5 respecto de una órbita de 60.
 const introZoomK = () => easeIO(clamp((introT - T_ZOOM) / ZOOM_DUR, 0, 1));
 const EARTH_W = 0.9 * Math.pow(60 / 84, 1.5);
 const holeGameR = () => Math.max(rr(sunLevel), SUN) * S;
 const zoomZ = () => holeGameR() / (20 * SI);
 const earthEndR = () => (rr(0) * S) / (zoomZ() * SI);
 const zoomF = () => 1 + (zoomZ() - 1) * introZoomK();
+/**
+ * Termina la intro, la marca como vista y vuelve a donde se abrió (inicio o niveles) o, la
+ * primera vez, deja el panel listo para jugar el nivel 1.
+ *
+ * @param {boolean} skipped true si se saltó; el juego aparece con un fundido más corto.
+ */
 function endIntro(skipped) {
   storySeen = true;
   try {
@@ -15723,6 +16100,11 @@ function endIntro(skipped) {
   elPanel.classList.add('top');
   elPanel.classList.remove('hide');
 }
+/**
+ * Zumbido grave de fondo de la intro (55 Hz con una sierra levemente desafinada).
+ *
+ * @param {boolean} on true para encenderlo, false para apagarlo con un desvanecido.
+ */
 function introDrone(on) {
   if (!AC) {
     return;
@@ -15760,6 +16142,9 @@ function introDrone(on) {
     }
   } catch (e) {}
 }
+/**
+ * Sonido de un planeta tragado: un tono que cae con ruido sordo.
+ */
 function eatSound() {
   if (!AC) {
     return;
@@ -15782,6 +16167,12 @@ function eatSound() {
   } catch (e) {}
 }
 
+/**
+ * Avanza la intro: dispara los sonidos de cada momento, deshace el Sol, tira de las partículas
+ * hacia el agujero negro y mueve los planetas.
+ *
+ * @param {number} dt Tiempo desde el cuadro anterior, en segundos.
+ */
 function updateIntro(dt) {
   if (state === 'intro') {
     introT += dt;
@@ -15812,7 +16203,7 @@ function updateIntro(dt) {
   const b = bhPos(),
     sk = sunK(),
     holeR = bhRadius();
-  // el Sol se deshace en una espiral de fuego alrededor del agujero negro
+  // El Sol se deshace en una espiral de fuego alrededor del agujero negro.
   if (state === 'intro' && sk > 0 && sk < 1) {
     const sR = 20 * Math.pow(1 - sk, 0.7),
       sx = b.x * sk * 0.5,
@@ -15871,7 +16262,7 @@ function updateIntro(dt) {
         thump();
       }
     } else {
-      // la Tierra llega arriba justo en "Escapa"
+      // La Tierra llega arriba justo cuando aparece "Escapa".
       p.a = p.earth ? -Math.PI / 2 + EARTH_W * Math.min(0, introT - T_ZOOM) : p.a + w * dt;
       if (p.earth && introT > T_EARTH) {
         const k = easeIO(Math.min((introT - T_EARTH) / 6, 1));
@@ -15898,6 +16289,7 @@ function updateIntro(dt) {
   }
 }
 
+// Id de cada planeta en el juego, para dibujarlo con su imagen.
 const INTRO_ID = {
   Mercurio: 'mercurio',
   Venus: 'venus',
@@ -15907,6 +16299,15 @@ const INTRO_ID = {
   Urano: 'urano',
   Neptuno: 'neptuno',
 };
+/**
+ * Dibuja un planeta de la intro; al ser tragado se estira hacia el agujero negro y se desvanece.
+ *
+ * @param {object} p Planeta de la intro.
+ * @param {number} x Posición horizontal, en píxeles de pantalla.
+ * @param {number} y Posición vertical, en píxeles de pantalla.
+ * @param {number} rad Radio, en píxeles de pantalla.
+ * @param {number} ph Avance de la caída, de 0 (intacto) a 1 (tragado).
+ */
 function drawPlanet(p, x, y, rad, ph) {
   ctx.save();
   ctx.translate(x, y);
@@ -15967,6 +16368,15 @@ function drawPlanet(p, x, y, rad, ph) {
   ctx.restore();
   ctx.globalAlpha = 1;
 }
+/**
+ * Texto de la historia que aparece y se desvanece entre dos momentos; se achica si no cabe.
+ *
+ * @param {string} txt Texto; `\n` separa líneas.
+ * @param {number} t0 Inicio, en segundos de la intro.
+ * @param {number} t1 Fin, en segundos de la intro.
+ * @param {number} size Tamaño de letra, en píxeles.
+ * @param {number} y Centro vertical, en píxeles de pantalla.
+ */
 function caption(txt, t0, t1, size, y) {
   if (introT < t0 || introT > t1) {
     return;
@@ -15990,6 +16400,9 @@ function caption(txt, t0, t1, size, y) {
   lines.forEach((l, i) => ctx.fillText(l, CX, y + (i - (lines.length - 1) / 2) * fs * 1.4));
   ctx.globalAlpha = 1;
 }
+/**
+ * Dibuja un cuadro de la intro: órbitas, Sol, agujero negro, planetas, partículas y textos.
+ */
 function renderIntro() {
   const z = ZONES[0],
     b = bhPos(),
@@ -16045,7 +16458,7 @@ function renderIntro() {
     ctx.stroke();
   }
   ctx.globalAlpha = 1;
-  // el Sol: intacto, y luego estirado hacia el agujero negro
+  // El Sol: intacto, y luego estirado hacia el agujero negro.
   if (sk < 1) {
     const sR = 20 * Math.pow(1 - sk, 0.7) * SI,
       sx = CX + b.x * sk * 0.5 * SI,
@@ -16073,7 +16486,7 @@ function renderIntro() {
     ctx.fill();
     ctx.restore();
   }
-  // el agujero negro (solo se ve por cómo dobla la luz, hasta que se alimenta y aparece su disco)
+  // El agujero negro solo se ve por cómo dobla la luz, hasta que se alimenta y aparece su disco.
   if (introT >= T_ENTER) {
     const zf = zoomF(),
       hx = CX + b.x * SI * zf,
@@ -18101,10 +18514,20 @@ function renderHomeIntro() {
     drawLogo(W / 2, Math.max(120, H * 0.24), Math.min(46, W * 0.1), T - logoT0);
   }
 }
-// ---------- sonidos de la interfaz: cristal y eco, en la tonalidad del juego ----------
+/**
+ * Sonidos de la interfaz (cristal y eco, en la tonalidad del juego) y de la absorción de la
+ * presentación, incluidos dos inspirados en datos reales: la sonificación de la NASA del agujero
+ * negro de Perseo y el chirrido de ondas gravitacionales de LIGO.
+ * Los clics y el paso del puntero sobre botones se escuchan en toda la página desde aquí.
+ */
 let uiBus = null,
   lastHover = null,
   uiLastT = 0;
+/**
+ * Salida de los sonidos de interfaz, con eco de 0,27 segundos; se crea al primer uso.
+ *
+ * @returns {GainNode} Entrada de la salida.
+ */
 function uiOut() {
   if (uiBus) {
     return uiBus;
@@ -18125,6 +18548,15 @@ function uiOut() {
   uiBus = inG;
   return uiBus;
 }
+/**
+ * Nota de cristal de la interfaz: ataque instantáneo y caída exponencial, con eco.
+ *
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Ganancia máxima.
+ * @param {string} [type] Forma de onda; por defecto 'sine'.
+ */
 function uiTone(f, t0, dur, gain, type) {
   const o = AC.createOscillator(),
     g = AC.createGain(),
@@ -18142,7 +18574,10 @@ function uiTone(f, t0, dur, gain, type) {
   o.start(t0);
   o.stop(t0 + dur + 0.05);
 }
-// al pasar el puntero: una nota de cristal suave, distinta cada vez
+/**
+ * Al pasar el puntero sobre un botón: una nota de cristal suave, distinta cada vez (como
+ * máximo una cada 0,06 segundos).
+ */
 function uiHover() {
   if (!AC || muted || AC.state !== 'running') {
     return;
@@ -18159,7 +18594,11 @@ function uiHover() {
     uiTone(ROOT * 2 * Math.pow(2, semi / 12), n + 0.01, 0.5, 0.012);
   } catch (e) {}
 }
-// al tocar: una campana grave; al tocar Jugar: el agujero negro "traga" el toque
+/**
+ * Sonido de tocar un botón: una campana grave, o en Jugar, el agujero negro que "traga" el toque.
+ *
+ * @param {string} kind 'play' para los botones de jugar; cualquier otro valor, el sonido suave.
+ */
 function uiClick(kind) {
   if (!AC || muted) {
     return;
@@ -18226,7 +18665,7 @@ window.addEventListener(
     }
     if (b.id === 'quit' || paused || (b.closest && b.closest('.pzp'))) {
       return;
-    } // la pausa tiene sus propios sonidos
+    } // La pausa tiene sus propios sonidos.
     if (b.classList.contains('glass') || b.classList.contains('arrow')) {
       uiGlass(b.classList.contains('l') ? -1 : 1);
       return;
@@ -18239,9 +18678,14 @@ window.addEventListener(
   true,
 );
 
-// ---------- el sonido de la absorción ----------
+// Sonido de la absorción en la presentación: showBus es su salida y bed el fondo continuo.
 let showBus = null,
   bed = null;
+/**
+ * Salida de los sonidos de la absorción; se crea si no existe.
+ *
+ * @returns {GainNode} La salida.
+ */
 function showOut() {
   if (!showBus) {
     showBus = AC.createGain();
@@ -18250,8 +18694,10 @@ function showOut() {
   }
   return showBus;
 }
-// un "inhalar" que nunca para: oleadas de aire que bajan de tono y se cortan, como un desagüe
-// cósmico
+/**
+ * Empieza el fondo de la absorción: un "inhalar" que nunca para, con la voz de Perseo y un
+ * latido grave de presión gravitacional.
+ */
 function showStart() {
   if (!AC) {
     return;
@@ -18271,7 +18717,7 @@ function showStart() {
     vg.gain.exponentialRampToValueAtTime(0.42, n + 1.8);
     vg.connect(showBus);
     const nodes = perseusVoice(vg, n);
-    // presión gravitacional: un latido grave, más sentido que escuchado
+    // Presión gravitacional: un latido grave, más sentido que escuchado.
     const pr = AC.createOscillator(),
       prg = AC.createGain(),
       pl = AC.createOscillator(),
@@ -18300,6 +18746,11 @@ function showStart() {
     bed = { g, nodes };
   } catch (e) {}
 }
+/**
+ * Apaga el fondo de la absorción con un desvanecido.
+ *
+ * @param {number} [fade] Duración del desvanecido, en segundos; por defecto 0,6.
+ */
 function showStop(fade) {
   if (!AC) {
     return;
@@ -18325,7 +18776,13 @@ function showStop(fade) {
     }
   } catch (e) {}
 }
-// cada roca: un silbido que sube mientras acelera hacia el centro y se corta al cruzar el horizonte
+/**
+ * Sonido de una roca que cae: sube de tono mientras acelera hacia el centro y se corta al
+ * cruzar el horizonte de sucesos.
+ *
+ * @param {number} dur Duración de la caída, en segundos.
+ * @param {number} pan Posición estéreo inicial, de -1 (izquierda) a 1 (derecha); termina al centro.
+ */
 function rockIn(dur, pan) {
   if (!AC || muted) {
     return;
@@ -18341,8 +18798,8 @@ function rockIn(dur, pan) {
       pn.connect(out);
       dest = pn;
     }
-    // la roca cae y su "voz" se vuelve cada vez más aguda (corrimiento al azul), hasta cortarse en
-    // el horizonte
+    // La "voz" de la roca se vuelve más aguda al caer (corrimiento al azul), hasta cortarse en el
+    // horizonte.
     for (const [f0, f1, gn, ty] of [
       [55, 330, 0.2, 'sine'],
       [82, 495, 0.07, 'sine'],
@@ -18371,7 +18828,11 @@ function rockIn(dur, pan) {
     }
   } catch (e) {}
 }
-// justo antes de tragarse la estrella: una gran inhalación que crece y se corta en seco
+/**
+ * Gran inhalación justo antes de tragarse la estrella: crece y se corta en seco.
+ *
+ * @param {number} dur Duración, en segundos.
+ */
 function bigSuck(dur) {
   if (!AC || muted) {
     return;
@@ -18408,9 +18869,14 @@ function bigSuck(dur) {
   } catch (e) {}
 }
 
-// ---------- sonidos científicos ----------
-// "Voz" inspirada en la sonificación de la NASA del agujero negro de Perseo (2022): un gemido grave
-// que cambia lentamente de tono
+/**
+ * "Voz" inspirada en la sonificación de la NASA del agujero negro del cúmulo de Perseo (2022):
+ * un gemido grave que cambia lentamente de tono y de vocal.
+ *
+ * @param {AudioNode} dest Destino del sonido.
+ * @param {number} n Momento de inicio, en segundos del reloj de audio.
+ * @returns {OscillatorNode[]} Osciladores creados, para detenerlos después.
+ */
 function perseusVoice(dest, n) {
   const nodes = [];
   const formA = AC.createBiquadFilter(),
@@ -18426,7 +18892,7 @@ function perseusVoice(dest, n) {
   formA.connect(mix);
   formB.connect(mix);
   mix.connect(dest);
-  // la "vocal" del gemido cambia despacio (ooo -> aaa)
+  // La "vocal" del gemido cambia despacio (ooo -> aaa).
   for (const [f, rate, depth] of [
     [formA, 0.09, 160],
     [formB, 0.06, 300],
@@ -18456,7 +18922,7 @@ function perseusVoice(dest, n) {
     l.frequency.value = rate;
     lg.gain.value = base * dep;
     l.connect(lg);
-    lg.connect(o.frequency); // el tono se arrastra arriba y abajo
+    lg.connect(o.frequency); // El tono se arrastra arriba y abajo.
     o.connect(og);
     og.connect(formA);
     og.connect(formB);
@@ -18466,8 +18932,10 @@ function perseusVoice(dest, n) {
   }
   return nodes;
 }
-// "Chirrido" inspirado en las ondas gravitacionales que detectó LIGO en 2015: sube de tono, crece y
-// se apaga de golpe
+/**
+ * "Chirrido" inspirado en las ondas gravitacionales que detectó LIGO en 2015: sube de tono,
+ * crece y se apaga de golpe (el "ringdown" tras la fusión).
+ */
 function gwChirp() {
   if (!AC || muted) {
     return;
@@ -21051,11 +21519,13 @@ function drawGalBG(i) {
   }
   ctx.globalAlpha = 1;
 }
-// Fondos en WebGL: lo que comparten todos los shaders de fondo
-// ---------- fondos en WebGL: capas, movimiento, gas y la luz doblada por el agujero negro
-// ----------
-// Se dibuja con la tarjeta gráfica a media resolución (el gas es suave) y se copia al lienzo del
-// juego.
+/**
+ * Código GLSL que comparten todos los fondos en WebGL: uniformes, ruido, estrellas y la luz
+ * doblada por el agujero negro. Se dibuja con la tarjeta gráfica a resolución reducida (el gas
+ * es suave) y se copia al lienzo del juego.
+ * Es solo texto GLSL: cambiar algo dentro de las plantillas cambia todos los fondos.
+ */
+// Shader de vértices: un triángulo que cubre toda la pantalla.
 const BG_VS = 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }';
 const BG_COMMON = `
 precision highp float;
@@ -21927,7 +22397,11 @@ vec3 flares(vec2 q){
   return c;
 }
 `;
-// Centaurus A (nivel 4): cuerpo, franja de polvo, chorros y lóbulos
+/**
+ * Shader GLSL del fondo de Centaurus A (nivel 4): cuerpo de la galaxia, franja de polvo, chorros
+ * y lóbulos de radio, con los tonos de las fotos de ESO.
+ * Es solo texto GLSL: el motor de fondos (32-fondos-9-motor) lo compila junto con lo común.
+ */
 const GX_CENTAURUS = `// ===================== CENTAURUS A =====================
 // tonos de las fotos de ESO: cuerpo crema-gris #d6c5c1, franja de polvo café con borde naranja, cúmulos azules,
 // regiones rosadas; chorros en rayos X azules (#6a8ad8) y lóbulos naranjas en submilimétrico
@@ -22457,7 +22931,12 @@ void main(){
   col *= 1. + uBeat*.08;
   gl_FragColor = vec4(col, 1.);
 }`;
-// ---------- fondos en WebGL: el motor que dibuja el shader de cada galaxia ----------
+/**
+ * Motor de fondos en WebGL: compila el shader de cada galaxia, le pasa el estado del juego como
+ * uniformes y copia el resultado al lienzo 2D del juego.
+ * Usa un lienzo WebGL propio y fuera de pantalla; si WebGL falla, `draw` devuelve false y el juego
+ * usa el fondo 2D. La interfaz pública es el objeto `GLBG`.
+ */
 const GLBG = (() => {
   let cv = null,
     gl = null,
@@ -22466,6 +22945,11 @@ const GLBG = (() => {
     failed = false,
     flow = 0,
     photoTex = {};
+  /**
+   * Crea el contexto WebGL y el triángulo que cubre la pantalla, una sola vez.
+   *
+   * @returns {boolean} true si WebGL está disponible.
+   */
   function init() {
     if (gl || failed) {
       return !!gl;
@@ -22496,6 +22980,13 @@ const GLBG = (() => {
       return false;
     }
   }
+  /**
+   * Compila y enlaza (una vez) el programa de un fondo y guarda sus uniformes.
+   *
+   * @param {string} name Nombre del programa en la caché.
+   * @param {string} fs Código GLSL del shader de fragmentos.
+   * @returns {?{p: WebGLProgram, U: object}} El programa, o null si no compila.
+   */
   function prog(name, fs) {
     if (progs[name] !== undefined) {
       return progs[name];
@@ -22544,7 +23035,14 @@ const GLBG = (() => {
     ].forEach(k => (U[k] = gl.getUniformLocation(p, k)));
     return (progs[name] = { p, U });
   }
-  // carga una fotografía (url o data:) como textura
+  /**
+   * Carga una fotografía como textura, una vez por nombre. Un lienzo se sube al momento; una
+   * dirección se carga en segundo plano y queda lista (`ready`) al llegar.
+   *
+   * @param {string} name Nombre de la textura en la caché.
+   * @param {string|HTMLCanvasElement} src Dirección (url o data:) o lienzo.
+   * @returns {object} Registro de la textura: `{ready, w, h, tex}`.
+   */
   function photo(name, src) {
     if (photoTex[name]) {
       return photoTex[name];
@@ -22586,7 +23084,16 @@ const GLBG = (() => {
     } catch (e) {}
     return rec;
   }
-  // dibuja el fondo del nivel; devuelve false si no se pudo (y el juego usa el fondo anterior)
+  /**
+   * Dibuja el fondo del nivel. Las galaxias detalladas se calculan a la resolución del
+   * dispositivo (hasta 1,6×); las demás, a 900 píxeles como máximo.
+   *
+   * @param {string} kind Fondo: 'mw', 'lmc', 'and2', 'and', 'gx' o 'photo'.
+   * @param {object} opts beat (golpe de música, de 0 a 1), wh (agujero de gusano: x, y, radio en
+   *   píxeles de pantalla y fuerza), kind (nivel, para 'gx'); para 'photo': name, src, fx, fy,
+   *   zoom.
+   * @returns {boolean} false si no se pudo dibujar; el juego usa entonces el fondo 2D.
+   */
   function draw(kind, opts) {
     if (!init()) {
       return false;
@@ -22628,7 +23135,7 @@ const GLBG = (() => {
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-    // el agujero negro y su anillo de Einstein (la luz se dobla más cerca de él)
+    // El agujero negro y su anillo de Einstein (la luz se dobla más cerca de él).
     const Rg = Math.max(rr(sunLevel), SUN) * S;
     gl.uniform2f(p.U.uRes, w, h);
     gl.uniform1f(p.U.uT, t);
@@ -22644,6 +23151,7 @@ const GLBG = (() => {
       gl.uniform1f(p.U.uBand, bandE);
     }
     gl.uniform3f(p.U.uBH, CX * sc, CY * sc, Rg * 1.9 * sc);
+    // WebGL cuenta la altura desde abajo, por eso se invierte la y.
     if (p.U.uWH) {
       const wh = opts.wh;
       if (wh) {
@@ -22672,11 +23180,19 @@ const GLBG = (() => {
     ctx.restore();
     return true;
   }
-  // cuánto "avanzas": lento siempre, más rápido al saltar y en la recta final
+  // Cuánto se avanza por el fondo: lento siempre, más rápido al saltar y en la recta final.
+  // jour: avance del viaje (de 0 a 1); spd: velocidad suavizada; bandE: tramo de luz de la canción.
   let jour = 0,
     spd = 0,
     band = 0,
     bandE = 0;
+  /**
+   * Avanza el fondo un cuadro.
+   *
+   * @param {number} d Tiempo del cuadro, en segundos.
+   * @param {number} speed Velocidad de avance (0 detiene el flujo).
+   * @param {number} [target] Avance del viaje hacia el que se acerca `jour`, de 0 a 1.
+   */
   function advance(d, speed, target) {
     flow += d * speed;
     spd += (Math.min(speed, 3) / 3 - spd) * Math.min(1, d * 4);
@@ -22684,7 +23200,13 @@ const GLBG = (() => {
       jour += (target - jour) * Math.min(1, d * 1.5);
     }
   }
-  // cambia de luz al ritmo de la canción: 15 entran los platillos, 28 el bombo, y el beat acelerado
+  /**
+   * Cambia la luz del fondo al ritmo de la canción, con un paso suave entre tramos (en el
+   * anillo 15 entran los platillos, en el 28 el bombo, y luego el ritmo acelerado).
+   *
+   * @param {number} target Tramo de luz al que ir (0, 1, 2, 3).
+   * @param {number} d Tiempo del cuadro, en segundos.
+   */
   function setBand(target, d) {
     const st = d / 6;
     band = band < target ? Math.min(target, band + st) : Math.max(target, band - st);
@@ -22692,6 +23214,9 @@ const GLBG = (() => {
       e = x * x * (3 - 2 * x);
     bandE = Math.floor(band) + e;
   }
+  /**
+   * Vuelve el viaje y la luz al principio, para una partida nueva.
+   */
   function reset() {
     jour = 0;
     band = bandE = 0;
@@ -22699,11 +23224,16 @@ const GLBG = (() => {
   return { draw, advance, reset, setBand, ok: () => init(), canvas: () => cv };
 })();
 
-// Remolino: método con fotografía real (mientras llega la foto, usa el dibujo actual como base)
+// Fotografía real para el fondo del Remolino; vacía, se usa el fondo dibujado.
 let REMOLINO_PHOTO = '';
+/**
+ * Fuente de la fotografía del Remolino.
+ *
+ * @returns {?string} La dirección de la foto, o null para usar el fondo dibujado.
+ */
 function remolinoSource() {
   return REMOLINO_PHOTO || null;
-} // sin foto todavía: se usa el fondo dibujado
+}
 // ---------- tarjetas vivas: cada galaxia se dibuja en movimiento, en tiempo real (WebGL)
 // ----------
 // Una sola escena a pantalla completa detrás de las tarjetas: al deslizar, cada galaxia se mueve
@@ -23278,13 +23808,19 @@ function drawLevelsBG() {
   ctx.restore();
   elLv.classList.toggle('live', !!soft);
 }
-// ---------- misiones y polvo estelar ----------
-// estrellas = habilidad (desbloquean) · polvo estelar = constancia (compra). Diarias: tres al día,
-// cambian a medianoche.
-// el ícono de Misiones en el inicio: una constelación de tres estrellas (una por misión del día)
-// dentro de un arco de progreso;
-// cada misión cumplida enciende una estrella y llena un tercio del arco; con las tres, la
-// constelación se une y el círculo se cierra
+/**
+ * Misiones diarias, logros y polvo estelar: progreso guardado, panel de Misiones y sus dibujos.
+ * Estrellas = habilidad (desbloquean); polvo estelar = constancia (compra). Hay tres misiones
+ * diarias que cambian a medianoche. El progreso vive en `MIS` (localStorage `orbita_mis`).
+ */
+
+/**
+ * Arma el ícono de Misiones del inicio: una constelación de tres estrellas (una por misión del
+ * día) dentro de un arco de progreso. Cada misión cumplida enciende una estrella y llena un
+ * tercio del arco; con las tres, la constelación se une y el círculo se cierra.
+ *
+ * @returns {string} Contenido SVG (sin la etiqueta `<svg>`), en un cuadro de 100 × 100.
+ */
 function misMoons() {
   misLoad();
   const done = Math.min(
@@ -23380,6 +23916,12 @@ function misMoons() {
   });
   return h;
 }
+/**
+ * Ícono SVG de cristales de polvo estelar. Cada llamada usa un id de degradado distinto para que
+ * varios íconos en la misma página no compartan el mismo `<linearGradient>`.
+ *
+ * @returns {string} Fragmento SVG.
+ */
 function misCrystal() {
   return (
     '<defs><linearGradient id="mcg' +
@@ -23391,6 +23933,8 @@ function misCrystal() {
     ')"/><path d="M10.5 16.2 L12.236 19 L10.5 21.8 L8.764 19Z" fill="#bff3ec"/>'
   );
 }
+// Misiones diarias. g: grupo (se sortea una de cada grupo), n: meta, ev: evento que la avanza,
+// max: la meta es el mejor valor alcanzado y no una suma, rw: premio en polvo estelar.
 const MIS_DAILY = [
   { id: 'perf10', g: 0, t: 'Haz 10 Perfectos', d: 'En cualquier nivel', n: 10, ev: 'perf', rw: 40 },
   {
@@ -23463,6 +24007,7 @@ const MIS_ACH = [
   { id: 'todos', t: 'Escapa de las 8 galaxias', d: 'Todos los niveles', rw: 500 },
   { id: 'sol', t: 'Llega al Sol', d: 'El final del viaje', rw: 1000, secret: true },
 ];
+// Dato científico real que se muestra al cobrar cada logro.
 const MIS_FACT = {
   tierra8:
     'La Tierra viaja alrededor del Sol a unos 30 km por segundo. Es el único planeta conocido con agua líquida en su superficie.',
@@ -23484,6 +24029,12 @@ var MIS = null,
   misFx = 0,
   misOpen = false,
   misSwitch = 0;
+/**
+ * Fecha local como texto `AAAA-MM-DD`, que identifica el día de las misiones.
+ *
+ * @param {number} [off] Días a sumar (por ejemplo -1 para ayer).
+ * @returns {string} La fecha.
+ */
 function misToday(off) {
   const d = new Date();
   if (off) {
@@ -23497,6 +24048,12 @@ function misToday(off) {
     String(d.getDate()).padStart(2, '0')
   );
 }
+/**
+ * Carga el progreso guardado la primera vez (con valores por defecto para campos faltantes) y
+ * sortea las misiones del día si cambió la fecha.
+ *
+ * @returns {object} El progreso `MIS`.
+ */
 function misLoad() {
   if (!MIS) {
     let d = {};
@@ -23533,6 +24090,10 @@ function misSave() {
     localStorage.setItem('orbita_mis', JSON.stringify(MIS));
   } catch (e) {}
 }
+/**
+ * Sortea las tres misiones del día, una por grupo. El sorteo sale de un hash de la fecha, así que
+ * es el mismo durante todo el día aunque se recargue la página.
+ */
 function misRoll() {
   const day = misToday();
   if (MIS.day === day && MIS.daily.length === 3) {
@@ -23551,6 +24112,13 @@ function misRoll() {
   misSave();
 }
 const misDef = id => MIS_DAILY.find(m => m.id === id);
+/**
+ * Avanza las misiones diarias que esperan este evento y avisa en pantalla si alguna se completa.
+ * No cuenta durante el tutorial.
+ *
+ * @param {string} ev Evento: 'perf', 'streak3', 'reach', 'ring', 'star', 'win', 'onda', 'power'.
+ * @param {number} [v] Valor alcanzado, para misiones de mejor marca (`max`); si falta, suma uno.
+ */
 function misEvent(ev, v) {
   if (tutorial) {
     return;
@@ -23579,6 +24147,14 @@ function misEvent(ev, v) {
     misPing();
   }
 }
+/**
+ * Registra que se escapó de un nivel, para los logros (niveles con la Tierra, planetas usados,
+ * Andrómeda en un intento, llegar al Sol) y la misión diaria de ganar.
+ *
+ * @param {number} lv Índice del nivel ganado.
+ * @param {string} [planet] Id del planeta usado; por defecto 'tierra'.
+ * @param {number} tries Intentos usados en ese nivel.
+ */
 function misWin(lv, planet, tries) {
   if (tutorial) {
     return;
@@ -23602,8 +24178,11 @@ function misWin(lv, planet, tries) {
   }
   misEvent('win');
 }
+/**
+ * Aviso durante la partida: el ícono de las misiones aparece un instante arriba con la nueva
+ * estrella encendida, con un tono suave.
+ */
 function misPing() {
-  // en plena partida: las tres lunas aparecen un instante arriba y se enciende la nueva
   let el = document.getElementById('misping');
   if (!el) {
     el = document.createElement('div');
@@ -23613,6 +24192,7 @@ function misPing() {
   }
   el.innerHTML = '<svg viewBox="0 0 100 100">' + misMoons() + '</svg>';
   el.classList.remove('go');
+  // Leer el tamaño fuerza un reflujo para que la animación `.go` vuelva a empezar.
   void el.offsetWidth;
   el.classList.add('go');
   if (AC && !muted) {
@@ -23622,6 +24202,11 @@ function misPing() {
     } catch (e) {}
   }
 }
+/**
+ * Busca el nivel donde se han recogido más estrellas.
+ *
+ * @returns {number[]} [estrellas recogidas, índice del nivel] (índice -1 si no hay ninguna).
+ */
 function misStarsBest() {
   let best = 0,
     bi = -1;
@@ -23643,6 +24228,12 @@ function misStarsBest() {
   });
   return [best, bi];
 }
+/**
+ * Progreso de un logro.
+ *
+ * @param {object} a Logro de `MIS_ACH`.
+ * @returns {Array} [valor actual, meta, texto de progreso para mostrar].
+ */
 function achProg(a) {
   const M = MIS;
   switch (a.id) {
@@ -23679,6 +24270,11 @@ function achProg(a) {
   }
   return [0, 1, ''];
 }
+/**
+ * Indica si hay algo listo para cobrar (misión, premio del día o logro), para marcar el botón.
+ *
+ * @returns {boolean} true si hay premios sin cobrar.
+ */
 function misReady() {
   misLoad();
   if (MIS.daily.some(m => !m.c && m.p >= (misDef(m.id) || { n: 1 }).n)) {
@@ -23692,9 +24288,19 @@ function misReady() {
     return c >= n && !MIS.ach[a.id];
   });
 }
+/**
+ * Racha de días seguidos con el premio diario cobrado; se pierde si se salta un día.
+ *
+ * @returns {number} Días de racha.
+ */
 function misStreak() {
   return MIS.lastBonus === misToday() || MIS.lastBonus === misToday(-1) ? MIS.streak : 0;
 }
+/**
+ * Tiempo que falta para medianoche, cuando cambian las misiones.
+ *
+ * @returns {string} Texto `HH:MM:SS`.
+ */
 function misLeft() {
   const n = new Date(),
     m = new Date(n);
@@ -23712,6 +24318,10 @@ function misLeft() {
   );
 }
 const elMis = document.getElementById('missions');
+/**
+ * Abre el panel de Misiones sobre el inicio y actualiza cada segundo la cuenta regresiva (y las
+ * misiones si pasa la medianoche con el panel abierto).
+ */
 function openMissions() {
   misLoad();
   misOpen = true;
@@ -23746,6 +24356,11 @@ function openMissions() {
     }
   }, 1000);
 }
+/**
+ * Sonido de abrir o cerrar el panel: un soplo filtrado que sube o baja, con un tono.
+ *
+ * @param {boolean} up true al abrir, false al cerrar.
+ */
 function misWhoosh(up) {
   if (!AC || muted) {
     return;
@@ -23780,6 +24395,11 @@ function closeMissions() {
     elHome.classList.remove('off');
   }
 }
+/**
+ * Arpegio de cobrar un premio.
+ *
+ * @param {boolean} big true para el arpegio largo (logros y premio del día).
+ */
 function misClaimSound(big) {
   if (!AC || muted) {
     return;
@@ -23811,8 +24431,8 @@ const MIS_AICO = {
 };
 var misThumbs = {},
   misMinis = {};
-// miniaturas con el mismo lenguaje que los dibujos grandes del juego (brillos, colores de cada
-// galaxia)
+// Miniaturas con el mismo lenguaje que los dibujos grandes del juego (brillos, colores de cada
+// galaxia); se dibujan una vez y se guardan como imagen en `misMinis`.
 function misMini(kind) {
   if (misMinis[kind]) {
     return misMinis[kind];
@@ -24024,6 +24644,13 @@ function misMini(kind) {
   }
   return (misMinis[kind] = '<img src="' + c.toDataURL() + '" alt="">');
 }
+/**
+ * Miniatura de un planeta para el panel. Solo se guarda cuando ya es imagen; mientras el planeta
+ * en alta definición no está listo, se devuelve el respaldo sin guardarlo.
+ *
+ * @param {string} id Id del planeta.
+ * @returns {string} HTML de la miniatura.
+ */
 function misThumb(id) {
   if (!misThumbs[id]) {
     const h = planetThumb(id);
@@ -24045,6 +24672,7 @@ const GAL_COL = {
   M87: '#ffcf8a',
   'Sagitario A*': '#ff9a6b',
 };
+// Colorea los nombres de galaxias dentro de un texto con el color de cada una.
 const misTint = txt =>
   txt.replace(
     /Sistema solar|Nubes de Magallanes|Andrómeda|Centaurus A|Remolino|Sombrero|M87|Sagitario A\*/g,
@@ -24059,8 +24687,13 @@ const MIS_COL = {
   todos: '#ffd38a',
   sol: '#ffb347',
 };
+/**
+ * Logro destacado: el más cercano a completarse, o uno listo para cobrar. Los secretos no se
+ * muestran hasta completarse.
+ *
+ * @returns {number} Índice en `MIS_ACH`.
+ */
 function misFeatured() {
-  // el logro más cercano a completarse (o uno listo para cobrar)
   let best = 0,
     bs = -1;
   MIS_ACH.forEach((a, i) => {
@@ -24079,6 +24712,10 @@ function misFeatured() {
   });
   return best;
 }
+/**
+ * Redibuja todo el panel de Misiones (pestaña activa, tarjetas, contador de polvo) y conecta sus
+ * botones.
+ */
 function renderMissions() {
   if (!elMis) {
     return;
@@ -24145,7 +24782,7 @@ function renderMissions() {
     const nC = MIS.daily.filter(m => m.c).length,
       nD = MIS.daily.filter(m => m.c || m.p >= (misDef(m.id) || { n: 1 }).n).length,
       allC = nC === 3;
-    // tarjeta de vidrio: tu planeta con sus tres lunas (una por misión) y el premio del día
+    // Tarjeta de vidrio: tu planeta con sus tres lunas (una por misión) y el premio del día.
     body +=
       '<div class="mhero" data-r="bonus" style="--hc:#9ff0e4"><canvas class="mplanet" data-kind="moons" data-n="' +
       nD +
@@ -24490,6 +25127,12 @@ function renderMissions() {
     }),
   );
 }
+/**
+ * Vista ampliada del logro abierto (`misDetail`), con su dibujo grande y su dato científico.
+ *
+ * @param {string} CRY Ícono SVG de cristal para el premio.
+ * @returns {string} HTML de la vista, o '' si no hay logro abierto.
+ */
 function misDetailHTML(CRY) {
   const a = MIS_ACH[misDetail];
   if (!a) {
@@ -24539,9 +25182,16 @@ function misDetailHTML(CRY) {
     '</div></div>'
   );
 }
-// el cobro: la fila destella, salen cristales volando al contador y el número sube de uno en uno
-// con una escala de cristal
+// Número que muestra el contador durante la animación de cobro (null: el valor real).
 var misCount = { v: null, raf: 0 };
+/**
+ * Animación de cobro: la fila destella, salen cristales volando al contador y el número sube de
+ * uno en uno con una escala de cristal.
+ *
+ * @param {Element} from Elemento desde donde salen los cristales.
+ * @param {number} amt Polvo estelar ganado.
+ * @param {boolean} big true para premios grandes (más cristales).
+ */
 function misBurst(from, amt, big) {
   const to = elMis.querySelector && elMis.querySelector('.mwal .c');
   if (!from || !to || !to.getBoundingClientRect) {
@@ -24638,7 +25288,10 @@ function misBurst(from, amt, big) {
   cancelAnimationFrame(misCount.raf);
   misCount.raf = requestAnimationFrame(tick);
 }
-// cerrar deslizando el panel hacia abajo
+/**
+ * Permite cerrar el panel deslizándolo hacia abajo (más de 110 píxeles), solo si está desplazado
+ * hasta arriba y el gesto no empieza en un botón.
+ */
 function misSwipe() {
   const pn = elMis.querySelector && elMis.querySelector('.mpanel');
   if (!pn || !pn.addEventListener) {
@@ -24678,12 +25331,21 @@ function misSwipe() {
   pn.addEventListener('pointerup', end);
   pn.addEventListener('pointercancel', end);
 }
+/**
+ * Redibuja los lienzos animados del panel; se llama cada cuadro mientras el panel está abierto.
+ */
 function misPlanetDraw() {
   if (!misOpen || !elMis || !elMis.querySelectorAll) {
     return;
   }
   elMis.querySelectorAll('.mplanet').forEach(misCanvasDraw);
 }
+/**
+ * Dibuja la ilustración animada de un lienzo del panel según su `data-kind` (planeta con lunas,
+ * galaxia espiral, estrellas, onda de supernova…).
+ *
+ * @param {HTMLCanvasElement} c Lienzo a dibujar.
+ */
 function misCanvasDraw(c) {
   if (!c || !c.getContext) {
     return;
@@ -24708,7 +25370,7 @@ function misCanvasDraw(c) {
     acy = cy + RA;
   const kind = c.dataset ? c.dataset.kind : 'tierra8';
   if (c.dataset && c.dataset.big && (kind === 'tierra8' || kind === 'cada' || kind === 'sol')) {
-    // en la vista grande, el planeta va sobre su órbita
+    // En la vista grande, el planeta va sobre su órbita.
     g.strokeStyle = 'rgba(236,230,216,.18)';
     g.lineWidth = 1.5;
     g.beginPath();
@@ -24748,7 +25410,7 @@ function misCanvasDraw(c) {
     g.fill();
   };
   if (kind === 'moons') {
-    // tu planeta con tres lunas: se encienden con cada misión completada
+    // Tu planeta con tres lunas: se encienden con cada misión completada.
     const n = +(c.dataset.n || 0),
       id = curPlanet || 'tierra',
       Rp = R * 0.82,
@@ -24823,7 +25485,7 @@ function misCanvasDraw(c) {
       g.fill();
     }
   } else if (kind === 'andro1' || kind === 'todos') {
-    // una galaxia espiral que gira
+    // Galaxia espiral que gira.
     const col = kind === 'andro1' ? 'rgba(156,192,255,A)' : 'rgba(255,211,138,A)';
     glow(cx, cy, R * 1.3, col, 0.35);
     g.save();
@@ -24845,7 +25507,7 @@ function misCanvasDraw(c) {
     g.restore();
     glow(cx, cy, R * 0.35, 'rgba(255,248,230,A)', 0.95);
   } else if (kind === 'seis') {
-    // seis estrellas en ronda
+    // Seis estrellas en ronda.
     for (let i = 0; i < 6; i++) {
       const an = -Math.PI / 2 + (i * Math.PI) / 3 + t * 0.2,
         x = cx + Math.cos(an) * R * 0.85,
@@ -24865,7 +25527,7 @@ function misCanvasDraw(c) {
     glow(cx, cy, R * 0.9, 'rgba(255,211,107,A)', 0.45);
     star4(cx, cy, R * 0.45, '#ffd36b', 1);
   } else if (kind === 'ondas20') {
-    // la onda de supernova de Magallanes
+    // La onda de la supernova 1987A, en la Gran Nube de Magallanes.
     for (let j = 0; j < 4; j++) {
       const u = (t * 0.35 + j / 4) % 1;
       g.strokeStyle = 'rgba(255,111,168,' + (1 - u) * 0.8 + ')';
@@ -24964,7 +25626,18 @@ function medFrame(now, t0) {
     ' en 10 s   partículas ' +
     particles.length;
 }
+/**
+ * Bucle principal: cada cuadro avanza y dibuja la pantalla actual. Va al final porque usa
+ * funciones de casi todos los archivos.
+ */
+// Momento del cuadro anterior, en milisegundos (`performance.now`).
 let last = performance.now();
+/**
+ * Un cuadro del juego. El paso de tiempo se limita a 0,05 segundos para que una pausa del
+ * navegador no haga saltar la física. Un error en un cuadro se registra sin detener el bucle.
+ *
+ * @param {number} now Momento del cuadro, en milisegundos.
+ */
 function frame(now) {
   const m0 = MEDIR ? performance.now() : 0;
   const dt = Math.min((now - last) / 1000, 0.05);
@@ -25020,7 +25693,7 @@ function frame(now) {
       updateHomeShow(dt);
       renderHomeIntro();
     } else if (paused) {
-      /* congelado: el lienzo conserva el último cuadro */
+      /* En pausa: el lienzo conserva el último cuadro. */
     } else {
       update(dt);
       if (MEDIR) {
@@ -25031,7 +25704,7 @@ function frame(now) {
     if (misOpen) {
       misPlanetDraw();
     }
-    // en pantallas tranquilas, adelantar las rocas de la partida (ver astPrebake)
+    // En pantallas tranquilas se preparan por adelantado las rocas de la partida (ver astPrebake).
     if (
       state === 'menu' ||
       state === 'levels' ||

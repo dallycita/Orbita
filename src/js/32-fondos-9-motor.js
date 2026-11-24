@@ -1,4 +1,9 @@
-// ---------- fondos en WebGL: el motor que dibuja el shader de cada galaxia ----------
+/**
+ * Motor de fondos en WebGL: compila el shader de cada galaxia, le pasa el estado del juego como
+ * uniformes y copia el resultado al lienzo 2D del juego.
+ * Usa un lienzo WebGL propio y fuera de pantalla; si WebGL falla, `draw` devuelve false y el juego
+ * usa el fondo 2D. La interfaz pública es el objeto `GLBG`.
+ */
 const GLBG = (() => {
   let cv = null,
     gl = null,
@@ -7,6 +12,11 @@ const GLBG = (() => {
     failed = false,
     flow = 0,
     photoTex = {};
+  /**
+   * Crea el contexto WebGL y el triángulo que cubre la pantalla, una sola vez.
+   *
+   * @returns {boolean} true si WebGL está disponible.
+   */
   function init() {
     if (gl || failed) {
       return !!gl;
@@ -37,6 +47,13 @@ const GLBG = (() => {
       return false;
     }
   }
+  /**
+   * Compila y enlaza (una vez) el programa de un fondo y guarda sus uniformes.
+   *
+   * @param {string} name Nombre del programa en la caché.
+   * @param {string} fs Código GLSL del shader de fragmentos.
+   * @returns {?{p: WebGLProgram, U: object}} El programa, o null si no compila.
+   */
   function prog(name, fs) {
     if (progs[name] !== undefined) {
       return progs[name];
@@ -85,7 +102,14 @@ const GLBG = (() => {
     ].forEach(k => (U[k] = gl.getUniformLocation(p, k)));
     return (progs[name] = { p, U });
   }
-  // carga una fotografía (url o data:) como textura
+  /**
+   * Carga una fotografía como textura, una vez por nombre. Un lienzo se sube al momento; una
+   * dirección se carga en segundo plano y queda lista (`ready`) al llegar.
+   *
+   * @param {string} name Nombre de la textura en la caché.
+   * @param {string|HTMLCanvasElement} src Dirección (url o data:) o lienzo.
+   * @returns {object} Registro de la textura: `{ready, w, h, tex}`.
+   */
   function photo(name, src) {
     if (photoTex[name]) {
       return photoTex[name];
@@ -127,7 +151,16 @@ const GLBG = (() => {
     } catch (e) {}
     return rec;
   }
-  // dibuja el fondo del nivel; devuelve false si no se pudo (y el juego usa el fondo anterior)
+  /**
+   * Dibuja el fondo del nivel. Las galaxias detalladas se calculan a la resolución del
+   * dispositivo (hasta 1,6×); las demás, a 900 píxeles como máximo.
+   *
+   * @param {string} kind Fondo: 'mw', 'lmc', 'and2', 'and', 'gx' o 'photo'.
+   * @param {object} opts beat (golpe de música, de 0 a 1), wh (agujero de gusano: x, y, radio en
+   *   píxeles de pantalla y fuerza), kind (nivel, para 'gx'); para 'photo': name, src, fx, fy,
+   *   zoom.
+   * @returns {boolean} false si no se pudo dibujar; el juego usa entonces el fondo 2D.
+   */
   function draw(kind, opts) {
     if (!init()) {
       return false;
@@ -169,7 +202,7 @@ const GLBG = (() => {
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-    // el agujero negro y su anillo de Einstein (la luz se dobla más cerca de él)
+    // El agujero negro y su anillo de Einstein (la luz se dobla más cerca de él).
     const Rg = Math.max(rr(sunLevel), SUN) * S;
     gl.uniform2f(p.U.uRes, w, h);
     gl.uniform1f(p.U.uT, t);
@@ -185,6 +218,7 @@ const GLBG = (() => {
       gl.uniform1f(p.U.uBand, bandE);
     }
     gl.uniform3f(p.U.uBH, CX * sc, CY * sc, Rg * 1.9 * sc);
+    // WebGL cuenta la altura desde abajo, por eso se invierte la y.
     if (p.U.uWH) {
       const wh = opts.wh;
       if (wh) {
@@ -213,11 +247,19 @@ const GLBG = (() => {
     ctx.restore();
     return true;
   }
-  // cuánto "avanzas": lento siempre, más rápido al saltar y en la recta final
+  // Cuánto se avanza por el fondo: lento siempre, más rápido al saltar y en la recta final.
+  // jour: avance del viaje (de 0 a 1); spd: velocidad suavizada; bandE: tramo de luz de la canción.
   let jour = 0,
     spd = 0,
     band = 0,
     bandE = 0;
+  /**
+   * Avanza el fondo un cuadro.
+   *
+   * @param {number} d Tiempo del cuadro, en segundos.
+   * @param {number} speed Velocidad de avance (0 detiene el flujo).
+   * @param {number} [target] Avance del viaje hacia el que se acerca `jour`, de 0 a 1.
+   */
   function advance(d, speed, target) {
     flow += d * speed;
     spd += (Math.min(speed, 3) / 3 - spd) * Math.min(1, d * 4);
@@ -225,7 +267,13 @@ const GLBG = (() => {
       jour += (target - jour) * Math.min(1, d * 1.5);
     }
   }
-  // cambia de luz al ritmo de la canción: 15 entran los platillos, 28 el bombo, y el beat acelerado
+  /**
+   * Cambia la luz del fondo al ritmo de la canción, con un paso suave entre tramos (en el
+   * anillo 15 entran los platillos, en el 28 el bombo, y luego el ritmo acelerado).
+   *
+   * @param {number} target Tramo de luz al que ir (0, 1, 2, 3).
+   * @param {number} d Tiempo del cuadro, en segundos.
+   */
   function setBand(target, d) {
     const st = d / 6;
     band = band < target ? Math.min(target, band + st) : Math.max(target, band - st);
@@ -233,6 +281,9 @@ const GLBG = (() => {
       e = x * x * (3 - 2 * x);
     bandE = Math.floor(band) + e;
   }
+  /**
+   * Vuelve el viaje y la luz al principio, para una partida nueva.
+   */
   function reset() {
     jour = 0;
     band = bandE = 0;
@@ -240,8 +291,13 @@ const GLBG = (() => {
   return { draw, advance, reset, setBand, ok: () => init(), canvas: () => cv };
 })();
 
-// Remolino: método con fotografía real (mientras llega la foto, usa el dibujo actual como base)
+// Fotografía real para el fondo del Remolino; vacía, se usa el fondo dibujado.
 let REMOLINO_PHOTO = '';
+/**
+ * Fuente de la fotografía del Remolino.
+ *
+ * @returns {?string} La dirección de la foto, o null para usar el fondo dibujado.
+ */
 function remolinoSource() {
   return REMOLINO_PHOTO || null;
-} // sin foto todavía: se usa el fondo dibujado
+}

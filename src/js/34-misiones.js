@@ -1,10 +1,16 @@
-// ---------- misiones y polvo estelar ----------
-// estrellas = habilidad (desbloquean) · polvo estelar = constancia (compra). Diarias: tres al día,
-// cambian a medianoche.
-// el ícono de Misiones en el inicio: una constelación de tres estrellas (una por misión del día)
-// dentro de un arco de progreso;
-// cada misión cumplida enciende una estrella y llena un tercio del arco; con las tres, la
-// constelación se une y el círculo se cierra
+/**
+ * Misiones diarias, logros y polvo estelar: progreso guardado, panel de Misiones y sus dibujos.
+ * Estrellas = habilidad (desbloquean); polvo estelar = constancia (compra). Hay tres misiones
+ * diarias que cambian a medianoche. El progreso vive en `MIS` (localStorage `orbita_mis`).
+ */
+
+/**
+ * Arma el ícono de Misiones del inicio: una constelación de tres estrellas (una por misión del
+ * día) dentro de un arco de progreso. Cada misión cumplida enciende una estrella y llena un
+ * tercio del arco; con las tres, la constelación se une y el círculo se cierra.
+ *
+ * @returns {string} Contenido SVG (sin la etiqueta `<svg>`), en un cuadro de 100 × 100.
+ */
 function misMoons() {
   misLoad();
   const done = Math.min(
@@ -100,6 +106,12 @@ function misMoons() {
   });
   return h;
 }
+/**
+ * Ícono SVG de cristales de polvo estelar. Cada llamada usa un id de degradado distinto para que
+ * varios íconos en la misma página no compartan el mismo `<linearGradient>`.
+ *
+ * @returns {string} Fragmento SVG.
+ */
 function misCrystal() {
   return (
     '<defs><linearGradient id="mcg' +
@@ -111,6 +123,8 @@ function misCrystal() {
     ')"/><path d="M10.5 16.2 L12.236 19 L10.5 21.8 L8.764 19Z" fill="#bff3ec"/>'
   );
 }
+// Misiones diarias. g: grupo (se sortea una de cada grupo), n: meta, ev: evento que la avanza,
+// max: la meta es el mejor valor alcanzado y no una suma, rw: premio en polvo estelar.
 const MIS_DAILY = [
   { id: 'perf10', g: 0, t: 'Haz 10 Perfectos', d: 'En cualquier nivel', n: 10, ev: 'perf', rw: 40 },
   {
@@ -183,6 +197,7 @@ const MIS_ACH = [
   { id: 'todos', t: 'Escapa de las 8 galaxias', d: 'Todos los niveles', rw: 500 },
   { id: 'sol', t: 'Llega al Sol', d: 'El final del viaje', rw: 1000, secret: true },
 ];
+// Dato científico real que se muestra al cobrar cada logro.
 const MIS_FACT = {
   tierra8:
     'La Tierra viaja alrededor del Sol a unos 30 km por segundo. Es el único planeta conocido con agua líquida en su superficie.',
@@ -204,6 +219,12 @@ var MIS = null,
   misFx = 0,
   misOpen = false,
   misSwitch = 0;
+/**
+ * Fecha local como texto `AAAA-MM-DD`, que identifica el día de las misiones.
+ *
+ * @param {number} [off] Días a sumar (por ejemplo -1 para ayer).
+ * @returns {string} La fecha.
+ */
 function misToday(off) {
   const d = new Date();
   if (off) {
@@ -217,6 +238,12 @@ function misToday(off) {
     String(d.getDate()).padStart(2, '0')
   );
 }
+/**
+ * Carga el progreso guardado la primera vez (con valores por defecto para campos faltantes) y
+ * sortea las misiones del día si cambió la fecha.
+ *
+ * @returns {object} El progreso `MIS`.
+ */
 function misLoad() {
   if (!MIS) {
     let d = {};
@@ -253,6 +280,10 @@ function misSave() {
     localStorage.setItem('orbita_mis', JSON.stringify(MIS));
   } catch (e) {}
 }
+/**
+ * Sortea las tres misiones del día, una por grupo. El sorteo sale de un hash de la fecha, así que
+ * es el mismo durante todo el día aunque se recargue la página.
+ */
 function misRoll() {
   const day = misToday();
   if (MIS.day === day && MIS.daily.length === 3) {
@@ -271,6 +302,13 @@ function misRoll() {
   misSave();
 }
 const misDef = id => MIS_DAILY.find(m => m.id === id);
+/**
+ * Avanza las misiones diarias que esperan este evento y avisa en pantalla si alguna se completa.
+ * No cuenta durante el tutorial.
+ *
+ * @param {string} ev Evento: 'perf', 'streak3', 'reach', 'ring', 'star', 'win', 'onda', 'power'.
+ * @param {number} [v] Valor alcanzado, para misiones de mejor marca (`max`); si falta, suma uno.
+ */
 function misEvent(ev, v) {
   if (tutorial) {
     return;
@@ -299,6 +337,14 @@ function misEvent(ev, v) {
     misPing();
   }
 }
+/**
+ * Registra que se escapó de un nivel, para los logros (niveles con la Tierra, planetas usados,
+ * Andrómeda en un intento, llegar al Sol) y la misión diaria de ganar.
+ *
+ * @param {number} lv Índice del nivel ganado.
+ * @param {string} [planet] Id del planeta usado; por defecto 'tierra'.
+ * @param {number} tries Intentos usados en ese nivel.
+ */
 function misWin(lv, planet, tries) {
   if (tutorial) {
     return;
@@ -322,8 +368,11 @@ function misWin(lv, planet, tries) {
   }
   misEvent('win');
 }
+/**
+ * Aviso durante la partida: el ícono de las misiones aparece un instante arriba con la nueva
+ * estrella encendida, con un tono suave.
+ */
 function misPing() {
-  // en plena partida: las tres lunas aparecen un instante arriba y se enciende la nueva
   let el = document.getElementById('misping');
   if (!el) {
     el = document.createElement('div');
@@ -333,6 +382,7 @@ function misPing() {
   }
   el.innerHTML = '<svg viewBox="0 0 100 100">' + misMoons() + '</svg>';
   el.classList.remove('go');
+  // Leer el tamaño fuerza un reflujo para que la animación `.go` vuelva a empezar.
   void el.offsetWidth;
   el.classList.add('go');
   if (AC && !muted) {
@@ -342,6 +392,11 @@ function misPing() {
     } catch (e) {}
   }
 }
+/**
+ * Busca el nivel donde se han recogido más estrellas.
+ *
+ * @returns {number[]} [estrellas recogidas, índice del nivel] (índice -1 si no hay ninguna).
+ */
 function misStarsBest() {
   let best = 0,
     bi = -1;
@@ -363,6 +418,12 @@ function misStarsBest() {
   });
   return [best, bi];
 }
+/**
+ * Progreso de un logro.
+ *
+ * @param {object} a Logro de `MIS_ACH`.
+ * @returns {Array} [valor actual, meta, texto de progreso para mostrar].
+ */
 function achProg(a) {
   const M = MIS;
   switch (a.id) {
@@ -399,6 +460,11 @@ function achProg(a) {
   }
   return [0, 1, ''];
 }
+/**
+ * Indica si hay algo listo para cobrar (misión, premio del día o logro), para marcar el botón.
+ *
+ * @returns {boolean} true si hay premios sin cobrar.
+ */
 function misReady() {
   misLoad();
   if (MIS.daily.some(m => !m.c && m.p >= (misDef(m.id) || { n: 1 }).n)) {
@@ -412,9 +478,19 @@ function misReady() {
     return c >= n && !MIS.ach[a.id];
   });
 }
+/**
+ * Racha de días seguidos con el premio diario cobrado; se pierde si se salta un día.
+ *
+ * @returns {number} Días de racha.
+ */
 function misStreak() {
   return MIS.lastBonus === misToday() || MIS.lastBonus === misToday(-1) ? MIS.streak : 0;
 }
+/**
+ * Tiempo que falta para medianoche, cuando cambian las misiones.
+ *
+ * @returns {string} Texto `HH:MM:SS`.
+ */
 function misLeft() {
   const n = new Date(),
     m = new Date(n);
@@ -432,6 +508,10 @@ function misLeft() {
   );
 }
 const elMis = document.getElementById('missions');
+/**
+ * Abre el panel de Misiones sobre el inicio y actualiza cada segundo la cuenta regresiva (y las
+ * misiones si pasa la medianoche con el panel abierto).
+ */
 function openMissions() {
   misLoad();
   misOpen = true;
@@ -466,6 +546,11 @@ function openMissions() {
     }
   }, 1000);
 }
+/**
+ * Sonido de abrir o cerrar el panel: un soplo filtrado que sube o baja, con un tono.
+ *
+ * @param {boolean} up true al abrir, false al cerrar.
+ */
 function misWhoosh(up) {
   if (!AC || muted) {
     return;
@@ -500,6 +585,11 @@ function closeMissions() {
     elHome.classList.remove('off');
   }
 }
+/**
+ * Arpegio de cobrar un premio.
+ *
+ * @param {boolean} big true para el arpegio largo (logros y premio del día).
+ */
 function misClaimSound(big) {
   if (!AC || muted) {
     return;
@@ -531,8 +621,8 @@ const MIS_AICO = {
 };
 var misThumbs = {},
   misMinis = {};
-// miniaturas con el mismo lenguaje que los dibujos grandes del juego (brillos, colores de cada
-// galaxia)
+// Miniaturas con el mismo lenguaje que los dibujos grandes del juego (brillos, colores de cada
+// galaxia); se dibujan una vez y se guardan como imagen en `misMinis`.
 function misMini(kind) {
   if (misMinis[kind]) {
     return misMinis[kind];
@@ -744,6 +834,13 @@ function misMini(kind) {
   }
   return (misMinis[kind] = '<img src="' + c.toDataURL() + '" alt="">');
 }
+/**
+ * Miniatura de un planeta para el panel. Solo se guarda cuando ya es imagen; mientras el planeta
+ * en alta definición no está listo, se devuelve el respaldo sin guardarlo.
+ *
+ * @param {string} id Id del planeta.
+ * @returns {string} HTML de la miniatura.
+ */
 function misThumb(id) {
   if (!misThumbs[id]) {
     const h = planetThumb(id);
@@ -765,6 +862,7 @@ const GAL_COL = {
   M87: '#ffcf8a',
   'Sagitario A*': '#ff9a6b',
 };
+// Colorea los nombres de galaxias dentro de un texto con el color de cada una.
 const misTint = txt =>
   txt.replace(
     /Sistema solar|Nubes de Magallanes|Andrómeda|Centaurus A|Remolino|Sombrero|M87|Sagitario A\*/g,
@@ -779,8 +877,13 @@ const MIS_COL = {
   todos: '#ffd38a',
   sol: '#ffb347',
 };
+/**
+ * Logro destacado: el más cercano a completarse, o uno listo para cobrar. Los secretos no se
+ * muestran hasta completarse.
+ *
+ * @returns {number} Índice en `MIS_ACH`.
+ */
 function misFeatured() {
-  // el logro más cercano a completarse (o uno listo para cobrar)
   let best = 0,
     bs = -1;
   MIS_ACH.forEach((a, i) => {
@@ -799,6 +902,10 @@ function misFeatured() {
   });
   return best;
 }
+/**
+ * Redibuja todo el panel de Misiones (pestaña activa, tarjetas, contador de polvo) y conecta sus
+ * botones.
+ */
 function renderMissions() {
   if (!elMis) {
     return;
@@ -865,7 +972,7 @@ function renderMissions() {
     const nC = MIS.daily.filter(m => m.c).length,
       nD = MIS.daily.filter(m => m.c || m.p >= (misDef(m.id) || { n: 1 }).n).length,
       allC = nC === 3;
-    // tarjeta de vidrio: tu planeta con sus tres lunas (una por misión) y el premio del día
+    // Tarjeta de vidrio: tu planeta con sus tres lunas (una por misión) y el premio del día.
     body +=
       '<div class="mhero" data-r="bonus" style="--hc:#9ff0e4"><canvas class="mplanet" data-kind="moons" data-n="' +
       nD +
@@ -1210,6 +1317,12 @@ function renderMissions() {
     }),
   );
 }
+/**
+ * Vista ampliada del logro abierto (`misDetail`), con su dibujo grande y su dato científico.
+ *
+ * @param {string} CRY Ícono SVG de cristal para el premio.
+ * @returns {string} HTML de la vista, o '' si no hay logro abierto.
+ */
 function misDetailHTML(CRY) {
   const a = MIS_ACH[misDetail];
   if (!a) {
@@ -1259,9 +1372,16 @@ function misDetailHTML(CRY) {
     '</div></div>'
   );
 }
-// el cobro: la fila destella, salen cristales volando al contador y el número sube de uno en uno
-// con una escala de cristal
+// Número que muestra el contador durante la animación de cobro (null: el valor real).
 var misCount = { v: null, raf: 0 };
+/**
+ * Animación de cobro: la fila destella, salen cristales volando al contador y el número sube de
+ * uno en uno con una escala de cristal.
+ *
+ * @param {Element} from Elemento desde donde salen los cristales.
+ * @param {number} amt Polvo estelar ganado.
+ * @param {boolean} big true para premios grandes (más cristales).
+ */
 function misBurst(from, amt, big) {
   const to = elMis.querySelector && elMis.querySelector('.mwal .c');
   if (!from || !to || !to.getBoundingClientRect) {
@@ -1358,7 +1478,10 @@ function misBurst(from, amt, big) {
   cancelAnimationFrame(misCount.raf);
   misCount.raf = requestAnimationFrame(tick);
 }
-// cerrar deslizando el panel hacia abajo
+/**
+ * Permite cerrar el panel deslizándolo hacia abajo (más de 110 píxeles), solo si está desplazado
+ * hasta arriba y el gesto no empieza en un botón.
+ */
 function misSwipe() {
   const pn = elMis.querySelector && elMis.querySelector('.mpanel');
   if (!pn || !pn.addEventListener) {
@@ -1398,12 +1521,21 @@ function misSwipe() {
   pn.addEventListener('pointerup', end);
   pn.addEventListener('pointercancel', end);
 }
+/**
+ * Redibuja los lienzos animados del panel; se llama cada cuadro mientras el panel está abierto.
+ */
 function misPlanetDraw() {
   if (!misOpen || !elMis || !elMis.querySelectorAll) {
     return;
   }
   elMis.querySelectorAll('.mplanet').forEach(misCanvasDraw);
 }
+/**
+ * Dibuja la ilustración animada de un lienzo del panel según su `data-kind` (planeta con lunas,
+ * galaxia espiral, estrellas, onda de supernova…).
+ *
+ * @param {HTMLCanvasElement} c Lienzo a dibujar.
+ */
 function misCanvasDraw(c) {
   if (!c || !c.getContext) {
     return;
@@ -1428,7 +1560,7 @@ function misCanvasDraw(c) {
     acy = cy + RA;
   const kind = c.dataset ? c.dataset.kind : 'tierra8';
   if (c.dataset && c.dataset.big && (kind === 'tierra8' || kind === 'cada' || kind === 'sol')) {
-    // en la vista grande, el planeta va sobre su órbita
+    // En la vista grande, el planeta va sobre su órbita.
     g.strokeStyle = 'rgba(236,230,216,.18)';
     g.lineWidth = 1.5;
     g.beginPath();
@@ -1468,7 +1600,7 @@ function misCanvasDraw(c) {
     g.fill();
   };
   if (kind === 'moons') {
-    // tu planeta con tres lunas: se encienden con cada misión completada
+    // Tu planeta con tres lunas: se encienden con cada misión completada.
     const n = +(c.dataset.n || 0),
       id = curPlanet || 'tierra',
       Rp = R * 0.82,
@@ -1543,7 +1675,7 @@ function misCanvasDraw(c) {
       g.fill();
     }
   } else if (kind === 'andro1' || kind === 'todos') {
-    // una galaxia espiral que gira
+    // Galaxia espiral que gira.
     const col = kind === 'andro1' ? 'rgba(156,192,255,A)' : 'rgba(255,211,138,A)';
     glow(cx, cy, R * 1.3, col, 0.35);
     g.save();
@@ -1565,7 +1697,7 @@ function misCanvasDraw(c) {
     g.restore();
     glow(cx, cy, R * 0.35, 'rgba(255,248,230,A)', 0.95);
   } else if (kind === 'seis') {
-    // seis estrellas en ronda
+    // Seis estrellas en ronda.
     for (let i = 0; i < 6; i++) {
       const an = -Math.PI / 2 + (i * Math.PI) / 3 + t * 0.2,
         x = cx + Math.cos(an) * R * 0.85,
@@ -1585,7 +1717,7 @@ function misCanvasDraw(c) {
     glow(cx, cy, R * 0.9, 'rgba(255,211,107,A)', 0.45);
     star4(cx, cy, R * 0.45, '#ffd36b', 1);
   } else if (kind === 'ondas20') {
-    // la onda de supernova de Magallanes
+    // La onda de la supernova 1987A, en la Gran Nube de Magallanes.
     for (let j = 0; j < 4; j++) {
       const u = (t * 0.35 + j / 4) % 1;
       g.strokeStyle = 'rgba(255,111,168,' + (1 - u) * 0.8 + ')';

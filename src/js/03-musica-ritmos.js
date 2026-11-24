@@ -1,4 +1,10 @@
-// ---------- beat (se van sumando capas al subir) ----------
+/**
+ * Música sintetizada en vivo con Web Audio: instrumentos, estilos de cada galaxia y la alarma del
+ * agujero negro. Todo va a 140 pulsos por minuto (para que la Respiración siga sincronizada) y
+ * se suman capas a medida que se sube de anillo (`lv()`).
+ * Cada `stepX(s, t0)` programa una semicorchea; el reproductor (05) las llama por adelantado.
+ */
+// Tempo: STEP es una semicorchea y TB un pulso, en segundos.
 const BPM = 140,
   STEP = 60 / BPM / 4,
   TB = 60 / BPM;
@@ -16,6 +22,11 @@ const BASS = {
   22: [3, 0.28],
   26: [-2, 0.42],
 };
+/**
+ * Bombo de phonk; anota su momento en `kickQueue` para que el juego reaccione al golpe.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ */
 function dKick(t0) {
   const o = AC.createOscillator(),
     g = AC.createGain();
@@ -38,6 +49,13 @@ function dClap(t0) {
 function dHat(t0, open) {
   noiseHit(t0, open ? 0.17 : 0.035, 'highpass', 8000, open ? 0.16 : 0.2, musicBus);
 }
+/**
+ * Bajo 808 saturado (con una curva tanh compartida en `shaper`).
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} semi Semitonos sobre la nota base.
+ * @param {number} dur Duración, en segundos.
+ */
 function d808(t0, semi, dur) {
   const f = (ROOT / 8) * Math.pow(2, semi / 12);
   if (!shaper) {
@@ -67,10 +85,10 @@ function d808(t0, semi, dur) {
   o.start(t0);
   o.stop(t0 + dur + 0.02);
 }
-// ---------- estilos de música (mismo tempo: 140, para que la Respiración siga sincronizada)
-// ----------
-const lv = () => (state === 'play' ? level : 30); // en el menú se escucha completa
-// progresión en Sol# menor: i – VI – III – VII (Sol#m, Mi, Si, Fa#), dos compases cada acorde
+// Estilos de música, todos al mismo tempo de 140.
+// Anillo que decide cuántas capas suenan; en el menú se escucha completa.
+const lv = () => (state === 'play' ? level : 30);
+// Progresión en Sol# menor: i – VI – III – VII (Sol#m, Mi, Si, Fa#), dos compases cada acorde
 const PROG = [
   [0, [0, 3, 7]],
   [-4, [0, 4, 7]],
@@ -79,6 +97,11 @@ const PROG = [
 ];
 const hz = semi => (ROOT / 2) * Math.pow(2, semi / 12); // Sol#3 como referencia
 let echoIn = null;
+/**
+ * Eco compartido (retardo de tres cuartos de pulso con realimentación); se crea al primer uso.
+ *
+ * @returns {GainNode} Entrada del eco.
+ */
 function echoBus() {
   if (echoIn) {
     return echoIn;
@@ -97,11 +120,29 @@ function echoBus() {
   wet.connect(musicBus);
   return echoIn;
 }
+/**
+ * Envolvente exponencial de ataque y caída sobre la ganancia de un nodo.
+ *
+ * @param {GainNode} g Nodo de ganancia.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} a Ataque, en segundos.
+ * @param {number} peak Ganancia máxima.
+ * @param {number} d Caída, en segundos.
+ */
 function env(g, t0, a, peak, d) {
   g.gain.setValueAtTime(0.0001, t0);
   g.gain.exponentialRampToValueAtTime(peak, t0 + a);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
 }
+/**
+ * Colchón de acorde con sierras desafinadas en ±6 centésimas y filtro pasa bajos.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number[]} freqs Frecuencias del acorde, en Hz.
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Ganancia máxima.
+ * @param {number} cutoff Corte del filtro, en Hz.
+ */
 function pad(t0, freqs, dur, gain, cutoff) {
   const lp = AC.createBiquadFilter(),
     g = AC.createGain();
@@ -126,6 +167,15 @@ function pad(t0, freqs, dur, gain, cutoff) {
     }
   }
 }
+/**
+ * Nota corta punteada.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} gain Ganancia máxima.
+ * @param {string} [type] Forma de onda; por defecto 'triangle'.
+ * @param {boolean} [echo] true para mandarla también al eco.
+ */
 function pluck(t0, f, gain, type, echo) {
   const o = AC.createOscillator(),
     g = AC.createGain(),
@@ -144,6 +194,16 @@ function pluck(t0, f, gain, type, echo) {
   o.start(t0);
   o.stop(t0 + 0.32);
 }
+/**
+ * Nota de bajo con filtro que se cierra hasta `cutoff`.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Ganancia máxima.
+ * @param {string} type Forma de onda.
+ * @param {number} cutoff Corte final del filtro, en Hz.
+ */
 function bassNote(t0, f, dur, gain, type, cutoff) {
   const o = AC.createOscillator(),
     g = AC.createGain(),
@@ -163,6 +223,12 @@ function bassNote(t0, f, dur, gain, type, cutoff) {
   o.start(t0);
   o.stop(t0 + dur + 0.02);
 }
+/**
+ * Bombo suave y grave; también se anota en `kickQueue`.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} gain Ganancia inicial.
+ */
 function softKick(t0, gain) {
   const o = AC.createOscillator(),
     g = AC.createGain();
@@ -190,14 +256,20 @@ function snareSW(t0) {
   o.start(t0);
   o.stop(t0 + 0.15);
 }
-// Espacial: oscuro y cinematográfico, en medio tiempo
-// qué tan cerca está el agujero negro de la Tierra: 0 = lejos, 1 = a punto de tragarla
+/**
+ * Qué tan cerca está el agujero negro del planeta, según la distancia en anillos.
+ *
+ * @returns {number} De 0 (lejos o fuera de partida) a 1 (a punto de tragarlo).
+ */
 function dangerNow() {
   return state === 'play' ? clamp((1.7 - (pLevel - sunLevel)) / 1.3, 0, 1) : 0;
 }
-// un zumbido disonante que tiembla, sube de tono y se acelera con el peligro
+// Zumbido disonante que tiembla, sube de tono y se acelera con el peligro.
 let tens = null,
   tensT = 0;
+/**
+ * Enciende el zumbido de tensión, si no está sonando.
+ */
 function tensionOn() {
   if (!AC || tens) {
     return;
@@ -233,6 +305,11 @@ function tensionOn() {
     tens = { g, lfo, o1, o2, bp };
   } catch (e) {}
 }
+/**
+ * Ajusta el zumbido de tensión al peligro actual: volumen, temblor y tono suben con él.
+ *
+ * @param {number} d Peligro, de 0 a 1 (ver `dangerNow`).
+ */
 function tensionSet(d) {
   if (!tens) {
     return;
@@ -247,11 +324,17 @@ function tensionSet(d) {
     tens.bp.frequency.setTargetAtTime(700 + 1600 * d, n, 0.2);
   } catch (e) {}
 }
-// alarma del agujero negro: cuanto más cerca, más rápido y más fuerte late (golpe grave + sirena +
-// latido)
+// Alarma del agujero negro: cuanto más cerca, más rápido y más fuerte late (golpe grave, sirena y
+// latido). dangerFlash es la intensidad del destello rojo en pantalla.
 let alarmT = 0,
   alarmWas = 0,
   dangerFlash = 0;
+/**
+ * Avanza la alarma cada cuadro: suena al entrar en peligro (más de 0,18) y luego se repite
+ * cada 1,2 a 0,3 segundos según lo cerca que esté el agujero negro.
+ *
+ * @param {number} dt Tiempo desde el cuadro anterior, en segundos.
+ */
 function alarmTick(dt) {
   if (!AC || muted || state !== 'play' || tutorial) {
     alarmT = 0;
@@ -261,7 +344,7 @@ function alarmTick(dt) {
   const d = dangerNow();
   if (d > 0.18 && alarmWas <= 0.18) {
     alarmHit(AC.currentTime + 0.01, d, true);
-  } // aviso al entrar en peligro
+  } // Aviso al entrar en peligro.
   alarmWas = d;
   if (d <= 0.18) {
     alarmT = 0;
@@ -273,6 +356,13 @@ function alarmTick(dt) {
     alarmHit(AC.currentTime + 0.01, d, false);
   }
 }
+/**
+ * Un golpe de alarma: golpe grave, segundo latido, sirena, succión, vibración y destello.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} d Peligro, de 0 a 1.
+ * @param {boolean} first true en el aviso de entrada (vibración más larga).
+ */
 function alarmHit(t0, d, first) {
   try {
     const k = Math.max(0, Math.min(1, (d - 0.18) / 0.72)),
@@ -358,6 +448,12 @@ function alarmHit(t0, d, first) {
     dangerFlash = 0.25 + 0.45 * k;
   } catch (e) {}
 }
+/**
+ * Estilo Espacial: oscuro y cinematográfico, en medio tiempo.
+ *
+ * @param {number} s Paso de la música, en semicorcheas desde el inicio.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ */
 function stepEspacial(s, t0) {
   const bar = Math.floor(s / 16),
     [root, tones] = PROG[Math.floor(bar / 2) % 4],
@@ -402,7 +498,12 @@ function stepEspacial(s, t0) {
     noiseHit(t0, 0.03, 'highpass', 9000, 0.04, musicBus);
   }
 }
-// Synthwave: retro, con energía de persecución
+/**
+ * Estilo Synthwave: retro, con energía de persecución.
+ *
+ * @param {number} s Paso de la música, en semicorcheas desde el inicio.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ */
 function stepSynthwave(s, t0) {
   const bar = Math.floor(s / 16),
     [root, tones] = PROG[Math.floor(bar / 2) % 4],
@@ -444,6 +545,12 @@ function stepSynthwave(s, t0) {
     pluck(t0, hz(root + tn + 12), 0.055, 'square', true);
   }
 }
+/**
+ * Estilo Phonk: bombo, palmas, platillos y bajo 808 en un ciclo de dos compases.
+ *
+ * @param {number} s Paso de la música, en semicorcheas desde el inicio.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ */
 function stepPhonk(s, t0) {
   s = s % 32;
   const b = s % 16,
@@ -469,9 +576,15 @@ function stepPhonk(s, t0) {
     }
   }
 }
-const SW_AT = 30; // anillo donde la música se vuelve Synthwave
+const SW_AT = 30; // Anillo donde la música se vuelve Synthwave.
 let riserOn = false,
   switchAt = 0;
+/**
+ * Barrido de ruido que sube antes de un cambio de estilo.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} dur Duración, en segundos.
+ */
 function riser(t0, dur) {
   const src = AC.createBufferSource();
   src.buffer = NOISE;
@@ -490,11 +603,16 @@ function riser(t0, dur) {
   src.start(t0);
   src.stop(t0 + dur + 0.1);
 }
+/**
+ * Golpe de llegada tras el barrido: ruido brillante y bombo.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ */
 function impact(t0) {
   noiseHit(t0, 1.4, 'highpass', 2500, 0.5, musicBus);
   dKick(t0);
 }
-// ---------- música de Andrómeda: otra galaxia, otra escala ----------
+// Música de Andrómeda: otra galaxia, otra escala.
 // Re# frigio (la 2ª menor le da un aire extraño y lejano), campanas metálicas, bajo ondulante y un
 // ritmo sincopado 3-3-4
 const ROOT_A = 311.13;
@@ -508,6 +626,14 @@ const PHRY = [0, 1, 3, 7, 8, 10, 12, 13];
 const hzA = sm => (ROOT_A / 2) * Math.pow(2, sm / 12);
 let andFast = false,
   switchMsg = '¡A toda velocidad!';
+/**
+ * Campana metálica por modulación de frecuencia.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} gain Ganancia máxima.
+ * @param {number} dur Duración, en segundos.
+ */
 function fmBell(t0, f, gain, dur) {
   const c = AC.createOscillator(),
     m = AC.createOscillator(),
@@ -532,6 +658,14 @@ function fmBell(t0, f, gain, dur) {
   c.stop(t0 + dur + 0.05);
   m.stop(t0 + dur + 0.05);
 }
+/**
+ * Bajo «reese»: osciladores desafinados con un filtro que se abre y se cierra.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Ganancia máxima.
+ */
 function reese(t0, f, dur, gain) {
   const lp = AC.createBiquadFilter(),
     g = AC.createGain();
@@ -556,6 +690,12 @@ function reese(t0, f, dur, gain) {
     o.stop(t0 + dur + 0.05);
   }
 }
+/**
+ * Música de Andrómeda (Re# frigio). Con `andFast` todo va al doble en la recta final.
+ *
+ * @param {number} s Paso de la música, en semicorcheas desde el inicio.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ */
 function stepAndromeda(s, t0) {
   const bar = Math.floor(s / 16),
     [root, tones] = PROG_A[Math.floor(bar / 2) % 4],
@@ -603,7 +743,7 @@ function stepAndromeda(s, t0) {
   }
 }
 
-// ---------- música de las Nubes de Magallanes: luminosa y aireada ----------
+// Música de las Nubes de Magallanes: luminosa y aireada.
 // Fa# lidio (la 4ª aumentada suena a asombro), notas de kalimba, un coro lejano y un bajo saltarín
 // a contratiempo
 const ROOT_M = 369.99;
@@ -615,6 +755,14 @@ const PROG_M = [
 ]; // I – II – vi – V
 const LYD = [0, 2, 4, 6, 7, 9, 11, 12];
 const hzM = sm => (ROOT_M / 2) * Math.pow(2, sm / 12);
+/**
+ * Nota de kalimba.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} gain Ganancia máxima.
+ * @param {number} dur Duración, en segundos.
+ */
 function kalimba(t0, f, gain, dur) {
   const o = AC.createOscillator(),
     o2 = AC.createOscillator(),
@@ -640,6 +788,14 @@ function kalimba(t0, f, gain, dur) {
   o.stop(t0 + dur + 0.05);
   o2.stop(t0 + 0.15);
 }
+/**
+ * Coro lejano: el acorde pasa por dos filtros de formante de vocal.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number[]} freqs Frecuencias del acorde, en Hz.
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Ganancia máxima.
+ */
 function choir(t0, freqs, dur, gain) {
   const f1 = AC.createBiquadFilter(),
     f2 = AC.createBiquadFilter(),
@@ -674,6 +830,13 @@ function choir(t0, freqs, dur, gain) {
     v.stop(t0 + dur + 0.35);
   }
 }
+/**
+ * Bajo saltarín corto.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} gain Ganancia máxima.
+ */
 function bounceBass(t0, f, gain) {
   const o = AC.createOscillator(),
     g = AC.createGain(),
@@ -704,6 +867,12 @@ function bounceBass(t0, f, gain) {
   s.start(t0);
   s.stop(t0 + 0.28);
 }
+/**
+ * Música de las Nubes de Magallanes (Fa# lidio).
+ *
+ * @param {number} s Paso de la música, en semicorcheas desde el inicio.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ */
 function stepMagallanes(s, t0) {
   const bar = Math.floor(s / 16),
     [root, tones] = PROG_M[Math.floor(bar / 2) % 4],
@@ -757,7 +926,8 @@ function stepMagallanes(s, t0) {
   }
 }
 
-// ---------- música de los niveles 4 a 8: misma energía, identidad propia ----------
+// Música de los niveles 4 a 8: misma energía, identidad propia. Cada entrada (por índice de
+// nivel) elige nota base, escala, progresión, instrumento principal, bajo, colchón y percusión.
 const GAL_CFG = {
   3: {
     root: 220.0,
@@ -835,6 +1005,14 @@ const GAL_CFG = {
     perc: 'tribal',
   }, // Sagitario A*: Sol# menor, épico
 };
+/**
+ * Nota punteada de sierra filtrada.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} gain Ganancia máxima.
+ * @param {number} dur Duración, en segundos.
+ */
 function pluckSaw(t0, f, gain, dur) {
   const o = AC.createOscillator(),
     lp = AC.createBiquadFilter(),
@@ -855,6 +1033,13 @@ function pluckSaw(t0, f, gain, dur) {
   o.start(t0);
   o.stop(t0 + dur + 0.05);
 }
+/**
+ * Tambor tom: baja rápido de tono hasta `f`.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia final, en Hz.
+ * @param {number} gain Ganancia máxima.
+ */
 function tom(t0, f, gain) {
   const o = AC.createOscillator(),
     g = AC.createGain();
@@ -869,6 +1054,13 @@ function tom(t0, f, gain) {
   o.start(t0);
   o.stop(t0 + 0.35);
 }
+/**
+ * Pulso sub grave.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} gain Ganancia máxima.
+ */
 function subPulse(t0, f, gain) {
   const o = AC.createOscillator(),
     g = AC.createGain();
@@ -882,6 +1074,13 @@ function subPulse(t0, f, gain) {
   o.start(t0);
   o.stop(t0 + 0.32);
 }
+/**
+ * Música genérica de los niveles 4 a 8, según su configuración en `GAL_CFG`.
+ *
+ * @param {number} s Paso de la música, en semicorcheas desde el inicio.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {object} c Configuración del nivel (de `GAL_CFG`).
+ */
 function stepGalaxy(s, t0, c) {
   const bar = Math.floor(s / 16),
     [root, tones] = c.prog[Math.floor(bar / 2) % 4],
@@ -960,6 +1159,15 @@ function stepGalaxy(s, t0, c) {
   }
 }
 
+/**
+ * Órgano de tubos con trémolo y eco.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number[]} freqs Frecuencias del acorde, en Hz.
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Ganancia máxima.
+ * @param {number} [bright] Brillo del filtro, de 0 a 1.
+ */
 function organ(t0, freqs, dur, gain, bright) {
   const lp = AC.createBiquadFilter(),
     g = AC.createGain(),

@@ -1,4 +1,10 @@
-// ---------- intro: un agujero negro errante entra al sistema solar ----------
+/**
+ * Historia de introducción: un agujero negro errante entra al sistema solar, se traga el Sol y
+ * los planetas, y la cámara se acerca a la Tierra hasta la escala del juego.
+ * Todo se mide con `introT` (segundos desde el inicio) contra los tiempos `T_*`; las posiciones
+ * están en unidades de un sistema de 224 de radio que `SI` escala a la pantalla.
+ */
+// Planetas de la intro. r: radio de la órbita y s: tamaño, en unidades de la intro.
 const PLANETS = [
   { n: 'Mercurio', r: 38, s: 3.5, c: '#a9a6a0' },
   { n: 'Venus', r: 60, s: 5.5, c: '#e3c27a' },
@@ -9,6 +15,7 @@ const PLANETS = [
   { n: 'Urano', r: 186, s: 7, c: '#8fd3e0' },
   { n: 'Neptuno', r: 208, s: 7, c: '#3f6fd6' },
 ];
+// Segundo de la intro en que el agujero negro se traga cada planeta.
 const EAT_AT = {
   Mercurio: 6.6,
   Venus: 7.3,
@@ -18,6 +25,7 @@ const EAT_AT = {
   Urano: 10.1,
   Neptuno: 10.8,
 };
+// Tiempos de la intro, en segundos.
 const INTRO_END = 15.9,
   T_ZOOM = 13.9,
   ZOOM_DUR = 1.8,
@@ -34,6 +42,9 @@ let introT = 0,
   SI = 1,
   droneNodes = null,
   cues = {};
+/**
+ * Reinicia el reloj, las partículas y los planetas de la intro.
+ */
 function introSetup() {
   introT = 0;
   iparts = [];
@@ -50,9 +61,15 @@ function introSetup() {
   );
 }
 introSetup();
+// true solo la primera vez que se pide cada señal `k`, para disparar sonidos una vez.
 const once = k => (cues[k] ? false : (cues[k] = true));
 const easeIO = x => (x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
-// trayectoria del agujero negro: llega desde afuera y se instala donde estaba el Sol
+/**
+ * Posición del agujero negro: llega desde afuera por una curva de Bézier y se instala donde
+ * estaba el Sol.
+ *
+ * @returns {{x: number, y: number}} Posición relativa al centro, en unidades de la intro.
+ */
 function bhPos() {
   if (introT < T_ARRIVE) {
     const u = easeIO(clamp((introT - T_ENTER) / (T_ARRIVE - T_ENTER), 0, 1));
@@ -64,17 +81,21 @@ function bhPos() {
   const u = easeIO(clamp((introT - T_ARRIVE) / (T_SUN_END - T_ARRIVE), 0, 1));
   return { x: 42 * (1 - u), y: -14 * (1 - u) };
 }
-// crece al alimentarse
+// El agujero negro crece al alimentarse; diskK y sunK son el avance (de 0 a 1) del disco y de la
+// destrucción del Sol.
 const bhRadius = () => 8 + 12 * clamp((introT - T_ARRIVE) / (T_DISK_END - T_ARRIVE), 0, 1);
 const diskK = () => clamp((introT - 4.8) / (T_DISK_END - 4.8), 0, 1);
 const sunK = () => clamp((introT - T_ARRIVE) / (T_SUN_END - T_ARRIVE), 0, 1);
 
-// antes de jugar: solo dónde estás y "toca para escapar"; la ayuda con íconos aparece hasta que
-// dominas el salto doble
+// Antes de jugar solo se muestra dónde estás y "toca para escapar"; la ayuda con íconos se muestra
+// hasta que se domina el salto doble (cuenta guardada en `orbita_p1_dobles`).
 let doblesHechos = 0;
 try {
   doblesHechos = parseInt(localStorage.getItem('orbita_p1_dobles') || '0', 10) || 0;
 } catch (e) {}
+/**
+ * Cuenta un salto doble hecho (fuera del tutorial) y avanza la misión de poderes.
+ */
 function noteDouble() {
   if (tutorial) {
     return;
@@ -85,6 +106,7 @@ function noteDouble() {
     localStorage.setItem('orbita_p1_dobles', String(doblesHechos));
   } catch (e) {}
 }
+// Panel previo a jugar: nivel elegido, invitación a tocar y los avisos de ayuda.
 const MENU_HTML = () => {
   const L = LEVELS[lvl] || LEVELS[0];
   return (
@@ -96,6 +118,9 @@ const MENU_HTML = () => {
     chipsHTML()
   );
 };
+/**
+ * Empieza la historia de introducción desde el principio.
+ */
 function startIntro() {
   homeAmbience(false);
   state = 'intro';
@@ -104,12 +129,21 @@ function startIntro() {
   elHud.style.opacity = 0;
   introDrone(true);
 }
+// Acercamiento final de la cámara: introZoomK es su avance (de 0 a 1) y zoomZ el aumento que deja
+// la escena a la escala del juego. EARTH_W es la velocidad angular de la Tierra en la intro: con
+// la tercera ley de Kepler, proporcional a r^-1,5 respecto de una órbita de 60.
 const introZoomK = () => easeIO(clamp((introT - T_ZOOM) / ZOOM_DUR, 0, 1));
 const EARTH_W = 0.9 * Math.pow(60 / 84, 1.5);
 const holeGameR = () => Math.max(rr(sunLevel), SUN) * S;
 const zoomZ = () => holeGameR() / (20 * SI);
 const earthEndR = () => (rr(0) * S) / (zoomZ() * SI);
 const zoomF = () => 1 + (zoomZ() - 1) * introZoomK();
+/**
+ * Termina la intro, la marca como vista y vuelve a donde se abrió (inicio o niveles) o, la
+ * primera vez, deja el panel listo para jugar el nivel 1.
+ *
+ * @param {boolean} skipped true si se saltó; el juego aparece con un fundido más corto.
+ */
 function endIntro(skipped) {
   storySeen = true;
   try {
@@ -136,6 +170,11 @@ function endIntro(skipped) {
   elPanel.classList.add('top');
   elPanel.classList.remove('hide');
 }
+/**
+ * Zumbido grave de fondo de la intro (55 Hz con una sierra levemente desafinada).
+ *
+ * @param {boolean} on true para encenderlo, false para apagarlo con un desvanecido.
+ */
 function introDrone(on) {
   if (!AC) {
     return;
@@ -173,6 +212,9 @@ function introDrone(on) {
     }
   } catch (e) {}
 }
+/**
+ * Sonido de un planeta tragado: un tono que cae con ruido sordo.
+ */
 function eatSound() {
   if (!AC) {
     return;
@@ -195,6 +237,12 @@ function eatSound() {
   } catch (e) {}
 }
 
+/**
+ * Avanza la intro: dispara los sonidos de cada momento, deshace el Sol, tira de las partículas
+ * hacia el agujero negro y mueve los planetas.
+ *
+ * @param {number} dt Tiempo desde el cuadro anterior, en segundos.
+ */
 function updateIntro(dt) {
   if (state === 'intro') {
     introT += dt;
@@ -225,7 +273,7 @@ function updateIntro(dt) {
   const b = bhPos(),
     sk = sunK(),
     holeR = bhRadius();
-  // el Sol se deshace en una espiral de fuego alrededor del agujero negro
+  // El Sol se deshace en una espiral de fuego alrededor del agujero negro.
   if (state === 'intro' && sk > 0 && sk < 1) {
     const sR = 20 * Math.pow(1 - sk, 0.7),
       sx = b.x * sk * 0.5,
@@ -284,7 +332,7 @@ function updateIntro(dt) {
         thump();
       }
     } else {
-      // la Tierra llega arriba justo en "Escapa"
+      // La Tierra llega arriba justo cuando aparece "Escapa".
       p.a = p.earth ? -Math.PI / 2 + EARTH_W * Math.min(0, introT - T_ZOOM) : p.a + w * dt;
       if (p.earth && introT > T_EARTH) {
         const k = easeIO(Math.min((introT - T_EARTH) / 6, 1));
@@ -311,6 +359,7 @@ function updateIntro(dt) {
   }
 }
 
+// Id de cada planeta en el juego, para dibujarlo con su imagen.
 const INTRO_ID = {
   Mercurio: 'mercurio',
   Venus: 'venus',
@@ -320,6 +369,15 @@ const INTRO_ID = {
   Urano: 'urano',
   Neptuno: 'neptuno',
 };
+/**
+ * Dibuja un planeta de la intro; al ser tragado se estira hacia el agujero negro y se desvanece.
+ *
+ * @param {object} p Planeta de la intro.
+ * @param {number} x Posición horizontal, en píxeles de pantalla.
+ * @param {number} y Posición vertical, en píxeles de pantalla.
+ * @param {number} rad Radio, en píxeles de pantalla.
+ * @param {number} ph Avance de la caída, de 0 (intacto) a 1 (tragado).
+ */
 function drawPlanet(p, x, y, rad, ph) {
   ctx.save();
   ctx.translate(x, y);
@@ -380,6 +438,15 @@ function drawPlanet(p, x, y, rad, ph) {
   ctx.restore();
   ctx.globalAlpha = 1;
 }
+/**
+ * Texto de la historia que aparece y se desvanece entre dos momentos; se achica si no cabe.
+ *
+ * @param {string} txt Texto; `\n` separa líneas.
+ * @param {number} t0 Inicio, en segundos de la intro.
+ * @param {number} t1 Fin, en segundos de la intro.
+ * @param {number} size Tamaño de letra, en píxeles.
+ * @param {number} y Centro vertical, en píxeles de pantalla.
+ */
 function caption(txt, t0, t1, size, y) {
   if (introT < t0 || introT > t1) {
     return;
@@ -403,6 +470,9 @@ function caption(txt, t0, t1, size, y) {
   lines.forEach((l, i) => ctx.fillText(l, CX, y + (i - (lines.length - 1) / 2) * fs * 1.4));
   ctx.globalAlpha = 1;
 }
+/**
+ * Dibuja un cuadro de la intro: órbitas, Sol, agujero negro, planetas, partículas y textos.
+ */
 function renderIntro() {
   const z = ZONES[0],
     b = bhPos(),
@@ -458,7 +528,7 @@ function renderIntro() {
     ctx.stroke();
   }
   ctx.globalAlpha = 1;
-  // el Sol: intacto, y luego estirado hacia el agujero negro
+  // El Sol: intacto, y luego estirado hacia el agujero negro.
   if (sk < 1) {
     const sR = 20 * Math.pow(1 - sk, 0.7) * SI,
       sx = CX + b.x * sk * 0.5 * SI,
@@ -486,7 +556,7 @@ function renderIntro() {
     ctx.fill();
     ctx.restore();
   }
-  // el agujero negro (solo se ve por cómo dobla la luz, hasta que se alimenta y aparece su disco)
+  // El agujero negro solo se ve por cómo dobla la luz, hasta que se alimenta y aparece su disco.
   if (introT >= T_ENTER) {
     const zf = zoomF(),
       hx = CX + b.x * SI * zf,
