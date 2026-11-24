@@ -30,3 +30,8 @@ Cada una se decide aparte, cuando termine la limpieza.
   nombres sin número (`'perf'`, `'ring'`).
 - **Clave guardada con "v2"**: el récord se guarda en `orbita_best_v2`. Es FIJO (cambiarla borraría el récord de
   los jugadores), así que se queda.
+- **Escudo de Saturno** (`12-poderes.js`): un comentario decía "3 segundos sin choques", pero el código da
+  `shieldT = 1.5`. Confirmar cuánto debe durar.
+- **Parámetro sin uso** (`12-poderes.js`): `powerUpdate(dt, d)` nunca usa `d`.
+- **Agujero de gusano** (`13-agujero-de-gusano.js`): se describía como "anillos 30 a 41", pero el código usa
+  `WH_K = 29`. Probablemente es contar desde 0 o desde 1; confirmar.
