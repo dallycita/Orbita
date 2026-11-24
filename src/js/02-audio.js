@@ -1,4 +1,9 @@
-// ---------- audio ----------
+/**
+ * Base del sonido con Web Audio: el contexto `AC`, los buses (efectos en `master`, música en
+ * `musicBus` → `musVol`, todo a `outBus` y un compresor), el volumen guardado y efectos simples.
+ * `AC` es null hasta el primer toque (`initAudio`) o si el navegador no tiene audio: todo lo que
+ * suena debe comprobarlo.
+ */
 let AC = null,
   master = null,
   musicBus = null,
@@ -6,8 +11,7 @@ let AC = null,
   shaper = null,
   outBus = null,
   musVol = null;
-// volumen de la música y de los efectos (0–100), se guardan; la curva es cuadrática para que el
-// control se sienta parejo
+// Volumen de la música y de los efectos (de 0 a 100), guardados en el navegador.
 let volMus = 100,
   volSfx = 100;
 try {
@@ -20,7 +24,15 @@ try {
     volSfx = Math.max(0, Math.min(100, +b || 0));
   }
 } catch (e) {}
+/**
+ * Convierte el volumen del control en ganancia; la curva es cuadrática para que el control se
+ * sienta parejo al oído.
+ *
+ * @param {number} v Volumen, de 0 a 100.
+ * @returns {number} Ganancia, de 0 a 1.
+ */
 const volGain = v => Math.pow(v / 100, 2);
+/** Aplica `volMus` y `volSfx` a los buses con una transición corta (sin chasquidos). */
 function applyVolumes() {
   if (!AC || !master || !musVol) {
     return;
@@ -31,12 +43,18 @@ function applyVolumes() {
     musVol.gain.setTargetAtTime(volGain(volMus), n, 0.03);
   } catch (e) {}
 }
+/** Guarda `volMus` y `volSfx` en el navegador. */
 function saveVolumes() {
   try {
     localStorage.setItem('orbita_vol_mus', String(Math.round(volMus)));
     localStorage.setItem('orbita_vol_sfx', String(Math.round(volSfx)));
   } catch (e) {}
 }
+/**
+ * Crea el contexto de audio y los buses, y prepara 2 s de ruido blanco (`NOISE`) para los
+ * efectos. Debe llamarse tras un toque del usuario (los navegadores bloquean el audio antes).
+ * Llamarla otra vez no hace nada.
+ */
 function initAudio() {
   if (AC) {
     return;
@@ -67,8 +85,14 @@ function initAudio() {
     AC = null;
   }
 }
-const ROOT = 415.3; // tonalidad: Sol# menor
+const ROOT = 415.3; // tonalidad: Sol# menor (Sol#4 = 415,3 Hz)
+// Escala pentatónica menor, en semitonos sobre ROOT.
 const SCALE = [0, 3, 5, 7, 10, 12, 15, 17];
+/**
+ * Toca un cencerro: dos ondas cuadradas desafinadas por un filtro de banda.
+ *
+ * @param {number} semi Altura, en semitonos sobre ROOT.
+ */
 function cowbell(semi) {
   if (!AC) {
     return;
@@ -99,6 +123,18 @@ function cowbell(semi) {
     o2.stop(t0 + 0.3);
   } catch (e) {}
 }
+/**
+ * Programa un golpe de ruido filtrado que se apaga; empieza en un punto al azar del ruido para que
+ * dos golpes seguidos no suenen idénticos. No comprueba `AC`.
+ *
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio.
+ * @param {number} dur Duración, en segundos.
+ * @param {string} type Tipo de filtro ('lowpass', 'highpass', 'bandpass'…).
+ * @param {number} freq Frecuencia inicial del filtro, en Hz.
+ * @param {number} gain Volumen inicial, de 0 a 1.
+ * @param {AudioNode} dest Nodo de destino.
+ * @param {number} [f1] Frecuencia final del filtro, en Hz (sin ella, el filtro no se mueve).
+ */
 function noiseHit(t0, dur, type, freq, gain, dest, f1) {
   const src = AC.createBufferSource();
   src.buffer = NOISE;
@@ -118,6 +154,15 @@ function noiseHit(t0, dur, type, freq, gain, dest, f1) {
   src.start(t0, Math.random() * 0.8);
   src.stop(t0 + dur + 0.02);
 }
+/**
+ * Toca ya un golpe de ruido filtrado por el bus de efectos.
+ *
+ * @param {number} dur Duración, en segundos.
+ * @param {number} f0 Frecuencia inicial del filtro, en Hz.
+ * @param {number} f1 Frecuencia final del filtro, en Hz.
+ * @param {number} gain Volumen inicial, de 0 a 1.
+ * @param {string} type Tipo de filtro ('lowpass', 'highpass', 'bandpass'…).
+ */
 function noise(dur, f0, f1, gain, type) {
   if (!AC) {
     return;
@@ -126,6 +171,7 @@ function noise(dur, f0, f1, gain, type) {
     noiseHit(AC.currentTime, dur, type, f0, gain, master, f1);
   } catch (e) {}
 }
+/** Golpe grave y corto (de 110 a 55 Hz en 0,1 s). */
 function thump() {
   if (!AC) {
     return;
@@ -145,6 +191,7 @@ function thump() {
     o.stop(t0 + 0.17);
   } catch (e) {}
 }
+/** Sonido de ser tragado por el agujero negro: un tono y un ruido que caen durante 1,8 s. */
 function suck() {
   if (!AC) {
     return;
@@ -166,6 +213,7 @@ function suck() {
     noiseHit(t0, 1.8, 'lowpass', 2200, 0.45, master, 70);
   } catch (e) {}
 }
+/** Bajo profundo que cae (de 110 a 28 Hz en 0,9 s), para golpes grandes. */
 function sub() {
   if (!AC) {
     return;
