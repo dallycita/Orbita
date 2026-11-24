@@ -13,7 +13,255 @@ import { LEVELS } from './data/levels.js';
 
 // Una sola escena WebGL a pantalla completa: al deslizar, mezcla las dos galaxias vecinas y cada
 // una se mueve con su tarjeta.
-let LVGL;
+const LVGL = (() => {
+  let gl = null,
+    cv = null,
+    prog = null,
+    U = {},
+    failed = false,
+    buf = null;
+  const FS = `
+  precision highp float;
+  uniform vec2 uRes; uniform float uT, uKA, uKB, uMix; uniform vec2 uCA, uCB; uniform float uS;
+  float h21(vec2 p){ p = fract(p*vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x*p.y); }
+  vec2 h22(vec2 p){ float n = h21(p); return vec2(n, h21(p + n)); }
+  float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3. - 2.*f);
+    return mix(mix(h21(i), h21(i + vec2(1, 0)), f.x), mix(h21(i + vec2(0, 1)), h21(i + vec2(1, 1)), f.x), f.y); }
+  float fbm(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 5; i++){ s += a*vn(p); p = m*p; a *= .5; } return s; }
+  mat2 R2(float a){ return mat2(cos(a), -sin(a), sin(a), cos(a)); }
+  vec3 stars(vec2 q, float sc, float dens, float bright){
+    vec2 g = q/sc, id = floor(g), f = fract(g); vec3 c = vec3(0.);
+    for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++){
+      vec2 o = vec2(x, y), cid = id + o; float n = h21(cid); if (n > dens) continue;
+      vec2 sp = o + h22(cid*1.7); float dd = length(f - sp)*sc;
+      float b = pow(h21(cid + 7.1), 6.)*1.6 + .12, tw = .7 + .3*sin(uT*(1. + 3.*n) + n*40.);
+      vec3 col = mix(vec3(1., .82, .65), vec3(.72, .83, 1.), h21(cid + 3.3));
+      c += col*b*tw*exp(-dd*dd*1.4)*bright;
+    }
+    return c;
+  }
+  // un disco iluminado por una fuente (para los planetas)
+  vec3 planet(vec2 p, vec2 c, float r, vec3 col, vec2 light){
+    vec2 d = (p - c)/r; float l2 = dot(d, d); if (l2 > 1.) return vec3(-1.);
+    vec3 n = vec3(d, sqrt(1. - l2)); float lam = clamp(dot(n, normalize(vec3(light, .35))), 0., 1.);
+    return col*(.06 + .94*lam);
+  }
+  // ---- 0 · el Sistema solar: el Sol vivo y sus planetas en órbita ----
+  vec3 kSolar(vec2 p){
+    float r = length(p), Rs = .15;
+    float cor = exp(-max(r - Rs, 0.)*12.)*(.75 + .3*fbm(vec2(atan(p.y, p.x)*3., r*8. - uT*.25)));
+    vec3 col = vec3(1., .62, .25)*cor*.9 + vec3(1., .5, .2)*exp(-r*4.)*.35;
+    float ba = length(p/vec2(1., .36)); col += vec3(.55, .5, .45)*exp(-pow((ba - .715)/.025, 2.))*.06*(.5 + fbm(p*40.));   // cinturón de asteroides, como polvo
+    return col;
+  }
+  // ---- 1 · las Nubes de Magallanes: irregulares, con la Tarántula y la Pequeña Nube ----
+  vec3 kMag(vec2 p){
+    vec2 w = p + .06*vec2(fbm(p*3. + uT*.03), fbm(p*3. - uT*.03));
+    vec2 b = R2(.45)*(w - vec2(-.1, .05)); float bar = exp(-pow(abs(b.x)/.42, 2.) - pow(abs(b.y)/.09, 2.));
+    float cloud = smoothstep(.35, .9, fbm(w*3.2 + 2.))*exp(-length(w - vec2(-.05, .02))/.5);
+    vec3 col = vec3(1., .86, .65)*bar*.9 + vec3(.6, .72, 1.)*cloud*1.2;
+    // la nebulosa de la Tarántula: filamentos rosados y su cúmulo central
+    vec2 tq = w - vec2(.28, -.16); float tr = length(tq), fil = fbm(vec2(atan(tq.y, tq.x)*2.5, tr*14. - uT*.08));
+    col += vec3(1., .35, .6)*smoothstep(.28, 0., tr)*(.4 + .9*fil)*1.1 + vec3(.9, .95, 1.)*exp(-tr*tr/.0004)*1.2;
+    // la Pequeña Nube, más lejos, y el puente de estrellas
+    float smc = exp(-length((w - vec2(.85, .62))*vec2(1., 1.6))/.16)*(.6 + .6*fbm(w*6.));
+    col += vec3(.75, .82, 1.)*smc*.8;
+    float bridge = exp(-pow(abs(dot(w - vec2(.3, .3), normalize(vec2(-.62, .78)))), 2.)/.006)*smoothstep(1.1, .3, length(w - vec2(.4, .35)));
+    col += vec3(.6, .7, 1.)*bridge*fbm(w*9.)*.25;
+    col *= 1. - .55*smoothstep(.62, .8, fbm(w*5. + 9.))*exp(-length(w)/.6);          // polvo oscuro
+    return col;
+  }
+  // ---- 2 · Andrómeda: espiral muy inclinada, núcleo dorado, brazos azules, polvo, M32 y M110 ----
+  vec3 kAnd(vec2 p){
+    vec2 d = R2(-.62)*p; d.y /= .3; float r0 = length(d); d = R2(-uT*(.05 + .02/(r0 + .3)))*d;
+    float r = length(d), ph = atan(d.y, d.x), tw = fbm(d*2.2 + 5.)*1.6, arm = 2.*(ph - log(r + .02)/.32) + tw, arms = .5 + .5*cos(arm);
+    float clump = .55 + .9*fbm(d*9. + 1.3), disk = exp(-r/.4)*(.25 + .75*pow(arms, 2.2))*clump;
+    float bulge = exp(-pow(r/.06, .65))*1.9 + exp(-r/.14)*.35;
+    float lane = smoothstep(.45, .92, .5 + .5*cos(arm - .7)), dust = lane*smoothstep(.05, .16, r)*exp(-r/1.1)*(.5 + .9*fbm(d*11. + 7.));
+    float hii = smoothstep(.7, .86, fbm(d*26. + 3.))*pow(arms, 3.)*smoothstep(.15, .3, r)*(1. - smoothstep(.55, .85, r));
+    vec3 col = vec3(.5, .62, 1.)*disk + vec3(1., .86, .62)*bulge + vec3(1., .38, .62)*hii*2.4;
+    col *= 1. - .85*clamp(dust, 0., 1.);
+    vec2 m32 = p - vec2(.13, .1); col += vec3(1., .9, .75)*exp(-dot(m32, m32)/.0006)*.9;
+    vec2 m110 = R2(.5)*(p - vec2(-.5, -.42)); m110.y /= .5; col += vec3(1., .9, .78)*exp(-dot(m110, m110)/.008)*.35;
+    return col;
+  }
+  // ---- 3 · Centaurus A: elíptica gigante, franja de polvo torcida y chorros que salen disparados ----
+  vec3 kCen(vec2 p){
+    float r = length(p); vec3 col = vec3(1., .88, .7)*(exp(-pow(r/.1, .7))*1.2 + exp(-r/.35)*.45);
+    vec2 q = R2(.38)*p; float yl = q.y - .07*sin(q.x*3.4 + .4) - .02*sin(q.x*9.);
+    float lane = exp(-yl*yl/.0035)*smoothstep(.85, .25, abs(q.x))*(.6 + .7*fbm(q*14. + vec2(uT*.03, 0.)));
+    col *= 1. - .92*clamp(lane, 0., 1.);
+    col += vec3(1., .4, .62)*lane*smoothstep(.6, .85, fbm(q*30. + 2.))*1.2;
+    // chorros perpendiculares: nudos de energía que viajan hacia afuera
+    vec2 j = R2(.38 + 1.5708)*p; float s = abs(j.x), perp = j.y;
+    float knots = .35 + .65*pow(.5 + .5*sin(s*22. - uT*2.6), 3.);
+    float jet = exp(-perp*perp/(.00012 + s*s*.004))*smoothstep(.02, .08, s)*(1. - smoothstep(.55, 1.2, s))*knots;
+    col += vec3(.55, .78, 1.)*jet*.9;
+    for (int k = 0; k < 2; k++){ float sg = k == 0 ? 1. : -1.; vec2 lc = R2(.38 + 1.5708)*vec2(1.25*sg, .06); float lb = exp(-length((p - vec2(lc.x, -lc.y)))/.2);
+      col += vec3(1., .5, .25)*lb*(.25 + .2*fbm(p*5. + uT*.05)); }
+    return col;
+  }
+  // ---- 4 · el Remolino: espiral perfecta vista de frente y su vecina al final de un brazo ----
+  vec3 kRem(vec2 p){
+    vec2 c = p + vec2(.1, -.05); float r0 = length(c); vec2 d = R2(-uT*(.06 + .02/(r0 + .25)))*c;
+    float r = length(d), ph = atan(d.y, d.x), arm = 2.*(ph - log(r + .02)/.28) + fbm(d*3.)*.8, arms = .5 + .5*cos(arm);
+    float disk = exp(-r/.33)*(.15 + .85*pow(arms, 3.))*(.55 + .9*fbm(d*10.));
+    float lane = smoothstep(.55, .95, .5 + .5*cos(arm - .55))*exp(-r/.9)*smoothstep(.04, .12, r);
+    float hii = smoothstep(.68, .84, fbm(d*24. + 2.))*pow(arms, 3.)*smoothstep(.1, .25, r)*(1. - smoothstep(.45, .7, r));
+    vec3 col = vec3(.52, .64, 1.)*disk*1.2 + vec3(1., .86, .62)*exp(-pow(r/.05, .7))*1.6 + vec3(1., .36, .6)*hii*2.4;
+    col *= 1. - .8*lane;
+    vec2 nc = p - vec2(.58, .52); float nb = exp(-length(nc)/.07);
+    col += vec3(1., .85, .6)*nb*1.2*(1. - .5*exp(-pow(nc.y + .2*nc.x, 2.)/.0004)*smoothstep(.09, .02, length(nc)));
+    col += vec3(.6, .7, 1.)*exp(-pow(length(p - vec2(.42, .35)) - .0, 2.)/.02)*.06;
+    return col;
+  }
+  // ---- 5 · el Sombrero: casi de lado, núcleo enorme y su franja oscura con borde brillante ----
+  vec3 kSom(vec2 p){
+    vec2 q = R2(-.08)*p; float bulge = exp(-length(q*vec2(1., 1.4))/.2)*1.3 + exp(-length(q*vec2(.8, 1.2))/.55)*.25;
+    vec3 col = vec3(1., .9, .72)*bulge;
+    float re = length(q*vec2(1., 1./.16));
+    float disk = exp(-pow((re - .62)/.28, 2.))*.5;
+    col += vec3(1., .88, .72)*disk*(q.y > -.01 ? .6 : .35);
+    float lane = exp(-pow((re - .66)/.07, 2.))*step(-.002, q.y)*(.6 + .6*fbm(vec2(q.x*12. + uT*.08, q.y*30.)));
+    col *= 1. - .93*clamp(lane, 0., 1.);
+    col += vec3(1., .8, .6)*exp(-pow((re - .78)/.03, 2.))*step(0., q.y)*.35;
+    return col;
+  }
+  // ---- 6 · M87: elíptica gigante, el chorro con nudos y el anillo de la primera foto de un agujero negro ----
+  vec3 kM87(vec2 p){
+    float r = length(p); vec3 col = vec3(1., .86, .66)*(exp(-pow(r/.06, .6))*1.1 + exp(-r/.5)*.4);
+    vec2 j = R2(.55)*p; float s = j.x, perp = j.y;
+    float knots = .3 + .7*pow(.5 + .5*sin(s*30. - uT*3.), 4.);
+    col += vec3(.6, .8, 1.)*exp(-perp*perp/(.00006 + s*s*.0016))*step(0., s)*(1. - smoothstep(.5, .95, s))*knots*1.2;
+    return col;
+  }
+  // ---- 7 · Sagitario A*: el agujero negro de nuestra galaxia y las estrellas S que lo orbitan (S2 con su órbita real, e≈0,88) ----
+  vec3 kSgr(vec2 p){
+    float r = length(p), an = atan(p.y, p.x);
+    float sw = fbm(vec2(an*2. + uT*.6 + 3./(r + .1), r*6.));
+    vec3 col = vec3(1., .42, .18)*exp(-pow((r - .3)/.18, 2.))*sw*.4 + vec3(.5, .2, .12)*exp(-r/.9)*.12;
+    col *= 1. - .6*smoothstep(.55, .75, fbm(p*3. + 4.));
+    return col;
+  }
+  vec3 kind(float k, vec2 p){
+    if (k < .5) return kSolar(p); if (k < 1.5) return kMag(p); if (k < 2.5) return kAnd(p); if (k < 3.5) return kCen(p);
+    if (k < 4.5) return kRem(p); if (k < 5.5) return kSom(p); if (k < 6.5) return kM87(p); return kSgr(p);
+  }
+  void main(){
+    vec2 q = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y);
+    vec2 drift = vec2(sin(uT*.05), cos(uT*.04))*uRes.y*.006;
+    vec3 col = vec3(.006, .007, .02) + vec3(.012, .01, .03)*(1. - q.y/uRes.y);
+    vec2 pa = (q - uCA + drift)/uS, pb = (q - uCB + drift)/uS;
+    if (uMix < .999){ float fa = smoothstep(2.4, .9, length(pa)); if (fa > 0.) col += kind(uKA, pa)*fa*(1. - uMix); }
+    if (uMix > .001){ float fb = smoothstep(2.4, .9, length(pb)); if (fb > 0.) col += kind(uKB, pb)*fb*uMix; }
+    col = 1. - exp(-col*1.3);
+    col = mix(col, col*col*(3. - 2.*col), .3);
+    vec2 uv = q/uRes; col *= .5 + .5*smoothstep(1.2, .35, length((uv - .5)*vec2(1.1, .9)));
+    gl_FragColor = vec4(max(col, 0.), 1.);
+  }`;
+  /**
+   * Crea el contexto WebGL y compila el shader la primera vez.
+   *
+   * @returns {boolean} true si WebGL está disponible.
+   */
+  function init() {
+    if (gl || failed) {
+      return !!gl;
+    }
+    try {
+      cv = document.createElement('canvas');
+      gl =
+        cv.getContext && cv.getContext('webgl', { preserveDrawingBuffer: true, antialias: false });
+      if (!gl || !gl.createShader) {
+        gl = null;
+        failed = true;
+        return false;
+      }
+      const sh = (ty, src) => {
+        const s = gl.createShader(ty);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+          console.warn(gl.getShaderInfoLog(s));
+          return null;
+        }
+        return s;
+      };
+      const v = sh(
+          gl.VERTEX_SHADER,
+          'attribute vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }',
+        ),
+        f = sh(gl.FRAGMENT_SHADER, FS);
+      if (!v || !f) {
+        gl = null;
+        failed = true;
+        return false;
+      }
+      prog = gl.createProgram();
+      gl.attachShader(prog, v);
+      gl.attachShader(prog, f);
+      gl.bindAttribLocation(prog, 0, 'p');
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+        gl = null;
+        failed = true;
+        return false;
+      }
+      ['uRes', 'uT', 'uKA', 'uKB', 'uMix', 'uCA', 'uCB', 'uS'].forEach(
+        k => (U[k] = gl.getUniformLocation(prog, k)),
+      );
+      buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      return true;
+    } catch (e) {
+      gl = null;
+      failed = true;
+      return false;
+    }
+  }
+  /**
+   * Dibuja la parte suave de dos galaxias vecinas mezcladas, a 520 píxeles como máximo.
+   *
+   * @param {number} w Ancho de la pantalla, en píxeles de pantalla.
+   * @param {number} h Alto de la pantalla, en píxeles de pantalla.
+   * @param {number} ka Índice del destino de la izquierda.
+   * @param {number} kb Índice del destino de la derecha.
+   * @param {number} mix Mezcla entre los dos, de 0 a 1.
+   * @param {number[]} ca Centro [x, y] del destino ka, en píxeles de pantalla.
+   * @param {number[]} cb Centro [x, y] del destino kb, en píxeles de pantalla.
+   * @param {number} scale Tamaño de la galaxia, en píxeles de pantalla.
+   * @returns {HTMLCanvasElement|null} La imagen, o null sin WebGL.
+   */
+  function soft(w, h, ka, kb, mix, ca, cb, scale) {
+    if (!init()) {
+      return null;
+    }
+    const q = Math.min(1, 520 / Math.max(w, h)),
+      cw = Math.max(2, Math.round(w * q)),
+      ch = Math.max(2, Math.round(h * q));
+    if (cv.width !== cw || cv.height !== ch) {
+      cv.width = cw;
+      cv.height = ch;
+    }
+    gl.viewport(0, 0, cw, ch);
+    gl.useProgram(prog);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform2f(U.uRes, cw, ch);
+    gl.uniform1f(U.uT, t);
+    gl.uniform1f(U.uKA, ka);
+    gl.uniform1f(U.uKB, kb);
+    gl.uniform1f(U.uMix, mix);
+    gl.uniform2f(U.uCA, ca[0] * q, ca[1] * q);
+    gl.uniform2f(U.uCB, cb[0] * q, cb[1] * q);
+    gl.uniform1f(U.uS, scale * q);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    return cv;
+  }
+  return { soft, ok: () => init() };
+})();
 // lvCanvas: el lienzo de fondo del selector; lvArts: el recuadro de dibujo de cada tarjeta.
 // Los asigna 25-selector-niveles.
 let lvCanvas = null,
@@ -410,260 +658,6 @@ function drawLevelsBG() {
   }
   ctx.restore();
   elLv.classList.toggle('live', !!soft);
-}
-
-/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
-export function initLevelCards() {
-  LVGL = (() => {
-    let gl = null,
-      cv = null,
-      prog = null,
-      U = {},
-      failed = false,
-      buf = null;
-    const FS = `
-  precision highp float;
-  uniform vec2 uRes; uniform float uT, uKA, uKB, uMix; uniform vec2 uCA, uCB; uniform float uS;
-  float h21(vec2 p){ p = fract(p*vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x*p.y); }
-  vec2 h22(vec2 p){ float n = h21(p); return vec2(n, h21(p + n)); }
-  float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3. - 2.*f);
-    return mix(mix(h21(i), h21(i + vec2(1, 0)), f.x), mix(h21(i + vec2(0, 1)), h21(i + vec2(1, 1)), f.x), f.y); }
-  float fbm(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 5; i++){ s += a*vn(p); p = m*p; a *= .5; } return s; }
-  mat2 R2(float a){ return mat2(cos(a), -sin(a), sin(a), cos(a)); }
-  vec3 stars(vec2 q, float sc, float dens, float bright){
-    vec2 g = q/sc, id = floor(g), f = fract(g); vec3 c = vec3(0.);
-    for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++){
-      vec2 o = vec2(x, y), cid = id + o; float n = h21(cid); if (n > dens) continue;
-      vec2 sp = o + h22(cid*1.7); float dd = length(f - sp)*sc;
-      float b = pow(h21(cid + 7.1), 6.)*1.6 + .12, tw = .7 + .3*sin(uT*(1. + 3.*n) + n*40.);
-      vec3 col = mix(vec3(1., .82, .65), vec3(.72, .83, 1.), h21(cid + 3.3));
-      c += col*b*tw*exp(-dd*dd*1.4)*bright;
-    }
-    return c;
-  }
-  // un disco iluminado por una fuente (para los planetas)
-  vec3 planet(vec2 p, vec2 c, float r, vec3 col, vec2 light){
-    vec2 d = (p - c)/r; float l2 = dot(d, d); if (l2 > 1.) return vec3(-1.);
-    vec3 n = vec3(d, sqrt(1. - l2)); float lam = clamp(dot(n, normalize(vec3(light, .35))), 0., 1.);
-    return col*(.06 + .94*lam);
-  }
-  // ---- 0 · el Sistema solar: el Sol vivo y sus planetas en órbita ----
-  vec3 kSolar(vec2 p){
-    float r = length(p), Rs = .15;
-    float cor = exp(-max(r - Rs, 0.)*12.)*(.75 + .3*fbm(vec2(atan(p.y, p.x)*3., r*8. - uT*.25)));
-    vec3 col = vec3(1., .62, .25)*cor*.9 + vec3(1., .5, .2)*exp(-r*4.)*.35;
-    float ba = length(p/vec2(1., .36)); col += vec3(.55, .5, .45)*exp(-pow((ba - .715)/.025, 2.))*.06*(.5 + fbm(p*40.));   // cinturón de asteroides, como polvo
-    return col;
-  }
-  // ---- 1 · las Nubes de Magallanes: irregulares, con la Tarántula y la Pequeña Nube ----
-  vec3 kMag(vec2 p){
-    vec2 w = p + .06*vec2(fbm(p*3. + uT*.03), fbm(p*3. - uT*.03));
-    vec2 b = R2(.45)*(w - vec2(-.1, .05)); float bar = exp(-pow(abs(b.x)/.42, 2.) - pow(abs(b.y)/.09, 2.));
-    float cloud = smoothstep(.35, .9, fbm(w*3.2 + 2.))*exp(-length(w - vec2(-.05, .02))/.5);
-    vec3 col = vec3(1., .86, .65)*bar*.9 + vec3(.6, .72, 1.)*cloud*1.2;
-    // la nebulosa de la Tarántula: filamentos rosados y su cúmulo central
-    vec2 tq = w - vec2(.28, -.16); float tr = length(tq), fil = fbm(vec2(atan(tq.y, tq.x)*2.5, tr*14. - uT*.08));
-    col += vec3(1., .35, .6)*smoothstep(.28, 0., tr)*(.4 + .9*fil)*1.1 + vec3(.9, .95, 1.)*exp(-tr*tr/.0004)*1.2;
-    // la Pequeña Nube, más lejos, y el puente de estrellas
-    float smc = exp(-length((w - vec2(.85, .62))*vec2(1., 1.6))/.16)*(.6 + .6*fbm(w*6.));
-    col += vec3(.75, .82, 1.)*smc*.8;
-    float bridge = exp(-pow(abs(dot(w - vec2(.3, .3), normalize(vec2(-.62, .78)))), 2.)/.006)*smoothstep(1.1, .3, length(w - vec2(.4, .35)));
-    col += vec3(.6, .7, 1.)*bridge*fbm(w*9.)*.25;
-    col *= 1. - .55*smoothstep(.62, .8, fbm(w*5. + 9.))*exp(-length(w)/.6);          // polvo oscuro
-    return col;
-  }
-  // ---- 2 · Andrómeda: espiral muy inclinada, núcleo dorado, brazos azules, polvo, M32 y M110 ----
-  vec3 kAnd(vec2 p){
-    vec2 d = R2(-.62)*p; d.y /= .3; float r0 = length(d); d = R2(-uT*(.05 + .02/(r0 + .3)))*d;
-    float r = length(d), ph = atan(d.y, d.x), tw = fbm(d*2.2 + 5.)*1.6, arm = 2.*(ph - log(r + .02)/.32) + tw, arms = .5 + .5*cos(arm);
-    float clump = .55 + .9*fbm(d*9. + 1.3), disk = exp(-r/.4)*(.25 + .75*pow(arms, 2.2))*clump;
-    float bulge = exp(-pow(r/.06, .65))*1.9 + exp(-r/.14)*.35;
-    float lane = smoothstep(.45, .92, .5 + .5*cos(arm - .7)), dust = lane*smoothstep(.05, .16, r)*exp(-r/1.1)*(.5 + .9*fbm(d*11. + 7.));
-    float hii = smoothstep(.7, .86, fbm(d*26. + 3.))*pow(arms, 3.)*smoothstep(.15, .3, r)*(1. - smoothstep(.55, .85, r));
-    vec3 col = vec3(.5, .62, 1.)*disk + vec3(1., .86, .62)*bulge + vec3(1., .38, .62)*hii*2.4;
-    col *= 1. - .85*clamp(dust, 0., 1.);
-    vec2 m32 = p - vec2(.13, .1); col += vec3(1., .9, .75)*exp(-dot(m32, m32)/.0006)*.9;
-    vec2 m110 = R2(.5)*(p - vec2(-.5, -.42)); m110.y /= .5; col += vec3(1., .9, .78)*exp(-dot(m110, m110)/.008)*.35;
-    return col;
-  }
-  // ---- 3 · Centaurus A: elíptica gigante, franja de polvo torcida y chorros que salen disparados ----
-  vec3 kCen(vec2 p){
-    float r = length(p); vec3 col = vec3(1., .88, .7)*(exp(-pow(r/.1, .7))*1.2 + exp(-r/.35)*.45);
-    vec2 q = R2(.38)*p; float yl = q.y - .07*sin(q.x*3.4 + .4) - .02*sin(q.x*9.);
-    float lane = exp(-yl*yl/.0035)*smoothstep(.85, .25, abs(q.x))*(.6 + .7*fbm(q*14. + vec2(uT*.03, 0.)));
-    col *= 1. - .92*clamp(lane, 0., 1.);
-    col += vec3(1., .4, .62)*lane*smoothstep(.6, .85, fbm(q*30. + 2.))*1.2;
-    // chorros perpendiculares: nudos de energía que viajan hacia afuera
-    vec2 j = R2(.38 + 1.5708)*p; float s = abs(j.x), perp = j.y;
-    float knots = .35 + .65*pow(.5 + .5*sin(s*22. - uT*2.6), 3.);
-    float jet = exp(-perp*perp/(.00012 + s*s*.004))*smoothstep(.02, .08, s)*(1. - smoothstep(.55, 1.2, s))*knots;
-    col += vec3(.55, .78, 1.)*jet*.9;
-    for (int k = 0; k < 2; k++){ float sg = k == 0 ? 1. : -1.; vec2 lc = R2(.38 + 1.5708)*vec2(1.25*sg, .06); float lb = exp(-length((p - vec2(lc.x, -lc.y)))/.2);
-      col += vec3(1., .5, .25)*lb*(.25 + .2*fbm(p*5. + uT*.05)); }
-    return col;
-  }
-  // ---- 4 · el Remolino: espiral perfecta vista de frente y su vecina al final de un brazo ----
-  vec3 kRem(vec2 p){
-    vec2 c = p + vec2(.1, -.05); float r0 = length(c); vec2 d = R2(-uT*(.06 + .02/(r0 + .25)))*c;
-    float r = length(d), ph = atan(d.y, d.x), arm = 2.*(ph - log(r + .02)/.28) + fbm(d*3.)*.8, arms = .5 + .5*cos(arm);
-    float disk = exp(-r/.33)*(.15 + .85*pow(arms, 3.))*(.55 + .9*fbm(d*10.));
-    float lane = smoothstep(.55, .95, .5 + .5*cos(arm - .55))*exp(-r/.9)*smoothstep(.04, .12, r);
-    float hii = smoothstep(.68, .84, fbm(d*24. + 2.))*pow(arms, 3.)*smoothstep(.1, .25, r)*(1. - smoothstep(.45, .7, r));
-    vec3 col = vec3(.52, .64, 1.)*disk*1.2 + vec3(1., .86, .62)*exp(-pow(r/.05, .7))*1.6 + vec3(1., .36, .6)*hii*2.4;
-    col *= 1. - .8*lane;
-    vec2 nc = p - vec2(.58, .52); float nb = exp(-length(nc)/.07);
-    col += vec3(1., .85, .6)*nb*1.2*(1. - .5*exp(-pow(nc.y + .2*nc.x, 2.)/.0004)*smoothstep(.09, .02, length(nc)));
-    col += vec3(.6, .7, 1.)*exp(-pow(length(p - vec2(.42, .35)) - .0, 2.)/.02)*.06;
-    return col;
-  }
-  // ---- 5 · el Sombrero: casi de lado, núcleo enorme y su franja oscura con borde brillante ----
-  vec3 kSom(vec2 p){
-    vec2 q = R2(-.08)*p; float bulge = exp(-length(q*vec2(1., 1.4))/.2)*1.3 + exp(-length(q*vec2(.8, 1.2))/.55)*.25;
-    vec3 col = vec3(1., .9, .72)*bulge;
-    float re = length(q*vec2(1., 1./.16));
-    float disk = exp(-pow((re - .62)/.28, 2.))*.5;
-    col += vec3(1., .88, .72)*disk*(q.y > -.01 ? .6 : .35);
-    float lane = exp(-pow((re - .66)/.07, 2.))*step(-.002, q.y)*(.6 + .6*fbm(vec2(q.x*12. + uT*.08, q.y*30.)));
-    col *= 1. - .93*clamp(lane, 0., 1.);
-    col += vec3(1., .8, .6)*exp(-pow((re - .78)/.03, 2.))*step(0., q.y)*.35;
-    return col;
-  }
-  // ---- 6 · M87: elíptica gigante, el chorro con nudos y el anillo de la primera foto de un agujero negro ----
-  vec3 kM87(vec2 p){
-    float r = length(p); vec3 col = vec3(1., .86, .66)*(exp(-pow(r/.06, .6))*1.1 + exp(-r/.5)*.4);
-    vec2 j = R2(.55)*p; float s = j.x, perp = j.y;
-    float knots = .3 + .7*pow(.5 + .5*sin(s*30. - uT*3.), 4.);
-    col += vec3(.6, .8, 1.)*exp(-perp*perp/(.00006 + s*s*.0016))*step(0., s)*(1. - smoothstep(.5, .95, s))*knots*1.2;
-    return col;
-  }
-  // ---- 7 · Sagitario A*: el agujero negro de nuestra galaxia y las estrellas S que lo orbitan (S2 con su órbita real, e≈0,88) ----
-  vec3 kSgr(vec2 p){
-    float r = length(p), an = atan(p.y, p.x);
-    float sw = fbm(vec2(an*2. + uT*.6 + 3./(r + .1), r*6.));
-    vec3 col = vec3(1., .42, .18)*exp(-pow((r - .3)/.18, 2.))*sw*.4 + vec3(.5, .2, .12)*exp(-r/.9)*.12;
-    col *= 1. - .6*smoothstep(.55, .75, fbm(p*3. + 4.));
-    return col;
-  }
-  vec3 kind(float k, vec2 p){
-    if (k < .5) return kSolar(p); if (k < 1.5) return kMag(p); if (k < 2.5) return kAnd(p); if (k < 3.5) return kCen(p);
-    if (k < 4.5) return kRem(p); if (k < 5.5) return kSom(p); if (k < 6.5) return kM87(p); return kSgr(p);
-  }
-  void main(){
-    vec2 q = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y);
-    vec2 drift = vec2(sin(uT*.05), cos(uT*.04))*uRes.y*.006;
-    vec3 col = vec3(.006, .007, .02) + vec3(.012, .01, .03)*(1. - q.y/uRes.y);
-    vec2 pa = (q - uCA + drift)/uS, pb = (q - uCB + drift)/uS;
-    if (uMix < .999){ float fa = smoothstep(2.4, .9, length(pa)); if (fa > 0.) col += kind(uKA, pa)*fa*(1. - uMix); }
-    if (uMix > .001){ float fb = smoothstep(2.4, .9, length(pb)); if (fb > 0.) col += kind(uKB, pb)*fb*uMix; }
-    col = 1. - exp(-col*1.3);
-    col = mix(col, col*col*(3. - 2.*col), .3);
-    vec2 uv = q/uRes; col *= .5 + .5*smoothstep(1.2, .35, length((uv - .5)*vec2(1.1, .9)));
-    gl_FragColor = vec4(max(col, 0.), 1.);
-  }`;
-    /**
-     * Crea el contexto WebGL y compila el shader la primera vez.
-     *
-     * @returns {boolean} true si WebGL está disponible.
-     */
-    function init() {
-      if (gl || failed) {
-        return !!gl;
-      }
-      try {
-        cv = document.createElement('canvas');
-        gl =
-          cv.getContext &&
-          cv.getContext('webgl', { preserveDrawingBuffer: true, antialias: false });
-        if (!gl || !gl.createShader) {
-          gl = null;
-          failed = true;
-          return false;
-        }
-        const sh = (ty, src) => {
-          const s = gl.createShader(ty);
-          gl.shaderSource(s, src);
-          gl.compileShader(s);
-          if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-            console.warn(gl.getShaderInfoLog(s));
-            return null;
-          }
-          return s;
-        };
-        const v = sh(
-            gl.VERTEX_SHADER,
-            'attribute vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }',
-          ),
-          f = sh(gl.FRAGMENT_SHADER, FS);
-        if (!v || !f) {
-          gl = null;
-          failed = true;
-          return false;
-        }
-        prog = gl.createProgram();
-        gl.attachShader(prog, v);
-        gl.attachShader(prog, f);
-        gl.bindAttribLocation(prog, 0, 'p');
-        gl.linkProgram(prog);
-        if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-          gl = null;
-          failed = true;
-          return false;
-        }
-        ['uRes', 'uT', 'uKA', 'uKB', 'uMix', 'uCA', 'uCB', 'uS'].forEach(
-          k => (U[k] = gl.getUniformLocation(prog, k)),
-        );
-        buf = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-        return true;
-      } catch (e) {
-        gl = null;
-        failed = true;
-        return false;
-      }
-    }
-    /**
-     * Dibuja la parte suave de dos galaxias vecinas mezcladas, a 520 píxeles como máximo.
-     *
-     * @param {number} w Ancho de la pantalla, en píxeles de pantalla.
-     * @param {number} h Alto de la pantalla, en píxeles de pantalla.
-     * @param {number} ka Índice del destino de la izquierda.
-     * @param {number} kb Índice del destino de la derecha.
-     * @param {number} mix Mezcla entre los dos, de 0 a 1.
-     * @param {number[]} ca Centro [x, y] del destino ka, en píxeles de pantalla.
-     * @param {number[]} cb Centro [x, y] del destino kb, en píxeles de pantalla.
-     * @param {number} scale Tamaño de la galaxia, en píxeles de pantalla.
-     * @returns {HTMLCanvasElement|null} La imagen, o null sin WebGL.
-     */
-    function soft(w, h, ka, kb, mix, ca, cb, scale) {
-      if (!init()) {
-        return null;
-      }
-      const q = Math.min(1, 520 / Math.max(w, h)),
-        cw = Math.max(2, Math.round(w * q)),
-        ch = Math.max(2, Math.round(h * q));
-      if (cv.width !== cw || cv.height !== ch) {
-        cv.width = cw;
-        cv.height = ch;
-      }
-      gl.viewport(0, 0, cw, ch);
-      gl.useProgram(prog);
-      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      gl.enableVertexAttribArray(0);
-      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-      gl.uniform2f(U.uRes, cw, ch);
-      gl.uniform1f(U.uT, t);
-      gl.uniform1f(U.uKA, ka);
-      gl.uniform1f(U.uKB, kb);
-      gl.uniform1f(U.uMix, mix);
-      gl.uniform2f(U.uCA, ca[0] * q, ca[1] * q);
-      gl.uniform2f(U.uCB, cb[0] * q, cb[1] * q);
-      gl.uniform1f(U.uS, scale * q);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-      return cv;
-    }
-    return { soft, ok: () => init() };
-  })();
 }
 
 /**

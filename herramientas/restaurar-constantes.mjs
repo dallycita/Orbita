@@ -43,6 +43,29 @@ for (const rel of process.argv.slice(2)){
         case 'BinaryExpression': case 'LogicalExpression': return isPure(n.left, before) && isPure(n.right, before);
         case 'ConditionalExpression': return isPure(n.test, before) && isPure(n.consequent, before) && isPure(n.alternate, before);
         case 'MemberExpression': return n.object.type === 'Identifier' && n.object.name === 'Math' && !n.computed;
+        case 'CallExpression': {
+          // módulo autoejecutable que solo prepara funciones: (() => { let a = null; function f(){…} return {f}; })()
+          const fn = n.callee;
+          if (n.arguments.length || !/^(ArrowFunctionExpression|FunctionExpression)$/.test(fn.type) || fn.params.length || fn.body.type !== 'BlockStatement') return false;
+          const locals = new Set();
+          for (const s of fn.body.body){
+            if (s.type === 'FunctionDeclaration') locals.add(s.id.name);
+            else if (s.type === 'VariableDeclaration') s.declarations.forEach(d => locals.add(d.id.name));
+          }
+          const inner = x => x && x.type === 'Identifier' && locals.has(x.name) ? true : isPure(x, before);
+          const pureIn = x => {
+            if (!x) return true;
+            if (x.type === 'Identifier') return inner(x);
+            if (x.type === 'ObjectExpression') return x.properties.every(p => p.type === 'Property' && !p.computed && pureIn(p.value));
+            if (x.type === 'ArrayExpression') return x.elements.every(e => !e || (e.type !== 'SpreadElement' && pureIn(e)));
+            if (x.type === 'TemplateLiteral') return x.expressions.every(pureIn);
+            if (x.type === 'BinaryExpression' || x.type === 'LogicalExpression') return pureIn(x.left) && pureIn(x.right);
+            return isPure(x, before);
+          };
+          return fn.body.body.every(s => s.type === 'FunctionDeclaration' ||
+            (s.type === 'VariableDeclaration' && s.declarations.every(d => d.id.type === 'Identifier' && pureIn(d.init))) ||
+            (s.type === 'ReturnStatement' && pureIn(s.argument)));
+        }
         case 'NewExpression': return n.callee.type === 'Identifier' && ['Set', 'Map'].includes(n.callee.name) && n.arguments.length <= 1 && n.arguments.every(a => isPure(a, before));
         default: return false;
       }
