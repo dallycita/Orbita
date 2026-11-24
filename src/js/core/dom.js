@@ -1,5 +1,6 @@
 /**
- * (encabezado pendiente)
+ * Elementos de la página que usan varias pantallas (inicio, niveles y planetas).
+ * Se buscan una sola vez al arrancar.
  */
 
 let elLv;

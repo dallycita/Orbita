@@ -1,5 +1,6 @@
 /**
- * (encabezado pendiente)
+ * Sonidos de la interfaz: notas de cristal al pasar y tocar botones, el ambiente de la pantalla de
+ * inicio, el zumbido de la historia y los sonidos del espectáculo del inicio.
  */
 import { AC, ROOT, master, noiseHit } from './engine.js';
 import { muted } from '../core/settings.js';

@@ -1,5 +1,5 @@
 /**
- * (encabezado pendiente)
+ * Reloj del bucle: el momento del último cuadro, para medir cuánto tiempo pasó entre cuadros.
  */
 
 // Momento del cuadro anterior, en milisegundos (`performance.now`).

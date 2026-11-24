@@ -1,5 +1,5 @@
 /**
- * (encabezado pendiente)
+ * Ícono de las tres lunas de las misiones (una por misión del día), en SVG.
  */
 import { MIS, misDef, misLoad } from '../game/missions.js';
 

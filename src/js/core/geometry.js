@@ -1,5 +1,5 @@
 /**
- * (encabezado pendiente)
+ * Geometría de los anillos en pantalla: a qué radio queda cada anillo según dónde está la cámara.
  */
 import { GAP, R0 } from './display.js';
 import { camLevel } from './state.js';

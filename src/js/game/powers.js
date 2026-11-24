@@ -4,18 +4,7 @@
  * Los efectos en curso viven en `pfx` ({k: tipo, t: segundos desde que empezó}); `powerUpdate` los
  * avanza y `drawPowerFx`, `drawPowerScene` y `drawRingPower` los dibujan.
  */
-import {
-  CX,
-  CY,
-  PR,
-  R0,
-  S,
-  buzz,
-  clamp,
-  ctx,
-  frac,
-  reduceMotion,
-} from '../core/display.js';
+import { CX, CY, PR, R0, S, buzz, clamp, ctx, frac, reduceMotion } from '../core/display.js';
 import { AC, ROOT, SCALE, cowbell, noise, sub } from '../audio/engine.js';
 import {
   charge,

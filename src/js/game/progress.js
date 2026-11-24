@@ -1,5 +1,5 @@
 /**
- * (encabezado pendiente)
+ * Progreso del jugador fuera de las partidas: estrellas recogidas por nivel y saltos dobles hechos.
  */
 
 /**

@@ -1,5 +1,5 @@
 /**
- * (encabezado pendiente)
+ * Dibujo de la lente gravitacional: la esfera que curva la luz del fondo alrededor del agujero negro.
  */
 import { CX, CY, H, S, W, ctx } from '../core/display.js';
 import { GLBG } from './backgrounds/engine.js';

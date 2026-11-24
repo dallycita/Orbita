@@ -4,19 +4,7 @@
  * (`bhDiskK`, `bhCore`, `brandHole`, `drawLogo`), que usan otras pantallas, con versión WebGL
  * (`BHGL`) y respaldo 2D con degradados cónicos.
  */
-import {
-  BONE,
-  CX,
-  CY,
-  H,
-  W,
-  buzz,
-  clamp,
-  ctx,
-  elHud,
-  elPanel,
-  stars,
-} from '../core/display.js';
+import { BONE, CX, CY, H, W, buzz, clamp, ctx, elHud, elPanel, stars } from '../core/display.js';
 import { AC, NOISE, ROOT, master, noiseHit } from '../audio/engine.js';
 import { setState, state } from '../core/state.js';
 import { flash, setFlash, setT, t } from '../core/run-state.js';

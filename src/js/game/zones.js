@@ -1,5 +1,5 @@
 /**
- * (encabezado pendiente)
+ * Colores de cada zona del camino según la galaxia y el anillo en que vas.
  */
 import { lvl } from '../core/state.js';
 import { tutorial } from '../core/run-state.js';

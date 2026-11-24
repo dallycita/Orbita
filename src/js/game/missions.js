@@ -1,5 +1,6 @@
 /**
- * (encabezado pendiente)
+ * Lógica de las misiones diarias y los logros: avance, cobro, racha y lo que se guarda (orbita_mis).
+ * Cuando una misión se completa avisa con el aviso missionReady; la pantalla de misiones lo muestra.
  */
 import { tutorial } from '../core/run-state.js';
 import { MIS_ACH, MIS_DAILY } from '../data/missions.js';

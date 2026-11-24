@@ -1,5 +1,6 @@
 /**
- * (encabezado pendiente)
+ * Generación de los anillos de cada partida (con el azar con semilla de los recorridos) y la memoria de
+ * los huecos del agujero de gusano.
  */
 import { TB } from '../audio/music-tracks.js';
 import { level, lvl, rings } from '../core/state.js';

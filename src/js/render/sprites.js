@@ -1,18 +1,11 @@
 /**
- * (encabezado pendiente)
+ * Rocas en 3D y su respaldo en 2D (sin WebGL), la carga del poder y el aura del planeta.
+ * Las rocas se preparan una vez en imágenes pequeñas y luego solo se copian.
  */
 import { BONE, CX, CY, DPR, PR, S, ctx, frac } from '../core/display.js';
 import { charge } from '../core/state.js';
 import { chargeMax, sizeK } from '../game/planets.js';
-import {
-  chargeFlash,
-  hintT,
-  particles,
-  pipFlash,
-  readyT,
-  t,
-  tutorial,
-} from '../core/run-state.js';
+import { chargeFlash, hintT, particles, pipFlash, readyT, t, tutorial } from '../core/run-state.js';
 import { wh, whShock } from '../game/wormhole.js';
 import { bend } from '../game/gravitational-lens.js';
 import { doblesHechos } from '../game/progress.js';

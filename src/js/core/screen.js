@@ -1,5 +1,6 @@
 /**
- * (encabezado pendiente)
+ * Estado de las pantallas: cuál está en pausa, las transiciones de la historia y del inicio, a dónde
+ * volver, y el registro de pantallas para abrirlas por su nombre (openScreen). Es el único dueño de ese estado.
  */
 
 let introFade = 0;

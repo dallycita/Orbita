@@ -1,5 +1,5 @@
 /**
- * (encabezado pendiente)
+ * El agujero negro y el logo de la presentación: el disco de acreción, su núcleo y las letras.
  */
 import { BONE, clamp, ctx } from '../core/display.js';
 import { t } from '../core/run-state.js';

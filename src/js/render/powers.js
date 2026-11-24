@@ -1,5 +1,6 @@
 /**
- * (encabezado pendiente)
+ * Dibujo de los poderes de los planetas: auroras, fuego solar, cola de sodio, efectos en los anillos y
+ * la escena de cada poder. La lógica de los poderes está en game/powers.js.
  */
 import { CX, CY, H, PR, S, SUN, W, clamp, ctx, frac, rgba } from '../core/display.js';
 import { level, pAng, pLevel, rings, state } from '../core/state.js';

@@ -1,5 +1,6 @@
 /**
- * (encabezado pendiente)
+ * Dibujo de los planetas: en 3D con WebGL (con su respaldo en 2D), el planeta del jugador en la partida,
+ * Caronte, la Tierra y las miniaturas.
  */
 import { CX, CY, H, PR, S, W, ctx, frac, rgba } from '../core/display.js';
 import { pAng, state } from '../core/state.js';

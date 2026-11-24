@@ -1,5 +1,5 @@
 /**
- * (encabezado pendiente)
+ * HTML del menú de inicio que comparten la historia y la pantalla de niveles.
  */
 import { chipsHTML } from '../core/display.js';
 import { lvl } from '../core/state.js';

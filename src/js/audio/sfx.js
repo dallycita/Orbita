@@ -1,5 +1,5 @@
 /**
- * (encabezado pendiente)
+ * Efectos de sonido del juego: poder listo y victoria.
  */
 import { AC, NOISE, ROOT, master } from './engine.js';
 

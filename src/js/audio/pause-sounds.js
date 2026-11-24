@@ -1,5 +1,6 @@
 /**
- * (encabezado pendiente)
+ * Sonidos de la pausa: abrir, cuenta 3·2·1, seguir, reintentar, volumen y silencio. Usan su propio
+ * motor de sonido, porque el del juego se suspende durante la pausa.
  */
 import { ROOT, volGain } from './engine.js';
 import { muted, volSfx } from '../core/settings.js';

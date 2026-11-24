@@ -3,15 +3,7 @@
  * pantalla actual (`state`), anillos, nivel de anillo del planeta y de la cámara, salto y carga.
  * Los récords viven en localStorage con claves `orbita_pN_anillo` y `orbita_pN_intentos`.
  */
-import {
-  elArcFg,
-  elBest,
-  elPbar,
-  elPnum,
-  elScore,
-  elWrap,
-  hudMode,
-} from './display.js';
+import { elArcFg, elBest, elPbar, elPnum, elScore, elWrap, hudMode } from './display.js';
 import { attempts, curGoal, tutorial } from './run-state.js';
 
 let best = 0;
