@@ -1,12 +1,9 @@
-// ---------- medidor de rendimiento (pruebas) ----------
-// Se enciende en Ajustes ("Medidor de rendimiento") o agregando ?medir al enlace. Apagado no hace
-// nada.
-// Muestra, de los últimos 2 segundos: cuadros por segundo, ms entre cuadros (mediana y peor 5 %),
-// cuánto de cada cuadro
-// es nuestro código (lógica y dibujo) y cuántos "tirones" hubo (cuadros de más de 25 ms) en los
-// últimos 10 segundos.
-// Si los ms entre cuadros son altos pero nuestro código tarda poco, el que no da abasto es la
-// tarjeta gráfica.
+/**
+ * Medidor de rendimiento para pruebas: se enciende en Ajustes o con ?medir en el enlace; apagado
+ * no hace nada. Muestra cuadros por segundo, ms entre cuadros (mediana y peor 5 %), cuánto tarda
+ * el código (lógica y dibujo) y los tirones (cuadros de más de 25 ms) de los últimos 10 s.
+ * Si los ms entre cuadros son altos pero el código tarda poco, el límite es la tarjeta gráfica.
+ */
 let MEDIR = false;
 try {
   MEDIR =
@@ -17,10 +14,19 @@ let medEl = null,
   medPrev = 0,
   medMid = 0,
   medShow = 0;
+// Últimos 120 cuadros: tiempo entre cuadros, tiempo de código y tiempo de lógica (en ms); y
+// momentos de los tirones de los últimos 10 s.
 const medInt = [],
   medJs = [],
   medUpd = [],
   medJank = [];
+/**
+ * Registra un cuadro al final del bucle principal y, cada 0,5 s, actualiza el recuadro del
+ * medidor. `medMid` lo marca el bucle al terminar la lógica, para separar lógica y dibujo.
+ *
+ * @param {number} now Momento del cuadro que da requestAnimationFrame, en ms.
+ * @param {number} t0 Momento en que empezó el código del cuadro (performance.now()), en ms.
+ */
 function medFrame(now, t0) {
   const t1 = performance.now();
   if (medPrev) {
