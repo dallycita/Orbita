@@ -41,3 +41,9 @@ Cada una se decide aparte, cuando termine la limpieza.
 - **CSS:** quedan 96 selectores repetidos que no se pudieron juntar sin riesgo de cambiar la cascada, 39
   `!important` y el orden por componente. Se resuelven al partir el CSS por componente, regla por regla.
 - **Ternarios anidados (55):** se parten al rehacer cada función (fases 9 y 12), para no tocarlas dos veces.
+
+## Pedido de la dueña para después de la limpieza
+
+- **Fluidez:** el juego se siente lento entre saltos. Primero medir con el "Medidor de rendimiento" en el celular
+  para saber si es rendimiento (cuadros perdidos) o el ritmo del juego (duración del salto, cámara, cámara lenta del
+  "Perfecto"). Lo segundo cambia cómo se juega.
