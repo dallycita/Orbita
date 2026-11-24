@@ -1,4 +1,8 @@
-// El Remolino, M51 (nivel 5): el viaje por dentro de la galaxia
+/**
+ * Trozo de shader GLSL de la galaxia del Remolino, M51 (nivel 5): el viaje por dentro de la
+ * galaxia, con los colores de la foto del Hubble. `32-fondos-56-final` lo une al shader de fondo.
+ * Todo `GX_REMOLINO` es texto GLSL: sus comentarios son parte del programa.
+ */
 const GX_REMOLINO = `// ===================== REMOLINO M51 =====================
 // Hubble: brazos azul-grisáceos #8aa0b8, núcleo amarillo #e8d0a8, regiones HII rojo-rosa muy marcadas, polvo café #5f4f49,
 // la compañera NGC 5195 amarillo-café con polvo cruzándola

@@ -22740,7 +22740,11 @@ vec3 cenLobes(vec2 q){
   return col;
 }
 `;
-// El Remolino, M51 (nivel 5): el viaje por dentro de la galaxia
+/**
+ * Trozo de shader GLSL de la galaxia del Remolino, M51 (nivel 5): el viaje por dentro de la
+ * galaxia, con los colores de la foto del Hubble. `32-fondos-56-final` lo une al shader de fondo.
+ * Todo `GX_REMOLINO` es texto GLSL: sus comentarios son parte del programa.
+ */
 const GX_REMOLINO = `// ===================== REMOLINO M51 =====================
 // Hubble: brazos azul-grisáceos #8aa0b8, núcleo amarillo #e8d0a8, regiones HII rojo-rosa muy marcadas, polvo café #5f4f49,
 // la compañera NGC 5195 amarillo-café con polvo cruzándola
@@ -22904,7 +22908,11 @@ vec3 m51Pair(vec2 q){
   return col;
 }
 `;
-// El Sombrero, M104 (nivel 6): bulbo, anillo de polvo y cúmulos globulares
+/**
+ * Trozo de shader GLSL de la galaxia del Sombrero, M104 (nivel 6): bulbo, anillo de polvo y
+ * cúmulos globulares, con los colores de la foto del Hubble. `32-fondos-56-final` lo une al
+ * shader de fondo. Todo `GX_SOMBRERO` es texto GLSL: sus comentarios son parte del programa.
+ */
 const GX_SOMBRERO = `// ===================== SOMBRERO M104 =====================
 // Hubble: bulbo plateado con un toque lavanda #d1ccdc, halo gris #8c8687, anillo de polvo café oscuro #2a1e18 con borde
 // cálido #6f5848, y cientos de cúmulos globulares alrededor
@@ -22952,7 +22960,11 @@ vec3 sombCore(vec2 q){
   return col + vec3(1., .95, .9)*starsD(q, 2.2, .8*exp(-r*5.), 1.) + globs(q*1.3 + 20., .25, .06)*.5;
 }
 `;
-// M87 (nivel 7): halo, chorro, gas y el anillo del Event Horizon Telescope
+/**
+ * Trozo de shader GLSL de la galaxia M87 (nivel 7): halo, chorro, gas y el anillo de su agujero
+ * negro como lo fotografió el Event Horizon Telescope. `32-fondos-56-final` lo une al shader de
+ * fondo. Todo `GX_M87` es texto GLSL: sus comentarios son parte del programa.
+ */
 const GX_M87 = `// ===================== M87 =====================
 // Hubble: halo crema-amarillo #ca9f72 → #d5c7b8 muy suave, el chorro azul-violeta con nudos, miles de cúmulos globulares;
 // el Event Horizon Telescope: anillo naranja #f38f14 / amarillo #fcd05b / rojo #911c01, más brillante abajo
