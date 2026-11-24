@@ -21635,9 +21635,13 @@ vec3 stars(vec2 q, float sc, float dens){
   return c;
 }
 `;
-// Andrómeda (nivel 3): el shader de la galaxia vista desde dentro
-// Andrómeda: disco inclinado ~77°, núcleo de estrellas viejas, brazos azules, franjas de polvo,
-// regiones rosadas, M32 y M110
+/**
+ * Shaders GLSL del fondo de Andrómeda (nivel 3), la galaxia vista desde dentro. Los usa el motor
+ * de fondos (32-fondos-9-motor). El texto GLSL es parte del programa: sus comentarios no se tocan.
+ */
+
+// Andrómeda (M31): disco inclinado ~77°, núcleo de estrellas viejas, brazos azules, franjas de
+// polvo, regiones rosadas y sus galaxias satélite M32 y M110.
 const FS_AND =
   BG_COMMON +
   `
@@ -21735,7 +21739,8 @@ void main(){
   col += (h21(q + fract(uT*7.3)*91.) - .5)*.035;                               // grano de cámara
   gl_FragColor = vec4(pow(max(col, 0.), vec3(.95)), 1.);
 }`;
-// Andrómeda: el viaje pasa por sus lugares reales, de las afueras al núcleo
+// Variante de viaje: pasa por lugares reales de Andrómeda, de las afueras al núcleo (NGC 206, M32,
+// el anillo de polvo que brilla en infrarrojo y el núcleo).
 const FS_AND2 =
   BG_COMMON +
   `
