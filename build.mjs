@@ -1,6 +1,6 @@
 // Une los archivos de src/ en un solo index.html (el juego que se publica).
 //   node build.mjs          → genera index.html
-//   node build.mjs --check  → comprueba que index.html está al día
+//   node build.mjs --check  → comprueba que index.html está al día y que no hay ciclos ni imports hacia arriba
 //
 // Cómo se arma:
 //   src/index.html     la página, con dos marcas: <!-- @css --> y <!-- @js -->
@@ -46,7 +46,12 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]){
   if (process.argv.includes('--check')){
     const same = existsSync(OUT) && read(OUT) === html;
     console.log(same ? '✓ index.html está al día' : '✗ index.html no coincide con src/ — corre: node build.mjs');
-    process.exit(same ? 0 : 1);
+    // dependencias en una sola dirección y sin ciclos (herramientas/capas.mjs)
+    const { execFileSync } = await import('node:child_process');
+    let layersOk = true;
+    try { execFileSync(process.execPath, [join(ROOT, 'herramientas', 'capas.mjs'), '--estricto', '--detalle'], { stdio: 'inherit' }); }
+    catch (e) { layersOk = false; }
+    process.exit(same && layersOk ? 0 : 1);
   }
   writeFileSync(OUT, html);
   console.log('✓ index.html (' + (Buffer.byteLength(html)/1024).toFixed(0) + ' KB)');

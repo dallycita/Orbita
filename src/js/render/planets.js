@@ -3,7 +3,7 @@
  */
 import { CX, CY, H, PR, S, W, ctx, frac, rgba } from '../01-pantalla-y-utilidades.js';
 import { pAng, state } from '../06-record-y-estado.js';
-import { PLANETS_P, curPlanet, sizeK, unlockedIds } from '../07-planetas.js';
+import { PLANETS_P, curPlanet, sizeK } from '../07-planetas.js';
 import { particles, t, tutorial } from '../08-partida-estado.js';
 import { hot, hotT } from '../11-peligros-datos.js';
 import {
@@ -1029,30 +1029,6 @@ function planetThumb(id) {
 }
 
 /**
- * HTML con las miniaturas de los planetas rescatados desde una lista anterior.
- *
- * @param {string[]} before Planetas desbloqueados antes de la partida.
- * @returns {string} HTML, o '' si no se rescató ninguno.
- */
-function rescuedCards(before) {
-  const now = unlockedIds(),
-    nuevos = PLANETS_P.filter(P => now.includes(P.id) && !before.includes(P.id));
-  if (!nuevos.length) {
-    return '';
-  }
-  return (
-    '<div class="wres"><div class="wpl">' +
-    nuevos
-      .map(P => '<span class="wp" title="' + P.name + '">' + planetThumb(P.id) + '</span>')
-      .join('') +
-    '</div>' +
-    '<small>' +
-    (nuevos.length > 1 ? 'Rescatados' : 'Rescatado') +
-    '</small></div>'
-  );
-}
-
-/**
  * Dibuja la órbita de Caronte y, si está en la mitad que pasa detrás de Plutón, la luna. Se
  * llama antes de dibujar el planeta; la mitad de delante la dibuja `drawPowerFx`.
  *
@@ -1183,4 +1159,4 @@ function drawCaronte(cx, cy, cr, al) {
   ctx.restore();
 }
 
-export { PLGL, drawBigPlanet, drawCaronte, drawEarth, drawPlayer, planetThumb, rescuedCards };
+export { PLGL, drawBigPlanet, drawCaronte, drawEarth, drawPlayer, planetThumb };

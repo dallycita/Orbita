@@ -69,7 +69,7 @@ import {
 import { skyFlash } from './11-peligros-datos.js';
 import { bhWob, setStrainK, strainK, strainNow } from './12-poderes.js';
 import { wh } from './13-agujero-de-gusano.js';
-import { bend, bendRad, bendW, drawBendSphere, lensJ, lensP } from './14-lente-gravitacional.js';
+import { bend, bendRad, bendW, lensJ, lensP } from './14-lente-gravitacional.js';
 import { drawFlare, drawHazards, drawNova } from './15-peligros.js';
 
 import { drawAndromeda, drawGalBG, drawMagallanes } from './31-fondos-2d.js';
@@ -90,6 +90,7 @@ import { zoneOf } from './game/zones.js';
 import { rr } from './core/geometry.js';
 import { drawPowerFx, drawPowerScene, drawRingPower } from './render/powers.js';
 import { drawAst, drawCharge, drawPowerAura } from './render/sprites.js';
+import { drawBendSphere } from './render/lens.js';
 
 /**
  * Dibuja la escena completa de la partida en el lienzo principal, con temblor y zoom de cámara.

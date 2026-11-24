@@ -349,6 +349,17 @@ const PLANETS_P = [
   },
 ];
 
+/**
+ * Los planetas que se desbloquearon desde `before` (por ejemplo, al terminar una partida).
+ *
+ * @param {string[]} before Ids de los planetas desbloqueados antes.
+ * @returns {object[]} Los planetas nuevos, en el orden de PLANETS_P.
+ */
+function rescuedPlanets(before) {
+  const now = unlockedIds();
+  return PLANETS_P.filter(P => now.includes(P.id) && !before.includes(P.id));
+}
+
 export {
   PLANETS_P,
   allPlanets,
@@ -362,6 +373,7 @@ export {
   planetOk,
   plutoOk,
   pst,
+  rescuedPlanets,
   saveRunStats,
   shieldLeft,
   sizeK,

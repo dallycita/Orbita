@@ -47,3 +47,7 @@ Cada una se decide aparte, cuando termine la limpieza.
 - **Fluidez:** el juego se siente lento entre saltos. En el equipo de la dueña el medidor marca 30 FPS y baja hasta 12 (en una Mac rápida iba a 60): es rendimiento. El medidor marca "código" de 40 a 60 ms por cuadro: el procesador no alcanza (el cuadro debe caber en 16 ms). Revisar: objetos creados en cada cuadro (degradados, listas, textos), shadowBlur, la copia del fondo WebGL al lienzo y la resolución de dibujo. Primero medir con el "Medidor de rendimiento" en el celular
   para saber si es rendimiento (cuadros perdidos) o el ritmo del juego (duración del salto, cámara, cámara lenta del
   "Perfecto"). Lo segundo cambia cómo se juega.
+- **Planetas rescatados que nunca se mostraban** (`16-partida.js`, `win()` y `die()`): se armaba el HTML de las
+  tarjetas de "Rescatado/Rescatados" con su miniatura, pero solo se usaba para saber si hubo planetas nuevos; nunca
+  entraba al panel. En la limpieza se reemplazó por `rescuedPlanets()`, que da lo mismo sin armar el HTML.
+  Decidir si las tarjetas deben aparecer en el panel de victoria.

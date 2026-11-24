@@ -56,6 +56,7 @@ import {
   curPlanet,
   jumpDur,
   markNewPlanets,
+  rescuedPlanets,
   saveRunStats,
   setPlutoOk,
   setShieldLeft,
@@ -160,7 +161,6 @@ import { misEvent, misWin, noteDouble } from './game/missions.js';
 import { resetJourney } from './core/journey.js';
 import { zoneOf } from './game/zones.js';
 import { rr } from './core/geometry.js';
-import { rescuedCards } from './render/planets.js';
 import { ensureRings, setGapC } from './game/rings.js';
 import { emit } from './core/events.js';
 
@@ -369,7 +369,7 @@ function win() {
       localStorage.setItem('orbita_p1_pluton', '1');
     } catch (e) {}
   }
-  const rescued = rescuedCards(before);
+  const rescued = rescuedPlanets(before).length > 0;
   if (score > best) {
     setBest(score);
     saveBest();
@@ -894,7 +894,7 @@ function die(x, y, cause, who) {
     setBestOf(lvl, reached);
   }
   saveRunStats();
-  const rescued = rescuedCards(before);
+  const rescued = rescuedPlanets(before).length > 0;
   const rec = reached > prevRing;
   if (rescued) {
     markNewPlanets();
