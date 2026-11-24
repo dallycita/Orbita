@@ -686,7 +686,7 @@
 #planets .ppow.off::after {
   background: rgba(236, 230, 216, 0.2);
 }
-/* en uso: ya no es un botón, es un estado */
+/* planeta en uso: se muestra como estado, no como botón */
 #planets .pinuse {
   margin-top: 24px;
   padding: 16px 0;
