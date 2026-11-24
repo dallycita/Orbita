@@ -5447,15 +5447,21 @@ body.paused #wallet {
   </div>
 </div>
 <script>
+/**
+ * Íconos SVG de las flechas (chevrones y arcos de gravedad) y su animación al tocarlas.
+ * Escucha los clics en todo el documento: al tocar una flecha (.arrow o .back) le pone la clase
+ * 'go' y se la quita al terminar la animación.
+ */
 const CHEV_L =
   '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-// arco de gravedad para las flechas: medio anillo que se abre hacia donde vas, con una pincelada
-// naranja
+// Arco de gravedad para las flechas: medio anillo que se abre hacia donde se va, con una pincelada
+// naranja.
 const ARC_L =
   '<svg class="arc" viewBox="0 0 52 52" aria-hidden="true"><path class="base" d="M34 6 A22 22 0 1 0 34 46"/><path class="hot" d="M34 6 A22 22 0 0 0 9 18"/></svg>';
 const ARC_R =
   '<svg class="arc" viewBox="0 0 52 52" aria-hidden="true"><path class="base" d="M18 6 A22 22 0 1 1 18 46"/><path class="hot" d="M18 6 A22 22 0 0 1 43 18"/></svg>';
-// al tocar una flecha, el arco naranja da una vuelta, como algo que entra en órbita
+// Al tocar una flecha, el arco naranja da una vuelta, como algo que entra en órbita. Quitar la
+// clase y leer offsetWidth reinicia la animación aunque ya estuviera puesta.
 document.addEventListener(
   'click',
   e => {
