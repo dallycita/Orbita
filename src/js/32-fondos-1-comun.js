@@ -1,8 +1,10 @@
-// Fondos en WebGL: lo que comparten todos los shaders de fondo
-// ---------- fondos en WebGL: capas, movimiento, gas y la luz doblada por el agujero negro
-// ----------
-// Se dibuja con la tarjeta gráfica a media resolución (el gas es suave) y se copia al lienzo del
-// juego.
+/**
+ * Código GLSL que comparten todos los fondos en WebGL: uniformes, ruido, estrellas y la luz
+ * doblada por el agujero negro. Se dibuja con la tarjeta gráfica a resolución reducida (el gas
+ * es suave) y se copia al lienzo del juego.
+ * Es solo texto GLSL: cambiar algo dentro de las plantillas cambia todos los fondos.
+ */
+// Shader de vértices: un triángulo que cubre toda la pantalla.
 const BG_VS = 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }';
 const BG_COMMON = `
 precision highp float;
