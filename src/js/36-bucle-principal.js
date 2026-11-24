@@ -1,4 +1,15 @@
+/**
+ * Bucle principal: cada cuadro avanza y dibuja la pantalla actual. Va al final porque usa
+ * funciones de casi todos los archivos.
+ */
+// Momento del cuadro anterior, en milisegundos (`performance.now`).
 let last = performance.now();
+/**
+ * Un cuadro del juego. El paso de tiempo se limita a 0,05 segundos para que una pausa del
+ * navegador no haga saltar la física. Un error en un cuadro se registra sin detener el bucle.
+ *
+ * @param {number} now Momento del cuadro, en milisegundos.
+ */
 function frame(now) {
   const m0 = MEDIR ? performance.now() : 0;
   const dt = Math.min((now - last) / 1000, 0.05);
@@ -54,7 +65,7 @@ function frame(now) {
       updateHomeShow(dt);
       renderHomeIntro();
     } else if (paused) {
-      /* congelado: el lienzo conserva el último cuadro */
+      /* En pausa: el lienzo conserva el último cuadro. */
     } else {
       update(dt);
       if (MEDIR) {
@@ -65,7 +76,7 @@ function frame(now) {
     if (misOpen) {
       misPlanetDraw();
     }
-    // en pantallas tranquilas, adelantar las rocas de la partida (ver astPrebake)
+    // En pantallas tranquilas se preparan por adelantado las rocas de la partida (ver astPrebake).
     if (
       state === 'menu' ||
       state === 'levels' ||
