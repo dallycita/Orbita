@@ -234,8 +234,6 @@
 }
 #home .plan.mis .lit {
   animation: misLit 2.4s ease-in-out infinite;
-}
-#home .plan.mis .lit {
   filter: drop-shadow(0 0 2px #ff8a3d);
 }
 #home .plan.mis.new::after {

@@ -499,22 +499,12 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: radial-gradient(
-    circle at 35% 30%,
-    rgba(143, 208, 255, 0.16),
-    rgba(143, 208, 255, 0.03)
-  );
   border: 1px solid rgba(143, 208, 255, 0.18);
   overflow: hidden;
 }
 #missions .mic svg {
   width: 22px;
   height: 22px;
-  fill: none;
-  stroke: #bfe0ff;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
 #missions .mic img {
   object-fit: contain;
@@ -809,16 +799,11 @@
 #missions .mhead {
   margin-top: 24px;
 }
-#missions .mic {
-  --mc: #8fd0ff;
-  background: radial-gradient(
-    circle at 35% 30%,
-    color-mix(in srgb, var(--mc) 16%, transparent),
-    color-mix(in srgb, var(--mc) 3%, transparent)
-  );
-  border-color: color-mix(in srgb, var(--mc) 22%, transparent);
-}
 #missions .mic svg {
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   stroke: color-mix(in srgb, var(--mc) 70%, #fff);
 }
 #missions .mstreak {
@@ -864,6 +849,8 @@
   height: 44px;
 }
 #missions .mic {
+  --mc: #8fd0ff;
+  border-color: color-mix(in srgb, var(--mc) 22%, transparent);
   background: radial-gradient(
     circle at 50% 45%,
     color-mix(in srgb, var(--mc) 10%, transparent),

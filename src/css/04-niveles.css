@@ -9,16 +9,10 @@
 #levels .back {
   position: absolute;
   z-index: 3;
-  width: 40px;
-  height: 40px;
   border-radius: 50%;
-  border: 1px solid rgba(236, 230, 216, 0.22);
-  background: rgba(13, 18, 32, 0.6);
-  color: var(--fg);
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
-  display: flex;
   align-items: center;
   justify-content: center;
 }
@@ -28,7 +22,6 @@
   z-index: 5;
   background: #05060c;
   transition: opacity 0.3s;
-  touch-action: pan-x pan-y;
   overflow: hidden;
 }
 #levels.off {
@@ -38,8 +31,6 @@
 #levels .lvbg {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
   z-index: 0;
   pointer-events: none;
 }
@@ -56,6 +47,8 @@
   opacity: 0;
 }
 #levels .lvbg {
+  width: 100%;
+  height: 100%;
   display: none;
 }
 #levels.live .page::before {
@@ -77,13 +70,11 @@
 #levels .page {
   flex: 0 0 100%;
   height: 100%;
-  scroll-snap-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: safe center;
   overflow-y: auto;
-  scrollbar-width: none;
   box-sizing: border-box;
   text-align: center;
   position: relative;
@@ -168,13 +159,9 @@
   position: absolute;
   z-index: 2;
   border-radius: 50%;
-  border: 1px solid rgba(236, 230, 216, 0.22);
-  background: rgba(13, 18, 32, 0.6);
-  color: var(--fg);
   font-size: 24px;
   line-height: 1;
   cursor: pointer;
-  display: flex;
   align-items: center;
   justify-content: center;
   transition: opacity 0.2s;
@@ -264,7 +251,6 @@
   box-shadow: 0 0 6px #8fd0ff;
   transform-origin: 2.5px 32px;
   animation: navmoon 6s linear infinite;
-  pointer-events: none;
 }
 #levels .arrow.l::after {
   animation-direction: reverse;
@@ -649,18 +635,6 @@
 #levels .lvst {
   margin-top: 14px;
 }
-#levels .card {
-  position: relative;
-  width: 100%;
-  max-width: 320px;
-  border-radius: 16px;
-  background: rgba(12, 16, 30, 0.55);
-  border: 1px solid rgba(160, 205, 255, 0.14);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  text-align: left;
-  overflow: hidden;
-}
 #levels .nuevo,
 #levels .tries,
 #levels .fact,
@@ -675,6 +649,16 @@
   font-size: clamp(28px, 8.6vw, 44px);
 }
 #levels .card {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  border-radius: 16px;
+  background: rgba(12, 16, 30, 0.55);
+  border: 1px solid rgba(160, 205, 255, 0.14);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  text-align: left;
+  overflow: hidden;
   margin-top: 14px;
 }
 /* ---- ajustes finales de la tarjeta (alineación y botón) ---- */
@@ -687,6 +671,8 @@
   }
 }
 #levels .page {
+  scroll-snap-align: center;
+  scrollbar-width: none;
   padding: calc(max(3vh, 18px) + 44px) 22px calc(max(3vh, 18px) + 34px);
 }
 @media (max-height: 820px) {
@@ -703,9 +689,6 @@
 /* botón Escapar */
 #levels .play {
   position: relative;
-  overflow: hidden;
-  isolation: isolate;
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
   width: 100%;
   max-width: 300px;
   padding: 16px;
@@ -810,11 +793,10 @@
 }
 /* flechas: dentro de la pantalla, sin la lunita suelta, y del mismo tamaño en todas las tarjetas */
 #levels .arrow::after {
+  pointer-events: none;
   content: none !important;
 }
 #levels .arrow {
-  width: 46px;
-  height: 46px;
   transform: translateY(-50%);
 }
 #levels .arrow.l {
@@ -848,7 +830,6 @@
   font-size: 9.5px;
   font-weight: 400;
   letter-spacing: 0.24em;
-  text-transform: uppercase;
   opacity: 0.85;
 }
 #levels .sighead span::before {
@@ -902,8 +883,6 @@
 }
 #levels .caret {
   display: inline-block;
-  width: 0.55em;
-  height: 1.05em;
   margin: 0 1px -0.18em;
   animation: caret 0.9s steps(1) infinite;
 }
@@ -918,9 +897,6 @@
   }
 }
 /* paleta: neutros + un color de marca (disco de acreción); la dificultad solo en su pastilla */
-#levels {
-  --brand: #ffa155;
-}
 #levels .page::before {
   display: none;
 }
@@ -937,9 +913,12 @@
   box-shadow: none;
 }
 #levels .sighead {
+  text-transform: uppercase;
   color: var(--brand);
 }
 #levels .caret {
+  width: 0.55em;
+  height: 1.05em;
   background: var(--brand);
   box-shadow: 0 0 8px var(--brand);
 }
@@ -951,7 +930,6 @@
 }
 /* estrellas: pastilla junto a la dificultad */
 #levels .tags {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1005,9 +983,6 @@
   border: 1.5px solid rgba(236, 230, 216, 0.35);
 }
 @media (max-height: 820px) {
-  #levels {
-    --art: min(70vw, 21vh, 260px);
-  }
   #levels .trip {
     margin-top: 34px;
   }
@@ -1066,11 +1041,7 @@
 }
 /* ritmo: tres bloques (galaxia · tu viaje · señal y botón), mismo espacio entre bloques, una sola columna */
 #levels {
-  --col: 300px;
   --g: 30px;
-}
-#levels .tripinfo {
-  min-height: 0;
 }
 #levels .trip,
 #levels .tripinfo,
@@ -1079,6 +1050,7 @@
   max-width: var(--col);
 }
 #levels .tags {
+  position: relative;
   margin-top: 16px;
 }
 #levels .dist {
@@ -1088,12 +1060,16 @@
   margin-top: var(--g);
 }
 #levels .tripinfo {
+  min-height: 0;
   margin-top: 10px;
 }
 #levels .sig {
   margin-top: var(--g);
 }
 #levels .play {
+  overflow: hidden;
+  isolation: isolate;
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
   margin-top: 24px;
 }
 #levels .sigtxt {
@@ -1102,6 +1078,7 @@
 }
 @media (max-height: 820px) {
   #levels {
+    --art: min(70vw, 21vh, 260px);
     --g: 26px;
   }
   #levels .tags {
@@ -1193,18 +1170,6 @@
   }
 }
 /* botón de volver: el mismo arco de gravedad */
-#levels .back {
-  width: 48px;
-  height: 48px;
-  background: none !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-  color: var(--fg);
-  display: grid;
-  place-items: center;
-}
 #levels .back::before,
 #levels .back::after {
   content: none !important;
@@ -1230,9 +1195,22 @@
 }
 /* barra superior: volver · título · estrellas en una misma línea; sin "Nivel X de 8" (los puntitos ya lo dicen) */
 #levels {
+  touch-action: pan-x pan-y;
+  --brand: #ffa155;
+  --col: 300px;
   --hdr: max(3vh, 18px);
 }
 #levels .back {
+  width: 48px;
+  height: 48px;
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  color: var(--fg);
+  display: grid;
+  place-items: center;
   top: var(--hdr);
 }
 #levels .top {

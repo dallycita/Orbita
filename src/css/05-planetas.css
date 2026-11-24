@@ -22,7 +22,6 @@
 #planets .back {
   position: absolute;
   top: max(3vh, 18px);
-  width: 40px;
   height: 40px;
   border-radius: 50%;
   border: 1px solid rgba(236, 230, 216, 0.22);
@@ -45,27 +44,14 @@
   position: absolute;
   top: 38%;
   transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
   border-radius: 50%;
-  border: 1px solid rgba(236, 230, 216, 0.25);
-  background: rgba(13, 18, 32, 0.5);
-  color: var(--fg);
   font-size: 26px;
   line-height: 1;
-  display: flex;
   align-items: center;
   justify-content: center;
 }
 #planets .pinfo {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: max(6vh, 36px);
   padding: 0 28px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 #planets .pname {
   font-size: clamp(28px, 8vw, 40px);
@@ -116,6 +102,13 @@
   letter-spacing: 0.12em;
 }
 #planets .pinfo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(6vh, 36px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   transition: opacity 0.3s;
 }
 #planets.scanning .pinfo {
@@ -246,18 +239,10 @@
   pointer-events: none;
 }
 #planets .arrow::after {
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  width: 5px;
-  height: 5px;
-  margin-left: -2.5px;
   border-radius: 50%;
-  background: #cfe6ff;
   box-shadow: 0 0 6px #8fd0ff;
   transform-origin: 2.5px 32px;
   animation: navmoon 6s linear infinite;
-  pointer-events: none;
 }
 #planets .arrow.l::after {
   animation-direction: reverse;
@@ -287,6 +272,14 @@
   }
 }
 #planets .arrow::after {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  background: #cfe6ff;
+  pointer-events: none;
   content: none !important;
 }
 #planets .arrow.l {
@@ -338,13 +331,10 @@
   }
 }
 #planets .back {
-  width: 48px;
   height: 48px;
   background: none !important;
   border: 0 !important;
   box-shadow: none !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
   color: var(--fg);
   display: grid;
   place-items: center;
@@ -469,6 +459,9 @@
   cursor: default;
 }
 #planets .back {
+  width: 48px;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
   z-index: 2;
 }
 /* escaneo (pantalla de órbita) */

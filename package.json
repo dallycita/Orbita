@@ -25,6 +25,7 @@
     "espree": "^10.4.0",
     "globals": "^17.14.0",
     "playwright": "^1.65.1",
+    "postcss": "^8.5.33",
     "prettier": "^3.10.1"
   }
 }
