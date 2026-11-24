@@ -1,4 +1,12 @@
-// ---------- lógica ----------
+/**
+ * Lógica de la partida en cada cuadro: tiempo y cámara lenta, giro de los anillos, salto y
+ * aterrizaje, avance del agujero negro, choques con asteroides y peligros, y agujero de gusano.
+ */
+/**
+ * Avanza el juego un cuadro.
+ *
+ * @param {number} dt Tiempo real desde el cuadro anterior, en segundos (antes de la cámara lenta).
+ */
 function update(dt) {
   // tiempo real: cámara lenta, sacudida, destello
   if (slowTimer > 0) {
@@ -230,9 +238,10 @@ function update(dt) {
       }
     }
     camLevel += (level - camLevel) * Math.min(1, d * 6);
-    // el sol crece y se come los anillos; si te quedas quieto, te alcanza
+    // El agujero negro crece y se come los anillos; si el planeta se queda quieto, lo alcanza.
+    // Si el planeta se aleja más de 2,4 anillos, acelera para no quedarse atrás.
     const gap = pLevel - sunLevel;
-    // nivel 1: un punto medio; tutorial: muy lento
+    // en el tutorial avanza muy lento
     let sp = (tutorial ? 0.1 : 0.2 + Math.min(level * 0.006, 0.26)) * (HOLE_MUL[lvl] || 1);
     if (gap > 2.4) {
       sp += (gap - 2.4) * 1.15;
