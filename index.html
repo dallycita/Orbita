@@ -18849,10 +18849,20 @@ function renderHomeIntro() {
     drawLogo(W / 2, Math.max(120, H * 0.24), Math.min(46, W * 0.1), T - logoT0);
   }
 }
-// ---------- sonidos de la interfaz: cristal y eco, en la tonalidad del juego ----------
+/**
+ * Sonidos de la interfaz (cristal y eco, en la tonalidad del juego) y de la absorción de la
+ * presentación, incluidos dos inspirados en datos reales: la sonificación de la NASA del agujero
+ * negro de Perseo y el chirrido de ondas gravitacionales de LIGO.
+ * Los clics y el paso del puntero sobre botones se escuchan en toda la página desde aquí.
+ */
 let uiBus = null,
   lastHover = null,
   uiLastT = 0;
+/**
+ * Salida de los sonidos de interfaz, con eco de 0,27 segundos; se crea al primer uso.
+ *
+ * @returns {GainNode} Entrada de la salida.
+ */
 function uiOut() {
   if (uiBus) {
     return uiBus;
@@ -18873,6 +18883,15 @@ function uiOut() {
   uiBus = inG;
   return uiBus;
 }
+/**
+ * Nota de cristal de la interfaz: ataque instantáneo y caída exponencial, con eco.
+ *
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio (`AC.currentTime`).
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Ganancia máxima.
+ * @param {string} [type] Forma de onda; por defecto 'sine'.
+ */
 function uiTone(f, t0, dur, gain, type) {
   const o = AC.createOscillator(),
     g = AC.createGain(),
@@ -18890,7 +18909,10 @@ function uiTone(f, t0, dur, gain, type) {
   o.start(t0);
   o.stop(t0 + dur + 0.05);
 }
-// al pasar el puntero: una nota de cristal suave, distinta cada vez
+/**
+ * Al pasar el puntero sobre un botón: una nota de cristal suave, distinta cada vez (como
+ * máximo una cada 0,06 segundos).
+ */
 function uiHover() {
   if (!AC || muted || AC.state !== 'running') {
     return;
@@ -18907,7 +18929,11 @@ function uiHover() {
     uiTone(ROOT * 2 * Math.pow(2, semi / 12), n + 0.01, 0.5, 0.012);
   } catch (e) {}
 }
-// al tocar: una campana grave; al tocar Jugar: el agujero negro "traga" el toque
+/**
+ * Sonido de tocar un botón: una campana grave, o en Jugar, el agujero negro que "traga" el toque.
+ *
+ * @param {string} kind 'play' para los botones de jugar; cualquier otro valor, el sonido suave.
+ */
 function uiClick(kind) {
   if (!AC || muted) {
     return;
@@ -18974,7 +19000,7 @@ window.addEventListener(
     }
     if (b.id === 'quit' || paused || (b.closest && b.closest('.pzp'))) {
       return;
-    } // la pausa tiene sus propios sonidos
+    } // La pausa tiene sus propios sonidos.
     if (b.classList.contains('glass') || b.classList.contains('arrow')) {
       uiGlass(b.classList.contains('l') ? -1 : 1);
       return;
@@ -18987,9 +19013,14 @@ window.addEventListener(
   true,
 );
 
-// ---------- el sonido de la absorción ----------
+// Sonido de la absorción en la presentación: showBus es su salida y bed el fondo continuo.
 let showBus = null,
   bed = null;
+/**
+ * Salida de los sonidos de la absorción; se crea si no existe.
+ *
+ * @returns {GainNode} La salida.
+ */
 function showOut() {
   if (!showBus) {
     showBus = AC.createGain();
@@ -18998,8 +19029,10 @@ function showOut() {
   }
   return showBus;
 }
-// un "inhalar" que nunca para: oleadas de aire que bajan de tono y se cortan, como un desagüe
-// cósmico
+/**
+ * Empieza el fondo de la absorción: un "inhalar" que nunca para, con la voz de Perseo y un
+ * latido grave de presión gravitacional.
+ */
 function showStart() {
   if (!AC) {
     return;
@@ -19019,7 +19052,7 @@ function showStart() {
     vg.gain.exponentialRampToValueAtTime(0.42, n + 1.8);
     vg.connect(showBus);
     const nodes = perseusVoice(vg, n);
-    // presión gravitacional: un latido grave, más sentido que escuchado
+    // Presión gravitacional: un latido grave, más sentido que escuchado.
     const pr = AC.createOscillator(),
       prg = AC.createGain(),
       pl = AC.createOscillator(),
@@ -19048,6 +19081,11 @@ function showStart() {
     bed = { g, nodes };
   } catch (e) {}
 }
+/**
+ * Apaga el fondo de la absorción con un desvanecido.
+ *
+ * @param {number} [fade] Duración del desvanecido, en segundos; por defecto 0,6.
+ */
 function showStop(fade) {
   if (!AC) {
     return;
@@ -19073,7 +19111,13 @@ function showStop(fade) {
     }
   } catch (e) {}
 }
-// cada roca: un silbido que sube mientras acelera hacia el centro y se corta al cruzar el horizonte
+/**
+ * Sonido de una roca que cae: sube de tono mientras acelera hacia el centro y se corta al
+ * cruzar el horizonte de sucesos.
+ *
+ * @param {number} dur Duración de la caída, en segundos.
+ * @param {number} pan Posición estéreo inicial, de -1 (izquierda) a 1 (derecha); termina al centro.
+ */
 function rockIn(dur, pan) {
   if (!AC || muted) {
     return;
@@ -19089,8 +19133,8 @@ function rockIn(dur, pan) {
       pn.connect(out);
       dest = pn;
     }
-    // la roca cae y su "voz" se vuelve cada vez más aguda (corrimiento al azul), hasta cortarse en
-    // el horizonte
+    // La "voz" de la roca se vuelve más aguda al caer (corrimiento al azul), hasta cortarse en el
+    // horizonte.
     for (const [f0, f1, gn, ty] of [
       [55, 330, 0.2, 'sine'],
       [82, 495, 0.07, 'sine'],
@@ -19119,7 +19163,11 @@ function rockIn(dur, pan) {
     }
   } catch (e) {}
 }
-// justo antes de tragarse la estrella: una gran inhalación que crece y se corta en seco
+/**
+ * Gran inhalación justo antes de tragarse la estrella: crece y se corta en seco.
+ *
+ * @param {number} dur Duración, en segundos.
+ */
 function bigSuck(dur) {
   if (!AC || muted) {
     return;
@@ -19156,9 +19204,14 @@ function bigSuck(dur) {
   } catch (e) {}
 }
 
-// ---------- sonidos científicos ----------
-// "Voz" inspirada en la sonificación de la NASA del agujero negro de Perseo (2022): un gemido grave
-// que cambia lentamente de tono
+/**
+ * "Voz" inspirada en la sonificación de la NASA del agujero negro del cúmulo de Perseo (2022):
+ * un gemido grave que cambia lentamente de tono y de vocal.
+ *
+ * @param {AudioNode} dest Destino del sonido.
+ * @param {number} n Momento de inicio, en segundos del reloj de audio.
+ * @returns {OscillatorNode[]} Osciladores creados, para detenerlos después.
+ */
 function perseusVoice(dest, n) {
   const nodes = [];
   const formA = AC.createBiquadFilter(),
@@ -19174,7 +19227,7 @@ function perseusVoice(dest, n) {
   formA.connect(mix);
   formB.connect(mix);
   mix.connect(dest);
-  // la "vocal" del gemido cambia despacio (ooo -> aaa)
+  // La "vocal" del gemido cambia despacio (ooo -> aaa).
   for (const [f, rate, depth] of [
     [formA, 0.09, 160],
     [formB, 0.06, 300],
@@ -19204,7 +19257,7 @@ function perseusVoice(dest, n) {
     l.frequency.value = rate;
     lg.gain.value = base * dep;
     l.connect(lg);
-    lg.connect(o.frequency); // el tono se arrastra arriba y abajo
+    lg.connect(o.frequency); // El tono se arrastra arriba y abajo.
     o.connect(og);
     og.connect(formA);
     og.connect(formB);
@@ -19214,8 +19267,10 @@ function perseusVoice(dest, n) {
   }
   return nodes;
 }
-// "Chirrido" inspirado en las ondas gravitacionales que detectó LIGO en 2015: sube de tono, crece y
-// se apaga de golpe
+/**
+ * "Chirrido" inspirado en las ondas gravitacionales que detectó LIGO en 2015: sube de tono,
+ * crece y se apaga de golpe (el "ringdown" tras la fusión).
+ */
 function gwChirp() {
   if (!AC || muted) {
     return;
