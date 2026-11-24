@@ -37,7 +37,6 @@ import {
   setScore,
   setState,
   state,
-  updateRingHUD,
 } from '../core/state.js';
 import {
   chargeMax,
@@ -228,7 +227,7 @@ function start() {
   }
   setRunRecord(bestOf(run.lvl));
   setNewRec(false);
-  updateRingHUD();
+  emit('ringChanged');
   elHud.style.opacity = 1;
   elPanel.classList.add('hide');
   setCharge(0);
@@ -585,7 +584,7 @@ function onLand(isDouble) {
     });
     setTimeout(() => cowbell(SCALE[7] + 12), 90);
   }
-  updateRingHUD();
+  emit('ringChanged');
   if (perfect) {
     cowbell(SCALE[Math.min(3 + outcome.streak, SCALE.length - 1)] + (outcome.streak >= 5 ? 12 : 0));
     effects.texts.push({
@@ -748,7 +747,7 @@ function onLand(isDouble) {
       setShake(reduceMotion ? 0 : 7);
       noise(0.45, 3000, 400, 0.3, 'lowpass');
       starPush();
-      updateRingHUD();
+      emit('ringChanged');
       return;
     } else {
       effects.texts.push({
@@ -762,7 +761,7 @@ function onLand(isDouble) {
       objChime(true);
       buzz([10, 30, 10]);
       setScore(run.score + 2);
-      updateRingHUD();
+      emit('ringChanged');
       if (run.level < curGoal()) {
         starLaunch();
         return;

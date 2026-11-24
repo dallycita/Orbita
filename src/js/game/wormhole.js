@@ -35,7 +35,6 @@ import {
   setPLevel,
   setScore,
   state,
-  updateRingHUD,
 } from '../core/state.js';
 import { sizeK } from './planets.js';
 import {
@@ -64,6 +63,7 @@ import { advanceJourney } from '../core/journey.js';
 import { GOAL } from '../data/levels.js';
 import { rr } from '../core/geometry.js';
 import { ensureRings } from './rings.js';
+import { emit } from '../core/events.js';
 
 /**
  * Golpes de música entre lanzamientos: cuatro en los primeros anillos (para aprender), luego tres.
@@ -184,7 +184,7 @@ function whInDone() {
     misEvent('ring');
     misEvent('reach', run.level);
   }
-  updateRingHUD();
+  emit('ringChanged');
   ensureRings();
   setAppear(0);
   setPulse(1);

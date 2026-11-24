@@ -49,10 +49,12 @@ import './screens/level-cards.js';
 import { initMissions } from './screens/missions.js';
 import { initPerfMeter } from './screens/perf-meter.js';
 import { initMainLoop } from './loop.js';
+import { initHud } from './render/hud.js';
 import { frame } from './loop.js';
 import { initAudioSettings } from './core/settings.js';
 
 initScreen();
+initHud();
 initAudioSettings();
 initRecords();
 initPlanets();

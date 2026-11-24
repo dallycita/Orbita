@@ -3,7 +3,7 @@
  * listas de efectos en pantalla. Solo declara variables; las cambian muchos archivos.
  */
 import { GOAL } from '../data/levels.js';
-import { records, setAttempts } from './state.js';
+import { setAttempts } from './state.js';
 
 // winT: segundos desde que se ganó; perfCount: saltos perfectos; attempts: intentos guardados
 const outcome = {

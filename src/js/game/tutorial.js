@@ -13,7 +13,6 @@ import {
   setPLevel,
   setRunRecord,
   setState,
-  updateRingHUD,
 } from '../core/state.js';
 import { setShieldLeft, setUsedDouble } from './planets.js';
 import {
@@ -41,7 +40,7 @@ import { setup } from './run.js';
 import { homeAmbience } from '../audio/ui-sounds.js';
 import { elLv } from '../core/dom.js';
 import { winSound } from '../audio/sfx.js';
-import { on } from '../core/events.js';
+import { emit, on } from '../core/events.js';
 
 /**
  * En el tutorial, un choque no termina la partida: el planeta estalla y reaparece en el mismo
@@ -139,7 +138,7 @@ function startTutorial() {
   setPerfCount(0);
   setRunRecord(0);
   setNewRec(false);
-  updateRingHUD();
+  emit('ringChanged');
   elHud.style.opacity = 1;
   elPanel.classList.add('hide');
   setCharge(0);

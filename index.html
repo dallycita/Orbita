@@ -5122,6 +5122,207 @@ const CHEV_R =
     }
   }
 
+  // src/js/core/state.js
+  var records = {
+    best: 0,
+    bestRing: 0,
+    best2: 0,
+    attempts2: 0,
+    best3: 0,
+    attempts3: 0,
+    attempts: 0
+  };
+  var saveBest = () => {
+    try {
+      localStorage.setItem("orbita_best_v2", String(records.best));
+    } catch (e) {
+    }
+  };
+  var saveBestRing = () => {
+    try {
+      localStorage.setItem("orbita_p1_anillo", String(records.bestRing));
+    } catch (e) {
+    }
+  };
+  var run = {
+    runRecord: 0,
+    newRec: false,
+    rings: void 0,
+    level: void 0,
+    pLevel: void 0,
+    pAng: void 0,
+    jumping: void 0,
+    jumpT: void 0,
+    combo: void 0,
+    lastLand: void 0,
+    score: void 0,
+    astFade: 0,
+    appear: 1,
+    charge: 0,
+    jumpTarget: 1,
+    crossed: false,
+    lvl: 0
+  };
+  var state = "pretitle";
+  var camera = {
+    camLevel: void 0
+  };
+  var bestX = {};
+  var attX = {};
+  var bestOf = (i) => i >= 3 ? bestX[i] || 0 : i === 2 ? records.best3 : i === 1 ? records.best2 : records.bestRing;
+  function setBestOf(i, v) {
+    if (i >= 3) {
+      bestX[i] = v;
+      try {
+        localStorage.setItem("orbita_p" + (i + 1) + "_anillo", String(v));
+      } catch (e) {
+      }
+    } else if (i === 2) {
+      records.best3 = v;
+      try {
+        localStorage.setItem("orbita_p3_anillo", String(v));
+      } catch (e) {
+      }
+    } else if (i === 1) {
+      records.best2 = v;
+      try {
+        localStorage.setItem("orbita_p2_anillo", String(v));
+      } catch (e) {
+      }
+    } else {
+      records.bestRing = v;
+      saveBestRing();
+    }
+  }
+  var attemptsOf = (i) => i >= 3 ? attX[i] || 0 : i === 2 ? records.attempts3 : i === 1 ? records.attempts2 : records.attempts;
+  function initRecords() {
+    try {
+      records.best = parseInt(localStorage.getItem("orbita_best_v2") || "0", 10) || 0;
+    } catch (e) {
+      records.best = 0;
+    }
+    try {
+      records.bestRing = parseInt(localStorage.getItem("orbita_p1_anillo") || "0", 10) || 0;
+    } catch (e) {
+      records.bestRing = 0;
+    }
+    try {
+      records.best3 = parseInt(localStorage.getItem("orbita_p3_anillo") || "0", 10) || 0;
+      records.attempts3 = parseInt(localStorage.getItem("orbita_p3_intentos") || "0", 10) || 0;
+    } catch (e) {
+    }
+    try {
+      records.best2 = parseInt(localStorage.getItem("orbita_p2_anillo") || "0", 10) || 0;
+      records.attempts2 = parseInt(localStorage.getItem("orbita_p2_intentos") || "0", 10) || 0;
+    } catch (e) {
+    }
+    for (let i = 3; i < 8; i++) {
+      try {
+        bestX[i] = parseInt(localStorage.getItem("orbita_p" + (i + 1) + "_anillo") || "0", 10) || 0;
+        attX[i] = parseInt(localStorage.getItem("orbita_p" + (i + 1) + "_intentos") || "0", 10) || 0;
+      } catch (e) {
+        bestX[i] = 0;
+        attX[i] = 0;
+      }
+    }
+  }
+  function setAppear(value) {
+    run.appear = value;
+    return value;
+  }
+  function setAstFade(value) {
+    run.astFade = value;
+    return value;
+  }
+  function setAttempts2(value) {
+    records.attempts2 = value;
+    return value;
+  }
+  function setAttempts3(value) {
+    records.attempts3 = value;
+    return value;
+  }
+  function setBest(value) {
+    records.best = value;
+    return value;
+  }
+  function setBestRing(value) {
+    records.bestRing = value;
+    return value;
+  }
+  function setCamLevel(value) {
+    camera.camLevel = value;
+    return value;
+  }
+  function setCharge(value) {
+    run.charge = value;
+    return value;
+  }
+  function setCombo(value) {
+    run.combo = value;
+    return value;
+  }
+  function setCrossed(value) {
+    run.crossed = value;
+    return value;
+  }
+  function setJumpT(value) {
+    run.jumpT = value;
+    return value;
+  }
+  function setJumpTarget(value) {
+    run.jumpTarget = value;
+    return value;
+  }
+  function setJumping(value) {
+    run.jumping = value;
+    return value;
+  }
+  function setLastLand(value) {
+    run.lastLand = value;
+    return value;
+  }
+  function setLevel(value) {
+    run.level = value;
+    return value;
+  }
+  function setLvl(value) {
+    run.lvl = value;
+    return value;
+  }
+  function setNewRec(value) {
+    run.newRec = value;
+    return value;
+  }
+  function setPAng(value) {
+    run.pAng = value;
+    return value;
+  }
+  function setPLevel(value) {
+    run.pLevel = value;
+    return value;
+  }
+  function setRings(value) {
+    run.rings = value;
+    return value;
+  }
+  function setRunRecord(value) {
+    run.runRecord = value;
+    return value;
+  }
+  function setScore(value) {
+    run.score = value;
+    return value;
+  }
+  function setState(value) {
+    state = value;
+    return value;
+  }
+  function setAttempts(value) {
+    records.attempts = value;
+    return value;
+  }
+
   // src/js/data/levels.js
   var LEVELS = [
     {
@@ -5443,232 +5644,6 @@ const CHEV_R =
   }
   function setWinT(value) {
     outcome.winT = value;
-    return value;
-  }
-
-  // src/js/core/state.js
-  var records = {
-    best: 0,
-    bestRing: 0,
-    best2: 0,
-    attempts2: 0,
-    best3: 0,
-    attempts3: 0,
-    attempts: 0
-  };
-  var saveBest = () => {
-    try {
-      localStorage.setItem("orbita_best_v2", String(records.best));
-    } catch (e) {
-    }
-  };
-  var saveBestRing = () => {
-    try {
-      localStorage.setItem("orbita_p1_anillo", String(records.bestRing));
-    } catch (e) {
-    }
-  };
-  var run = {
-    runRecord: 0,
-    newRec: false,
-    rings: void 0,
-    level: void 0,
-    pLevel: void 0,
-    pAng: void 0,
-    jumping: void 0,
-    jumpT: void 0,
-    combo: void 0,
-    lastLand: void 0,
-    score: void 0,
-    astFade: 0,
-    appear: 1,
-    charge: 0,
-    jumpTarget: 1,
-    crossed: false,
-    lvl: 0
-  };
-  function updateRingHUD() {
-    if (elPbar && elPbar.style) {
-      const g = curGoal(), v = Math.min(run.level, g), rec = tutorialState.tutorial ? 0 : Math.min(run.runRecord, g);
-      elPbar.style.setProperty("--p", (v / g * 100).toFixed(2) + "%");
-      elPbar.style.setProperty("--r", (rec / g * 100).toFixed(2) + "%");
-      if (elPbar.classList) {
-        elPbar.classList.toggle("hasrec", rec > 0 && rec < g);
-        elPbar.classList.toggle("beat", rec > 0 && v > rec);
-      }
-      if (elPnum) {
-        elPnum.innerHTML = v + "<span>/ " + g + "</span>";
-        if (elPnum.classList) {
-          elPnum.classList.toggle("beat", rec > 0 && v > rec);
-        }
-      }
-    }
-    elScore.innerHTML = Math.min(run.level, curGoal()) + "<small>/ " + curGoal() + "</small>";
-    elBest.textContent = "";
-    const arc = hudMode === "arco" && run.runRecord > 0;
-    elWrap.classList.toggle("arc", arc);
-    if (arc) {
-      elArcFg.style.strokeDashoffset = String(276.5 * (1 - Math.min(run.level / run.runRecord, 1)));
-      elArcFg.style.stroke = run.newRec ? "var(--fg)" : "var(--sun)";
-    }
-  }
-  var state = "pretitle";
-  var camera = {
-    camLevel: void 0
-  };
-  var bestX = {};
-  var attX = {};
-  var bestOf = (i) => i >= 3 ? bestX[i] || 0 : i === 2 ? records.best3 : i === 1 ? records.best2 : records.bestRing;
-  function setBestOf(i, v) {
-    if (i >= 3) {
-      bestX[i] = v;
-      try {
-        localStorage.setItem("orbita_p" + (i + 1) + "_anillo", String(v));
-      } catch (e) {
-      }
-    } else if (i === 2) {
-      records.best3 = v;
-      try {
-        localStorage.setItem("orbita_p3_anillo", String(v));
-      } catch (e) {
-      }
-    } else if (i === 1) {
-      records.best2 = v;
-      try {
-        localStorage.setItem("orbita_p2_anillo", String(v));
-      } catch (e) {
-      }
-    } else {
-      records.bestRing = v;
-      saveBestRing();
-    }
-  }
-  var attemptsOf = (i) => i >= 3 ? attX[i] || 0 : i === 2 ? records.attempts3 : i === 1 ? records.attempts2 : records.attempts;
-  function initRecords() {
-    try {
-      records.best = parseInt(localStorage.getItem("orbita_best_v2") || "0", 10) || 0;
-    } catch (e) {
-      records.best = 0;
-    }
-    try {
-      records.bestRing = parseInt(localStorage.getItem("orbita_p1_anillo") || "0", 10) || 0;
-    } catch (e) {
-      records.bestRing = 0;
-    }
-    try {
-      records.best3 = parseInt(localStorage.getItem("orbita_p3_anillo") || "0", 10) || 0;
-      records.attempts3 = parseInt(localStorage.getItem("orbita_p3_intentos") || "0", 10) || 0;
-    } catch (e) {
-    }
-    try {
-      records.best2 = parseInt(localStorage.getItem("orbita_p2_anillo") || "0", 10) || 0;
-      records.attempts2 = parseInt(localStorage.getItem("orbita_p2_intentos") || "0", 10) || 0;
-    } catch (e) {
-    }
-    for (let i = 3; i < 8; i++) {
-      try {
-        bestX[i] = parseInt(localStorage.getItem("orbita_p" + (i + 1) + "_anillo") || "0", 10) || 0;
-        attX[i] = parseInt(localStorage.getItem("orbita_p" + (i + 1) + "_intentos") || "0", 10) || 0;
-      } catch (e) {
-        bestX[i] = 0;
-        attX[i] = 0;
-      }
-    }
-  }
-  function setAppear(value) {
-    run.appear = value;
-    return value;
-  }
-  function setAstFade(value) {
-    run.astFade = value;
-    return value;
-  }
-  function setAttempts2(value) {
-    records.attempts2 = value;
-    return value;
-  }
-  function setAttempts3(value) {
-    records.attempts3 = value;
-    return value;
-  }
-  function setBest(value) {
-    records.best = value;
-    return value;
-  }
-  function setBestRing(value) {
-    records.bestRing = value;
-    return value;
-  }
-  function setCamLevel(value) {
-    camera.camLevel = value;
-    return value;
-  }
-  function setCharge(value) {
-    run.charge = value;
-    return value;
-  }
-  function setCombo(value) {
-    run.combo = value;
-    return value;
-  }
-  function setCrossed(value) {
-    run.crossed = value;
-    return value;
-  }
-  function setJumpT(value) {
-    run.jumpT = value;
-    return value;
-  }
-  function setJumpTarget(value) {
-    run.jumpTarget = value;
-    return value;
-  }
-  function setJumping(value) {
-    run.jumping = value;
-    return value;
-  }
-  function setLastLand(value) {
-    run.lastLand = value;
-    return value;
-  }
-  function setLevel(value) {
-    run.level = value;
-    return value;
-  }
-  function setLvl(value) {
-    run.lvl = value;
-    return value;
-  }
-  function setNewRec(value) {
-    run.newRec = value;
-    return value;
-  }
-  function setPAng(value) {
-    run.pAng = value;
-    return value;
-  }
-  function setPLevel(value) {
-    run.pLevel = value;
-    return value;
-  }
-  function setRings(value) {
-    run.rings = value;
-    return value;
-  }
-  function setRunRecord(value) {
-    run.runRecord = value;
-    return value;
-  }
-  function setScore(value) {
-    run.score = value;
-    return value;
-  }
-  function setState(value) {
-    state = value;
-    return value;
-  }
-  function setAttempts(value) {
-    records.attempts = value;
     return value;
   }
 
@@ -11174,7 +11149,7 @@ const CHEV_R =
       misEvent("ring");
       misEvent("reach", run.level);
     }
-    updateRingHUD();
+    emit("ringChanged");
     ensureRings();
     setAppear(0);
     setPulse(1);
@@ -11617,7 +11592,7 @@ const CHEV_R =
     }
     setRunRecord(bestOf(run.lvl));
     setNewRec(false);
-    updateRingHUD();
+    emit("ringChanged");
     elHud.style.opacity = 1;
     elPanel.classList.add("hide");
     setCharge(0);
@@ -11879,7 +11854,7 @@ const CHEV_R =
       });
       setTimeout(() => cowbell(SCALE[7] + 12), 90);
     }
-    updateRingHUD();
+    emit("ringChanged");
     if (perfect) {
       cowbell(SCALE[Math.min(3 + outcome.streak, SCALE.length - 1)] + (outcome.streak >= 5 ? 12 : 0));
       effects.texts.push({
@@ -12038,7 +12013,7 @@ const CHEV_R =
         setShake(reduceMotion ? 0 : 7);
         noise(0.45, 3e3, 400, 0.3, "lowpass");
         starPush();
-        updateRingHUD();
+        emit("ringChanged");
         return;
       } else {
         effects.texts.push({
@@ -12052,7 +12027,7 @@ const CHEV_R =
         objChime(true);
         buzz([10, 30, 10]);
         setScore(run.score + 2);
-        updateRingHUD();
+        emit("ringChanged");
         if (run.level < curGoal()) {
           starLaunch();
           return;
@@ -12299,7 +12274,7 @@ const CHEV_R =
     setPerfCount(0);
     setRunRecord(0);
     setNewRec(false);
-    updateRingHUD();
+    emit("ringChanged");
     elHud.style.opacity = 1;
     elPanel.classList.add("hide");
     setCharge(0);
@@ -23053,8 +23028,39 @@ void main(){
     setLast(performance.now());
   }
 
+  // src/js/render/hud.js
+  function updateRingHUD() {
+    if (elPbar && elPbar.style) {
+      const g = curGoal(), v = Math.min(run.level, g), rec = tutorialState.tutorial ? 0 : Math.min(run.runRecord, g);
+      elPbar.style.setProperty("--p", (v / g * 100).toFixed(2) + "%");
+      elPbar.style.setProperty("--r", (rec / g * 100).toFixed(2) + "%");
+      if (elPbar.classList) {
+        elPbar.classList.toggle("hasrec", rec > 0 && rec < g);
+        elPbar.classList.toggle("beat", rec > 0 && v > rec);
+      }
+      if (elPnum) {
+        elPnum.innerHTML = v + "<span>/ " + g + "</span>";
+        if (elPnum.classList) {
+          elPnum.classList.toggle("beat", rec > 0 && v > rec);
+        }
+      }
+    }
+    elScore.innerHTML = Math.min(run.level, curGoal()) + "<small>/ " + curGoal() + "</small>";
+    elBest.textContent = "";
+    const arc = hudMode === "arco" && run.runRecord > 0;
+    elWrap.classList.toggle("arc", arc);
+    if (arc) {
+      elArcFg.style.strokeDashoffset = String(276.5 * (1 - Math.min(run.level / run.runRecord, 1)));
+      elArcFg.style.stroke = run.newRec ? "var(--fg)" : "var(--sun)";
+    }
+  }
+  function initHud() {
+    on("ringChanged", updateRingHUD);
+  }
+
   // src/js/main.js
   initScreen();
+  initHud();
   initAudioSettings();
   initRecords();
   initPlanets();
