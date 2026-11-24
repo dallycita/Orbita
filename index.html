@@ -22433,8 +22433,11 @@ void main(){
   col = col/(1. + col*.5);
   gl_FragColor = vec4(col, 1.);
 }`;
-// Galaxias lejanas (niveles 4 a 8): lo que comparten sus fondos (estrellas, cúmulos, meteoros,
-// destellos)
+/**
+ * Primera parte del shader de las galaxias lejanas (niveles 4 a 8): lo que comparten sus fondos
+ * (estrellas, cúmulos, meteoros y destellos). 32-fondos-56-final la une con las demás en FS_GX.
+ * Todo es código GLSL dentro de un texto: cambiar algo ahí dentro cambia el juego.
+ */
 const GX_BASE = `
 uniform float uScale; uniform float uKind;
 float fbm7(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 7; i++){ s += a*vn(p); p = m*p; a *= .5; } return s; }
@@ -22857,7 +22860,11 @@ vec3 m87Shadow(vec2 q){
   return col;
 }
 `;
-// Sagitario A* (nivel 8): el centro de nuestra galaxia
+/**
+ * Parte del shader de las galaxias lejanas para Sagitario A* (nivel 8), el agujero negro del
+ * centro de nuestra galaxia. 32-fondos-56-final la une con las demás en FS_GX.
+ * Todo es código GLSL dentro de un texto: cambiar algo ahí dentro cambia el juego.
+ */
 const GX_SAGITARIO = `// ===================== SAGITARIO A* =====================
 // centro galáctico: en luz visible nubes doradas y polvo; el compuesto de NASA (Hubble+Spitzer+Chandra) en violeta #3e3775,
 // azul #454b9f, magenta #7e4774 y filamentos dorados; los filamentos de radio de MeerKAT; las estrellas S girando;
@@ -22927,7 +22934,11 @@ vec3 sgrShadow(vec2 q){
   return col;
 }
 `;
-// Galaxias lejanas: la Vía Láctea vista desde fuera, la capa final y main(); aquí se arma FS_GX
+/**
+ * Última parte del shader de las galaxias lejanas: la Vía Láctea vista desde fuera, la capa final
+ * común a todos los niveles y main(). Aquí se arma FS_GX uniendo todas las partes en orden.
+ * Todo es código GLSL dentro de textos: cambiar algo ahí dentro cambia el juego.
+ */
 const GX_FINAL = `// la Vía Láctea vista desde fuera: el regreso a casa
 vec3 homeGalaxy(vec2 q){
   vec2 d = (q - vec2(.5*uRes.x, .74*uRes.y))/(uScale*.36); d = rot(.4 + uT*.01)*d; d.y /= .6;
