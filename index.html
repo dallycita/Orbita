@@ -8193,7 +8193,12 @@ const PLANET_SVG = {
     '<circle cx="50" cy="50" r="17" fill="#d9c7b4"/><path d="M52 62 C44 57 45 49 52 52 C59 49 60 57 52 62 Z" fill="#f4ebe0"/>',
 };
 // nivel 1: el sistema solar termina en el anillo 50
-// ---------- estado de la partida: contadores, tutorial, efectos en pantalla ----------
+/**
+ * Estado compartido de la partida: contadores, tutorial, gestos, rachas, reloj del juego (`t`) y
+ * listas de efectos en pantalla. Solo declara variables; las cambian muchos archivos.
+ */
+
+// winT: segundos desde que se ganó; perfCount: saltos perfectos; attempts: intentos guardados
 let winT = 0,
   perfCount = 0,
   attempts = 0;
@@ -8202,7 +8207,8 @@ try {
 } catch (e) {
   attempts = 0;
 }
-// ---- tutorial: los primeros 10 anillos de la huida, una cosa a la vez ----
+// Tutorial: los primeros 10 anillos de la huida, una cosa a la vez.
+// TUT_TYPES da el tipo de cada anillo y TUT_TIPS el consejo que se muestra en él.
 const TUT_GOAL = 10;
 const TUT_TYPES = [
   'vacio',
@@ -8229,8 +8235,14 @@ const TUT_TIPS = [
   'Una barrera sin huecos. Desliza hacia arriba para el salto doble.',
 ];
 let tutorial = false,
-  tutorialDone = true; // ya no hay tutorial: se aprende jugando
+  tutorialDone = true; // el tutorial no se impone al empezar: se aprende jugando
+/**
+ * Meta de la partida actual.
+ *
+ * @returns {number} Nivel de anillo que hay que alcanzar (TUT_GOAL en el tutorial).
+ */
 const curGoal = () => (tutorial ? TUT_GOAL : GOAL);
+// brillo de cada marca de carga del poder al llenarse, de 0 a 1
 const pipFlash = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 let readyT = 0,
   chargeFlash = 0,
@@ -8238,6 +8250,8 @@ let readyT = 0,
 try {
   readyHintDone = localStorage.getItem('orbita_p1_poderlisto') === '1';
 } catch (e) {}
+// gest: gesto en curso; pending: salto pedido que espera 0,09 s por si el gesto es un
+// deslizamiento (salto doble); pendingT: segundos que lleva esperando
 let gest = null,
   pending = false,
   pendingT = 0;
@@ -8256,7 +8270,9 @@ let streak = 0,
   culprit = null,
   culpritT = 0,
   landPop = 0;
+// holgura máxima con los asteroides para que un salto cuente como perfecto
 const PERFECT = 12;
+// t: reloj del juego, en segundos; timeScale y slowTimer: cámara lenta
 let t = 0,
   timeScale = 1,
   slowTimer = 0,
@@ -8269,12 +8285,15 @@ let particles = [],
   trail = [],
   texts = [],
   burns = [];
+// sunLevel: nivel de anillo hasta donde llega el agujero negro; lastEaten: último anillo tragado
 let sunLevel = -1.6,
   lastEaten = -2;
+// restos que caen en espiral hacia el agujero negro (ángulo en radianes y distancia)
 const debris = Array.from({ length: 60 }, () => ({
   a: Math.random() * Math.PI * 2,
   r: 60 + Math.random() * 180,
 }));
+// duración base de un salto entre anillos, en segundos (jumpDur la ajusta según el planeta)
 const JUMP_DUR = 0.12;
 // generador con semilla fija: el recorrido es siempre el mismo, como un nivel de Geometry Dash
 const SEED = 20261007;
