@@ -78,7 +78,12 @@ const sm = eslintScope.analyze(mAst, { ecmaVersion: 2022, sourceType: 'module' }
 const free = new Set(sm.globalScope.through.map(r => r.identifier.name).filter(n => !moved.has(n)));
 const writesLeft = [...new Set(sm.globalScope.through.filter(r => r.isWrite() && !moved.has(r.identifier.name)).map(r => r.identifier.name))]
   .filter(n => !/^[A-Z]/.test(n) || true).filter(n => parse(readFileSync(FROM, 'utf8')).body.some(st => declName(st).includes(n)));
-if (writesLeft.length){ console.error('✗ el código que se muda cambia ' + writesLeft.join(', ') + ', que se queda en el origen: múdalo también'); process.exit(1); }
+const srcNow = readFileSync(FROM, 'utf8');
+const withoutSetter = writesLeft.filter(n => !new RegExp('function\\s+' + setterOf(n) + '\\s*\\(').test(srcNow));
+if (withoutSetter.length < writesLeft.length && !withoutSetter.length){
+  // todo lo que se cambia tiene su función setX en el origen: después de mudar, corre usar-setters.mjs en el destino
+  console.log('  (después: node herramientas/usar-setters.mjs ' + toRel + ')');
+} else if (writesLeft.length){ console.error('✗ el código que se muda cambia ' + writesLeft.join(', ') + ', que se queda en el origen: múdalo también'); process.exit(1); }
 
 // lo que el origen importa y el código movido necesita, y lo que el origen declara y el código movido necesita
 const srcAst2 = parse(src);

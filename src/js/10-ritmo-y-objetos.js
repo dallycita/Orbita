@@ -17,12 +17,12 @@ import {
   setLevel,
 } from './06-record-y-estado.js';
 import { curGoal, setPending, t } from './08-partida-estado.js';
-import { rr } from './16-partida.js';
 
 import { COIN_RINGS } from './data/levels.js';
 import { muted } from './core/settings.js';
 import { lvStarsGot } from './game/progress.js';
 import { uiTone } from './audio/ui-sounds.js';
+import { rr } from './core/geometry.js';
 
 /**
  * Fase dentro del golpe actual de la música.

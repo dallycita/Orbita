@@ -79,7 +79,7 @@ import {
 import { hideEarth, viewInside, wh } from './13-agujero-de-gusano.js';
 import { bend, bendRad, bendW, drawBendSphere, lensJ, lensP } from './14-lente-gravitacional.js';
 import { drawFlare, drawHazards, drawNova } from './15-peligros.js';
-import { rr } from './16-partida.js';
+
 import { drawAst, drawCharge, drawPowerAura } from './21-dibujo.js';
 
 import { drawAndromeda, drawGalBG, drawMagallanes } from './31-fondos-2d.js';
@@ -89,6 +89,7 @@ import { brandHole, drawLogo } from './render/black-hole.js';
 import { camZoom, homeT, introFade, logoT0, setCamZoom } from './core/screen.js';
 import { GOAL } from './data/levels.js';
 import { zoneOf } from './game/zones.js';
+import { rr } from './core/geometry.js';
 
 /**
  * Dibuja la escena completa de la partida en el lienzo principal, con temblor y zoom de cámara.

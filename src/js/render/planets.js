@@ -3,7 +3,7 @@
  */
 import { CX, CY, H, S, W, ctx, rgba } from '../01-pantalla-y-utilidades.js';
 import { state } from '../06-record-y-estado.js';
-import { PLANETS_P, curPlanet, sizeK } from '../07-planetas.js';
+import { PLANETS_P, curPlanet, sizeK, unlockedIds } from '../07-planetas.js';
 import { particles, t, tutorial } from '../08-partida-estado.js';
 import { hot, hotT } from '../11-peligros-datos.js';
 import { drawCaronteBack, hsh, ringBoostNow, setRingBoostNow, shieldT } from '../12-poderes.js';
@@ -1020,4 +1020,28 @@ function planetThumb(id) {
     : '';
 }
 
-export { PLGL, drawBigPlanet, drawPlayer, planetThumb };
+/**
+ * HTML con las miniaturas de los planetas rescatados desde una lista anterior.
+ *
+ * @param {string[]} before Planetas desbloqueados antes de la partida.
+ * @returns {string} HTML, o '' si no se rescató ninguno.
+ */
+function rescuedCards(before) {
+  const now = unlockedIds(),
+    nuevos = PLANETS_P.filter(P => now.includes(P.id) && !before.includes(P.id));
+  if (!nuevos.length) {
+    return '';
+  }
+  return (
+    '<div class="wres"><div class="wpl">' +
+    nuevos
+      .map(P => '<span class="wp" title="' + P.name + '">' + planetThumb(P.id) + '</span>')
+      .join('') +
+    '</div>' +
+    '<small>' +
+    (nuevos.length > 1 ? 'Rescatados' : 'Rescatado') +
+    '</small></div>'
+  );
+}
+
+export { PLGL, drawBigPlanet, drawPlayer, planetThumb, rescuedCards };

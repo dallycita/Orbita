@@ -3,16 +3,7 @@
  * aterriza, gana y muere. También muestra el contador de intentos.
  * Los anillos se generan con la semilla fija SEED (rng), así cada nivel sale siempre igual.
  */
-import {
-  BONE,
-  GAP,
-  PR,
-  R0,
-  buzz,
-  elHud,
-  elPanel,
-  reduceMotion,
-} from './01-pantalla-y-utilidades.js';
+import { BONE, PR, R0, buzz, elHud, elPanel, reduceMotion } from './01-pantalla-y-utilidades.js';
 import { AC, NOISE, ROOT, SCALE, cowbell, master, noise, sub, suck, thump } from './02-audio.js';
 import { TB } from './03-musica-ritmos.js';
 import { startMusic, stopMusic } from './05-musica-reproductor.js';
@@ -23,7 +14,6 @@ import {
   attemptsOf,
   best,
   bestOf,
-  camLevel,
   charge,
   jumpT,
   jumpTarget,
@@ -67,7 +57,6 @@ import {
   curPlanet,
   jumpDur,
   markNewPlanets,
-  rescuedCards,
   saveRunStats,
   setPlutoOk,
   setShieldLeft,
@@ -172,11 +161,13 @@ import { COIN_RINGS, LEVELS } from './data/levels.js';
 import { TYPE_INFO } from './data/courses.js';
 import { NEB_AT, OBJ_NEBULA, OBJ_PULSAR, PUL_AT } from './data/hazards.js';
 import { powerReadySound } from './audio/sfx.js';
-import { lvStarsGot, noteDouble } from './game/progress.js';
+import { lvStarsGot } from './game/progress.js';
 import { setPendingTut } from './core/screen.js';
-import { misEvent, misWin } from './game/missions.js';
+import { misEvent, misWin, noteDouble } from './game/missions.js';
 import { resetJourney } from './core/journey.js';
 import { zoneOf } from './game/zones.js';
+import { rr } from './core/geometry.js';
+import { rescuedCards } from './render/planets.js';
 
 /**
  * Crea un anillo con sus obstáculos y su giro según el tipo que le toca en el nivel.
@@ -494,14 +485,6 @@ function start() {
   setRunCoins(0);
   startMusic();
 }
-
-/**
- * Radio de un anillo visto desde la cámara.
- *
- * @param {number} k Nivel de anillo (puede tener decimales).
- * @returns {number} Radio, en unidades del juego.
- */
-const rr = k => R0 + (k - camLevel) * GAP;
 
 /**
  * Distancia libre entre el planeta y el asteroide más cercano de un anillo; sirve para decidir si
@@ -1263,7 +1246,6 @@ export {
   ensureRings,
   jump,
   onLand,
-  rr,
   sesTries,
   setup,
   showTry,

@@ -6,7 +6,6 @@
 import { bestOf, bestRing } from './06-record-y-estado.js';
 import { JUMP_DUR, perfCount } from './08-partida-estado.js';
 
-import { planetThumb } from './render/planets.js';
 import { GOAL } from './data/levels.js';
 
 // Planeta elegido, récord de Perfectos en una partida, secreto de Plutón, truco de todos los
@@ -55,29 +54,6 @@ function markNewPlanets() {
   try {
     localStorage.setItem('orbita_pl_nuevo', '1');
   } catch (e) {}
-}
-/**
- * HTML con las miniaturas de los planetas rescatados desde una lista anterior.
- *
- * @param {string[]} before Planetas desbloqueados antes de la partida.
- * @returns {string} HTML, o '' si no se rescató ninguno.
- */
-function rescuedCards(before) {
-  const now = unlockedIds(),
-    nuevos = PLANETS_P.filter(P => now.includes(P.id) && !before.includes(P.id));
-  if (!nuevos.length) {
-    return '';
-  }
-  return (
-    '<div class="wres"><div class="wpl">' +
-    nuevos
-      .map(P => '<span class="wp" title="' + P.name + '">' + planetThumb(P.id) + '</span>')
-      .join('') +
-    '</div>' +
-    '<small>' +
-    (nuevos.length > 1 ? 'Rescatados' : 'Rescatado') +
-    '</small></div>'
-  );
 }
 /** Guarda el récord de Perfectos en una partida, que desbloquea a Mercurio y Urano. */
 function saveRunStats() {
@@ -386,7 +362,6 @@ export {
   planetOk,
   plutoOk,
   pst,
-  rescuedCards,
   saveRunStats,
   shieldLeft,
   sizeK,

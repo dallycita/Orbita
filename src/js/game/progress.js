@@ -1,8 +1,6 @@
 /**
  * (encabezado pendiente)
  */
-import { tutorial } from '../08-partida-estado.js';
-import { misEvent } from './missions.js';
 
 /**
  * Lee las estrellas ganadas en un nivel.
@@ -24,20 +22,6 @@ function lvStarsGot(i) {
 let doblesHechos = 0;
 
 /**
- * Cuenta un salto doble hecho (fuera del tutorial) y avanza la misión de poderes.
- */
-function noteDouble() {
-  if (tutorial) {
-    return;
-  }
-  misEvent('power');
-  doblesHechos++;
-  try {
-    localStorage.setItem('orbita_p1_dobles', String(doblesHechos));
-  } catch (e) {}
-}
-
-/**
  * Cambia `doblesHechos` desde otro módulo (este módulo es su dueño).
  *
  * @param {*} value Valor nuevo.
@@ -48,4 +32,4 @@ function setDoblesHechos(value) {
   return value;
 }
 
-export { doblesHechos, lvStarsGot, noteDouble, setDoblesHechos };
+export { doblesHechos, lvStarsGot, setDoblesHechos };

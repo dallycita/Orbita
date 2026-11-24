@@ -73,12 +73,13 @@ import {
   tutorial,
 } from './08-partida-estado.js';
 import { beatTime, obsAng, obsRad } from './10-ritmo-y-objetos.js';
-import { rr } from './16-partida.js';
 
 import { muted } from './core/settings.js';
 import { PLGL, drawPlayer } from './render/planets.js';
-import { noteDouble } from './game/progress.js';
+
 import { uiTone } from './audio/ui-sounds.js';
+import { rr } from './core/geometry.js';
+import { noteDouble } from './game/missions.js';
 
 let ghostT = 0;
 let shieldT = 0;

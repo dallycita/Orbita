@@ -21,7 +21,6 @@ import {
 import { AC, ROOT, noiseHit } from './02-audio.js';
 import { echoBus } from './03-musica-ritmos.js';
 import { sunLevel, t } from './08-partida-estado.js';
-import { rr } from './16-partida.js';
 
 import { muted } from './core/settings.js';
 import { drawPlayer } from './render/planets.js';
@@ -29,6 +28,7 @@ import { BR0, BR1, SK, bhCore, bhDiskK, drawLogo, setSfl, sfl } from './render/b
 import { HOME_IN, homeT, logoT0 } from './core/screen.js';
 import { bigSuck, gwChirp, rockIn, showOut, showStop, uiOut, uiTone } from './audio/ui-sounds.js';
 import { easeIO } from './core/math.js';
+import { rr } from './core/geometry.js';
 
 // ---- La demostración: el agujero negro dobla la luz, se come rocas y destroza una estrella ----
 // HOME_BIG: segundo en que el agujero empieza a alejarse; HOME_IN: segundo en que llega a su

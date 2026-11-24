@@ -133,12 +133,13 @@ import {
   whRip,
 } from './14-lente-gravitacional.js';
 import { NOVA_LIFE, hazardsUpdate, novaBurst, novaHit, novaSound } from './15-peligros.js';
-import { die, eatRings, jump, onLand, rr } from './16-partida.js';
+import { die, eatRings, jump, onLand } from './16-partida.js';
 
 import { introFade, setIntroFade } from './core/screen.js';
 import { advanceJourney, setJourneyBand } from './core/journey.js';
 import { GOAL } from './data/levels.js';
 import { zoneOf } from './game/zones.js';
+import { rr } from './core/geometry.js';
 
 /**
  * Avanza el juego un cuadro.

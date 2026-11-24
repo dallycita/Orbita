@@ -6,7 +6,7 @@
  */
 import { CX, CY, H, S, SUN, W, ctx } from './01-pantalla-y-utilidades.js';
 import { sunLevel, t } from './08-partida-estado.js';
-import { rr } from './16-partida.js';
+
 import { BG_VS } from './32-fondos-1-comun.js';
 import { FS_AND, FS_AND2 } from './32-fondos-2-andromeda.js';
 import { FS_MW } from './32-fondos-3-via-lactea.js';
@@ -14,6 +14,7 @@ import { FS_LMC } from './32-fondos-4-magallanes.js';
 import { FS_GX } from './32-fondos-56-final.js';
 import { FS_PHOTO } from './32-fondos-6-foto.js';
 import { bandE, flow, jour, spd } from './core/journey.js';
+import { rr } from './core/geometry.js';
 
 const GLBG = (() => {
   let cv = null,

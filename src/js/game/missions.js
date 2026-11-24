@@ -6,7 +6,7 @@ import { MIS_ACH, MIS_DAILY } from '../data/missions.js';
 import { emit } from '../core/events.js';
 import { PLANETS_P } from '../07-planetas.js';
 import { COIN_RINGS, LEVELS } from '../data/levels.js';
-import { lvStarsGot } from './progress.js';
+import { doblesHechos, lvStarsGot, setDoblesHechos } from './progress.js';
 
 var MIS = null;
 
@@ -255,4 +255,30 @@ function misStarsBest() {
   return [best, bi];
 }
 
-export { MIS, achProg, misDef, misEvent, misLoad, misReady, misRoll, misSave, misToday, misWin };
+/**
+ * Cuenta un salto doble hecho (fuera del tutorial) y avanza la misión de poderes.
+ */
+function noteDouble() {
+  if (tutorial) {
+    return;
+  }
+  misEvent('power');
+  setDoblesHechos(doblesHechos + 1);
+  try {
+    localStorage.setItem('orbita_p1_dobles', String(doblesHechos));
+  } catch (e) {}
+}
+
+export {
+  MIS,
+  achProg,
+  misDef,
+  misEvent,
+  misLoad,
+  misReady,
+  misRoll,
+  misSave,
+  misToday,
+  misWin,
+  noteDouble,
+};

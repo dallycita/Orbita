@@ -37,7 +37,7 @@ import {
   sunLevel,
   t,
 } from './08-partida-estado.js';
-import { rr } from './16-partida.js';
+
 import { drawEarth } from './21-dibujo.js';
 
 import { PLGL, drawBigPlanet } from './render/planets.js';
@@ -57,6 +57,7 @@ import { setDoblesHechos } from './game/progress.js';
 import { ZONES } from './game/zones.js';
 import { easeIO } from './core/math.js';
 import { MENU_HTML } from './screens/menu.js';
+import { rr } from './core/geometry.js';
 
 // Planetas de la intro. r: radio de la órbita y s: tamaño, en unidades de la intro.
 const PLANETS = [

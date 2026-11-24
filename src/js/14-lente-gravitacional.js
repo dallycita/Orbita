@@ -9,8 +9,9 @@ import { level, lvl, state } from './06-record-y-estado.js';
 import { t, tutorial } from './08-partida-estado.js';
 import { viewInside } from './13-agujero-de-gusano.js';
 import { hazardTip } from './15-peligros.js';
-import { rr } from './16-partida.js';
+
 import { GLBG } from './32-fondos-9-motor.js';
+import { rr } from './core/geometry.js';
 
 // BEND_AT[nivel] = [primer, último] nivel de anillo con lente; WH_K es el anillo de la boca del
 // gusano y WH_EXIT el de salida. BEND_R es el radio de Einstein de la lente.

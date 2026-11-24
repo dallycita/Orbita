@@ -61,12 +61,13 @@ import { seenTypes } from './09-recorridos.js';
 import { beatKick, beatTime } from './10-ritmo-y-objetos.js';
 import { WH_K, WORM_COL, bend, bendW, lensP, setBend, setWhRip } from './14-lente-gravitacional.js';
 import { hazardTip } from './15-peligros.js';
-import { ensureRings, rr } from './16-partida.js';
+import { ensureRings } from './16-partida.js';
 
 import { muted } from './core/settings.js';
 import { misEvent } from './game/missions.js';
 import { advanceJourney } from './core/journey.js';
 import { GOAL } from './data/levels.js';
+import { rr } from './core/geometry.js';
 
 /**
  * Golpes de música entre lanzamientos: cuatro en los primeros anillos (para aprender), luego tres.
