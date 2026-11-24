@@ -31,10 +31,8 @@ src/
   js/                    el juego, en orden
 index.html               el juego armado (no se edita)
 build.mjs  dev.mjs       las herramientas para armar y trabajar
-diseno/                  imágenes de diseño, pruebas y comparaciones
-musica/                  muestras de la banda sonora
-versiones-anteriores/    prototipos viejos
-orbita_ideas_pendientes.md
+material/                prototipos, imágenes de diseño y muestras de música (no son parte del juego)
+docs/ideas.md            ideas pendientes
 ```
 
 ### El estilo (`src/css/`)

@@ -47,5 +47,5 @@ export default [
     files: ['*.mjs', 'herramientas/**/*.mjs', 'pruebas/**/*.mjs', 'eslint.config.js'],
     languageOptions: { ecmaVersion: 'latest', sourceType: 'module', globals: { ...globals.node } },
   },
-  { ignores: ['index.html', 'node_modules/', 'versiones-anteriores/', 'diseno/', 'musica/', 'pruebas/bot.js'] },
+  { ignores: ['index.html', 'node_modules/', 'material/', 'pruebas/bot.js'] },
 ];
