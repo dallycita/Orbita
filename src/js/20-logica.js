@@ -147,8 +147,8 @@ import {
 import { NOVA_LIFE, hazardsUpdate, novaBurst, novaHit, novaSound } from './15-peligros.js';
 import { die, eatRings, jump, onLand, rr } from './16-partida.js';
 
-import { GLBG } from './32-fondos-9-motor.js';
 import { introFade, setIntroFade } from './core/screen.js';
+import { advanceJourney, setJourneyBand } from './core/journey.js';
 
 /**
  * Avanza el juego un cuadro.
@@ -310,9 +310,9 @@ function update(dt) {
   if (state === 'play' && wh && wh.ph !== 'orb') {
     whTrans(dt);
   } else if (state === 'play') {
-    GLBG.advance(d, 0.35 + (jumping ? 1.1 : 0) + (andFast ? 0.35 : 0), Math.min(1, level / GOAL));
+    advanceJourney(d, 0.35 + (jumping ? 1.1 : 0) + (andFast ? 0.35 : 0), Math.min(1, level / GOAL));
     const bt = andFast ? 3 : level >= 28 ? 2 : level >= 15 ? 1 : 0;
-    GLBG.setBand(bt, d);
+    setJourneyBand(bt, d);
     if (wh && wh.ph === 'orb') {
       // dentro del gusano: giras tú sobre el anillo, y la corriente te lanza en el golpe
       setPAng(Math.atan2(Math.sin(pAng + wh.dir * ORB_W * d), Math.cos(pAng + wh.dir * ORB_W * d)));
@@ -497,12 +497,12 @@ function update(dt) {
   }
   if (state === 'dead') {
     setDeadT(deadT + d);
-    GLBG.advance(d, 0);
+    advanceJourney(d, 0);
   }
   if (state === 'win') {
     setWinT(winT + dt);
-    GLBG.advance(dt, 2 + winT * 4, 1);
-    GLBG.setBand(3, dt);
+    advanceJourney(dt, 2 + winT * 4, 1);
+    setJourneyBand(3, dt);
     setPLevel(pLevel + dt * (1.2 + winT * 4));
     setSunLevel(sunLevel - dt * (0.6 + winT * 0.8));
     trail.push({ a: pAng, l: pLevel });

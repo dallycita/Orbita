@@ -9,7 +9,7 @@ import { hot, hotT } from '../11-peligros-datos.js';
 import { drawCaronteBack, hsh, ringBoostNow, setRingBoostNow, shieldT } from '../12-poderes.js';
 import { waveProx } from '../15-peligros.js';
 import { drawEarth } from '../21-dibujo.js';
-import { PBANDS, PBASE, PFEAT } from '../data/planets.js';
+import { PBANDS, PBASE, PFEAT, PLANET_SVG } from '../data/planets.js';
 
 /**
  * Motor WebGL de planetas: hornea una vez la textura procedural de cada planeta (mapa de
@@ -1002,4 +1002,22 @@ function drawHot(px, py, r) {
   }
 }
 
-export { PLGL, drawBigPlanet, drawPlayer };
+/**
+ * Miniatura de un planeta para la interfaz: imagen 3D si hay WebGL, si no su ícono SVG.
+ *
+ * @param {string} id Identificador del planeta.
+ * @returns {string} HTML de la miniatura (vacío si no hay ícono).
+ */
+function planetThumb(id) {
+  try {
+    const r = PLGL.render(id, 120, 0.6, [-0.78, 0.42, 0.48], [1.12, 1.06, 0.98], 1);
+    if (r && r.cv.toDataURL) {
+      return '<img src="' + r.cv.toDataURL() + '" alt="">';
+    }
+  } catch (e) {}
+  return PLANET_SVG[id]
+    ? '<svg viewBox="0 0 100 100" aria-hidden="true">' + PLANET_SVG[id] + '</svg>'
+    : '';
+}
+
+export { PLGL, drawBigPlanet, drawPlayer, planetThumb };

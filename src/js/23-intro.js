@@ -55,7 +55,7 @@ import { PLGL, drawBigPlanet } from './render/planets.js';
 import { homeAmbience } from './audio/ui-sounds.js';
 import { bhDiskK } from './render/black-hole.js';
 import { setIntroFade } from './core/screen.js';
-import { doblesHechos, setDoblesHechos } from './game/progress.js';
+import { setDoblesHechos } from './game/progress.js';
 
 // Planetas de la intro. r: radio de la órbita y s: tamaño, en unidades de la intro.
 const PLANETS = [

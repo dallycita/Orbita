@@ -7404,99 +7404,6 @@ const CHEV_R =
     }
   }
 
-  // src/js/data/planets.js
-  var PLANET_SVG = {
-    tierra: '<circle cx="50" cy="50" r="26" fill="#3d8bff"/><path d="M34 40 Q42 30 52 38 Q48 48 38 47 Z M56 56 Q66 50 70 60 Q62 70 55 64 Z" fill="#5ccf6b"/><path d="M30 46 Q50 42 70 47" stroke="#fff" stroke-opacity=".7" stroke-width="2" fill="none"/>',
-    saturno: '<ellipse cx="50" cy="50" rx="44" ry="12" transform="rotate(-18 50 50)" fill="none" stroke="#f3e2b0" stroke-width="5" stroke-opacity=".9"/><circle cx="50" cy="50" r="22" fill="#e6cf8f"/><rect x="28" y="44" width="44" height="4" fill="#c9a86a" opacity=".6"/><rect x="28" y="53" width="44" height="5" fill="#c9a86a" opacity=".5"/><path d="M8 58 A44 12 -18 0 0 92 42" transform="rotate(0)" fill="none" stroke="#f3e2b0" stroke-width="5" stroke-opacity=".9"/>',
-    urano: '<ellipse cx="50" cy="50" rx="9" ry="40" transform="rotate(8 50 50)" fill="none" stroke="#c8f0fa" stroke-width="3" stroke-opacity=".6"/><circle cx="50" cy="50" r="23" fill="#8fd3e0"/>',
-    neptuno: '<circle cx="50" cy="50" r="24" fill="#3f6fd6"/><rect x="26" y="42" width="48" height="5" fill="#2b4fa8" opacity=".6"/><ellipse cx="58" cy="57" rx="6" ry="3.5" fill="#1f3f8f" opacity=".8"/>',
-    pluton: '<circle cx="50" cy="50" r="17" fill="#d9c7b4"/><path d="M52 62 C44 57 45 49 52 52 C59 49 60 57 52 62 Z" fill="#f4ebe0"/>'
-  };
-  var PFEAT = {
-    tierra: [
-      [0, -0.35, 0.5, 0.25, "#5ccf6b"],
-      [1.4, 0.15, 0.35, 0.45, "#5ccf6b"],
-      [2.6, -0.05, 0.45, 0.3, "#5ccf6b"],
-      [3.9, 0.5, 0.3, 0.15, "#5ccf6b"],
-      [4.9, -0.2, 0.4, 0.35, "#5ccf6b"],
-      [0.8, -0.6, 0.6, 0.06, "rgba(255,255,255,.85)"],
-      [2.2, 0.35, 0.7, 0.06, "rgba(255,255,255,.8)"],
-      [4.2, -0.4, 0.6, 0.05, "rgba(255,255,255,.8)"]
-    ],
-    luna: [
-      [0.4, -0.25, 0.35, 0.28, "#9a9a9a"],
-      [1.6, 0.2, 0.25, 0.2, "#a3a3a3"],
-      [2.9, -0.1, 0.4, 0.3, "#959595"],
-      [4.3, 0.35, 0.18, 0.14, "#8d8d8d"],
-      [5.4, -0.4, 0.14, 0.12, "#b0b0b0"]
-    ],
-    mercurio: [
-      [0.3, 0.2, 0.16, 0.14, "#867a6d"],
-      [1.3, -0.35, 0.2, 0.17, "#8e8275"],
-      [2.4, 0.05, 0.12, 0.1, "#7d7266"],
-      [3.5, 0.4, 0.22, 0.16, "#8a7e71"],
-      [4.7, -0.15, 0.15, 0.13, "#7f7367"],
-      [5.6, 0.3, 0.1, 0.09, "#867a6d"]
-    ],
-    venus: [
-      [1, 0.1, 0.7, 0.1, "rgba(255,245,220,.45)"],
-      [3.2, -0.25, 0.8, 0.08, "rgba(255,240,205,.4)"],
-      [5, 0.3, 0.6, 0.07, "rgba(255,245,220,.35)"]
-    ],
-    marte: [
-      [0.5, 0.1, 0.45, 0.25, "#8a3a26"],
-      [2.1, -0.2, 0.3, 0.3, "#94402a"],
-      [3.7, 0.25, 0.4, 0.18, "#7e3422"],
-      [5.1, -0.05, 0.25, 0.2, "#8a3a26"],
-      [0, -0.88, 1, 0.14, "rgba(255,255,255,.9)"]
-    ],
-    jupiter: [
-      [1.8, 0.28, 0.26, 0.13, "#c0533a"],
-      [4.5, -0.3, 0.12, 0.06, "rgba(255,240,220,.6)"]
-    ],
-    saturno: [
-      [1.2, 0.3, 0.25, 0.12, "rgba(255,245,220,.5)"],
-      [3.8, -0.2, 0.2, 0.1, "rgba(255,245,220,.4)"]
-    ],
-    urano: [[2, 0, 0.3, 0.15, "rgba(200,245,250,.35)"]],
-    neptuno: [
-      [1.5, 0.25, 0.32, 0.18, "#1f3f8f"],
-      [4, -0.3, 0.18, 0.08, "rgba(230,240,255,.8)"],
-      [5.2, 0.1, 0.14, 0.06, "rgba(230,240,255,.6)"]
-    ],
-    pluton: [
-      [0, 0.15, 0.55, 0.5, "#f4ebe0"],
-      [2.5, -0.3, 0.3, 0.2, "#9a8371"],
-      [4.1, 0.35, 0.25, 0.18, "#9a8371"],
-      [5.3, -0.1, 0.2, 0.14, "#b9a48f"]
-    ],
-    sol: [
-      [1, 0.2, 0.1, 0.07, "rgba(160,70,10,.55)"],
-      [3.4, -0.15, 0.08, 0.06, "rgba(160,70,10,.5)"],
-      [5, 0.35, 0.07, 0.05, "rgba(160,70,10,.45)"]
-    ]
-  };
-  var PBASE = {
-    tierra: "#2f6fd8",
-    luna: "#bcbcbc",
-    mercurio: "#a59a8f",
-    venus: "#e3c27a",
-    marte: "#c1543a",
-    jupiter: "#d7a86e",
-    saturno: "#e6cf8f",
-    urano: "#8fd3e0",
-    neptuno: "#3f6fd6",
-    pluton: "#cdb9a4",
-    sol: "#ffcf5a"
-  };
-  var PBANDS = {
-    saturno: ["rgba(170,130,70,.35)", [-0.45, -0.15, 0.2, 0.5]],
-    neptuno: ["rgba(25,45,130,.35)", [-0.3, 0.25]],
-    urano: ["rgba(120,190,205,.3)", []],
-    jupiter: ["rgba(130,80,45,.45)", [-0.7, -0.42, -0.12, 0.1, 0.38, 0.62]],
-    venus: ["rgba(200,160,90,.25)", [-0.5, 0.05, 0.45]]
-  };
-
   // src/js/11-peligros-datos.js
   var comets = [];
   var beams = [];
@@ -11091,9 +10998,33 @@ void main(){
   gl_FragColor = vec4(col, 1.);
 }`;
 
+  // src/js/core/journey.js
+  var flow = 0;
+  var jour = 0;
+  var spd = 0;
+  var band = 0;
+  var bandE = 0;
+  function advanceJourney(d, speed, target) {
+    flow += d * speed;
+    spd += (Math.min(speed, 3) / 3 - spd) * Math.min(1, d * 4);
+    if (target !== void 0) {
+      jour += (target - jour) * Math.min(1, d * 1.5);
+    }
+  }
+  function setJourneyBand(target, d) {
+    const st = d / 6;
+    band = band < target ? Math.min(target, band + st) : Math.max(target, band - st);
+    const x = band - Math.floor(band), e = x * x * (3 - 2 * x);
+    bandE = Math.floor(band) + e;
+  }
+  function resetJourney() {
+    jour = 0;
+    band = bandE = 0;
+  }
+
   // src/js/32-fondos-9-motor.js
   var GLBG = /* @__PURE__ */ (() => {
-    let cv = null, gl = null, progs = {}, buf = null, failed = false, flow = 0, photoTex = {};
+    let cv = null, gl = null, progs = {}, buf = null, failed = false, photoTex = {};
     function init() {
       if (gl || failed) {
         return !!gl;
@@ -11278,25 +11209,7 @@ void main(){
       ctx.restore();
       return true;
     }
-    let jour = 0, spd = 0, band = 0, bandE = 0;
-    function advance(d, speed, target) {
-      flow += d * speed;
-      spd += (Math.min(speed, 3) / 3 - spd) * Math.min(1, d * 4);
-      if (target !== void 0) {
-        jour += (target - jour) * Math.min(1, d * 1.5);
-      }
-    }
-    function setBand(target, d) {
-      const st = d / 6;
-      band = band < target ? Math.min(target, band + st) : Math.max(target, band - st);
-      const x = band - Math.floor(band), e = x * x * (3 - 2 * x);
-      bandE = Math.floor(band) + e;
-    }
-    function reset() {
-      jour = 0;
-      band = bandE = 0;
-    }
-    return { draw, advance, reset, setBand, ok: () => init(), canvas: () => cv };
+    return { draw, ok: () => init(), canvas: () => cv };
   })();
   var REMOLINO_PHOTO = "";
   function remolinoSource() {
@@ -11604,7 +11517,7 @@ void main(){
   }
   function whTrans(dt) {
     wh.t += dt;
-    GLBG.advance(dt, 1.5 + 3 * clamp(wh.t / WH_IN, 0, 1), Math.min(1, level / GOAL));
+    advanceJourney(dt, 1.5 + 3 * clamp(wh.t / WH_IN, 0, 1), Math.min(1, level / GOAL));
     setCamLevel(camLevel + (level - camLevel) * Math.min(1, dt * 6));
     if (wh.ph === "in") {
       const p = clamp(wh.t / WH_IN, 0, 1), q = clamp(p / 0.5, 0, 1), qe = q * q;
@@ -12207,7 +12120,7 @@ void main(){
     setBurnT(0);
     hazardsReset();
     try {
-      GLBG.reset();
+      resetJourney();
     } catch (e) {
     }
     ensureRings();
@@ -14937,11 +14850,11 @@ void main(){
     g.save();
     g.translate(coreX, coreY);
     g.rotate(0.66);
-    const band = g.createLinearGradient(0, -D * 0.32, 0, D * 0.32);
-    band.addColorStop(0, "rgba(90,110,220,0)");
-    band.addColorStop(0.5, "rgba(120,145,240,.2)");
-    band.addColorStop(1, "rgba(90,110,220,0)");
-    g.fillStyle = band;
+    const band2 = g.createLinearGradient(0, -D * 0.32, 0, D * 0.32);
+    band2.addColorStop(0, "rgba(90,110,220,0)");
+    band2.addColorStop(0.5, "rgba(120,145,240,.2)");
+    band2.addColorStop(1, "rgba(90,110,220,0)");
+    g.fillStyle = band2;
     g.fillRect(-D * 0.3, -D * 0.32, D * 1.8, D * 0.64);
     g.restore();
     g.save();
@@ -16999,6 +16912,99 @@ void main(){
     ctx.restore();
   }
 
+  // src/js/data/planets.js
+  var PLANET_SVG = {
+    tierra: '<circle cx="50" cy="50" r="26" fill="#3d8bff"/><path d="M34 40 Q42 30 52 38 Q48 48 38 47 Z M56 56 Q66 50 70 60 Q62 70 55 64 Z" fill="#5ccf6b"/><path d="M30 46 Q50 42 70 47" stroke="#fff" stroke-opacity=".7" stroke-width="2" fill="none"/>',
+    saturno: '<ellipse cx="50" cy="50" rx="44" ry="12" transform="rotate(-18 50 50)" fill="none" stroke="#f3e2b0" stroke-width="5" stroke-opacity=".9"/><circle cx="50" cy="50" r="22" fill="#e6cf8f"/><rect x="28" y="44" width="44" height="4" fill="#c9a86a" opacity=".6"/><rect x="28" y="53" width="44" height="5" fill="#c9a86a" opacity=".5"/><path d="M8 58 A44 12 -18 0 0 92 42" transform="rotate(0)" fill="none" stroke="#f3e2b0" stroke-width="5" stroke-opacity=".9"/>',
+    urano: '<ellipse cx="50" cy="50" rx="9" ry="40" transform="rotate(8 50 50)" fill="none" stroke="#c8f0fa" stroke-width="3" stroke-opacity=".6"/><circle cx="50" cy="50" r="23" fill="#8fd3e0"/>',
+    neptuno: '<circle cx="50" cy="50" r="24" fill="#3f6fd6"/><rect x="26" y="42" width="48" height="5" fill="#2b4fa8" opacity=".6"/><ellipse cx="58" cy="57" rx="6" ry="3.5" fill="#1f3f8f" opacity=".8"/>',
+    pluton: '<circle cx="50" cy="50" r="17" fill="#d9c7b4"/><path d="M52 62 C44 57 45 49 52 52 C59 49 60 57 52 62 Z" fill="#f4ebe0"/>'
+  };
+  var PFEAT = {
+    tierra: [
+      [0, -0.35, 0.5, 0.25, "#5ccf6b"],
+      [1.4, 0.15, 0.35, 0.45, "#5ccf6b"],
+      [2.6, -0.05, 0.45, 0.3, "#5ccf6b"],
+      [3.9, 0.5, 0.3, 0.15, "#5ccf6b"],
+      [4.9, -0.2, 0.4, 0.35, "#5ccf6b"],
+      [0.8, -0.6, 0.6, 0.06, "rgba(255,255,255,.85)"],
+      [2.2, 0.35, 0.7, 0.06, "rgba(255,255,255,.8)"],
+      [4.2, -0.4, 0.6, 0.05, "rgba(255,255,255,.8)"]
+    ],
+    luna: [
+      [0.4, -0.25, 0.35, 0.28, "#9a9a9a"],
+      [1.6, 0.2, 0.25, 0.2, "#a3a3a3"],
+      [2.9, -0.1, 0.4, 0.3, "#959595"],
+      [4.3, 0.35, 0.18, 0.14, "#8d8d8d"],
+      [5.4, -0.4, 0.14, 0.12, "#b0b0b0"]
+    ],
+    mercurio: [
+      [0.3, 0.2, 0.16, 0.14, "#867a6d"],
+      [1.3, -0.35, 0.2, 0.17, "#8e8275"],
+      [2.4, 0.05, 0.12, 0.1, "#7d7266"],
+      [3.5, 0.4, 0.22, 0.16, "#8a7e71"],
+      [4.7, -0.15, 0.15, 0.13, "#7f7367"],
+      [5.6, 0.3, 0.1, 0.09, "#867a6d"]
+    ],
+    venus: [
+      [1, 0.1, 0.7, 0.1, "rgba(255,245,220,.45)"],
+      [3.2, -0.25, 0.8, 0.08, "rgba(255,240,205,.4)"],
+      [5, 0.3, 0.6, 0.07, "rgba(255,245,220,.35)"]
+    ],
+    marte: [
+      [0.5, 0.1, 0.45, 0.25, "#8a3a26"],
+      [2.1, -0.2, 0.3, 0.3, "#94402a"],
+      [3.7, 0.25, 0.4, 0.18, "#7e3422"],
+      [5.1, -0.05, 0.25, 0.2, "#8a3a26"],
+      [0, -0.88, 1, 0.14, "rgba(255,255,255,.9)"]
+    ],
+    jupiter: [
+      [1.8, 0.28, 0.26, 0.13, "#c0533a"],
+      [4.5, -0.3, 0.12, 0.06, "rgba(255,240,220,.6)"]
+    ],
+    saturno: [
+      [1.2, 0.3, 0.25, 0.12, "rgba(255,245,220,.5)"],
+      [3.8, -0.2, 0.2, 0.1, "rgba(255,245,220,.4)"]
+    ],
+    urano: [[2, 0, 0.3, 0.15, "rgba(200,245,250,.35)"]],
+    neptuno: [
+      [1.5, 0.25, 0.32, 0.18, "#1f3f8f"],
+      [4, -0.3, 0.18, 0.08, "rgba(230,240,255,.8)"],
+      [5.2, 0.1, 0.14, 0.06, "rgba(230,240,255,.6)"]
+    ],
+    pluton: [
+      [0, 0.15, 0.55, 0.5, "#f4ebe0"],
+      [2.5, -0.3, 0.3, 0.2, "#9a8371"],
+      [4.1, 0.35, 0.25, 0.18, "#9a8371"],
+      [5.3, -0.1, 0.2, 0.14, "#b9a48f"]
+    ],
+    sol: [
+      [1, 0.2, 0.1, 0.07, "rgba(160,70,10,.55)"],
+      [3.4, -0.15, 0.08, 0.06, "rgba(160,70,10,.5)"],
+      [5, 0.35, 0.07, 0.05, "rgba(160,70,10,.45)"]
+    ]
+  };
+  var PBASE = {
+    tierra: "#2f6fd8",
+    luna: "#bcbcbc",
+    mercurio: "#a59a8f",
+    venus: "#e3c27a",
+    marte: "#c1543a",
+    jupiter: "#d7a86e",
+    saturno: "#e6cf8f",
+    urano: "#8fd3e0",
+    neptuno: "#3f6fd6",
+    pluton: "#cdb9a4",
+    sol: "#ffcf5a"
+  };
+  var PBANDS = {
+    saturno: ["rgba(170,130,70,.35)", [-0.45, -0.15, 0.2, 0.5]],
+    neptuno: ["rgba(25,45,130,.35)", [-0.3, 0.25]],
+    urano: ["rgba(120,190,205,.3)", []],
+    jupiter: ["rgba(130,80,45,.45)", [-0.7, -0.42, -0.12, 0.1, 0.38, 0.62]],
+    venus: ["rgba(200,160,90,.25)", [-0.5, 0.05, 0.45]]
+  };
+
   // src/js/render/planets.js
   var PLGL = (() => {
     let gl = null, cv = null, empty = null, failed = false, buf = null, bakeP = null, sphP = null, UB = {}, US = {}, deriv = false;
@@ -17876,6 +17882,16 @@ void main(){
       });
     }
   }
+  function planetThumb(id) {
+    try {
+      const r = PLGL.render(id, 120, 0.6, [-0.78, 0.42, 0.48], [1.12, 1.06, 0.98], 1);
+      if (r && r.cv.toDataURL) {
+        return '<img src="' + r.cv.toDataURL() + '" alt="">';
+      }
+    } catch (e) {
+    }
+    return PLANET_SVG[id] ? '<svg viewBox="0 0 100 100" aria-hidden="true">' + PLANET_SVG[id] + "</svg>" : "";
+  }
 
   // src/js/07-planetas.js
   var curPlanet = "tierra";
@@ -17892,16 +17908,6 @@ void main(){
   var jumpDur = () => Math.max(0.09, JUMP_DUR * (1 - pst().vel / 100 * 0.75));
   var catchMargin = () => 0.18 - pst().res / 100 * 0.6;
   var unlockedIds = () => PLANETS_P.filter(planetOk).map((P) => P.id);
-  function planetThumb(id) {
-    try {
-      const r = PLGL.render(id, 120, 0.6, [-0.78, 0.42, 0.48], [1.12, 1.06, 0.98], 1);
-      if (r && r.cv.toDataURL) {
-        return '<img src="' + r.cv.toDataURL() + '" alt="">';
-      }
-    } catch (e) {
-    }
-    return PLANET_SVG[id] ? '<svg viewBox="0 0 100 100" aria-hidden="true">' + PLANET_SVG[id] + "</svg>" : "";
-  }
   function markNewPlanets() {
     try {
       localStorage.setItem("orbita_pl_nuevo", "1");
@@ -22619,9 +22625,9 @@ void main(){
     if (state === "play" && wh && wh.ph !== "orb") {
       whTrans(dt);
     } else if (state === "play") {
-      GLBG.advance(d, 0.35 + (jumping ? 1.1 : 0) + (andFast ? 0.35 : 0), Math.min(1, level / GOAL));
+      advanceJourney(d, 0.35 + (jumping ? 1.1 : 0) + (andFast ? 0.35 : 0), Math.min(1, level / GOAL));
       const bt = andFast ? 3 : level >= 28 ? 2 : level >= 15 ? 1 : 0;
-      GLBG.setBand(bt, d);
+      setJourneyBand(bt, d);
       if (wh && wh.ph === "orb") {
         setPAng(Math.atan2(Math.sin(pAng + wh.dir * ORB_W * d), Math.cos(pAng + wh.dir * ORB_W * d)));
         const bi2 = Math.floor(beatTime() / TB);
@@ -22777,12 +22783,12 @@ void main(){
     }
     if (state === "dead") {
       setDeadT(deadT + d);
-      GLBG.advance(d, 0);
+      advanceJourney(d, 0);
     }
     if (state === "win") {
       setWinT(winT + dt);
-      GLBG.advance(dt, 2 + winT * 4, 1);
-      GLBG.setBand(3, dt);
+      advanceJourney(dt, 2 + winT * 4, 1);
+      setJourneyBand(3, dt);
       setPLevel(pLevel + dt * (1.2 + winT * 4));
       setSunLevel(sunLevel - dt * (0.6 + winT * 0.8));
       trail.push({ a: pAng, l: pLevel });

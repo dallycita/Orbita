@@ -63,10 +63,10 @@ import { beatKick, beatTime } from './10-ritmo-y-objetos.js';
 import { WH_K, WORM_COL, bend, bendW, lensP, setBend, setWhRip } from './14-lente-gravitacional.js';
 import { hazardTip } from './15-peligros.js';
 import { ensureRings, rr } from './16-partida.js';
-import { GLBG } from './32-fondos-9-motor.js';
 
 import { muted } from './core/settings.js';
 import { misEvent } from './game/missions.js';
+import { advanceJourney } from './core/journey.js';
 
 /**
  * Golpes de música entre lanzamientos: cuatro en los primeros anillos (para aprender), luego tres.
@@ -300,7 +300,7 @@ function whTap() {
  */
 function whTrans(dt) {
   wh.t += dt;
-  GLBG.advance(dt, 1.5 + 3 * clamp(wh.t / WH_IN, 0, 1), Math.min(1, level / GOAL));
+  advanceJourney(dt, 1.5 + 3 * clamp(wh.t / WH_IN, 0, 1), Math.min(1, level / GOAL));
   setCamLevel(camLevel + (level - camLevel) * Math.min(1, dt * 6));
   if (wh.ph === 'in') {
     const p = clamp(wh.t / WH_IN, 0, 1),

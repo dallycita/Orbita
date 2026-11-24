@@ -6,8 +6,7 @@
 import { GOAL, bestOf, bestRing } from './06-record-y-estado.js';
 import { JUMP_DUR, perfCount } from './08-partida-estado.js';
 
-import { PLANET_SVG } from './data/planets.js';
-import { PLGL } from './render/planets.js';
+import { planetThumb } from './render/planets.js';
 
 // Planeta elegido, récord de Perfectos en una partida, secreto de Plutón, truco de todos los
 // planetas, cargas de escudo y si se usó el salto doble en la partida.
@@ -50,23 +49,6 @@ const jumpDur = () => Math.max(0.09, JUMP_DUR * (1 - (pst().vel / 100) * 0.75));
 const catchMargin = () => 0.18 - (pst().res / 100) * 0.6;
 /** @returns {string[]} Identificadores de los planetas desbloqueados. */
 const unlockedIds = () => PLANETS_P.filter(planetOk).map(P => P.id);
-/**
- * Miniatura de un planeta para la interfaz: imagen 3D si hay WebGL, si no su ícono SVG.
- *
- * @param {string} id Identificador del planeta.
- * @returns {string} HTML de la miniatura (vacío si no hay ícono).
- */
-function planetThumb(id) {
-  try {
-    const r = PLGL.render(id, 120, 0.6, [-0.78, 0.42, 0.48], [1.12, 1.06, 0.98], 1);
-    if (r && r.cv.toDataURL) {
-      return '<img src="' + r.cv.toDataURL() + '" alt="">';
-    }
-  } catch (e) {}
-  return PLANET_SVG[id]
-    ? '<svg viewBox="0 0 100 100" aria-hidden="true">' + PLANET_SVG[id] + '</svg>'
-    : '';
-}
 /** Guarda que hay planetas recién rescatados, para avisar en el menú. */
 function markNewPlanets() {
   try {
@@ -401,7 +383,6 @@ export {
   markNewPlanets,
   maxPerf,
   planetOk,
-  planetThumb,
   plutoOk,
   pst,
   rescuedCards,
