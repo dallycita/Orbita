@@ -22173,8 +22173,11 @@ void main(){
   col = col/(1. + col*.5);
   gl_FragColor = vec4(col, 1.);
 }`;
-// Nubes de Magallanes (nivel 2)
-// Nubes de Magallanes: el viaje pasa por sus lugares reales
+/**
+ * Shader del fondo de las Nubes de Magallanes (nivel 2): el viaje pasa por sus lugares reales
+ * (la Gran Nube, la Tarántula, N44, la Supernova 1987A, el Puente y la Pequeña Nube).
+ * Todo es código GLSL dentro de un texto: cambiar algo ahí dentro cambia el juego.
+ */
 const FS_LMC =
   BG_COMMON +
   `
