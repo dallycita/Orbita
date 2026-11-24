@@ -1,13 +1,18 @@
-// ---- dentro del agujero de gusano: modo ÓRBITA (anillos 30–41) ----
-// La corriente del gusano te lanza sola al siguiente anillo cada dos golpes de la música.
-// Tú ya no saltas: tocas para cambiar el sentido en que la Tierra gira sobre su anillo y te colocas
-// bajo el hueco.
-// Entrada y salida: un portal corto (menos de un segundo), como en Geometry Dash, pero hecho con la
-// lente real:
-// el mundo de afuera se estira y se abre en un círculo de luz con los colores separados (aberración
-// cromática).
-// los primeros cuatro, cada cuatro golpes (para aprender); luego cada tres
+/**
+ * Dentro del agujero de gusano, modo ÓRBITA (anillos 30 a 41): la corriente lanza sola al planeta
+ * al siguiente anillo cada pocos golpes de la música; tocar cambia el sentido en que gira sobre su
+ * anillo, para quedar bajo el hueco. Entrada y salida son un portal corto (menos de un segundo)
+ * hecho con la lente real: el mundo se estira y se abre en un círculo de luz con aberración
+ * cromática. `wh` guarda el estado (ph: 'in', 'orb' u 'out'); null fuera del gusano.
+ */
+/**
+ * Golpes de música entre lanzamientos: cuatro en los primeros anillos (para aprender), luego tres.
+ *
+ * @returns {number} Golpes de música.
+ */
 const whGap = () => (level + 1 < 34 ? 4 : 3);
+// ORB_W: velocidad de giro sobre el anillo, en radianes por segundo; WH_IN y WH_OUT: duración
+// del portal de entrada y de salida, en segundos.
 const ORB_W = 1.75,
   WH_IN = 0.78,
   WH_OUT = 0.7;
@@ -16,8 +21,12 @@ let wh = null,
   gapC = {},
   viewInside = false,
   hideEarth = false;
+/**
+ * Sonido de entrada: un tirón grave que sube, con el aire que se arrastra hacia la boca.
+ *
+ * @param {number} dur Duración, en segundos.
+ */
 function whPull(dur) {
-  // tirón grave que sube, con el aire que se arrastra hacia la boca
   if (!AC || muted) {
     return;
   }
@@ -50,8 +59,8 @@ function whPull(dur) {
     noiseHit(n, dur + 0.1, 'bandpass', 300, 0.32, master, 7000);
   } catch (e) {}
 }
+/** Sonido de salida: un golpe con eco. */
 function whBoom() {
-  // golpe con eco al salir
   if (!AC || muted) {
     return;
   }
@@ -77,6 +86,10 @@ function whBoom() {
   } catch (e) {}
 }
 const WH_G = 46; // cuánto crece la boca al entrar (hasta cubrir toda la pantalla)
+/**
+ * Empieza la entrada al gusano desde la posición actual del planeta: fija la lente al máximo y
+ * corta el salto en curso.
+ */
 function whEnter() {
   const [wx, wy] = bendW(),
     pr = rr(pLevel);
@@ -100,6 +113,7 @@ function whEnter() {
   buzz([20, 30, 50]);
   whPull(WH_IN * 0.85);
 }
+/** Termina la entrada: el planeta aparece dentro, sobre el anillo WH_K, y empieza el modo ÓRBITA. */
 function whInDone() {
   wh.ph = 'orb';
   bend = { str: 0, a: -Math.PI / 2, L: 0, on: false, grow: 1, fixed: false };
@@ -107,7 +121,7 @@ function whInDone() {
   pLevel = WH_K;
   pAng = -Math.PI / 2;
   jumpTarget = 1;
-  trail = []; // del otro lado apareces sobre el anillo 29
+  trail = []; // del otro lado el planeta aparece sobre el anillo WH_K, sin estela
   score += 1;
   if (!tutorial) {
     misEvent('ring');
@@ -131,6 +145,7 @@ function whInDone() {
   thump();
   hazardTip('orbVisto', 'Órbita', 'Toca para cambiar de sentido', WORM_COL);
 }
+/** Empieza la salida del gusano: la otra boca se abre detrás del planeta y lo escupe. */
 function whStartOut() {
   wh.ph = 'out';
   wh.t = 0;
@@ -140,6 +155,10 @@ function whStartOut() {
   buzz([30, 40, 60]);
   whBoom();
 }
+/**
+ * Termina la salida: apaga la lente, lanza las ondas por los anillos y la onda de choque, aleja
+ * el agujero negro y, la primera vez, muestra el dato real sobre los agujeros de gusano.
+ */
 function whOutDone() {
   const [wx, wy] = bendW();
   wh = null;
@@ -200,6 +219,7 @@ function whOutDone() {
     });
   }
 }
+/** Toque en modo ÓRBITA: invierte el sentido de giro sobre el anillo. */
 function whTap() {
   if (!wh || wh.ph !== 'orb') {
     return;
@@ -209,6 +229,12 @@ function whTap() {
   noise(0.06, 2500, 7000, 0.07, 'highpass');
   buzz(8);
 }
+/**
+ * Avanza un cuadro el portal de entrada o de salida: hace crecer o encoger la boca y mueve el
+ * planeta hacia su centro.
+ *
+ * @param {number} dt Tiempo del cuadro, en segundos.
+ */
 function whTrans(dt) {
   wh.t += dt;
   GLBG.advance(dt, 1.5 + 3 * clamp(wh.t / WH_IN, 0, 1), Math.min(1, level / GOAL));
@@ -249,7 +275,16 @@ function whTrans(dt) {
     }
   }
 }
-// el anillo de luz del portal, con los colores separados como en una lente real
+/**
+ * Dibuja el anillo de luz del portal con los colores separados, como en una lente real
+ * (aberración cromática).
+ *
+ * @param {number} x Centro horizontal, en píxeles de pantalla.
+ * @param {number} y Centro vertical, en píxeles de pantalla.
+ * @param {number} R Radio, en píxeles de pantalla.
+ * @param {number} al Opacidad, de 0 a 1.
+ * @param {number} w Grosor base, en píxeles de pantalla.
+ */
 function chromaRing(x, y, R, al, w) {
   if (R < 1 || al <= 0.01) {
     return;
@@ -277,8 +312,13 @@ function chromaRing(x, y, R, al, w) {
   });
   ctx.restore();
 }
-// cómo se ve todo estando dentro: el mismo cielo y los mismos anillos, vistos a través de la
-// garganta del gusano
+/**
+ * Dibuja cómo se ve todo estando dentro: el mismo cielo y los mismos anillos vistos a través de
+ * la garganta del gusano, la corriente, hacia dónde gira el planeta y cuánto falta para el
+ * siguiente lanzamiento.
+ *
+ * @param {number} al Opacidad del efecto, de 0 a 1.
+ */
 function drawInside(al) {
   if (al <= 0.01) {
     return;
@@ -374,4 +414,3 @@ function drawInside(al) {
   ctx.stroke();
   ctx.restore();
 }
-// al salir: ondas que recorren los anillos
