@@ -449,7 +449,7 @@ function hzSnare(t0, gain) {
 }
 // cuerdas: 3-3-2, el pulso de la persecución
 const HZ_OST = [0, 0, 0, 12, 0, 0, 12, 0, 0, 0, 0, 12, 0, 7, 3, 0];
-let HZ_ACC;
+const HZ_ACC = new Set([0, 3, 6, 8, 11, 14]);
 // ---- la melodía que cambia: un mismo motivo (pegadizo) que se transforma por secciones ----
 // Escala de Sol# menor en grados (0 = Sol#). El motivo se "secuencia" sobre los acordes: misma
 // forma, otra altura.
@@ -837,11 +837,6 @@ function stepCosmos(s, t0) {
       noiseHit(t0, 0.025, 'highpass', 9000, 0.045, musicBus);
     }
   }
-}
-
-/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
-export function initHorizonMusic() {
-  HZ_ACC = new Set([0, 3, 6, 8, 11, 14]);
 }
 
 export { hzDroneStop, hzS, stepCosmos };
