@@ -1,4 +1,15 @@
-// ---------- el reproductor: qué estilo suena, cuándo arranca y cuándo para ----------
+/**
+ * Reproductor de música: elige el estilo según el nivel, programa cada paso un poco por
+ * adelantado en el reloj de Web Audio, cambia de estilo a mitad de partida y arranca o para.
+ * Los cambios de estilo esperan al inicio de una frase de 32 pasos, tras un crescendo de 16.
+ */
+/**
+ * Programa un paso de la música del estilo actual. A cierta altura de la partida lanza un
+ * crescendo y cambia a una versión más rápida (synthwave, o el modo rápido de las galaxias).
+ *
+ * @param {number} s Número de paso, de 0 a 127.
+ * @param {number} t0 Momento en que suena, en segundos del reloj de Web Audio.
+ */
 function scheduleStep(s, t0) {
   if (musicStyle === 'espacial' && state === 'play' && level >= SW_AT) {
     if (!riserOn && s % 32 === 16) {
@@ -47,6 +58,10 @@ function scheduleStep(s, t0) {
     stepEspacial(s, t0);
   }
 }
+/**
+ * Programa los pasos que caen en los próximos 0,12 segundos; se llama cada 25 ms. Si el reloj
+ * se atrasó (pestaña en segundo plano), salta al presente en lugar de tocar todo de golpe.
+ */
 function tick() {
   if (!AC || !musicOn) {
     return;
@@ -62,6 +77,7 @@ function tick() {
     }
   } catch (e) {}
 }
+/** Arranca la música del nivel actual (o la del menú) desde el principio, con una entrada suave. */
 function startMusic() {
   if (!AC) {
     return;
@@ -100,7 +116,12 @@ function startMusic() {
     tick();
   } catch (e) {}
 }
-let galAmb = null;
+let galAmb = null; // ambiente de Andrómeda sonando: {g, nodes}
+/**
+ * Enciende o apaga el ambiente grave de Andrómeda: cinco tonos que respiran lentamente.
+ *
+ * @param {boolean} on true para encender, false para apagar con un fundido de 0,6 segundos.
+ */
 function galAmbience(on) {
   if (!AC) {
     return;
@@ -159,6 +180,11 @@ function galAmbience(on) {
     galAmb = { g, nodes };
   } catch (e) {}
 }
+/**
+ * Detiene la música con un fundido.
+ *
+ * @param {boolean} [quick] true para un corte casi inmediato (0,06 s en vez de 0,35 s).
+ */
 function stopMusic(quick) {
   galAmbience(false);
   try {
