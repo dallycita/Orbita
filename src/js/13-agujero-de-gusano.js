@@ -5,6 +5,68 @@
  * hecho con la lente real: el mundo se estira y se abre en un círculo de luz con aberración
  * cromática. `wh` guarda el estado (ph: 'in', 'orb' u 'out'); null fuera del gusano.
  */
+import {
+  BONE,
+  CX,
+  CY,
+  GAP,
+  H,
+  PR,
+  R0,
+  S,
+  W,
+  buzz,
+  clamp,
+  ctx,
+  frac,
+  reduceMotion,
+} from './01-pantalla-y-utilidades.js';
+import { AC, ROOT, master, noise, noiseHit, thump } from './02-audio.js';
+import { TB, dKick, echoBus, impact } from './03-musica-ritmos.js';
+import {
+  GOAL,
+  camLevel,
+  level,
+  pAng,
+  pLevel,
+  score,
+  setAppear,
+  setCamLevel,
+  setJumpTarget,
+  setJumping,
+  setLevel,
+  setPAng,
+  setPLevel,
+  setScore,
+  state,
+  updateRingHUD,
+} from './06-record-y-estado.js';
+import { sizeK } from './07-planetas.js';
+import {
+  particles,
+  setBurns,
+  setFlash,
+  setLastEaten,
+  setPending,
+  setPulse,
+  setShake,
+  setSunLevel,
+  setTexts,
+  setTrail,
+  sunLevel,
+  t,
+  texts,
+  tutorial,
+} from './08-partida-estado.js';
+import { seenTypes } from './09-recorridos.js';
+import { beatKick, beatTime } from './10-ritmo-y-objetos.js';
+import { WH_K, WORM_COL, bend, bendW, lensP, setBend, setWhRip } from './14-lente-gravitacional.js';
+import { hazardTip } from './15-peligros.js';
+import { ensureRings, rr } from './16-partida.js';
+import { muted } from './26-pantalla-inicio.js';
+import { GLBG } from './32-fondos-9-motor.js';
+import { misEvent } from './34-misiones.js';
+
 /**
  * Golpes de música entre lanzamientos: cuatro en los primeros anillos (para aprender), luego tres.
  *
@@ -103,36 +165,36 @@ function whEnter() {
     wy,
     nextB: 0,
   };
-  jumping = false;
-  pending = false;
-  texts = texts.filter(x => !x.tip);
+  setJumping(false);
+  setPending(false);
+  setTexts(texts.filter(x => !x.tip));
   bend.fixed = true;
   bend.str = 1;
   bend.grow = 1;
-  shake = reduceMotion ? 0 : 3;
+  setShake(reduceMotion ? 0 : 3);
   buzz([20, 30, 50]);
   whPull(WH_IN * 0.85);
 }
 /** Termina la entrada: el planeta aparece dentro, sobre el anillo WH_K, y empieza ÓRBITA. */
 function whInDone() {
   wh.ph = 'orb';
-  bend = { str: 0, a: -Math.PI / 2, L: 0, on: false, grow: 1, fixed: false };
-  level = WH_K;
-  pLevel = WH_K;
-  pAng = -Math.PI / 2;
-  jumpTarget = 1;
-  trail = []; // del otro lado el planeta aparece sobre el anillo WH_K, sin estela
-  score += 1;
+  setBend({ str: 0, a: -Math.PI / 2, L: 0, on: false, grow: 1, fixed: false });
+  setLevel(WH_K);
+  setPLevel(WH_K);
+  setPAng(-Math.PI / 2);
+  setJumpTarget(1);
+  setTrail([]); // del otro lado el planeta aparece sobre el anillo WH_K, sin estela
+  setScore(score + 1);
   if (!tutorial) {
     misEvent('ring');
     misEvent('reach', level);
   }
   updateRingHUD();
   ensureRings();
-  appear = 0;
-  pulse = 1;
-  flash = 0.25;
-  shake = reduceMotion ? 0 : 6;
+  setAppear(0);
+  setPulse(1);
+  setFlash(0.25);
+  setShake(reduceMotion ? 0 : 6);
   const bi = Math.floor(beatTime() / TB);
   wh.gapB = 4;
   wh.nextB = bi + 3 + (bi % 2);
@@ -150,8 +212,8 @@ function whStartOut() {
   wh.ph = 'out';
   wh.t = 0;
   // la otra boca queda justo detrás de ti y te escupe hacia afuera
-  bend = { str: 1, a: pAng, L: level - 0.55, on: true, grow: WH_G, fixed: true };
-  shake = reduceMotion ? 0 : 6;
+  setBend({ str: 1, a: pAng, L: level - 0.55, on: true, grow: WH_G, fixed: true });
+  setShake(reduceMotion ? 0 : 6);
   buzz([30, 40, 60]);
   whBoom();
 }
@@ -162,14 +224,14 @@ function whStartOut() {
 function whOutDone() {
   const [wx, wy] = bendW();
   wh = null;
-  bend = { str: 0, a: -Math.PI / 2, L: 0, on: false, grow: 1, fixed: false };
-  whRip = { t: 0, x: wx, y: wy };
+  setBend({ str: 0, a: -Math.PI / 2, L: 0, on: false, grow: 1, fixed: false });
+  setWhRip({ t: 0, x: wx, y: wy });
   whShock = { t: 0, cx: CX + wx * S, cy: CY + wy * S };
-  sunLevel = Math.min(sunLevel, level - 2.2);
-  lastEaten = Math.floor(sunLevel);
-  burns = [];
-  pulse = 1;
-  shake = reduceMotion ? 0 : 7;
+  setSunLevel(Math.min(sunLevel, level - 2.2));
+  setLastEaten(Math.floor(sunLevel));
+  setBurns([]);
+  setPulse(1);
+  setShake(reduceMotion ? 0 : 7);
   thump();
   buzz([40, 60]);
   for (let i = 0; i < 40; i++) {
@@ -238,7 +300,7 @@ function whTap() {
 function whTrans(dt) {
   wh.t += dt;
   GLBG.advance(dt, 1.5 + 3 * clamp(wh.t / WH_IN, 0, 1), Math.min(1, level / GOAL));
-  camLevel += (level - camLevel) * Math.min(1, dt * 6);
+  setCamLevel(camLevel + (level - camLevel) * Math.min(1, dt * 6));
   if (wh.ph === 'in') {
     const p = clamp(wh.t / WH_IN, 0, 1),
       q = clamp(p / 0.5, 0, 1),
@@ -248,8 +310,8 @@ function whTrans(dt) {
     const x = wh.ex + (wh.wx - wh.ex) * qe,
       // la Tierra cae hacia su centro (y la lente la estira en arco)
       y = wh.ey + (wh.wy - wh.ey) * qe;
-    pAng = Math.atan2(y, x);
-    pLevel = (Math.hypot(x, y) - R0) / GAP + camLevel;
+    setPAng(Math.atan2(y, x));
+    setPLevel((Math.hypot(x, y) - R0) / GAP + camLevel);
     if (Math.random() < 0.6) {
       const [lx, ly] = lensP(x, y);
       particles.push({
@@ -414,3 +476,75 @@ function drawInside(al) {
   ctx.stroke();
   ctx.restore();
 }
+
+/**
+ * Cambia `gapC` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setGapC(value) {
+  gapC = value;
+  return value;
+}
+
+/**
+ * Cambia `hideEarth` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setHideEarth(value) {
+  hideEarth = value;
+  return value;
+}
+
+/**
+ * Cambia `viewInside` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setViewInside(value) {
+  viewInside = value;
+  return value;
+}
+
+/**
+ * Cambia `wh` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setWh(value) {
+  wh = value;
+  return value;
+}
+
+/**
+ * Cambia `whShock` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setWhShock(value) {
+  whShock = value;
+  return value;
+}
+
+export {
+  ORB_W,
+  WH_IN,
+  WH_OUT,
+  drawInside,
+  gapC,
+  hideEarth,
+  viewInside,
+  wh,
+  whEnter,
+  whGap,
+  whShock,
+  whStartOut,
+  whTap,
+  whTrans,
+};

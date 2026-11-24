@@ -3,6 +3,10 @@
  * elegido y cómo sus estadísticas cambian el juego (tamaño, salto, resistencia, carga).
  * Las estadísticas st son porcentajes respecto a la Tierra; el balance se revisa con simulaciones.
  */
+import { GOAL, bestOf, bestRing } from './06-record-y-estado.js';
+import { JUMP_DUR, perfCount } from './08-partida-estado.js';
+import { PLGL } from './29-planetas-hd.js';
+
 // Estadísticas sacadas de datos reales: size del diámetro (escala logarítmica), vel de la
 // velocidad orbital, res de la densidad (resistencia a la fuerza de marea) y charge de la
 // rotación (cuántos Perfectos hacen falta para cargar el poder).
@@ -215,15 +219,6 @@ let curPlanet = 'tierra',
   allPlanets = false,
   shieldLeft = 0,
   usedDouble = false;
-try {
-  curPlanet = localStorage.getItem('orbita_p1_planeta') || 'tierra';
-  maxPerf = parseInt(localStorage.getItem('orbita_p1_maxperf') || '0', 10) || 0;
-  plutoOk = localStorage.getItem('orbita_p1_pluton') === '1';
-  allPlanets = localStorage.getItem('orbita_p1_todos') === '1';
-} catch (e) {}
-if (!PLANETS_P.some(P => P.id === curPlanet)) {
-  curPlanet = 'tierra';
-}
 /**
  * @param {object} P Planeta de PLANETS_P.
  * @returns {boolean} true si está desbloqueado.
@@ -324,4 +319,106 @@ const PLANET_SVG = {
     '<circle cx="50" cy="50" r="24" fill="#3f6fd6"/><rect x="26" y="42" width="48" height="5" fill="#2b4fa8" opacity=".6"/><ellipse cx="58" cy="57" rx="6" ry="3.5" fill="#1f3f8f" opacity=".8"/>',
   pluton:
     '<circle cx="50" cy="50" r="17" fill="#d9c7b4"/><path d="M52 62 C44 57 45 49 52 52 C59 49 60 57 52 62 Z" fill="#f4ebe0"/>',
+};
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initPlanets() {
+  try {
+    curPlanet = localStorage.getItem('orbita_p1_planeta') || 'tierra';
+    maxPerf = parseInt(localStorage.getItem('orbita_p1_maxperf') || '0', 10) || 0;
+    plutoOk = localStorage.getItem('orbita_p1_pluton') === '1';
+    allPlanets = localStorage.getItem('orbita_p1_todos') === '1';
+  } catch (e) {}
+  if (!PLANETS_P.some(P => P.id === curPlanet)) {
+    curPlanet = 'tierra';
+  }
+}
+
+/**
+ * Cambia `allPlanets` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setAllPlanets(value) {
+  allPlanets = value;
+  return value;
+}
+
+/**
+ * Cambia `curPlanet` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setCurPlanet(value) {
+  curPlanet = value;
+  return value;
+}
+
+/**
+ * Cambia `maxPerf` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setMaxPerf(value) {
+  maxPerf = value;
+  return value;
+}
+
+/**
+ * Cambia `plutoOk` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setPlutoOk(value) {
+  plutoOk = value;
+  return value;
+}
+
+/**
+ * Cambia `shieldLeft` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setShieldLeft(value) {
+  shieldLeft = value;
+  return value;
+}
+
+/**
+ * Cambia `usedDouble` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setUsedDouble(value) {
+  usedDouble = value;
+  return value;
+}
+
+export {
+  PLANETS_P,
+  PLANET_SVG,
+  allPlanets,
+  catchMargin,
+  chargeMax,
+  curP,
+  curPlanet,
+  jumpDur,
+  markNewPlanets,
+  maxPerf,
+  planetOk,
+  planetThumb,
+  plutoOk,
+  pst,
+  rescuedCards,
+  saveRunStats,
+  shieldLeft,
+  sizeK,
+  unlockedIds,
+  usedDouble,
 };

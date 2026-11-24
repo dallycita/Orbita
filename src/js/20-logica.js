@@ -2,6 +2,153 @@
  * Lógica de la partida en cada cuadro: tiempo y cámara lenta, giro de los anillos, salto y
  * aterrizaje, avance del agujero negro, choques con asteroides y peligros, y agujero de gusano.
  */
+import {
+  BONE,
+  CX,
+  CY,
+  PR,
+  R0,
+  S,
+  SUN,
+  buzz,
+  reduceMotion,
+  zoneOf,
+} from './01-pantalla-y-utilidades.js';
+import { AC, noise, thump } from './02-audio.js';
+import {
+  TB,
+  alarmTick,
+  andFast,
+  dangerFlash,
+  dangerNow,
+  kickQueue,
+  musicOn,
+  musicStart,
+  setDangerFlash,
+  setSwitchAt,
+  setTensT,
+  switchAt,
+  switchMsg,
+  tensT,
+  tensionSet,
+} from './03-musica-ritmos.js';
+import {
+  GOAL,
+  appear,
+  astFade,
+  camLevel,
+  charge,
+  crossed,
+  jumpT,
+  jumpTarget,
+  jumping,
+  level,
+  lvl,
+  pAng,
+  pLevel,
+  rings,
+  setAppear,
+  setAstFade,
+  setCamLevel,
+  setCrossed,
+  setJumpT,
+  setJumpTarget,
+  setJumping,
+  setLevel,
+  setPAng,
+  setPLevel,
+  state,
+} from './06-record-y-estado.js';
+import { catchMargin, chargeMax, jumpDur, sizeK } from './07-planetas.js';
+import {
+  burns,
+  chargeFlash,
+  culpritT,
+  deadT,
+  debris,
+  flash,
+  hintT,
+  holeFlare,
+  landPop,
+  particles,
+  pending,
+  pendingT,
+  pipFlash,
+  pulse,
+  readyT,
+  setBurns,
+  setChargeFlash,
+  setCulpritT,
+  setDeadT,
+  setFlash,
+  setHintT,
+  setHoleFlare,
+  setLandPop,
+  setParticles,
+  setPending,
+  setPendingT,
+  setPulse,
+  setReadyT,
+  setShake,
+  setSlowTimer,
+  setSunLevel,
+  setT,
+  setTexts,
+  setTimeScale,
+  setWinT,
+  shake,
+  slowTimer,
+  sunLevel,
+  swallow,
+  t,
+  texts,
+  timeScale,
+  trail,
+  tutorial,
+  winT,
+} from './08-partida-estado.js';
+import {
+  HOLE_MUL,
+  beatTime,
+  lastBeatIdx,
+  obsAng,
+  obsRad,
+  pushFrom,
+  pushT,
+  pushing,
+  setLastBeatIdx,
+  setPushT,
+  setPushing,
+  stretchAt,
+} from './10-ritmo-y-objetos.js';
+import { novaSrc, setNovaSrc } from './11-peligros-datos.js';
+import {
+  burnT,
+  caronteSaves,
+  ghostT,
+  powerUpdate,
+  ringSpark,
+  setLastJT,
+  shieldT,
+  vaporize,
+} from './12-poderes.js';
+import { ORB_W, setWhShock, wh, whEnter, whGap, whShock, whTrans } from './13-agujero-de-gusano.js';
+import {
+  BEND_R,
+  WH_EXIT,
+  WH_K,
+  bend,
+  bendUpdate,
+  bendW,
+  lensP,
+  setWhRip,
+  whRip,
+} from './14-lente-gravitacional.js';
+import { NOVA_LIFE, hazardsUpdate, novaBurst, novaHit, novaSound } from './15-peligros.js';
+import { die, eatRings, jump, onLand, rr } from './16-partida.js';
+import { introFade, setIntroFade } from './23-intro.js';
+import { GLBG } from './32-fondos-9-motor.js';
+
 /**
  * Avanza el juego un cuadro.
  *
@@ -10,21 +157,21 @@
 function update(dt) {
   // tiempo real: cámara lenta, sacudida, destello
   if (slowTimer > 0) {
-    slowTimer -= dt;
+    setSlowTimer(slowTimer - dt);
   } else {
-    timeScale += (1 - timeScale) * Math.min(1, dt * 5);
+    setTimeScale(timeScale + (1 - timeScale) * Math.min(1, dt * 5));
   }
-  culpritT = Math.max(0, culpritT - dt);
-  hintT = Math.max(0, hintT - dt);
+  setCulpritT(Math.max(0, culpritT - dt));
+  setHintT(Math.max(0, hintT - dt));
   if (pending) {
-    pendingT += dt;
+    setPendingT(pendingT + dt);
     if (pendingT > 0.09) {
-      pending = false;
+      setPending(false);
     }
   }
   const bi = AC && musicOn && musicStart >= 0 ? Math.floor(beatTime() / TB) : -1;
   if (bi !== lastBeatIdx) {
-    lastBeatIdx = bi;
+    setLastBeatIdx(bi);
     if (bi >= 0 && bi % 2 === 0 && state === 'play' && !reduceMotion) {
       const pr0 = rr(pLevel),
         x0 = Math.cos(pAng) * pr0,
@@ -48,27 +195,27 @@ function update(dt) {
   for (let i = 0; i < 10; i++) {
     pipFlash[i] = Math.max(0, pipFlash[i] - dt * 3);
   }
-  chargeFlash = Math.max(0, chargeFlash - dt * 1.6);
-  readyT = charge >= chargeMax() && state === 'play' ? readyT + dt : 0;
-  astFade = Math.max(0, astFade - dt * 5);
-  appear = Math.min(1, appear + dt * 5);
-  landPop = Math.max(0, landPop - dt * 6);
-  shake = Math.max(0, shake - dt * 40);
-  flash = Math.max(0, flash - dt * 2.6);
-  pulse = Math.max(0, pulse - dt * 3.5);
+  setChargeFlash(Math.max(0, chargeFlash - dt * 1.6));
+  setReadyT(charge >= chargeMax() && state === 'play' ? readyT + dt : 0);
+  setAstFade(Math.max(0, astFade - dt * 5));
+  setAppear(Math.min(1, appear + dt * 5));
+  setLandPop(Math.max(0, landPop - dt * 6));
+  setShake(Math.max(0, shake - dt * 40));
+  setFlash(Math.max(0, flash - dt * 2.6));
+  setPulse(Math.max(0, pulse - dt * 3.5));
   if (AC) {
     while (kickQueue.length && AC.currentTime >= kickQueue[0]) {
       kickQueue.shift();
-      pulse = 1;
+      setPulse(1);
       if (dangerNow() > 0.55) {
         buzz(14);
       }
     }
   }
   if (switchAt && AC && AC.currentTime >= switchAt) {
-    switchAt = 0;
-    flash = 0.35;
-    pulse = 1;
+    setSwitchAt(0);
+    setFlash(0.35);
+    setPulse(1);
     buzz([20, 30, 40]);
     texts.push({
       txt: switchMsg,
@@ -80,15 +227,15 @@ function update(dt) {
       center: true,
     });
   }
-  tensT += dt;
+  setTensT(tensT + dt);
   if (tensT > 0.08) {
-    tensT = 0;
+    setTensT(0);
     tensionSet(dangerNow());
   }
   alarmTick(dt);
-  dangerFlash = Math.max(0, dangerFlash - dt * 2.2);
+  setDangerFlash(Math.max(0, dangerFlash - dt * 2.2));
   const d = dt * timeScale;
-  t += d;
+  setT(t + d);
   powerUpdate(dt, d);
   const curR = rings.get(level),
     frozen =
@@ -147,13 +294,13 @@ function update(dt) {
   if (whShock) {
     whShock.t += dt;
     if (whShock.t > 1.1) {
-      whShock = null;
+      setWhShock(null);
     }
   }
   if (whRip) {
     whRip.t += dt;
     if (whRip.t > 1.1) {
-      whRip = null;
+      setWhRip(null);
     }
   }
   if (wh && wh.flipT) {
@@ -167,49 +314,49 @@ function update(dt) {
     GLBG.setBand(bt, d);
     if (wh && wh.ph === 'orb') {
       // dentro del gusano: giras tú sobre el anillo, y la corriente te lanza en el golpe
-      pAng = Math.atan2(Math.sin(pAng + wh.dir * ORB_W * d), Math.cos(pAng + wh.dir * ORB_W * d));
+      setPAng(Math.atan2(Math.sin(pAng + wh.dir * ORB_W * d), Math.cos(pAng + wh.dir * ORB_W * d)));
       const bi = Math.floor(beatTime() / TB);
       if (!jumping && level < WH_EXIT && bi >= wh.nextB) {
         jump();
         wh.gapB = whGap();
         wh.nextB = bi + wh.gapB;
-        pulse = 1;
+        setPulse(1);
       }
     } else if (!jumping && !pushing) {
       const cr = rings.get(level);
       if (cr && cr.type === 'arrastre') {
-        pAng += cr.w * d;
+        setPAng(pAng + cr.w * d);
       } else {
         const df = Math.atan2(Math.sin(-Math.PI / 2 - pAng), Math.cos(-Math.PI / 2 - pAng));
         if (Math.abs(df) > 0.0005) {
-          pAng += df * Math.min(1, d * 5);
+          setPAng(pAng + df * Math.min(1, d * 5));
         }
       }
-      pAng = Math.atan2(Math.sin(pAng), Math.cos(pAng));
+      setPAng(Math.atan2(Math.sin(pAng), Math.cos(pAng)));
     }
     if (pushing) {
-      pushT += d;
+      setPushT(pushT + d);
       const pp = Math.min(pushT / 0.32, 1);
-      pLevel = pushFrom + (level - pushFrom) * (1 - Math.pow(1 - pp, 3));
+      setPLevel(pushFrom + (level - pushFrom) * (1 - Math.pow(1 - pp, 3)));
       if (pp >= 1) {
-        pushing = false;
-        pLevel = level;
+        setPushing(false);
+        setPLevel(level);
       }
     }
     if (jumping) {
       const dur = jumpTarget >= 2 ? 0.24 + (jumpTarget - 2) * 0.1 : jumpDur();
-      jumpT += d;
+      setJumpT(jumpT + d);
       const p = Math.min(jumpT / dur, 1);
-      pLevel = level + jumpTarget * (1 - Math.pow(1 - p, 3));
+      setPLevel(level + jumpTarget * (1 - Math.pow(1 - p, 3)));
       if (
         jumpTarget >= 2 &&
         ((!crossed && pLevel >= level + 1) ||
-          (jumpTarget === 3 && crossed === true && pLevel >= level + 2 && (crossed = 2)))
+          (jumpTarget === 3 && crossed === true && pLevel >= level + 2 && setCrossed(2)))
       ) {
         // la Tierra atraviesa el anillo y lo rompe
-        crossed = true;
-        shake = reduceMotion ? 0 : 6;
-        pulse = 1;
+        setCrossed(true);
+        setShake(reduceMotion ? 0 : 6);
+        setPulse(1);
         const R = rr(level + 1),
           cx0 = Math.cos(pAng) * R,
           cy0 = Math.sin(pAng) * R;
@@ -229,15 +376,15 @@ function update(dt) {
         noise(0.35, 5000, 200, 0.4, 'lowpass');
       }
       if (p >= 1) {
-        jumping = false;
-        level += jumpTarget;
-        pLevel = level;
-        lastJT = jumpTarget;
+        setJumping(false);
+        setLevel(level + jumpTarget);
+        setPLevel(level);
+        setLastJT(jumpTarget);
         onLand(jumpTarget >= 2);
-        jumpTarget = 1;
+        setJumpTarget(1);
       }
     }
-    camLevel += (level - camLevel) * Math.min(1, d * 6);
+    setCamLevel(camLevel + (level - camLevel) * Math.min(1, d * 6));
     // El agujero negro crece y se come los anillos; si el planeta se queda quieto, lo alcanza.
     // Si el planeta se aleja más de 2,4 anillos, acelera para no quedarse atrás.
     const gap = pLevel - sunLevel;
@@ -247,7 +394,7 @@ function update(dt) {
       sp += (gap - 2.4) * 1.15;
     }
     if (!(wh && wh.ph === 'orb')) {
-      sunLevel += sp * d;
+      setSunLevel(sunLevel + sp * d);
     } // dentro del gusano el agujero negro no te puede seguir
     eatRings();
     if (sunLevel >= pLevel - catchMargin()) {
@@ -316,8 +463,8 @@ function update(dt) {
           novaBurst(s);
         }
       }
-      novaSrc = novaSrc.filter(
-        s => !(bt > s.b0 + (s.n - 1) * s.P + NOVA_LIFE * (s.big ? 1.6 : 1) + 0.2),
+      setNovaSrc(
+        novaSrc.filter(s => !(bt > s.b0 + (s.n - 1) * s.P + NOVA_LIFE * (s.big ? 1.6 : 1) + 0.2)),
       );
       if (
         jumping &&
@@ -341,29 +488,29 @@ function update(dt) {
       }
     }
   } else {
-    camLevel += (level - camLevel) * Math.min(1, d * 6);
+    setCamLevel(camLevel + (level - camLevel) * Math.min(1, d * 6));
     if (state === 'dead' && sunLevel < level + 3 && (!swallow || swallow.done)) {
-      sunLevel += 0.9 * d;
+      setSunLevel(sunLevel + 0.9 * d);
       eatRings();
     }
   }
   if (state === 'dead') {
-    deadT += d;
+    setDeadT(deadT + d);
     GLBG.advance(d, 0);
   }
   if (state === 'win') {
-    winT += dt;
+    setWinT(winT + dt);
     GLBG.advance(dt, 2 + winT * 4, 1);
     GLBG.setBand(3, dt);
-    pLevel += dt * (1.2 + winT * 4);
-    sunLevel -= dt * (0.6 + winT * 0.8);
+    setPLevel(pLevel + dt * (1.2 + winT * 4));
+    setSunLevel(sunLevel - dt * (0.6 + winT * 0.8));
     trail.push({ a: pAng, l: pLevel });
     if (trail.length > 30) {
       trail.shift();
     }
   }
-  holeFlare = Math.max(0, holeFlare - dt * 1.4);
-  introFade = Math.max(0, introFade - dt * 1.6);
+  setHoleFlare(Math.max(0, holeFlare - dt * 1.4));
+  setIntroFade(Math.max(0, introFade - dt * 1.6));
   if (swallow && !swallow.done) {
     swallow.p = Math.min(1, swallow.p + dt / 1.8);
     const p = swallow.p,
@@ -387,10 +534,10 @@ function update(dt) {
     }
     if (p >= 1) {
       swallow.done = true;
-      flash = 0.7;
-      pulse = 1;
-      holeFlare = 1;
-      shake = reduceMotion ? 0 : 10;
+      setFlash(0.7);
+      setPulse(1);
+      setHoleFlare(1);
+      setShake(reduceMotion ? 0 : 10);
       noise(0.6, 6000, 150, 0.5, 'lowpass');
       thump();
       buzz(70);
@@ -410,14 +557,14 @@ function update(dt) {
       p.life -= d * 3;
     }
   }
-  particles = particles.filter(p => p.life > 0);
+  setParticles(particles.filter(p => p.life > 0));
   for (const tx of texts) {
     tx.life -= dt;
     if (!tx.center) {
       tx.y -= dt * 22;
     }
   }
-  texts = texts.filter(tx => tx.life > 0);
+  setTexts(texts.filter(tx => tx.life > 0));
   for (const b of burns) {
     b.life -= dt * 1.6;
   }
@@ -430,5 +577,7 @@ function update(dt) {
       db.a = Math.random() * Math.PI * 2;
     }
   }
-  burns = burns.filter(b => b.life > 0);
+  setBurns(burns.filter(b => b.life > 0));
 }
+
+export { update };

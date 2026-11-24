@@ -1,6 +1,45 @@
 /**
  * El tutorial: empezarlo, reaparecer al chocar sin perder la partida y terminarlo.
  */
+import { BONE, R0, buzz, elHud, elPanel, reduceMotion } from './01-pantalla-y-utilidades.js';
+import { noise } from './02-audio.js';
+import { startMusic, stopMusic } from './05-musica-reproductor.js';
+import {
+  level,
+  setCharge,
+  setJumpTarget,
+  setJumping,
+  setNewRec,
+  setPLevel,
+  setRunRecord,
+  setState,
+  updateRingHUD,
+} from './06-record-y-estado.js';
+import { setShieldLeft, setUsedDouble } from './07-planetas.js';
+import {
+  particles,
+  setCanRestart,
+  setCulprit,
+  setCulpritT,
+  setFlash,
+  setGest,
+  setLastEaten,
+  setPending,
+  setPerfCount,
+  setPulse,
+  setShake,
+  setShowHint,
+  setSunLevel,
+  setSwallow,
+  setTutorial,
+  setTutorialDone,
+  setWinT,
+  sunLevel,
+  texts,
+} from './08-partida-estado.js';
+import { setup, winSound } from './16-partida.js';
+import { elLv } from './25-selector-niveles.js';
+import { homeAmbience } from './27-inicio-animacion.js';
 
 /**
  * En el tutorial, un choque no termina la partida: el planeta estalla y reaparece en el mismo
@@ -10,9 +49,9 @@
  * @param {number} y Posición vertical del choque, en unidades del mundo.
  */
 function tutRespawn(x, y) {
-  state = 'dead';
-  flash = 0.4;
-  shake = reduceMotion ? 0 : 6;
+  setState('dead');
+  setFlash(0.4);
+  setShake(reduceMotion ? 0 : 6);
   buzz(30);
   noise(0.35, 3000, 200, 0.35, 'lowpass');
   for (let i = 0; i < 24; i++) {
@@ -30,31 +69,31 @@ function tutRespawn(x, y) {
   }
   texts.push({ txt: 'Otra vez', x: 0, y: -R0 - 70, life: 1.2, size: 18, col: BONE, center: true });
   setTimeout(() => {
-    state = 'play';
-    jumping = false;
-    jumpTarget = 1;
-    pLevel = level;
-    pending = false;
-    gest = null;
+    setState('play');
+    setJumping(false);
+    setJumpTarget(1);
+    setPLevel(level);
+    setPending(false);
+    setGest(null);
     // aleja el agujero negro para que no vuelva a atrapar al jugador enseguida
-    sunLevel = Math.min(sunLevel, level - 1.6);
-    lastEaten = Math.floor(sunLevel);
-    swallow = null;
-    culprit = null;
-    culpritT = 0;
+    setSunLevel(Math.min(sunLevel, level - 1.6));
+    setLastEaten(Math.floor(sunLevel));
+    setSwallow(null);
+    setCulprit(null);
+    setCulpritT(0);
     if (level >= 8) {
-      charge = 3;
+      setCharge(3);
     }
   }, 700);
 }
 /** Termina el tutorial: lo marca como hecho y ofrece jugar el Sistema solar o ver los niveles. */
 function tutorialWin() {
-  state = 'win';
-  winT = 0;
-  canRestart = false;
-  flash = 0.5;
-  pulse = 1;
-  tutorialDone = true;
+  setState('win');
+  setWinT(0);
+  setCanRestart(false);
+  setFlash(0.5);
+  setPulse(1);
+  setTutorialDone(true);
   try {
     localStorage.setItem('orbita_p1_tutorial', '1');
   } catch (e) {}
@@ -73,7 +112,7 @@ function tutorialWin() {
       '<button type="button" class="chip act" data-act="levels" style="margin-top:12px">Ver todos los niveles</button>';
     elPanel.classList.remove('hide');
     setTimeout(() => {
-      canRestart = true;
+      setCanRestart(true);
     }, 600);
   }, 2200);
 }
@@ -83,22 +122,24 @@ function startTutorial() {
   if (elLv) {
     elLv.classList.add('off');
   }
-  tutorial = true;
+  setTutorial(true);
   setup();
-  state = 'play';
-  winT = 0;
-  perfCount = 0;
-  runRecord = 0;
-  newRec = false;
+  setState('play');
+  setWinT(0);
+  setPerfCount(0);
+  setRunRecord(0);
+  setNewRec(false);
   updateRingHUD();
   elHud.style.opacity = 1;
   elPanel.classList.add('hide');
-  charge = 0;
-  jumpTarget = 1;
-  pending = false;
-  gest = null;
-  showHint = false;
-  shieldLeft = 1;
-  usedDouble = false;
+  setCharge(0);
+  setJumpTarget(1);
+  setPending(false);
+  setGest(null);
+  setShowHint(false);
+  setShieldLeft(1);
+  setUsedDouble(false);
   startMusic();
 }
+
+export { startTutorial, tutRespawn, tutorialWin };

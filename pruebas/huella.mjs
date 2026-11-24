@@ -117,6 +117,9 @@ const PLAY = (n, extra = '') => `(() => { const DT = 1/60; let nx = null, h = 0,
     H(st); if (f % 60 === 0) samp.push(st);
   } return [h, samp]; })()`;
 
+// antes de un clic: las animaciones de CSS corren con el reloj real, así que se terminan para que lo que se toca
+// esté siempre en el mismo lugar (las infinitas no se pueden terminar y no mueven nada que se toque)
+const FIN = ['ev', 'document.getAnimations().forEach(a => { try{ a.finish(); }catch(e){} })'];
 const SCENES = [];
 const add = (name, steps, opts = {}) => SCENES.push({name, steps, opts});
 // pantallas
@@ -124,13 +127,13 @@ add('splash_0', [['ev', 'startSplash()'], ['ev', FRAMES(40)]]);
 add('splash_1', [['ev', 'startSplash()'], ['ev', FRAMES(260)]]);
 add('presentacion', [['ev', 'openHome(true)'], ['ev', FRAMES(200)]]);
 add('inicio', [['ev', 'openHome()'], ['ev', FRAMES(60)]]);
-add('inicio_ajustes', [['ev', 'openHome()'], ['ev', FRAMES(30)], ['ev', "homeAction('cfg', null)"], ['ev', FRAMES(20)]]);
+add('inicio_ajustes', [['ev', 'openHome()'], ['ev', FRAMES(30)], FIN, ['ev', "homeAction('cfg', null)"], ['ev', FRAMES(20)]]);
 add('intro_0', [['ev', 'startIntro()'], ['ev', FRAMES(120)]]);
 add('intro_1', [['ev', 'startIntro()'], ['ev', FRAMES(420)]]);
 for (let i = 0; i < 8; i++) add('niveles_' + i, [['ev', 'openLevels()'], ['ev', FRAMES(5)], ['ev', `{ const tr = elLv.querySelector('.track'); tr.style.scrollBehavior = 'auto'; tr.scrollLeft = ${i}*tr.clientWidth; tr.dispatchEvent(new Event('scroll')); }`], ['ev', FRAMES(90)]]);
 add('planetas', [['ev', 'openPlanets()'], ['ev', FRAMES(60)]]);
 add('planetas_jupiter', [['ev', "allPlanets = true; openPlanets()"], ['ev', 'planetStep(1); planetStep(1)'], ['ev', FRAMES(90)]]);
-add('planetas_escanear', [['ev', "allPlanets = true; openPlanets()"], ['ev', FRAMES(20)], ['ev', "{ const b = elPl.querySelector('.scanbtn'); if (b) b.click(); }"], ['ev', FRAMES(120)]]);
+add('planetas_escanear', [['ev', "allPlanets = true; openPlanets()"], ['ev', FRAMES(20)], FIN, ['ev', "{ const b = elPl.querySelector('.scanbtn'); if (b) b.click(); }"], FIN, ['ev', FRAMES(120)]]);
 add('misiones', [['ev', 'openMissions()'], ['ev', FRAMES(60)]]);
 add('misiones_logros', [['ev', 'openMissions()'], ['ev', FRAMES(10)], ['ev', "{ const b = document.querySelector('#missions [data-t=\"logros\"]'); if (b) b.click(); }"], ['ev', FRAMES(60)]]);
 add('antes_de_jugar', [['ev', 'startLevel(0)'], ['ev', FRAMES(40)]]);
@@ -153,23 +156,23 @@ add('derrota', [['ev', "lvl = 1; tutorial = false; curPlanet = 'tierra'; start()
 
 // --- cobertura extra (Fase 0 de la limpieza) ---
 // Ajustes: cada opción
-add('ajustes_opciones', [['ev', 'openHome()'], ['ev', FRAMES(30)], ['ev', "homeAction('cfg', null)"], ['ev', FRAMES(10)],
+add('ajustes_opciones', [['ev', 'openHome()'], ['ev', FRAMES(30)], FIN, ['ev', "homeAction('cfg', null)"], ['ev', FRAMES(10)],
   ['ev', "for (const h of ['snd', 'allp', 'medir']){ const b = elHome.querySelector('[data-h=\"' + h + '\"]'); if (b) b.click(); }"], ['ev', FRAMES(20)]]);
-add('ajustes_borrar_seguro', [['ev', 'openHome()'], ['ev', FRAMES(30)], ['ev', "homeAction('cfg', null)"], ['ev', FRAMES(10)],
+add('ajustes_borrar_seguro', [['ev', 'openHome()'], ['ev', FRAMES(30)], FIN, ['ev', "homeAction('cfg', null)"], ['ev', FRAMES(10)],
   ['ev', "{ const b = elHome.querySelector('[data-h=\"reset\"]'); if (b) b.click(); }"], ['ev', FRAMES(20)]]);
-add('ajustes_borrado', [['ev', "lvl = 0; tutorial = false; curPlanet = 'tierra'; start()"], ['play', 300], ['ev', 'openHome()'], ['ev', FRAMES(30)], ['ev', "homeAction('cfg', null)"],
+add('ajustes_borrado', [['ev', "lvl = 0; tutorial = false; curPlanet = 'tierra'; start()"], ['play', 300], ['ev', 'openHome()'], ['ev', FRAMES(30)], FIN, ['ev', "homeAction('cfg', null)"],
   ['ev', "{ const b = elHome.querySelector('[data-h=\"reset\"]'); if (b){ b.click(); b.click(); } }"], ['ev', FRAMES(60)]]);
 // misiones: una completa lista para cobrar, el cobro (polvo estelar y el dato real), el bono del día y un logro
 const MIS_DONE = "misLoad(); MIS.daily.forEach((m, i) => { if (i < __n) m.p = misDef(m.id).n; }); misSave();";
 add('mision_lista', [['ev', MIS_DONE.replace('__n', '1')], ['ev', 'openMissions()'], ['ev', FRAMES(40)]]);
-add('mision_cobrada', [['ev', MIS_DONE.replace('__n', '1')], ['ev', 'openMissions()'], ['ev', FRAMES(40)], ['ev', "{ const b = elMis.querySelector('.claim'); if (b) b.click(); }"], ['ev', FRAMES(60)]]);
+add('mision_cobrada', [['ev', MIS_DONE.replace('__n', '1')], ['ev', 'openMissions()'], ['ev', FRAMES(40)], FIN, ['ev', "{ const b = elMis.querySelector('.claim'); if (b) b.click(); }"], FIN, ['ev', FRAMES(60)]]);
 add('mision_bono', [['ev', MIS_DONE.replace('__n', '3')], ['ev', 'openMissions()'], ['ev', FRAMES(20)],
   ['ev', "for (let i = 0; i < 3; i++){ const b = elMis.querySelector('.claim[data-k=\"d' + i + '\"]'); if (b) b.click(); }"], ['ev', FRAMES(20)],
   ['ev', "{ const b = elMis.querySelector('.claim[data-k=\"bonus\"]'); if (b) b.click(); }"], ['ev', FRAMES(60)]]);
 add('logro_detalle', [['ev', "misLoad(); MIS.st.perf = 100; misSave()"], ['ev', 'openMissions()'], ['ev', FRAMES(10)], ['ev', "{ const b = document.querySelector('#missions [data-t=\"logros\"]'); if (b) b.click(); }"], ['ev', FRAMES(20)],
   ['ev', "{ const c = elMis.querySelector('[data-open=\"' + MIS_ACH.findIndex(a => a.id === 'perf100') + '\"]'); if (c) c.click(); }"], ['ev', FRAMES(40)]]);
 add('logro_cobrado', [['ev', "misLoad(); MIS.st.perf = 100; misSave()"], ['ev', 'openMissions()'], ['ev', FRAMES(10)], ['ev', "{ const b = document.querySelector('#missions [data-t=\"logros\"]'); if (b) b.click(); }"], ['ev', FRAMES(20)],
-  ['ev', "{ const c = elMis.querySelector('[data-open=\"' + MIS_ACH.findIndex(a => a.id === 'perf100') + '\"]'); if (c) c.click(); }"], ['ev', FRAMES(20)], ['ev', "{ const b = elMis.querySelector('.mdet .claim'); if (b) b.click(); }"], ['ev', FRAMES(60)]]);
+  ['ev', "{ const c = elMis.querySelector('[data-open=\"' + MIS_ACH.findIndex(a => a.id === 'perf100') + '\"]'); if (c) c.click(); }"], ['ev', FRAMES(20)], FIN, ['ev', "{ const b = elMis.querySelector('.mdet .claim'); if (b) b.click(); }"], FIN, ['ev', FRAMES(60)]]);
 // el tutorial completo (con el salto doble en la barrera) y su pantalla final
 const TUT_DJ = "if (tutorial && state === 'play' && !jumping && level === 8 && charge >= chargeMax()) doubleJump();";
 add('tutorial_mitad', [['ev', 'startTutorial()'], ['play', 400, TUT_DJ]]);
@@ -218,9 +221,9 @@ async function runScene(sc){
   }
   await pg.evaluate(s => window.__ev(s), FRAMES(3));
   // las animaciones de CSS corren con el reloj real: se congelan en un instante fijo (las que terminan, en su final)
-  await pg.evaluate(() => { for (const an of document.getAnimations()){ try{ const tm = an.effect.getComputedTiming(); an.pause(); an.currentTime = isFinite(tm.endTime) ? tm.endTime : 1234; }catch(e){} } });
-  // las de opacidad y movimiento las dibuja el compositor aparte: se espera a que muestre el estado congelado
-  await pg.waitForTimeout(150);
+  // luego se fija ese valor en el elemento y se quita la animación: así el compositor (que dibuja aparte las de
+  // opacidad y movimiento) no puede mostrar un instante distinto en la captura
+  await pg.evaluate(() => { for (const an of document.getAnimations()){ try{ const tm = an.effect.getComputedTiming(); an.pause(); an.currentTime = isFinite(tm.endTime) ? tm.endTime : 1234; an.commitStyles(); an.cancel(); }catch(e){} } });
   const png = await pg.screenshot({path: join(OUT, sc.name + '.png'), caret: 'hide'});
   const estilos = await pg.evaluate(() => {
     const out = {}, key = el => { const p = []; for (let e = el; e && e.nodeType === 1; e = e.parentElement){ let i = 0; for (let s = e; (s = s.previousElementSibling);) i++; p.unshift(e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + ':' + i); } return p.join('>'); };
@@ -232,9 +235,13 @@ async function runScene(sc){
   process.stdout.write((errs.length ? '!' : '.'));
   await pg.close();
 }
-const queue = SCENES.filter(sc => !only || only.test(sc.name));
+// las escenas con clics corren de a una al final: lo que arranca un clic avanza con el reloj real y la carga de
+// otras escenas en paralelo lo movería
+const chosen = SCENES.filter(sc => !only || only.test(sc.name)), hasClick = sc => sc.steps.includes(FIN);
+const queue = chosen.filter(sc => !hasClick(sc)), serial = chosen.filter(hasClick);
 const JOBS = Math.max(1, +process.env.JOBS || 4);
 await Promise.all(Array.from({length: JOBS}, async () => { while (queue.length) await runScene(queue.shift()); }));
+for (const sc of serial) await runScene(sc);
 await b.close();
 const ordered = {}; for (const sc of SCENES) if (result[sc.name]) ordered[sc.name] = result[sc.name];
 writeFileSync(join(OUT, 'huella.json'), JSON.stringify(ordered, null, 1));

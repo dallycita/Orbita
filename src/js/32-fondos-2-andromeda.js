@@ -2,6 +2,7 @@
  * Shaders GLSL del fondo de Andrómeda (nivel 3), la galaxia vista desde dentro. Los usa el motor
  * de fondos (32-fondos-9-motor). El texto GLSL es parte del programa: sus comentarios no se tocan.
  */
+import { BG_COMMON } from './32-fondos-1-comun.js';
 
 // Andrómeda (M31): disco inclinado ~77°, núcleo de estrellas viejas, brazos azules, franjas de
 // polvo, regiones rosadas y sus galaxias satélite M32 y M110.
@@ -289,3 +290,5 @@ void main(){
   col = col/(1. + col*.5);
   gl_FragColor = vec4(col, 1.);
 }`;
+
+export { FS_AND, FS_AND2 };

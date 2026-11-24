@@ -4,6 +4,81 @@
  * Los efectos en curso viven en `pfx` ({k: tipo, t: segundos desde que empezó}); `powerUpdate` los
  * avanza y `drawPowerFx`, `drawPowerScene` y `drawRingPower` los dibujan.
  */
+import {
+  CX,
+  CY,
+  H,
+  PR,
+  R0,
+  S,
+  SUN,
+  W,
+  buzz,
+  clamp,
+  ctx,
+  frac,
+  reduceMotion,
+  rgba,
+} from './01-pantalla-y-utilidades.js';
+import { AC, ROOT, SCALE, cowbell, noise, sub } from './02-audio.js';
+import {
+  charge,
+  jumpT,
+  jumpTarget,
+  jumping,
+  level,
+  pAng,
+  pLevel,
+  rings,
+  setCharge,
+  setCrossed,
+  setJumpT,
+  setJumpTarget,
+  setJumping,
+  state,
+} from './06-record-y-estado.js';
+import {
+  catchMargin,
+  chargeMax,
+  curP,
+  curPlanet,
+  jumpDur,
+  pst,
+  setShieldLeft,
+  setUsedDouble,
+  shieldLeft,
+  sizeK,
+} from './07-planetas.js';
+import {
+  curGoal,
+  flash,
+  lastEaten,
+  particles,
+  setFlash,
+  setHoleFlare,
+  setLastEaten,
+  setPending,
+  setPulse,
+  setShake,
+  setShowHint,
+  setSlowTimer,
+  setSunLevel,
+  setTexts,
+  setTimeScale,
+  shake,
+  slowTimer,
+  sunLevel,
+  t,
+  texts,
+  tutorial,
+} from './08-partida-estado.js';
+import { beatTime, obsAng, obsRad } from './10-ritmo-y-objetos.js';
+import { rr } from './16-partida.js';
+import { noteDouble } from './23-intro.js';
+import { muted } from './26-pantalla-inicio.js';
+import { uiTone } from './28-sonidos-interfaz.js';
+import { PLGL, drawPlayer } from './29-planetas-hd.js';
+
 let ghostT = 0,
   shieldT = 0,
   eclipseT = 0,
@@ -41,7 +116,7 @@ let bhWob = 0,
  */
 function powerShout(col) {
   pfx.push({ k: 'ignite', t: 0, col: col || '#ffd36b' });
-  pulse = 1;
+  setPulse(1);
   try {
     if (AC && !muted) {
       const n = AC.currentTime;
@@ -71,7 +146,7 @@ function powerShout(col) {
       );
     }
   } catch (e) {}
-  texts = texts.filter(x => !x.tip && x.key !== 'pow' && x.y !== -R0 - 96 && x.y !== -R0 - 76);
+  setTexts(texts.filter(x => !x.tip && x.key !== 'pow' && x.y !== -R0 - 96 && x.y !== -R0 - 76));
   texts.push({
     txt: powerName(),
     x: 0,
@@ -106,10 +181,10 @@ function usePower(mid) {
     }
     return;
   }
-  charge = 0;
-  showHint = false;
-  pending = false;
-  usedDouble = true;
+  setCharge(0);
+  setShowHint(false);
+  setPending(false);
+  setUsedDouble(true);
   noteDouble();
   buzz([15, 30, 25]);
   const nr = rings.get(level + 1);
@@ -119,13 +194,13 @@ function usePower(mid) {
     if (mid) {
       const p1 = Math.min(jumpT / jumpDur(), 1),
         e1 = 1 - Math.pow(1 - p1, 3);
-      jumpT = (1 - Math.cbrt(1 - e1 / up)) * (0.24 + (up - 2) * 0.1);
+      setJumpT((1 - Math.cbrt(1 - e1 / up)) * (0.24 + (up - 2) * 0.1));
     } else {
-      jumping = true;
-      jumpT = 0;
+      setJumping(true);
+      setJumpT(0);
     }
-    jumpTarget = up;
-    crossed = false;
+    setJumpTarget(up);
+    setCrossed(false);
     pfx.push({ k: 'olimpo', t: 0 });
     noise(0.4, 200, 5000, 0.3, 'bandpass');
     cowbell(SCALE[5] + 12);
@@ -133,8 +208,8 @@ function usePower(mid) {
   } else if (id === 'luna') {
     // Eclipse: cámara lenta
     eclipseT = 2.5;
-    timeScale = 0.42;
-    slowTimer = 2.5;
+    setTimeScale(0.42);
+    setSlowTimer(2.5);
     pfx.push({ k: 'eclipse', t: 0 });
     noise(1.2, 3000, 200, 0.2, 'lowpass');
     powerShout('#dfe6ff');
@@ -144,10 +219,10 @@ function usePower(mid) {
     if (mid) {
       periLeft = 1;
       pfx.push({ k: 'destello', t: 0, a: pAng, l0: pLevel });
-      jumpT = 99;
+      setJumpT(99);
       ghostT = 0.15;
     }
-    flash = 0.2;
+    setFlash(0.2);
     noise(0.18, 6000, 9000, 0.25, 'highpass');
     cowbell(SCALE[7] + 12);
     powerShout('#ffe9b8');
@@ -172,8 +247,8 @@ function usePower(mid) {
     powerShout('#ffb070');
   } else if (id === 'jupiter') {
     // Empujón gravitacional: aleja al agujero negro
-    sunLevel = Math.max(-1.6, sunLevel - 0.4);
-    lastEaten = Math.min(lastEaten, Math.floor(sunLevel));
+    setSunLevel(Math.max(-1.6, sunLevel - 0.4));
+    setLastEaten(Math.min(lastEaten, Math.floor(sunLevel)));
     // El resto del empujón y el temblor del agujero negro llegan con la onda (ver powerUpdate).
     pfx.push({ k: 'empujon', t: 0, a: pAng, l: pLevel, left: 0.8 });
     sub();
@@ -223,8 +298,8 @@ function usePower(mid) {
     // Arder: 1.5 segundos en los que los asteroides que tocas se vuelven plasma
     burnT = BURN_DUR;
     pfx.push({ k: 'arder', t: 0 });
-    flash = 0.25;
-    shake = reduceMotion ? 0 : 5;
+    setFlash(0.25);
+    setShake(reduceMotion ? 0 : 5);
     sub();
     noise(1.4, 300, 3000, 0.35, 'bandpass');
     powerShout('#ffb347');
@@ -242,8 +317,8 @@ function usePower(mid) {
 function vaporize(ring, o, x, y) {
   o.melt = t;
   o.burn = 1;
-  shake = Math.max(shake, reduceMotion ? 0 : 4);
-  flash = Math.max(flash, 0.12);
+  setShake(Math.max(shake, reduceMotion ? 0 : 4));
+  setFlash(Math.max(flash, 0.12));
   buzz([12]);
   const wx = (x - CX) / S,
     wy = (y - CY) / S;
@@ -280,12 +355,12 @@ function caronteSaves(x, y, tx, ty) {
   }
   const ta = tx !== undefined ? Math.atan2(ty - y, tx - x) : Math.atan2(-y, -x);
   pfx.push({ k: 'caronte', t: 0, x, y, a: ta, ca: caronteAng() });
-  shieldLeft = 0;
-  charge = 0;
+  setShieldLeft(0);
+  setCharge(0);
   ghostT = 0.9;
-  sunLevel = Math.min(pLevel - catchMargin() - 0.6, sunLevel + 0.6);
-  flash = 0.4;
-  shake = reduceMotion ? 0 : 8;
+  setSunLevel(Math.min(pLevel - catchMargin() - 0.6, sunLevel + 0.6));
+  setFlash(0.4);
+  setShake(reduceMotion ? 0 : 8);
   buzz([30, 20, 60]);
   noise(0.6, 3000, 200, 0.35, 'lowpass'); // el choque te frena: el agujero negro se acerca
   {
@@ -363,7 +438,7 @@ function powerUpdate(dt, d) {
   eclipseT = Math.max(0, eclipseT - dt);
   predT = Math.max(0, predT - dt);
   if (eclipseT > 0 && slowTimer > 0) {
-    timeScale = 0.42;
+    setTimeScale(0.42);
   }
   for (const r of rings.values()) {
     if (r.revT) {
@@ -415,16 +490,16 @@ function powerUpdate(dt, d) {
       // la magnetosfera llega al agujero negro y lo empuja
       if (!f.hit) {
         f.hit = 1;
-        holeFlare = 1;
+        setHoleFlare(1);
         bhWob = 1;
-        shake = reduceMotion ? 0 : 10;
+        setShake(reduceMotion ? 0 : 10);
         sub();
         noise(0.7, 1800, 90, 0.35, 'lowpass');
       }
       const q = Math.min(f.left, dt * 2.8);
       f.left -= q;
-      sunLevel = Math.max(-1.6, sunLevel - q);
-      lastEaten = Math.min(lastEaten, Math.floor(sunLevel));
+      setSunLevel(Math.max(-1.6, sunLevel - q));
+      setLastEaten(Math.min(lastEaten, Math.floor(sunLevel)));
     }
     if (f.k === 'arder' && burnT > 0) {
       f.t = Math.min(f.t, 0.5);
@@ -2009,3 +2084,138 @@ function drawRingPower(ring, R, alpha) {
     ctx.restore();
   }
 }
+
+/**
+ * Cambia `burnT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setBurnT(value) {
+  burnT = value;
+  return value;
+}
+
+/**
+ * Cambia `eclipseT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setEclipseT(value) {
+  eclipseT = value;
+  return value;
+}
+
+/**
+ * Cambia `ghostT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setGhostT(value) {
+  ghostT = value;
+  return value;
+}
+
+/**
+ * Cambia `lastJT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setLastJT(value) {
+  lastJT = value;
+  return value;
+}
+
+/**
+ * Cambia `periLeft` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setPeriLeft(value) {
+  periLeft = value;
+  return value;
+}
+
+/**
+ * Cambia `pfx` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setPfx(value) {
+  pfx = value;
+  return value;
+}
+
+/**
+ * Cambia `predT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setPredT(value) {
+  predT = value;
+  return value;
+}
+
+/**
+ * Cambia `ringBoostNow` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setRingBoostNow(value) {
+  ringBoostNow = value;
+  return value;
+}
+
+/**
+ * Cambia `shieldT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setShieldT(value) {
+  shieldT = value;
+  return value;
+}
+
+/**
+ * Cambia `strainK` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setStrainK(value) {
+  strainK = value;
+  return value;
+}
+
+export {
+  bhWob,
+  burnT,
+  caronteSaves,
+  drawCaronteBack,
+  drawPowerFx,
+  drawPowerScene,
+  drawRingPower,
+  eclipseT,
+  ghostT,
+  hsh,
+  lastJT,
+  periLeft,
+  pfx,
+  powerUpdate,
+  predT,
+  ringBoostNow,
+  ringSpark,
+  shieldT,
+  strainK,
+  strainNow,
+  usePower,
+  vaporize,
+};

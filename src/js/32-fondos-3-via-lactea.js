@@ -4,6 +4,8 @@
  * la galaxia vista desde fuera con sus brazos espirales.
  * Todo `FS_MW` es texto GLSL (tras `BG_COMMON`): sus comentarios son parte del programa.
  */
+import { BG_COMMON } from './32-fondos-1-comun.js';
+
 const FS_MW =
   BG_COMMON +
   `
@@ -235,3 +237,5 @@ void main(){
   col = col/(1. + col*.5);
   gl_FragColor = vec4(col, 1.);
 }`;
+
+export { FS_MW };

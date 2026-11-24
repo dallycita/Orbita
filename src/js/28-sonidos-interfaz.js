@@ -4,6 +4,11 @@
  * negro de Perseo y el chirrido de ondas gravitacionales de LIGO.
  * Los clics y el paso del puntero sobre botones se escuchan en toda la página desde aquí.
  */
+import { AC, ROOT, master, noiseHit } from './02-audio.js';
+import { paused, pzSnd } from './18-pausa.js';
+import { muted } from './26-pantalla-inicio.js';
+import { uiGlass } from './29-planetas-hd.js';
+
 let uiBus = null,
   lastHover = null,
   uiLastT = 0;
@@ -123,44 +128,6 @@ function uiClick(kind) {
     }
   } catch (e) {}
 }
-window.addEventListener('pointerover', e => {
-  if (e.pointerType && e.pointerType !== 'mouse') {
-    return;
-  }
-  const b = e.target && e.target.closest ? e.target.closest('button') : null;
-  if (b && !b.disabled && b !== lastHover) {
-    lastHover = b;
-    if (paused) {
-      pzSnd('hover');
-    } else {
-      uiHover();
-    }
-  }
-  if (!b) {
-    lastHover = null;
-  }
-});
-window.addEventListener(
-  'click',
-  e => {
-    const b = e.target && e.target.closest ? e.target.closest('button') : null;
-    if (!b || b.disabled) {
-      return;
-    }
-    if (b.id === 'quit' || paused || (b.closest && b.closest('.pzp'))) {
-      return;
-    } // La pausa tiene sus propios sonidos.
-    if (b.classList.contains('glass') || b.classList.contains('arrow')) {
-      uiGlass(b.classList.contains('l') ? -1 : 1);
-      return;
-    }
-    if (b.classList.contains('scanbtn')) {
-      return;
-    }
-    uiClick(b.classList.contains('bigplay') || b.classList.contains('play') ? 'play' : 'soft');
-  },
-  true,
-);
 
 // Sonido de la absorción en la presentación: showBus es su salida y bed el fondo continuo.
 let showBus = null,
@@ -451,3 +418,47 @@ function gwChirp() {
     }
   } catch (e) {}
 }
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initUiSounds() {
+  window.addEventListener('pointerover', e => {
+    if (e.pointerType && e.pointerType !== 'mouse') {
+      return;
+    }
+    const b = e.target && e.target.closest ? e.target.closest('button') : null;
+    if (b && !b.disabled && b !== lastHover) {
+      lastHover = b;
+      if (paused) {
+        pzSnd('hover');
+      } else {
+        uiHover();
+      }
+    }
+    if (!b) {
+      lastHover = null;
+    }
+  });
+  window.addEventListener(
+    'click',
+    e => {
+      const b = e.target && e.target.closest ? e.target.closest('button') : null;
+      if (!b || b.disabled) {
+        return;
+      }
+      if (b.id === 'quit' || paused || (b.closest && b.closest('.pzp'))) {
+        return;
+      } // La pausa tiene sus propios sonidos.
+      if (b.classList.contains('glass') || b.classList.contains('arrow')) {
+        uiGlass(b.classList.contains('l') ? -1 : 1);
+        return;
+      }
+      if (b.classList.contains('scanbtn')) {
+        return;
+      }
+      uiClick(b.classList.contains('bigplay') || b.classList.contains('play') ? 'play' : 'soft');
+    },
+    true,
+  );
+}
+
+export { bigSuck, gwChirp, rockIn, showOut, showStart, showStop, uiOut, uiTone };

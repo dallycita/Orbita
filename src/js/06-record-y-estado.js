@@ -3,23 +3,24 @@
  * pantalla actual (`state`), anillos, nivel de anillo del planeta y de la cámara, salto y carga.
  * Los récords viven en localStorage con claves `orbita_pN_anillo` y `orbita_pN_intentos`.
  */
+import {
+  elArcFg,
+  elBest,
+  elPbar,
+  elPnum,
+  elScore,
+  elWrap,
+  hudMode,
+} from './01-pantalla-y-utilidades.js';
+import { attempts, curGoal, tutorial } from './08-partida-estado.js';
+
 let best = 0;
-try {
-  best = parseInt(localStorage.getItem('orbita_best_v2') || '0', 10) || 0;
-} catch (e) {
-  best = 0;
-}
 const saveBest = () => {
   try {
     localStorage.setItem('orbita_best_v2', String(best));
   } catch (e) {}
 };
 let bestRing = 0;
-try {
-  bestRing = parseInt(localStorage.getItem('orbita_p1_anillo') || '0', 10) || 0;
-} catch (e) {
-  bestRing = 0;
-}
 const saveBestRing = () => {
   try {
     localStorage.setItem('orbita_p1_anillo', String(bestRing));
@@ -76,25 +77,8 @@ let best2 = 0,
   attempts2 = 0,
   best3 = 0,
   attempts3 = 0;
-try {
-  best3 = parseInt(localStorage.getItem('orbita_p3_anillo') || '0', 10) || 0;
-  attempts3 = parseInt(localStorage.getItem('orbita_p3_intentos') || '0', 10) || 0;
-} catch (e) {}
-try {
-  best2 = parseInt(localStorage.getItem('orbita_p2_anillo') || '0', 10) || 0;
-  attempts2 = parseInt(localStorage.getItem('orbita_p2_intentos') || '0', 10) || 0;
-} catch (e) {}
 const bestX = {},
   attX = {};
-for (let i = 3; i < 8; i++) {
-  try {
-    bestX[i] = parseInt(localStorage.getItem('orbita_p' + (i + 1) + '_anillo') || '0', 10) || 0;
-    attX[i] = parseInt(localStorage.getItem('orbita_p' + (i + 1) + '_intentos') || '0', 10) || 0;
-  } catch (e) {
-    bestX[i] = 0;
-    attX[i] = 0;
-  }
-}
 /**
  * Mejor anillo alcanzado en un nivel.
  *
@@ -137,3 +121,320 @@ function setBestOf(i, v) {
  */
 const attemptsOf = i =>
   i >= 3 ? attX[i] || 0 : i === 2 ? attempts3 : i === 1 ? attempts2 : attempts;
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initRecords() {
+  try {
+    best = parseInt(localStorage.getItem('orbita_best_v2') || '0', 10) || 0;
+  } catch (e) {
+    best = 0;
+  }
+  try {
+    bestRing = parseInt(localStorage.getItem('orbita_p1_anillo') || '0', 10) || 0;
+  } catch (e) {
+    bestRing = 0;
+  }
+  try {
+    best3 = parseInt(localStorage.getItem('orbita_p3_anillo') || '0', 10) || 0;
+    attempts3 = parseInt(localStorage.getItem('orbita_p3_intentos') || '0', 10) || 0;
+  } catch (e) {}
+  try {
+    best2 = parseInt(localStorage.getItem('orbita_p2_anillo') || '0', 10) || 0;
+    attempts2 = parseInt(localStorage.getItem('orbita_p2_intentos') || '0', 10) || 0;
+  } catch (e) {}
+  for (let i = 3; i < 8; i++) {
+    try {
+      bestX[i] = parseInt(localStorage.getItem('orbita_p' + (i + 1) + '_anillo') || '0', 10) || 0;
+      attX[i] = parseInt(localStorage.getItem('orbita_p' + (i + 1) + '_intentos') || '0', 10) || 0;
+    } catch (e) {
+      bestX[i] = 0;
+      attX[i] = 0;
+    }
+  }
+}
+
+/**
+ * Cambia `appear` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setAppear(value) {
+  appear = value;
+  return value;
+}
+
+/**
+ * Cambia `astFade` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setAstFade(value) {
+  astFade = value;
+  return value;
+}
+
+/**
+ * Cambia `attempts2` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setAttempts2(value) {
+  attempts2 = value;
+  return value;
+}
+
+/**
+ * Cambia `attempts3` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setAttempts3(value) {
+  attempts3 = value;
+  return value;
+}
+
+/**
+ * Cambia `best` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setBest(value) {
+  best = value;
+  return value;
+}
+
+/**
+ * Cambia `bestRing` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setBestRing(value) {
+  bestRing = value;
+  return value;
+}
+
+/**
+ * Cambia `camLevel` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setCamLevel(value) {
+  camLevel = value;
+  return value;
+}
+
+/**
+ * Cambia `charge` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setCharge(value) {
+  charge = value;
+  return value;
+}
+
+/**
+ * Cambia `combo` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setCombo(value) {
+  combo = value;
+  return value;
+}
+
+/**
+ * Cambia `crossed` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setCrossed(value) {
+  crossed = value;
+  return value;
+}
+
+/**
+ * Cambia `jumpT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setJumpT(value) {
+  jumpT = value;
+  return value;
+}
+
+/**
+ * Cambia `jumpTarget` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setJumpTarget(value) {
+  jumpTarget = value;
+  return value;
+}
+
+/**
+ * Cambia `jumping` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setJumping(value) {
+  jumping = value;
+  return value;
+}
+
+/**
+ * Cambia `lastLand` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setLastLand(value) {
+  lastLand = value;
+  return value;
+}
+
+/**
+ * Cambia `level` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setLevel(value) {
+  level = value;
+  return value;
+}
+
+/**
+ * Cambia `lvl` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setLvl(value) {
+  lvl = value;
+  return value;
+}
+
+/**
+ * Cambia `newRec` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setNewRec(value) {
+  newRec = value;
+  return value;
+}
+
+/**
+ * Cambia `pAng` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setPAng(value) {
+  pAng = value;
+  return value;
+}
+
+/**
+ * Cambia `pLevel` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setPLevel(value) {
+  pLevel = value;
+  return value;
+}
+
+/**
+ * Cambia `rings` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setRings(value) {
+  rings = value;
+  return value;
+}
+
+/**
+ * Cambia `runRecord` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setRunRecord(value) {
+  runRecord = value;
+  return value;
+}
+
+/**
+ * Cambia `score` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setScore(value) {
+  score = value;
+  return value;
+}
+
+/**
+ * Cambia `state` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setState(value) {
+  state = value;
+  return value;
+}
+
+export {
+  GOAL,
+  appear,
+  astFade,
+  attX,
+  attempts2,
+  attempts3,
+  attemptsOf,
+  best,
+  bestOf,
+  bestRing,
+  camLevel,
+  charge,
+  combo,
+  crossed,
+  jumpT,
+  jumpTarget,
+  jumping,
+  lastLand,
+  level,
+  lvl,
+  newRec,
+  pAng,
+  pLevel,
+  rings,
+  runRecord,
+  saveBest,
+  score,
+  setBestOf,
+  state,
+  updateRingHUD,
+};

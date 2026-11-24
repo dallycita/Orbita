@@ -4,12 +4,9 @@
  * el código (lógica y dibujo) y los tirones (cuadros de más de 25 ms) de los últimos 10 s.
  * Si los ms entre cuadros son altos pero el código tarda poco, el límite es la tarjeta gráfica.
  */
+import { particles } from './08-partida-estado.js';
+
 let MEDIR = false;
-try {
-  MEDIR =
-    localStorage.getItem('orbita_medidor') === '1' ||
-    /[?&#]medir\b/.test(location.search + location.hash);
-} catch (e) {}
 let medEl = null,
   medPrev = 0,
   medMid = 0,
@@ -91,3 +88,58 @@ function medFrame(now, t0) {
     ' en 10 s   partículas ' +
     particles.length;
 }
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initPerfMeter() {
+  try {
+    MEDIR =
+      localStorage.getItem('orbita_medidor') === '1' ||
+      /[?&#]medir\b/.test(location.search + location.hash);
+  } catch (e) {}
+}
+
+/**
+ * Cambia `MEDIR` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setMEDIR(value) {
+  MEDIR = value;
+  return value;
+}
+
+/**
+ * Cambia `medEl` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setMedEl(value) {
+  medEl = value;
+  return value;
+}
+
+/**
+ * Cambia `medMid` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setMedMid(value) {
+  medMid = value;
+  return value;
+}
+
+/**
+ * Cambia `medPrev` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setMedPrev(value) {
+  medPrev = value;
+  return value;
+}
+
+export { MEDIR, medEl, medFrame, medMid, medPrev };

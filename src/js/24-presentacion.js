@@ -4,12 +4,30 @@
  * (`bhDiskK`, `bhCore`, `brandHole`, `drawLogo`), que usan otras pantallas, con versión WebGL
  * (`BHGL`) y respaldo 2D con degradados cónicos.
  */
+import {
+  BONE,
+  CX,
+  CY,
+  H,
+  W,
+  buzz,
+  clamp,
+  ctx,
+  elHud,
+  elPanel,
+  stars,
+} from './01-pantalla-y-utilidades.js';
+import { AC, NOISE, ROOT, master, noiseHit } from './02-audio.js';
+import { setState, state } from './06-record-y-estado.js';
+import { flash, setFlash, setT, t } from './08-partida-estado.js';
+import { afterSplash } from './25-selector-niveles.js';
+
 // SK: aplastamiento del disco visto a 37°; BR0 y BR1: radios interior y exterior del disco, en
 // radios del horizonte.
 const SPLASH_END = 10,
-  SK = Math.sin((37 * Math.PI) / 180),
   BR0 = 1.35,
   BR1 = 2.05;
+let SK;
 // Colores del disco según su brillo (de 0 a 1): de rojo oscuro a blanco cálido.
 const BST = [
   [0, [50, 10, 4]],
@@ -23,16 +41,6 @@ let splashT = 0,
   splashFont = false,
   sflared = false,
   sfl = 0;
-try {
-  if (document.fonts && document.fonts.load) {
-    document.fonts.load('400 52px Unbounded').then(
-      () => {
-        splashFont = true;
-      },
-      () => {},
-    );
-  }
-} catch (e) {}
 /** Aceleración y frenado suaves (cuadrática): de 0 a 1 en v de 0 a 1. */
 const easeIO2 = v => (v < 0.5 ? 2 * v * v : 1 - Math.pow(-2 * v + 2, 2) / 2);
 /**
@@ -165,151 +173,7 @@ function bhDiskK(cx, cy, R, k, f0, f1, from, to, alpha) {
 
 // Agujero negro en alta calidad: el mismo diseño (mismos colores, misma forma, mismo giro),
 // dibujado píxel a píxel en la GPU en un canvas aparte y copiado al lienzo principal.
-const BHGL = (() => {
-  let cv = null,
-    gl = null,
-    pr = null,
-    U = {},
-    ok = null;
-  const FS = `precision highp float;
-  uniform vec2 uSize; uniform float uR, uK, uR0, uR1, uT, uAlpha, uPart, uScale;
-  vec3 bcol(float b){ b = clamp(b, 0., 1.);
-    vec3 c0 = vec3(50.,10.,4.)/255., c1 = vec3(150.,38.,8.)/255., c2 = vec3(255.,100.,28.)/255., c3 = vec3(255.,196.,96.)/255., c4 = vec3(255.,246.,222.)/255.;
-    if (b < .35) return mix(c0, c1, b/.35); if (b < .6) return mix(c1, c2, (b - .35)/.25); if (b < .82) return mix(c2, c3, (b - .6)/.22); return mix(c3, c4, (b - .82)/.18); }
-  float bbright(float th, float r, float r0, float r1){ float rad = 1. - (r - r0)/(r1 - r0), dop = .5 - .5*cos(th), s = .89 + .11*sin(th*5. + r/uR*7. - uT*2.4*pow(r0/r, 1.5));   // el dibujo del disco escala con su tamaño: no se vuelve un disco de vinilo al crecer
-    return (.25 + .75*pow(max(rad, 0.), .8))*(.4 + .6*dop)*s; }
-  void main(){
-    vec2 p = (gl_FragCoord.xy - .5*uSize); p.y = -p.y;           // y hacia abajo, como el lienzo 2D
-    vec4 o = vec4(0.);
-    if (uPart < 1.5){                                             // disco: 0 = mitad de atrás (arriba), 1 = mitad de delante (abajo)
-      float hm = uPart < .5 ? 1. - smoothstep(-.5, .5, p.y) : smoothstep(-1.5, -.5, p.y);   // mitades complementarias: sin costura
-      float r = length(vec2(p.x, p.y/uK)), th = atan(p.y/uK, p.x);
-      float r0 = uR*uR0, r1 = uR*uR1;
-      if (r >= r0 - 1. && r <= r1 + 1.){
-        float fade = min(1., (r1 - r)/(uR*.35) + .15)*uAlpha;
-        float a = 1. - pow(1. - clamp(fade, 0., 1.), 2.2);
-        a *= smoothstep(r0 - 1., r0 + 1., r)*smoothstep(r1 + 1., r1 - 1., r)*hm;
-        vec3 c = bcol(bbright(th, r, r0, r1)); c = clamp(mix(vec3(dot(c, vec3(.299,.587,.114))), c, 1.12), 0., 1.);
-        o = vec4(c*a, a);
-      }
-    } else {                                                      // la luz curvada alrededor de la esfera
-      float rho = length(p), ph = atan(p.y, p.x), up = .5 - .5*sin(ph);
-      float q = (rho/uR - 1.03)/(.08 + .16*up);
-      if (q >= -.05 && q <= 1.05){
-        float rd = uR*1.35 + clamp(q, 0., 1.)*uR*(2.05 - 1.35);
-        float a = uAlpha*(1. - clamp(q, 0., 1.)*.6)*(.45 + .45*up);
-        a = 1. - pow(1. - clamp(a, 0., 1.), .75/(.08 + .16*up));   // tantas capas como el dibujo original
-        a *= smoothstep(-.05, .02, q)*smoothstep(1.05, .97, q);
-        vec3 c = bcol(bbright(ph, rd, uR*1.35, uR*2.05)); c = clamp(mix(vec3(dot(c, vec3(.299,.587,.114))), c, 1.12), 0., 1.);
-        o = vec4(c*a, a);
-      }
-    }
-    gl_FragColor = o;
-  }`;
-  function init() {
-    if (ok !== null) {
-      return ok;
-    }
-    try {
-      cv = document.createElement('canvas');
-      gl = cv.getContext('webgl', { premultipliedAlpha: true, alpha: true, antialias: false });
-      if (!gl) {
-        ok = false;
-        return ok;
-      }
-      const sh = (t, src) => {
-        const o = gl.createShader(t);
-        gl.shaderSource(o, src);
-        gl.compileShader(o);
-        if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) {
-          throw new Error(gl.getShaderInfoLog(o));
-        }
-        return o;
-      };
-      pr = gl.createProgram();
-      gl.attachShader(
-        pr,
-        sh(gl.VERTEX_SHADER, 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'),
-      );
-      gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS));
-      gl.linkProgram(pr);
-      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) {
-        throw new Error('link');
-      }
-      gl.useProgram(pr);
-      const b = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, b);
-      gl.bufferData(
-        gl.ARRAY_BUFFER,
-        new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
-        gl.STATIC_DRAW,
-      );
-      const l = gl.getAttribLocation(pr, 'p');
-      gl.enableVertexAttribArray(l);
-      gl.vertexAttribPointer(l, 2, gl.FLOAT, false, 0, 0);
-      ['uSize', 'uR', 'uK', 'uR0', 'uR1', 'uT', 'uAlpha', 'uPart', 'uScale'].forEach(
-        n => (U[n] = gl.getUniformLocation(pr, n)),
-      );
-      ok = true;
-    } catch (e) {
-      ok = false;
-      try {
-        console.warn('BHGL', e && e.message);
-      } catch (_) {}
-    }
-    return ok;
-  }
-  /**
-   * Dibuja una parte del agujero negro centrada en (cx, cy) del lienzo principal, a la resolución
-   * real de la pantalla.
-   *
-   * @param {number} part 0: mitad de atrás del disco; 1: mitad de delante; 2: anillo de luz.
-   * @param {number} cx Centro horizontal, en píxeles de pantalla.
-   * @param {number} cy Centro vertical, en píxeles de pantalla.
-   * @param {number} R Radio del horizonte, en píxeles de pantalla.
-   * @param {number} k Aplastamiento vertical del disco (1: visto de frente).
-   * @param {number} f0 Radio interior del disco, en radios del horizonte.
-   * @param {number} f1 Radio exterior del disco, en radios del horizonte.
-   * @param {number} alpha Opacidad, de 0 a 1.
-   * @returns {boolean} Falso si no hay WebGL (quien llama dibuja el respaldo 2D).
-   */
-  function draw(part, cx, cy, R, k, f0, f1, alpha) {
-    if (!init() || !(R > 2)) {
-      return false;
-    }
-    let sc = 1;
-    try {
-      const m = ctx.getTransform && ctx.getTransform();
-      sc = m ? Math.hypot(m.a, m.b) : window.devicePixelRatio || 1;
-    } catch (e) {}
-    const ext = part === 2 ? R * 1.3 : R * f1 + 2,
-      w = Math.min(4096, Math.ceil(ext * 2 * sc) + 4),
-      h = part === 2 ? w : Math.min(4096, Math.ceil((R * f1 * k + 2) * 2 * sc) + 4);
-    if (cv.width !== w || cv.height !== h) {
-      cv.width = w;
-      cv.height = h;
-    }
-    gl.viewport(0, 0, w, h);
-    gl.clearColor(0, 0, 0, 0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.uniform2f(U.uSize, w, h);
-    gl.uniform1f(U.uR, R * sc);
-    gl.uniform1f(U.uK, k);
-    gl.uniform1f(U.uR0, f0);
-    gl.uniform1f(U.uR1, f1);
-    gl.uniform1f(U.uT, t);
-    gl.uniform1f(U.uAlpha, alpha);
-    gl.uniform1f(U.uPart, part);
-    gl.uniform1f(U.uScale, sc);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    const ga = ctx.globalAlpha;
-    ctx.globalAlpha = 1;
-    ctx.drawImage(cv, cx - w / sc / 2, cy - h / sc / 2, w / sc, h / sc);
-    ctx.globalAlpha = ga;
-    return true;
-  }
-  return { draw };
-})();
+let BHGL;
 
 /**
  * Dibuja el agujero negro de la marca visto casi desde arriba (como en el juego).
@@ -607,7 +471,7 @@ function splashSounds() {
 }
 /** Empieza la presentación: oculta el panel y el HUD y lanza su sonido. */
 function startSplash() {
-  state = 'splash';
+  setState('splash');
   splashT = 0;
   sflared = false;
   sfl = 0;
@@ -633,15 +497,15 @@ function skipSplash() {
  * @param {number} dt Tiempo del cuadro, en segundos.
  */
 function updateSplash(dt) {
-  t += dt;
+  setT(t + dt);
   if (state === 'splash') {
     splashT += dt;
   }
-  flash = Math.max(0, flash - dt * 2);
+  setFlash(Math.max(0, flash - dt * 2));
   sfl = Math.max(0, sfl - dt * 1.3);
   if (state === 'splash' && !sflared && splashT >= 5.5) {
     sflared = true;
-    flash = 0.35;
+    setFlash(0.35);
     sfl = 1;
     buzz([30, 40, 80]);
   }
@@ -750,3 +614,189 @@ function renderSplash() {
     ctx.globalAlpha = 1;
   }
 }
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initSplash() {
+  SK = Math.sin((37 * Math.PI) / 180);
+  try {
+    if (document.fonts && document.fonts.load) {
+      document.fonts.load('400 52px Unbounded').then(
+        () => {
+          splashFont = true;
+        },
+        () => {},
+      );
+    }
+  } catch (e) {}
+  BHGL = (() => {
+    let cv = null,
+      gl = null,
+      pr = null,
+      U = {},
+      ok = null;
+    const FS = `precision highp float;
+    uniform vec2 uSize; uniform float uR, uK, uR0, uR1, uT, uAlpha, uPart, uScale;
+    vec3 bcol(float b){ b = clamp(b, 0., 1.);
+      vec3 c0 = vec3(50.,10.,4.)/255., c1 = vec3(150.,38.,8.)/255., c2 = vec3(255.,100.,28.)/255., c3 = vec3(255.,196.,96.)/255., c4 = vec3(255.,246.,222.)/255.;
+      if (b < .35) return mix(c0, c1, b/.35); if (b < .6) return mix(c1, c2, (b - .35)/.25); if (b < .82) return mix(c2, c3, (b - .6)/.22); return mix(c3, c4, (b - .82)/.18); }
+    float bbright(float th, float r, float r0, float r1){ float rad = 1. - (r - r0)/(r1 - r0), dop = .5 - .5*cos(th), s = .89 + .11*sin(th*5. + r/uR*7. - uT*2.4*pow(r0/r, 1.5));   // el dibujo del disco escala con su tamaño: no se vuelve un disco de vinilo al crecer
+      return (.25 + .75*pow(max(rad, 0.), .8))*(.4 + .6*dop)*s; }
+    void main(){
+      vec2 p = (gl_FragCoord.xy - .5*uSize); p.y = -p.y;           // y hacia abajo, como el lienzo 2D
+      vec4 o = vec4(0.);
+      if (uPart < 1.5){                                             // disco: 0 = mitad de atrás (arriba), 1 = mitad de delante (abajo)
+        float hm = uPart < .5 ? 1. - smoothstep(-.5, .5, p.y) : smoothstep(-1.5, -.5, p.y);   // mitades complementarias: sin costura
+        float r = length(vec2(p.x, p.y/uK)), th = atan(p.y/uK, p.x);
+        float r0 = uR*uR0, r1 = uR*uR1;
+        if (r >= r0 - 1. && r <= r1 + 1.){
+          float fade = min(1., (r1 - r)/(uR*.35) + .15)*uAlpha;
+          float a = 1. - pow(1. - clamp(fade, 0., 1.), 2.2);
+          a *= smoothstep(r0 - 1., r0 + 1., r)*smoothstep(r1 + 1., r1 - 1., r)*hm;
+          vec3 c = bcol(bbright(th, r, r0, r1)); c = clamp(mix(vec3(dot(c, vec3(.299,.587,.114))), c, 1.12), 0., 1.);
+          o = vec4(c*a, a);
+        }
+      } else {                                                      // la luz curvada alrededor de la esfera
+        float rho = length(p), ph = atan(p.y, p.x), up = .5 - .5*sin(ph);
+        float q = (rho/uR - 1.03)/(.08 + .16*up);
+        if (q >= -.05 && q <= 1.05){
+          float rd = uR*1.35 + clamp(q, 0., 1.)*uR*(2.05 - 1.35);
+          float a = uAlpha*(1. - clamp(q, 0., 1.)*.6)*(.45 + .45*up);
+          a = 1. - pow(1. - clamp(a, 0., 1.), .75/(.08 + .16*up));   // tantas capas como el dibujo original
+          a *= smoothstep(-.05, .02, q)*smoothstep(1.05, .97, q);
+          vec3 c = bcol(bbright(ph, rd, uR*1.35, uR*2.05)); c = clamp(mix(vec3(dot(c, vec3(.299,.587,.114))), c, 1.12), 0., 1.);
+          o = vec4(c*a, a);
+        }
+      }
+      gl_FragColor = o;
+    }`;
+    function init() {
+      if (ok !== null) {
+        return ok;
+      }
+      try {
+        cv = document.createElement('canvas');
+        gl = cv.getContext('webgl', { premultipliedAlpha: true, alpha: true, antialias: false });
+        if (!gl) {
+          ok = false;
+          return ok;
+        }
+        const sh = (t, src) => {
+          const o = gl.createShader(t);
+          gl.shaderSource(o, src);
+          gl.compileShader(o);
+          if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) {
+            throw new Error(gl.getShaderInfoLog(o));
+          }
+          return o;
+        };
+        pr = gl.createProgram();
+        gl.attachShader(
+          pr,
+          sh(gl.VERTEX_SHADER, 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'),
+        );
+        gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS));
+        gl.linkProgram(pr);
+        if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) {
+          throw new Error('link');
+        }
+        gl.useProgram(pr);
+        const b = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, b);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
+          gl.STATIC_DRAW,
+        );
+        const l = gl.getAttribLocation(pr, 'p');
+        gl.enableVertexAttribArray(l);
+        gl.vertexAttribPointer(l, 2, gl.FLOAT, false, 0, 0);
+        ['uSize', 'uR', 'uK', 'uR0', 'uR1', 'uT', 'uAlpha', 'uPart', 'uScale'].forEach(
+          n => (U[n] = gl.getUniformLocation(pr, n)),
+        );
+        ok = true;
+      } catch (e) {
+        ok = false;
+        try {
+          console.warn('BHGL', e && e.message);
+        } catch (_) {}
+      }
+      return ok;
+    }
+    /**
+     * Dibuja una parte del agujero negro centrada en (cx, cy) del lienzo principal, a la resolución
+     * real de la pantalla.
+     *
+     * @param {number} part 0: mitad de atrás del disco; 1: mitad de delante; 2: anillo de luz.
+     * @param {number} cx Centro horizontal, en píxeles de pantalla.
+     * @param {number} cy Centro vertical, en píxeles de pantalla.
+     * @param {number} R Radio del horizonte, en píxeles de pantalla.
+     * @param {number} k Aplastamiento vertical del disco (1: visto de frente).
+     * @param {number} f0 Radio interior del disco, en radios del horizonte.
+     * @param {number} f1 Radio exterior del disco, en radios del horizonte.
+     * @param {number} alpha Opacidad, de 0 a 1.
+     * @returns {boolean} Falso si no hay WebGL (quien llama dibuja el respaldo 2D).
+     */
+    function draw(part, cx, cy, R, k, f0, f1, alpha) {
+      if (!init() || !(R > 2)) {
+        return false;
+      }
+      let sc = 1;
+      try {
+        const m = ctx.getTransform && ctx.getTransform();
+        sc = m ? Math.hypot(m.a, m.b) : window.devicePixelRatio || 1;
+      } catch (e) {}
+      const ext = part === 2 ? R * 1.3 : R * f1 + 2,
+        w = Math.min(4096, Math.ceil(ext * 2 * sc) + 4),
+        h = part === 2 ? w : Math.min(4096, Math.ceil((R * f1 * k + 2) * 2 * sc) + 4);
+      if (cv.width !== w || cv.height !== h) {
+        cv.width = w;
+        cv.height = h;
+      }
+      gl.viewport(0, 0, w, h);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.uniform2f(U.uSize, w, h);
+      gl.uniform1f(U.uR, R * sc);
+      gl.uniform1f(U.uK, k);
+      gl.uniform1f(U.uR0, f0);
+      gl.uniform1f(U.uR1, f1);
+      gl.uniform1f(U.uT, t);
+      gl.uniform1f(U.uAlpha, alpha);
+      gl.uniform1f(U.uPart, part);
+      gl.uniform1f(U.uScale, sc);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      const ga = ctx.globalAlpha;
+      ctx.globalAlpha = 1;
+      ctx.drawImage(cv, cx - w / sc / 2, cy - h / sc / 2, w / sc, h / sc);
+      ctx.globalAlpha = ga;
+      return true;
+    }
+    return { draw };
+  })();
+}
+
+/**
+ * Cambia `sfl` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setSfl(value) {
+  sfl = value;
+  return value;
+}
+
+export {
+  BR0,
+  BR1,
+  SK,
+  bhCore,
+  bhDiskK,
+  brandHole,
+  drawLogo,
+  renderSplash,
+  sfl,
+  skipSplash,
+  splashT,
+  updateSplash,
+};

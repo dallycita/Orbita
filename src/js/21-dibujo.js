@@ -4,162 +4,47 @@
  * Los asteroides se dibujan una vez en imágenes pequeñas (8 formas × 12 giros × tamaño) y en el
  * juego solo se copian, así va rápido incluso en celulares.
  */
+import { BONE, CX, CY, DPR, H, PR, S, W, clamp, ctx, frac } from './01-pantalla-y-utilidades.js';
+import { AC, ROOT } from './02-audio.js';
+import {
+  camLevel,
+  charge,
+  jumping,
+  level,
+  pLevel,
+  setCamLevel,
+  state,
+} from './06-record-y-estado.js';
+import { chargeMax, sizeK } from './07-planetas.js';
+import {
+  chargeFlash,
+  hintT,
+  particles,
+  pipFlash,
+  readyT,
+  t,
+  tutorial,
+} from './08-partida-estado.js';
+import {
+  WH_IN,
+  WH_OUT,
+  drawInside,
+  setHideEarth,
+  setViewInside,
+  wh,
+  whShock,
+} from './13-agujero-de-gusano.js';
+import { bend } from './14-lente-gravitacional.js';
+import { renderScene } from './22-viaje-sistema-solar.js';
+import { doblesHechos } from './23-intro.js';
+import { muted } from './26-pantalla-inicio.js';
+import { uiOut, uiTone } from './28-sonidos-interfaz.js';
+import { PLGL, drawBigPlanet } from './29-planetas-hd.js';
+
 // Asteroides en 3D con WebGL, con la misma luz cálida del disco del agujero negro que los
 // planetas. Cada roca es un elipsoide deformado con ruido, con cráteres hundidos de borde
 // levantado, calculado con trazado de rayos.
-const ASTGL = (() => {
-  let cv = null,
-    gl = null,
-    pr = null,
-    U = {},
-    ok = null;
-  const FS = `precision highp float;
-  uniform vec2 uRes; uniform float uSeed, uAng; uniform vec3 uAx, uE, uLC;
-  float h31(vec3 p){ p = fract(p*vec3(.1031, .11369, .13787)); p += dot(p, p.yzx + 19.19); return fract((p.x + p.y)*p.z); }
-  float n3(vec3 p){ vec3 i = floor(p), f = fract(p); f = f*f*(3. - 2.*f);
-    return mix(mix(mix(h31(i), h31(i + vec3(1,0,0)), f.x), mix(h31(i + vec3(0,1,0)), h31(i + vec3(1,1,0)), f.x), f.y),
-               mix(mix(h31(i + vec3(0,0,1)), h31(i + vec3(1,0,1)), f.x), mix(h31(i + vec3(0,1,1)), h31(i + vec3(1,1,1)), f.x), f.y), f.z); }
-  float fbm(vec3 p){ float s = 0., a = .5; for (int i = 0; i < 5; i++){ s += a*n3(p); p = p*2.03 + vec3(1.7, 9.2, 3.1); a *= .5; } return s; }
-  mat3 rotA(vec3 ax, float a){ ax = normalize(ax); float c = cos(a), s = sin(a), C = 1. - c;
-    return mat3(c + ax.x*ax.x*C, ax.y*ax.x*C + ax.z*s, ax.z*ax.x*C - ax.y*s,
-                ax.x*ax.y*C - ax.z*s, c + ax.y*ax.y*C, ax.z*ax.y*C + ax.x*s,
-                ax.x*ax.z*C + ax.y*s, ax.y*ax.z*C - ax.x*s, c + ax.z*ax.z*C); }
-  float craters(vec3 p){
-    vec3 q = normalize(p); float h = 0.;
-    for (int i = 0; i < 16; i++){ float fi = float(i);
-      vec3 c = normalize(vec3(h31(vec3(fi, uSeed, 1.)) - .5, h31(vec3(fi, uSeed, 2.)) - .5, h31(vec3(fi, uSeed, 3.)) - .5));
-      float r = i < 5 ? .2 + .26*h31(vec3(fi, uSeed, 4.)) : .06 + .1*h31(vec3(fi, uSeed, 4.)), d = length(q - c)/r;
-      h += (d < 1. ? (d*d - 1.)*r*.55 : 0.) + r*.22*exp(-pow((d - 1.)*3.2, 2.)); }   // cuenco hundido y borde levantado
-    return h;
-  }
-  float sdf(vec3 p){ return (length(p/uE) - 1.)*.75 - .26*(fbm(p*1.1 + uSeed) - .5) - .06*(fbm(p*4.5 + uSeed*2.) - .5) - .018*(n3(p*16. + uSeed) - .5) - craters(p)*.34; }
-  vec3 nrm(vec3 p){ vec2 e = vec2(.004, -.004);
-    return normalize(e.xyy*sdf(p + e.xyy) + e.yyx*sdf(p + e.yyx) + e.yxy*sdf(p + e.yxy) + e.xxx*sdf(p + e.xxx)); }
-  void main(){
-    vec2 uv = (gl_FragCoord.xy/uRes*2. - 1.)*1.45;
-    mat3 R = rotA(uAx, uAng), Ri = rotA(uAx, -uAng);
-    vec3 ro = Ri*vec3(uv, 2.5), rd = Ri*vec3(0., 0., -1.);
-    float t = 0., d = 1.; bool hit = false;
-    for (int i = 0; i < 64; i++){ d = sdf(ro + rd*t); if (d < .0015){ hit = true; break; } t += d*.85; if (t > 5.) break; }
-    if (!hit){ gl_FragColor = vec4(0.); return; }
-    vec3 p = ro + rd*t, n = R*nrm(p);                       // normal en el espacio de la pantalla
-    vec3 L = normalize(vec3(0., -1., .55)), V = vec3(0., 0., 1.);   // la luz viene de abajo: hacia el agujero negro
-    float crd = clamp(-craters(p)*2.2, 0., 1.);
-    float tone = fbm(p*3.1 + uSeed*3.), fine = fbm(p*11. + uSeed);
-    vec3 alb = mix(vec3(.34, .33, .32), vec3(.62, .6, .57), tone)*(.8 + .38*fine)*(1. - .3*crd);   // regolito gris, más oscuro dentro de los cráteres
-    alb = mix(alb, alb*vec3(1.08, .98, .86), smoothstep(.55, .75, fbm(p*1.8 + 7.)));                  // manchas un poco más cálidas
-    float dif = max(dot(n, L), 0.), wrap = max(dot(n, L)*.6 + .4, 0.);
-    float soft = max(dot(n, L)*.5 + .5, 0.);                                                        // luz que envuelve: la sombra no queda negra
-    vec3 col = alb*(uLC*pow(dif, 1.05)*1.15 + uLC*soft*soft*.28 + vec3(.2, .21, .27)*(.65 + .35*n.z));                     // luz del disco + un poco de cielo
-    col += vec3(1., .5, .2)*pow(1. - max(dot(n, V), 0.), 3.)*wrap*.55;                               // borde encendido por el disco
-    col = col/(1. + col*.35); col = pow(col, vec3(.92));
-    gl_FragColor = vec4(col, 1.);
-  }`;
-  function init() {
-    if (ok !== null) {
-      return ok;
-    }
-    ok = false;
-    try {
-      cv = document.createElement('canvas');
-      gl = cv.getContext('webgl', {
-        premultipliedAlpha: false,
-        preserveDrawingBuffer: true,
-        antialias: false,
-      });
-      if (!gl) {
-        return false;
-      }
-      const sh = (ty, src) => {
-        const o = gl.createShader(ty);
-        gl.shaderSource(o, src);
-        gl.compileShader(o);
-        if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) {
-          console.warn('ASTGL', gl.getShaderInfoLog(o));
-          return null;
-        }
-        return o;
-      };
-      const v = sh(
-          gl.VERTEX_SHADER,
-          'attribute vec2 aP; void main(){ gl_Position = vec4(aP, 0., 1.); }',
-        ),
-        f = sh(gl.FRAGMENT_SHADER, FS);
-      if (!v || !f) {
-        return false;
-      }
-      pr = gl.createProgram();
-      gl.attachShader(pr, v);
-      gl.attachShader(pr, f);
-      gl.bindAttribLocation(pr, 0, 'aP');
-      gl.linkProgram(pr);
-      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) {
-        return false;
-      }
-      const b = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, b);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-      ['uRes', 'uSeed', 'uAng', 'uAx', 'uE', 'uLC'].forEach(
-        k => (U[k] = gl.getUniformLocation(pr, k)),
-      );
-      ok = true;
-    } catch (e) {
-      ok = false;
-    }
-    return ok;
-  }
-  /**
-   * Dibuja una roca en una imagen, a doble resolución y luego reducida para suavizar los bordes.
-   *
-   * @param {number} shape Forma, de 0 a 7.
-   * @param {number} frame Giro, de 0 a 11 (doceavos de vuelta).
-   * @param {number} sz Lado de la imagen, en píxeles reales.
-   * @returns {HTMLCanvasElement|null} La imagen, o null sin WebGL.
-   */
-  function bake(shape, frame, sz) {
-    if (!init()) {
-      return null;
-    }
-    const big = sz * 2;
-    if (cv.width !== big || cv.height !== big) {
-      cv.width = big;
-      cv.height = big;
-    }
-    gl.viewport(0, 0, big, big);
-    gl.clearColor(0, 0, 0, 0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.useProgram(pr);
-    gl.enableVertexAttribArray(0);
-    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-    const sd = shape * 7.31 + 1.7,
-      fr = x => x - Math.floor(x),
-      rnd = k => fr(Math.sin(sd * 91.7 + k * 12.9898) * 43758.5453);
-    gl.uniform2f(U.uRes, big, big);
-    gl.uniform1f(U.uSeed, sd);
-    gl.uniform1f(U.uAng, (frame / 12) * Math.PI * 2 + shape);
-    gl.uniform3f(U.uAx, 0.3 + rnd(1), 1, 0.2 + rnd(2) * 0.6);
-    gl.uniform3f(U.uE, 1.18 + 0.14 * rnd(5), 0.74 + 0.14 * rnd(3), 0.8 + 0.12 * rnd(4));
-    gl.uniform3f(U.uLC, 1.25, 0.98, 0.82);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-    const out = document.createElement('canvas');
-    out.width = out.height = sz;
-    const g = out.getContext('2d');
-    if (!g) {
-      return null;
-    }
-    // Sombra suave detrás, para que la roca se despegue del cielo (como el halo de los planetas).
-    const hg = g.createRadialGradient(sz / 2, sz / 2, sz * 0.26, sz / 2, sz / 2, sz * 0.44);
-    hg.addColorStop(0, 'rgba(3,4,10,.22)');
-    hg.addColorStop(1, 'rgba(3,4,10,0)');
-    g.fillStyle = hg;
-    g.fillRect(0, 0, sz, sz);
-    g.imageSmoothingEnabled = true;
-    g.imageSmoothingQuality = 'high';
-    g.drawImage(cv, 0, 0, sz, sz);
-    return out;
-  }
-  return { bake, ok: () => init() };
-})();
+let ASTGL;
 const AST_SPR = {},
   AST_B = [8, 12, 16, 22, 30, 40, 54, 72]; // radios fijos en píxeles: la memoria no crece
 /**
@@ -660,17 +545,17 @@ function camViewStep() {
 function render() {
   camViewStep();
   const camL = camLevel;
-  camLevel = camView;
+  setCamLevel(camView);
   try {
     renderFrame();
   } finally {
-    camLevel = camL;
+    setCamLevel(camL);
   }
 }
 /** Elige qué dibujar: fuera, entrando, dentro o saliendo del agujero de gusano (y su onda). */
 function renderFrame() {
-  hideEarth = false;
-  viewInside = false;
+  setHideEarth(false);
+  setViewInside(false);
   if (!wh) {
     renderScene();
     if (whShock) {
@@ -679,10 +564,10 @@ function renderFrame() {
     return;
   }
   if (wh.ph === 'orb') {
-    viewInside = true;
+    setViewInside(true);
     renderScene();
     drawInside(1);
-    viewInside = false;
+    setViewInside(false);
     return;
   }
   if (wh.ph === 'in') {
@@ -690,7 +575,7 @@ function renderFrame() {
       z = 1 + 0.18 * p * p,
       cx = CX + wh.wx * S,
       cy = CY + wh.wy * S;
-    hideEarth = p > 0.62;
+    setHideEarth(p > 0.62);
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(0.12 * p * p);
@@ -698,17 +583,17 @@ function renderFrame() {
     ctx.translate(-cx, -cy);
     renderScene();
     ctx.restore();
-    hideEarth = false;
+    setHideEarth(false);
     // ya adentro: el mismo cielo a través de la garganta
     if (p > 0.8) {
       ctx.save();
       ctx.globalAlpha = (p - 0.8) / 0.2;
-      viewInside = true;
-      hideEarth = true;
+      setViewInside(true);
+      setHideEarth(true);
       renderScene();
       drawInside(1);
-      viewInside = false;
-      hideEarth = false;
+      setViewInside(false);
+      setHideEarth(false);
       ctx.restore();
     }
     return;
@@ -743,3 +628,162 @@ function drawShock() {
   }
   ctx.restore();
 }
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initDrawing() {
+  ASTGL = (() => {
+    let cv = null,
+      gl = null,
+      pr = null,
+      U = {},
+      ok = null;
+    const FS = `precision highp float;
+    uniform vec2 uRes; uniform float uSeed, uAng; uniform vec3 uAx, uE, uLC;
+    float h31(vec3 p){ p = fract(p*vec3(.1031, .11369, .13787)); p += dot(p, p.yzx + 19.19); return fract((p.x + p.y)*p.z); }
+    float n3(vec3 p){ vec3 i = floor(p), f = fract(p); f = f*f*(3. - 2.*f);
+      return mix(mix(mix(h31(i), h31(i + vec3(1,0,0)), f.x), mix(h31(i + vec3(0,1,0)), h31(i + vec3(1,1,0)), f.x), f.y),
+                 mix(mix(h31(i + vec3(0,0,1)), h31(i + vec3(1,0,1)), f.x), mix(h31(i + vec3(0,1,1)), h31(i + vec3(1,1,1)), f.x), f.y), f.z); }
+    float fbm(vec3 p){ float s = 0., a = .5; for (int i = 0; i < 5; i++){ s += a*n3(p); p = p*2.03 + vec3(1.7, 9.2, 3.1); a *= .5; } return s; }
+    mat3 rotA(vec3 ax, float a){ ax = normalize(ax); float c = cos(a), s = sin(a), C = 1. - c;
+      return mat3(c + ax.x*ax.x*C, ax.y*ax.x*C + ax.z*s, ax.z*ax.x*C - ax.y*s,
+                  ax.x*ax.y*C - ax.z*s, c + ax.y*ax.y*C, ax.z*ax.y*C + ax.x*s,
+                  ax.x*ax.z*C + ax.y*s, ax.y*ax.z*C - ax.x*s, c + ax.z*ax.z*C); }
+    float craters(vec3 p){
+      vec3 q = normalize(p); float h = 0.;
+      for (int i = 0; i < 16; i++){ float fi = float(i);
+        vec3 c = normalize(vec3(h31(vec3(fi, uSeed, 1.)) - .5, h31(vec3(fi, uSeed, 2.)) - .5, h31(vec3(fi, uSeed, 3.)) - .5));
+        float r = i < 5 ? .2 + .26*h31(vec3(fi, uSeed, 4.)) : .06 + .1*h31(vec3(fi, uSeed, 4.)), d = length(q - c)/r;
+        h += (d < 1. ? (d*d - 1.)*r*.55 : 0.) + r*.22*exp(-pow((d - 1.)*3.2, 2.)); }   // cuenco hundido y borde levantado
+      return h;
+    }
+    float sdf(vec3 p){ return (length(p/uE) - 1.)*.75 - .26*(fbm(p*1.1 + uSeed) - .5) - .06*(fbm(p*4.5 + uSeed*2.) - .5) - .018*(n3(p*16. + uSeed) - .5) - craters(p)*.34; }
+    vec3 nrm(vec3 p){ vec2 e = vec2(.004, -.004);
+      return normalize(e.xyy*sdf(p + e.xyy) + e.yyx*sdf(p + e.yyx) + e.yxy*sdf(p + e.yxy) + e.xxx*sdf(p + e.xxx)); }
+    void main(){
+      vec2 uv = (gl_FragCoord.xy/uRes*2. - 1.)*1.45;
+      mat3 R = rotA(uAx, uAng), Ri = rotA(uAx, -uAng);
+      vec3 ro = Ri*vec3(uv, 2.5), rd = Ri*vec3(0., 0., -1.);
+      float t = 0., d = 1.; bool hit = false;
+      for (int i = 0; i < 64; i++){ d = sdf(ro + rd*t); if (d < .0015){ hit = true; break; } t += d*.85; if (t > 5.) break; }
+      if (!hit){ gl_FragColor = vec4(0.); return; }
+      vec3 p = ro + rd*t, n = R*nrm(p);                       // normal en el espacio de la pantalla
+      vec3 L = normalize(vec3(0., -1., .55)), V = vec3(0., 0., 1.);   // la luz viene de abajo: hacia el agujero negro
+      float crd = clamp(-craters(p)*2.2, 0., 1.);
+      float tone = fbm(p*3.1 + uSeed*3.), fine = fbm(p*11. + uSeed);
+      vec3 alb = mix(vec3(.34, .33, .32), vec3(.62, .6, .57), tone)*(.8 + .38*fine)*(1. - .3*crd);   // regolito gris, más oscuro dentro de los cráteres
+      alb = mix(alb, alb*vec3(1.08, .98, .86), smoothstep(.55, .75, fbm(p*1.8 + 7.)));                  // manchas un poco más cálidas
+      float dif = max(dot(n, L), 0.), wrap = max(dot(n, L)*.6 + .4, 0.);
+      float soft = max(dot(n, L)*.5 + .5, 0.);                                                        // luz que envuelve: la sombra no queda negra
+      vec3 col = alb*(uLC*pow(dif, 1.05)*1.15 + uLC*soft*soft*.28 + vec3(.2, .21, .27)*(.65 + .35*n.z));                     // luz del disco + un poco de cielo
+      col += vec3(1., .5, .2)*pow(1. - max(dot(n, V), 0.), 3.)*wrap*.55;                               // borde encendido por el disco
+      col = col/(1. + col*.35); col = pow(col, vec3(.92));
+      gl_FragColor = vec4(col, 1.);
+    }`;
+    function init() {
+      if (ok !== null) {
+        return ok;
+      }
+      ok = false;
+      try {
+        cv = document.createElement('canvas');
+        gl = cv.getContext('webgl', {
+          premultipliedAlpha: false,
+          preserveDrawingBuffer: true,
+          antialias: false,
+        });
+        if (!gl) {
+          return false;
+        }
+        const sh = (ty, src) => {
+          const o = gl.createShader(ty);
+          gl.shaderSource(o, src);
+          gl.compileShader(o);
+          if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) {
+            console.warn('ASTGL', gl.getShaderInfoLog(o));
+            return null;
+          }
+          return o;
+        };
+        const v = sh(
+            gl.VERTEX_SHADER,
+            'attribute vec2 aP; void main(){ gl_Position = vec4(aP, 0., 1.); }',
+          ),
+          f = sh(gl.FRAGMENT_SHADER, FS);
+        if (!v || !f) {
+          return false;
+        }
+        pr = gl.createProgram();
+        gl.attachShader(pr, v);
+        gl.attachShader(pr, f);
+        gl.bindAttribLocation(pr, 0, 'aP');
+        gl.linkProgram(pr);
+        if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) {
+          return false;
+        }
+        const b = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, b);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+        ['uRes', 'uSeed', 'uAng', 'uAx', 'uE', 'uLC'].forEach(
+          k => (U[k] = gl.getUniformLocation(pr, k)),
+        );
+        ok = true;
+      } catch (e) {
+        ok = false;
+      }
+      return ok;
+    }
+    /**
+     * Dibuja una roca en una imagen, a doble resolución y luego reducida para suavizar los bordes.
+     *
+     * @param {number} shape Forma, de 0 a 7.
+     * @param {number} frame Giro, de 0 a 11 (doceavos de vuelta).
+     * @param {number} sz Lado de la imagen, en píxeles reales.
+     * @returns {HTMLCanvasElement|null} La imagen, o null sin WebGL.
+     */
+    function bake(shape, frame, sz) {
+      if (!init()) {
+        return null;
+      }
+      const big = sz * 2;
+      if (cv.width !== big || cv.height !== big) {
+        cv.width = big;
+        cv.height = big;
+      }
+      gl.viewport(0, 0, big, big);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.useProgram(pr);
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+      const sd = shape * 7.31 + 1.7,
+        fr = x => x - Math.floor(x),
+        rnd = k => fr(Math.sin(sd * 91.7 + k * 12.9898) * 43758.5453);
+      gl.uniform2f(U.uRes, big, big);
+      gl.uniform1f(U.uSeed, sd);
+      gl.uniform1f(U.uAng, (frame / 12) * Math.PI * 2 + shape);
+      gl.uniform3f(U.uAx, 0.3 + rnd(1), 1, 0.2 + rnd(2) * 0.6);
+      gl.uniform3f(U.uE, 1.18 + 0.14 * rnd(5), 0.74 + 0.14 * rnd(3), 0.8 + 0.12 * rnd(4));
+      gl.uniform3f(U.uLC, 1.25, 0.98, 0.82);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      const out = document.createElement('canvas');
+      out.width = out.height = sz;
+      const g = out.getContext('2d');
+      if (!g) {
+        return null;
+      }
+      // Sombra suave detrás, para que la roca se despegue del cielo (como el halo de los planetas).
+      const hg = g.createRadialGradient(sz / 2, sz / 2, sz * 0.26, sz / 2, sz / 2, sz * 0.44);
+      hg.addColorStop(0, 'rgba(3,4,10,.22)');
+      hg.addColorStop(1, 'rgba(3,4,10,0)');
+      g.fillStyle = hg;
+      g.fillRect(0, 0, sz, sz);
+      g.imageSmoothingEnabled = true;
+      g.imageSmoothingQuality = 'high';
+      g.drawImage(cv, 0, 0, sz, sz);
+      return out;
+    }
+    return { bake, ok: () => init() };
+  })();
+}
+
+export { astPrebake, drawAst, drawCharge, drawEarth, drawPowerAura, powerReadySound, render };

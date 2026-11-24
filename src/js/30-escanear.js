@@ -2,6 +2,10 @@
  * Escáner de la pantalla de planetas: el planeta gira, se encoge y aparecen sus datos reales y
  * cómo se siente en el juego. El dibujo del escaneo está en 29-planetas-hd.
  */
+import { AC, ROOT } from './02-audio.js';
+import { muted } from './26-pantalla-inicio.js';
+import { uiOut, uiTone } from './28-sonidos-interfaz.js';
+import { elPl } from './29-planetas-hd.js';
 
 // scanOn: escaneo activo; scanK: avance de la animación, de 0 a 1; pRot: giro del planeta en
 // radianes; scanLineT: avance de la línea de luz; scanApplyAt: cuándo crecen las barras
@@ -137,3 +141,70 @@ function setScan(on) {
     scanApplyAt = performance.now() + 650;
   }
 }
+
+/**
+ * Cambia `pRot` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setPRot(value) {
+  pRot = value;
+  return value;
+}
+
+/**
+ * Cambia `scanApplyAt` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setScanApplyAt(value) {
+  scanApplyAt = value;
+  return value;
+}
+
+/**
+ * Cambia `scanK` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setScanK(value) {
+  scanK = value;
+  return value;
+}
+
+/**
+ * Cambia `scanLineT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setScanLineT(value) {
+  scanLineT = value;
+  return value;
+}
+
+/**
+ * Cambia `scanOn` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setScanOn(value) {
+  scanOn = value;
+  return value;
+}
+
+export {
+  STAT_ROWS,
+  applyScanBars,
+  pRot,
+  scanApplyAt,
+  scanK,
+  scanLineT,
+  scanOn,
+  setScan,
+  statWords,
+};

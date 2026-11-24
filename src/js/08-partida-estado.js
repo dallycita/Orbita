@@ -2,16 +2,12 @@
  * Estado compartido de la partida: contadores, tutorial, gestos, rachas, reloj del juego (`t`) y
  * listas de efectos en pantalla. Solo declara variables; las cambian muchos archivos.
  */
+import { GOAL } from './06-record-y-estado.js';
 
 // winT: segundos desde que se ganó; perfCount: saltos perfectos; attempts: intentos guardados
 let winT = 0,
   perfCount = 0,
   attempts = 0;
-try {
-  attempts = parseInt(localStorage.getItem('orbita_p1_intentos') || '0', 10) || 0;
-} catch (e) {
-  attempts = 0;
-}
 // Tutorial: los primeros 10 anillos de la huida, una cosa a la vez.
 // TUT_TYPES da el tipo de cada anillo y TUT_TIPS el consejo que se muestra en él.
 const TUT_GOAL = 10;
@@ -52,20 +48,12 @@ const pipFlash = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 let readyT = 0,
   chargeFlash = 0,
   readyHintDone = false;
-try {
-  readyHintDone = localStorage.getItem('orbita_p1_poderlisto') === '1';
-} catch (e) {}
 // gest: gesto en curso; pending: salto pedido que espera 0,09 s por si el gesto es un
 // deslizamiento (salto doble); pendingT: segundos que lleva esperando
 let gest = null,
   pending = false,
   pendingT = 0;
 let hintsShown = 0;
-try {
-  hintsShown = parseInt(localStorage.getItem('orbita_p1_pista') || '0', 10) || 0;
-} catch (e) {
-  hintsShown = 0;
-}
 let showHint = false,
   hintT = 0;
 let swallow = null,
@@ -94,9 +82,457 @@ let particles = [],
 let sunLevel = -1.6,
   lastEaten = -2;
 // restos que caen en espiral hacia el agujero negro (ángulo en radianes y distancia)
-const debris = Array.from({ length: 60 }, () => ({
-  a: Math.random() * Math.PI * 2,
-  r: 60 + Math.random() * 180,
-}));
+let debris;
 // duración base de un salto entre anillos, en segundos (jumpDur la ajusta según el planeta)
 const JUMP_DUR = 0.12;
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initRunState() {
+  try {
+    attempts = parseInt(localStorage.getItem('orbita_p1_intentos') || '0', 10) || 0;
+  } catch (e) {
+    attempts = 0;
+  }
+  try {
+    readyHintDone = localStorage.getItem('orbita_p1_poderlisto') === '1';
+  } catch (e) {}
+  try {
+    hintsShown = parseInt(localStorage.getItem('orbita_p1_pista') || '0', 10) || 0;
+  } catch (e) {
+    hintsShown = 0;
+  }
+  debris = Array.from({ length: 60 }, () => ({
+    a: Math.random() * Math.PI * 2,
+    r: 60 + Math.random() * 180,
+  }));
+}
+
+/**
+ * Cambia `attempts` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setAttempts(value) {
+  attempts = value;
+  return value;
+}
+
+/**
+ * Cambia `burns` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setBurns(value) {
+  burns = value;
+  return value;
+}
+
+/**
+ * Cambia `canRestart` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setCanRestart(value) {
+  canRestart = value;
+  return value;
+}
+
+/**
+ * Cambia `chargeFlash` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setChargeFlash(value) {
+  chargeFlash = value;
+  return value;
+}
+
+/**
+ * Cambia `culprit` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setCulprit(value) {
+  culprit = value;
+  return value;
+}
+
+/**
+ * Cambia `culpritT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setCulpritT(value) {
+  culpritT = value;
+  return value;
+}
+
+/**
+ * Cambia `deadT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setDeadT(value) {
+  deadT = value;
+  return value;
+}
+
+/**
+ * Cambia `flash` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setFlash(value) {
+  flash = value;
+  return value;
+}
+
+/**
+ * Cambia `gest` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setGest(value) {
+  gest = value;
+  return value;
+}
+
+/**
+ * Cambia `hintT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setHintT(value) {
+  hintT = value;
+  return value;
+}
+
+/**
+ * Cambia `hintsShown` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setHintsShown(value) {
+  hintsShown = value;
+  return value;
+}
+
+/**
+ * Cambia `holeFlare` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setHoleFlare(value) {
+  holeFlare = value;
+  return value;
+}
+
+/**
+ * Cambia `jumpClear` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setJumpClear(value) {
+  jumpClear = value;
+  return value;
+}
+
+/**
+ * Cambia `landPop` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setLandPop(value) {
+  landPop = value;
+  return value;
+}
+
+/**
+ * Cambia `lastEaten` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setLastEaten(value) {
+  lastEaten = value;
+  return value;
+}
+
+/**
+ * Cambia `particles` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setParticles(value) {
+  particles = value;
+  return value;
+}
+
+/**
+ * Cambia `pending` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setPending(value) {
+  pending = value;
+  return value;
+}
+
+/**
+ * Cambia `pendingT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setPendingT(value) {
+  pendingT = value;
+  return value;
+}
+
+/**
+ * Cambia `perfCount` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setPerfCount(value) {
+  perfCount = value;
+  return value;
+}
+
+/**
+ * Cambia `pulse` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setPulse(value) {
+  pulse = value;
+  return value;
+}
+
+/**
+ * Cambia `readyHintDone` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setReadyHintDone(value) {
+  readyHintDone = value;
+  return value;
+}
+
+/**
+ * Cambia `readyT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setReadyT(value) {
+  readyT = value;
+  return value;
+}
+
+/**
+ * Cambia `shake` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setShake(value) {
+  shake = value;
+  return value;
+}
+
+/**
+ * Cambia `showHint` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setShowHint(value) {
+  showHint = value;
+  return value;
+}
+
+/**
+ * Cambia `slowTimer` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setSlowTimer(value) {
+  slowTimer = value;
+  return value;
+}
+
+/**
+ * Cambia `streak` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setStreak(value) {
+  streak = value;
+  return value;
+}
+
+/**
+ * Cambia `sunLevel` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setSunLevel(value) {
+  sunLevel = value;
+  return value;
+}
+
+/**
+ * Cambia `swallow` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setSwallow(value) {
+  swallow = value;
+  return value;
+}
+
+/**
+ * Cambia `t` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setT(value) {
+  t = value;
+  return value;
+}
+
+/**
+ * Cambia `texts` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setTexts(value) {
+  texts = value;
+  return value;
+}
+
+/**
+ * Cambia `timeScale` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setTimeScale(value) {
+  timeScale = value;
+  return value;
+}
+
+/**
+ * Cambia `trail` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setTrail(value) {
+  trail = value;
+  return value;
+}
+
+/**
+ * Cambia `tutorial` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setTutorial(value) {
+  tutorial = value;
+  return value;
+}
+
+/**
+ * Cambia `tutorialDone` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setTutorialDone(value) {
+  tutorialDone = value;
+  return value;
+}
+
+/**
+ * Cambia `winT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setWinT(value) {
+  winT = value;
+  return value;
+}
+
+export {
+  JUMP_DUR,
+  PERFECT,
+  TUT_TIPS,
+  TUT_TYPES,
+  attempts,
+  burns,
+  canRestart,
+  chargeFlash,
+  culprit,
+  culpritT,
+  curGoal,
+  deadT,
+  debris,
+  flash,
+  gest,
+  hintT,
+  hintsShown,
+  holeFlare,
+  jumpClear,
+  landPop,
+  lastEaten,
+  particles,
+  pending,
+  pendingT,
+  perfCount,
+  pipFlash,
+  pulse,
+  readyHintDone,
+  readyT,
+  shake,
+  showHint,
+  slowTimer,
+  streak,
+  sunLevel,
+  swallow,
+  t,
+  texts,
+  timeScale,
+  trail,
+  tutorial,
+  tutorialDone,
+  winT,
+};

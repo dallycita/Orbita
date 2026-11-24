@@ -3,6 +3,92 @@
  * textos, en ese orden (lo de abajo se pinta primero). En el Sistema solar los planetas pasan en el
  * fondo en su orden real.
  */
+import {
+  BONE,
+  CX,
+  CY,
+  H,
+  PR,
+  R0,
+  S,
+  SUN,
+  W,
+  clamp,
+  ctx,
+  frac,
+  reduceMotion,
+  rgba,
+  stars,
+  zoneOf,
+} from './01-pantalla-y-utilidades.js';
+import { dangerFlash, dangerNow } from './03-musica-ritmos.js';
+import {
+  GOAL,
+  appear,
+  astFade,
+  charge,
+  jumping,
+  level,
+  lvl,
+  pAng,
+  pLevel,
+  rings,
+  runRecord,
+  state,
+} from './06-record-y-estado.js';
+import { chargeMax } from './07-planetas.js';
+import {
+  TUT_TIPS,
+  burns,
+  culprit,
+  culpritT,
+  curGoal,
+  debris,
+  flash,
+  holeFlare,
+  landPop,
+  particles,
+  pulse,
+  shake,
+  sunLevel,
+  swallow,
+  t,
+  texts,
+  trail,
+  tutorial,
+  winT,
+} from './08-partida-estado.js';
+import {
+  bassBreath,
+  beatKick,
+  drawCoin,
+  drawNebula,
+  drawPulsar,
+  obsAng,
+  obsRad,
+  stretchAt,
+} from './10-ritmo-y-objetos.js';
+import { skyFlash } from './11-peligros-datos.js';
+import {
+  bhWob,
+  drawPowerFx,
+  drawPowerScene,
+  drawRingPower,
+  setStrainK,
+  strainK,
+  strainNow,
+} from './12-poderes.js';
+import { hideEarth, viewInside, wh } from './13-agujero-de-gusano.js';
+import { bend, bendRad, bendW, drawBendSphere, lensJ, lensP } from './14-lente-gravitacional.js';
+import { drawFlare, drawHazards, drawNova } from './15-peligros.js';
+import { rr } from './16-partida.js';
+import { drawAst, drawCharge, drawPowerAura } from './21-dibujo.js';
+import { introFade } from './23-intro.js';
+import { brandHole, drawLogo } from './24-presentacion.js';
+import { camZoom, homeT, logoT0, setCamZoom } from './27-inicio-animacion.js';
+import { drawPlayer } from './29-planetas-hd.js';
+import { drawAndromeda, drawGalBG, drawMagallanes } from './31-fondos-2d.js';
+import { GLBG, REMOLINO_PHOTO, remolinoSource } from './32-fondos-9-motor.js';
 
 /**
  * Dibuja la escena completa de la partida en el lienzo principal, con temblor y zoom de cámara.
@@ -17,7 +103,7 @@ function renderScene() {
     ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
   }
   if (lvl === 2 && !tutorial && !reduceMotion) {
-    camZoom += (1 + 0.05 * dangerNow() - camZoom) * 0.06;
+    setCamZoom(camZoom + (1 + 0.05 * dangerNow() - camZoom) * 0.06);
     ctx.translate(CX, CY);
     ctx.scale(camZoom, camZoom);
     ctx.translate(-CX, -CY);
@@ -535,7 +621,7 @@ function renderScene() {
       );
       ctx.restore();
     } else {
-      strainK = strainNow();
+      setStrainK(strainNow());
       const sa = Math.atan2(CY - py, CX - px),
         jit = strainK > 0.3 ? (Math.random() - 0.5) * strainK * 1.6 : 0;
       ctx.save();
@@ -675,3 +761,5 @@ function renderScene() {
   }
   drawFlare();
 }
+
+export { renderScene };

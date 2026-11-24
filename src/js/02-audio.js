@@ -4,6 +4,8 @@
  * `AC` es null hasta el primer toque (`initAudio`) o si el navegador no tiene audio: todo lo que
  * suena debe comprobarlo.
  */
+import { muted } from './26-pantalla-inicio.js';
+
 let AC = null,
   master = null,
   musicBus = null,
@@ -14,16 +16,6 @@ let AC = null,
 // Volumen de la música y de los efectos (de 0 a 100), guardados en el navegador.
 let volMus = 100,
   volSfx = 100;
-try {
-  const a = localStorage.getItem('orbita_vol_mus'),
-    b = localStorage.getItem('orbita_vol_sfx');
-  if (a !== null) {
-    volMus = Math.max(0, Math.min(100, +a || 0));
-  }
-  if (b !== null) {
-    volSfx = Math.max(0, Math.min(100, +b || 0));
-  }
-} catch (e) {}
 /**
  * Convierte el volumen del control en ganancia; la curva es cuadrática para que el control se
  * sienta parejo al oído.
@@ -237,3 +229,74 @@ function sub() {
     o.stop(t0 + 1.05);
   } catch (e) {}
 }
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initAudioSettings() {
+  try {
+    const a = localStorage.getItem('orbita_vol_mus'),
+      b = localStorage.getItem('orbita_vol_sfx');
+    if (a !== null) {
+      volMus = Math.max(0, Math.min(100, +a || 0));
+    }
+    if (b !== null) {
+      volSfx = Math.max(0, Math.min(100, +b || 0));
+    }
+  } catch (e) {}
+}
+
+/**
+ * Cambia `shaper` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setShaper(value) {
+  shaper = value;
+  return value;
+}
+
+/**
+ * Cambia `volMus` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setVolMus(value) {
+  volMus = value;
+  return value;
+}
+
+/**
+ * Cambia `volSfx` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setVolSfx(value) {
+  volSfx = value;
+  return value;
+}
+
+export {
+  AC,
+  NOISE,
+  ROOT,
+  SCALE,
+  applyVolumes,
+  cowbell,
+  initAudio,
+  master,
+  musVol,
+  musicBus,
+  noise,
+  noiseHit,
+  outBus,
+  saveVolumes,
+  shaper,
+  sub,
+  suck,
+  thump,
+  volGain,
+  volMus,
+  volSfx,
+};

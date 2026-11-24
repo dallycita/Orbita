@@ -3,6 +3,44 @@
  * adelantado en el reloj de Web Audio, cambia de estilo a mitad de partida y arranca o para.
  * Los cambios de estilo esperan al inicio de una frase de 32 pasos, tras un crescendo de 16.
  */
+import { musicStyle, setMusicStyle } from './01-pantalla-y-utilidades.js';
+import { AC, master, musVol, musicBus } from './02-audio.js';
+import {
+  GAL_CFG,
+  ROOT_A,
+  STEP,
+  SW_AT,
+  andFast,
+  echoBus,
+  impact,
+  musicOn,
+  nextT,
+  riser,
+  riserOn,
+  schedTimer,
+  setAndFast,
+  setKickQueue,
+  setMusicOn,
+  setMusicStart,
+  setNextT,
+  setRiserOn,
+  setSchedTimer,
+  setStep,
+  setSwitchAt,
+  setSwitchMsg,
+  step,
+  stepAndromeda,
+  stepEspacial,
+  stepGalaxy,
+  stepMagallanes,
+  stepPhonk,
+  stepSynthwave,
+  tensionOn,
+} from './03-musica-ritmos.js';
+import { hzDroneStop, hzS, stepCosmos } from './04-musica-horizonte.js';
+import { level, lvl, state } from './06-record-y-estado.js';
+import { tutorial } from './08-partida-estado.js';
+
 /**
  * Programa un paso de la música del estilo actual. A cierta altura de la partida lanza un
  * crescendo y cambia a una versión más rápida (synthwave, o el modo rápido de las galaxias).
@@ -13,14 +51,14 @@
 function scheduleStep(s, t0) {
   if (musicStyle === 'espacial' && state === 'play' && level >= SW_AT) {
     if (!riserOn && s % 32 === 16) {
-      riserOn = true;
+      setRiserOn(true);
       riser(t0, 16 * STEP);
     } else if (riserOn && s % 32 === 0) {
-      riserOn = false;
-      musicStyle = 'synthwave';
+      setRiserOn(false);
+      setMusicStyle('synthwave');
       impact(t0);
-      switchAt = t0;
-      switchMsg = '¡A toda velocidad!';
+      setSwitchAt(t0);
+      setSwitchMsg('¡A toda velocidad!');
     }
   }
   if (
@@ -32,14 +70,14 @@ function scheduleStep(s, t0) {
     !andFast
   ) {
     if (!riserOn && s % 32 === 16) {
-      riserOn = true;
+      setRiserOn(true);
       riser(t0, 16 * STEP);
     } else if (riserOn && s % 32 === 0) {
-      riserOn = false;
-      andFast = true;
+      setRiserOn(false);
+      setAndFast(true);
       impact(t0);
-      switchAt = t0;
-      switchMsg = '¡Ya casi!';
+      setSwitchAt(t0);
+      setSwitchMsg('¡Ya casi!');
     }
   }
   if (musicStyle === 'cosmos') {
@@ -68,12 +106,12 @@ function tick() {
   }
   try {
     if (nextT < AC.currentTime - 0.2) {
-      nextT = AC.currentTime + 0.05;
+      setNextT(AC.currentTime + 0.05);
     }
     while (nextT < AC.currentTime + 0.12) {
       scheduleStep(step, nextT);
-      nextT += STEP;
-      step = (step + 1) % 128;
+      setNextT(nextT + STEP);
+      setStep((step + 1) % 128);
     }
   } catch (e) {}
 }
@@ -83,7 +121,7 @@ function startMusic() {
     return;
   }
   try {
-    musicStyle =
+    setMusicStyle(
       !tutorial && state !== 'home' && state !== 'levels'
         ? lvl >= 3
           ? 'gal' + lvl
@@ -92,21 +130,22 @@ function startMusic() {
             : lvl === 2
               ? 'andromeda'
               : 'cosmos'
-        : 'espacial';
-    riserOn = false;
-    switchAt = 0;
-    andFast = false;
-    musicOn = true;
-    step = 0;
-    nextT = AC.currentTime + 0.08;
-    kickQueue = [];
-    musicStart = nextT;
+        : 'espacial',
+    );
+    setRiserOn(false);
+    setSwitchAt(0);
+    setAndFast(false);
+    setMusicOn(true);
+    setStep(0);
+    setNextT(AC.currentTime + 0.08);
+    setKickQueue([]);
+    setMusicStart(nextT);
     const n = AC.currentTime;
     musicBus.gain.cancelScheduledValues(n);
     musicBus.gain.setValueAtTime(0.0001, n);
     musicBus.gain.exponentialRampToValueAtTime(0.55, n + 0.25);
     if (!schedTimer) {
-      schedTimer = setInterval(tick, 25);
+      setSchedTimer(setInterval(tick, 25));
     }
     galAmbience(musicStyle === 'andromeda');
     if (hzS) {
@@ -194,10 +233,12 @@ function stopMusic(quick) {
     return;
   }
   try {
-    musicOn = false;
+    setMusicOn(false);
     const n = AC.currentTime;
     musicBus.gain.cancelScheduledValues(n);
     musicBus.gain.setValueAtTime(Math.max(musicBus.gain.value, 0.0001), n);
     musicBus.gain.exponentialRampToValueAtTime(0.0001, n + (quick ? 0.06 : 0.35));
   } catch (e) {}
 }
+
+export { startMusic, stopMusic };

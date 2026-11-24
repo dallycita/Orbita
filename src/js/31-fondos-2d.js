@@ -4,6 +4,8 @@
  * Cada fondo se pinta una vez en un canvas aparte por tamaño de pantalla y luego solo se copia,
  * con un giro muy lento y estrellas que titilan encima. Los colores siguen las fotos reales.
  */
+import { CX, CY, H, W, clamp, ctx } from './01-pantalla-y-utilidades.js';
+import { t } from './08-partida-estado.js';
 
 // ---- Dentro de Andrómeda: toda la pantalla es la galaxia (colores reales) ----
 // Núcleo amarillo-blanco de estrellas viejas, brazos espirales azules de estrellas jóvenes,
@@ -159,11 +161,7 @@ function buildAndromeda() {
 }
 // Estrellas que titilan sobre los fondos 2D: posiciones repartidas con la razón áurea (de 0 a 1
 // del ancho y del alto) y fase propia.
-const AND_TW = Array.from({ length: 26 }, (_, i) => ({
-  x: (i * 0.6180339) % 1,
-  y: (i * 0.7548776) % 1,
-  p: i * 1.7,
-}));
+let AND_TW;
 /** Dibuja el fondo de Andrómeda en toda la pantalla (respaldo 2D del fondo WebGL). */
 function drawAndromeda() {
   const c = buildAndromeda();
@@ -740,3 +738,14 @@ function drawGalBG(i) {
   }
   ctx.globalAlpha = 1;
 }
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initBackgrounds2d() {
+  AND_TW = Array.from({ length: 26 }, (_, i) => ({
+    x: (i * 0.6180339) % 1,
+    y: (i * 0.7548776) % 1,
+    p: i * 1.7,
+  }));
+}
+
+export { drawAndromeda, drawGalBG, drawMagallanes };

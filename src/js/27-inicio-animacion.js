@@ -3,6 +3,38 @@
  * una estrella; luego se aleja hasta su tamaño de juego mientras se forma el logotipo.
  * Incluye la música de misterio de los menús. El reloj de la animación es `homeT`, en segundos.
  */
+import {
+  BONE,
+  CX,
+  CY,
+  H,
+  PR,
+  S,
+  SUN,
+  W,
+  buzz,
+  clamp,
+  ctx,
+  reduceMotion,
+  stars,
+} from './01-pantalla-y-utilidades.js';
+import { AC, ROOT, master, noiseHit } from './02-audio.js';
+import { echoBus } from './03-musica-ritmos.js';
+import { sunLevel, t } from './08-partida-estado.js';
+import { rr } from './16-partida.js';
+import { easeIO } from './23-intro.js';
+import { BR0, BR1, SK, bhCore, bhDiskK, drawLogo, setSfl, sfl } from './24-presentacion.js';
+import { muted } from './26-pantalla-inicio.js';
+import {
+  bigSuck,
+  gwChirp,
+  rockIn,
+  showOut,
+  showStop,
+  uiOut,
+  uiTone,
+} from './28-sonidos-interfaz.js';
+import { drawPlayer } from './29-planetas-hd.js';
 
 /**
  * Enciende o apaga la música de misterio de los menús: un zumbido profundo que respira, notas de
@@ -298,7 +330,7 @@ function updateHomeShow(dt) {
   hsBoost = Math.max(0, hsBoost - dt * 0.5);
   hsShake = Math.max(0, hsShake - dt * 20);
   hsJet = Math.max(0, hsJet - dt * 0.75);
-  sfl = Math.max(sfl - dt * 1.3, hsFlare);
+  setSfl(Math.max(sfl - dt * 1.3, hsFlare));
   ROCKS.forEach(([tb, a0, d], i) => {
     if (homeT >= tb && !hsEvents['s' + i]) {
       hsEvents['s' + i] = 1;
@@ -576,3 +608,120 @@ function renderHomeIntro() {
     drawLogo(W / 2, Math.max(120, H * 0.24), Math.min(46, W * 0.1), T - logoT0);
   }
 }
+
+/**
+ * Cambia `camZoom` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setCamZoom(value) {
+  camZoom = value;
+  return value;
+}
+
+/**
+ * Cambia `homeT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setHomeT(value) {
+  homeT = value;
+  return value;
+}
+
+/**
+ * Cambia `hsBoost` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setHsBoost(value) {
+  hsBoost = value;
+  return value;
+}
+
+/**
+ * Cambia `hsEvents` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setHsEvents(value) {
+  hsEvents = value;
+  return value;
+}
+
+/**
+ * Cambia `hsFlare` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setHsFlare(value) {
+  hsFlare = value;
+  return value;
+}
+
+/**
+ * Cambia `hsJet` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setHsJet(value) {
+  hsJet = value;
+  return value;
+}
+
+/**
+ * Cambia `hsRipple` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setHsRipple(value) {
+  hsRipple = value;
+  return value;
+}
+
+/**
+ * Cambia `hsShake` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setHsShake(value) {
+  hsShake = value;
+  return value;
+}
+
+/**
+ * Cambia `logoT0` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setLogoT0(value) {
+  logoT0 = value;
+  return value;
+}
+
+export {
+  HOME_BIG,
+  HOME_IN,
+  camZoom,
+  homeAmbience,
+  homeT,
+  hsBoost,
+  hsEvents,
+  hsFlare,
+  hsJet,
+  hsRipple,
+  hsShake,
+  logoSounds,
+  logoT0,
+  renderHomeIntro,
+  updateHomeShow,
+};

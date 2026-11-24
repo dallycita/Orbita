@@ -4,6 +4,12 @@
  * se suman capas a medida que se sube de anillo (`lv()`).
  * Cada `stepX(s, t0)` programa una semicorchea; el reproductor (05) las llama por adelantado.
  */
+import { buzz, clamp, reduceMotion } from './01-pantalla-y-utilidades.js';
+import { AC, NOISE, ROOT, musicBus, noiseHit, setShaper, shaper } from './02-audio.js';
+import { level, pLevel, state } from './06-record-y-estado.js';
+import { setShake, shake, sunLevel, tutorial } from './08-partida-estado.js';
+import { muted } from './26-pantalla-inicio.js';
+
 // Tempo: STEP es una semicorchea y TB un pulso, en segundos.
 const BPM = 140,
   STEP = 60 / BPM / 4,
@@ -59,7 +65,7 @@ function dHat(t0, open) {
 function d808(t0, semi, dur) {
   const f = (ROOT / 8) * Math.pow(2, semi / 12);
   if (!shaper) {
-    shaper = AC.createWaveShaper();
+    setShaper(AC.createWaveShaper());
     const c = new Float32Array(256);
     for (let i = 0; i < 256; i++) {
       const x = i / 128 - 1;
@@ -442,7 +448,7 @@ function alarmHit(t0, d, first) {
     }
     // vibración y un destello rojo leve en pantalla al ritmo de la alarma
     if (!reduceMotion) {
-      shake = Math.max(shake, 1.5 + 4 * k);
+      setShake(Math.max(shake, 1.5 + 4 * k));
     }
     buzz(first ? [40, 40, 40] : 18);
     dangerFlash = 0.25 + 0.45 * k;
@@ -1210,3 +1216,172 @@ function organ(t0, freqs, dur, gain, bright) {
   trem.start(t0);
   trem.stop(t0 + dur + 0.7);
 }
+
+/**
+ * Cambia `andFast` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setAndFast(value) {
+  andFast = value;
+  return value;
+}
+
+/**
+ * Cambia `dangerFlash` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setDangerFlash(value) {
+  dangerFlash = value;
+  return value;
+}
+
+/**
+ * Cambia `kickQueue` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setKickQueue(value) {
+  kickQueue = value;
+  return value;
+}
+
+/**
+ * Cambia `musicOn` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setMusicOn(value) {
+  musicOn = value;
+  return value;
+}
+
+/**
+ * Cambia `musicStart` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setMusicStart(value) {
+  musicStart = value;
+  return value;
+}
+
+/**
+ * Cambia `nextT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setNextT(value) {
+  nextT = value;
+  return value;
+}
+
+/**
+ * Cambia `riserOn` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setRiserOn(value) {
+  riserOn = value;
+  return value;
+}
+
+/**
+ * Cambia `schedTimer` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setSchedTimer(value) {
+  schedTimer = value;
+  return value;
+}
+
+/**
+ * Cambia `step` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setStep(value) {
+  step = value;
+  return value;
+}
+
+/**
+ * Cambia `switchAt` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setSwitchAt(value) {
+  switchAt = value;
+  return value;
+}
+
+/**
+ * Cambia `switchMsg` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setSwitchMsg(value) {
+  switchMsg = value;
+  return value;
+}
+
+/**
+ * Cambia `tensT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setTensT(value) {
+  tensT = value;
+  return value;
+}
+
+export {
+  GAL_CFG,
+  ROOT_A,
+  STEP,
+  SW_AT,
+  TB,
+  alarmTick,
+  andFast,
+  dKick,
+  dangerFlash,
+  dangerNow,
+  echoBus,
+  impact,
+  kickQueue,
+  lv,
+  musicOn,
+  musicStart,
+  nextT,
+  organ,
+  riser,
+  riserOn,
+  schedTimer,
+  softKick,
+  step,
+  stepAndromeda,
+  stepEspacial,
+  stepGalaxy,
+  stepMagallanes,
+  stepPhonk,
+  stepSynthwave,
+  switchAt,
+  switchMsg,
+  tensT,
+  tensionOn,
+  tensionSet,
+};

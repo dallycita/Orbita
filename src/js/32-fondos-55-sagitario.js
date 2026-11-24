@@ -3,6 +3,7 @@
  * centro de nuestra galaxia. 32-fondos-56-final la une con las demás en FS_GX.
  * Todo es código GLSL dentro de un texto: cambiar algo ahí dentro cambia el juego.
  */
+
 const GX_SAGITARIO = `// ===================== SAGITARIO A* =====================
 // centro galáctico: en luz visible nubes doradas y polvo; el compuesto de NASA (Hubble+Spitzer+Chandra) en violeta #3e3775,
 // azul #454b9f, magenta #7e4774 y filamentos dorados; los filamentos de radio de MeerKAT; las estrellas S girando;
@@ -72,3 +73,5 @@ vec3 sgrShadow(vec2 q){
   return col;
 }
 `;
+
+export { GX_SAGITARIO };

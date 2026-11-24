@@ -3,6 +3,14 @@
  * común a todos los niveles y main(). Aquí se arma FS_GX uniendo todas las partes en orden.
  * Todo es código GLSL dentro de textos: cambiar algo ahí dentro cambia el juego.
  */
+import { BG_COMMON } from './32-fondos-1-comun.js';
+import { GX_BASE } from './32-fondos-50-lejanas.js';
+import { GX_CENTAURUS } from './32-fondos-51-centaurus.js';
+import { GX_REMOLINO } from './32-fondos-52-remolino.js';
+import { GX_SOMBRERO } from './32-fondos-53-sombrero.js';
+import { GX_M87 } from './32-fondos-54-m87.js';
+import { GX_SAGITARIO } from './32-fondos-55-sagitario.js';
+
 const GX_FINAL = `// la Vía Láctea vista desde fuera: el regreso a casa
 vec3 homeGalaxy(vec2 q){
   vec2 d = (q - vec2(.5*uRes.x, .74*uRes.y))/(uScale*.36); d = rot(.4 + uT*.01)*d; d.y /= .6;
@@ -94,3 +102,5 @@ void main(){
 // fotos de Hubble, ESO, Webb y el EHT
 const FS_GX =
   BG_COMMON + GX_BASE + GX_CENTAURUS + GX_REMOLINO + GX_SOMBRERO + GX_M87 + GX_SAGITARIO + GX_FINAL;
+
+export { FS_GX };

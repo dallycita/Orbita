@@ -4,6 +4,10 @@
  * motivo que cae medio tono, cada vez más seguido) y la Tierra (frase de cristal que corre).
  * Debajo, una escala de Shepard que sube sin fin; todo con reverberación de varios segundos.
  */
+import { AC, NOISE, ROOT, musicBus, noiseHit } from './02-audio.js';
+import { STEP, andFast, dangerNow, lv, organ, riserOn, softKick } from './03-musica-ritmos.js';
+import { GOAL, state } from './06-record-y-estado.js';
+
 /** Estado del sintetizador: nodos de reverberación, zumbido, bus y sección actual. */
 let hzS = null;
 /**
@@ -445,7 +449,7 @@ function hzSnare(t0, gain) {
 }
 // cuerdas: 3-3-2, el pulso de la persecución
 const HZ_OST = [0, 0, 0, 12, 0, 0, 12, 0, 0, 0, 0, 12, 0, 7, 3, 0];
-const HZ_ACC = new Set([0, 3, 6, 8, 11, 14]);
+let HZ_ACC;
 // ---- la melodía que cambia: un mismo motivo (pegadizo) que se transforma por secciones ----
 // Escala de Sol# menor en grados (0 = Sol#). El motivo se "secuencia" sobre los acordes: misma
 // forma, otra altura.
@@ -834,3 +838,10 @@ function stepCosmos(s, t0) {
     }
   }
 }
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initHorizonMusic() {
+  HZ_ACC = new Set([0, 3, 6, 8, 11, 14]);
+}
+
+export { hzDroneStop, hzS, stepCosmos };

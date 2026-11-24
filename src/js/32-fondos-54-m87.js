@@ -3,6 +3,7 @@
  * negro como lo fotografió el Event Horizon Telescope. `32-fondos-56-final` lo une al shader de
  * fondo. Todo `GX_M87` es texto GLSL: sus comentarios son parte del programa.
  */
+
 const GX_M87 = `// ===================== M87 =====================
 // Hubble: halo crema-amarillo #ca9f72 → #d5c7b8 muy suave, el chorro azul-violeta con nudos, miles de cúmulos globulares;
 // el Event Horizon Telescope: anillo naranja #f38f14 / amarillo #fcd05b / rojo #911c01, más brillante abajo
@@ -63,3 +64,5 @@ vec3 m87Shadow(vec2 q){
   return col;
 }
 `;
+
+export { GX_M87 };

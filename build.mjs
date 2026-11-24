@@ -1,7 +1,6 @@
 // Une los archivos de src/ en un solo index.html (el juego que se publica).
 //   node build.mjs          → genera index.html
 //   node build.mjs --check  → comprueba que index.html está al día
-//   node build.mjs --deps   → escribe docs/dependencias.md (reporte de qué usa cada archivo de los demás)
 //
 // Cómo se arma:
 //   src/index.html     la página, con dos marcas: <!-- @css --> y <!-- @js -->
@@ -14,6 +13,8 @@
 import { readFileSync, readdirSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+const esbuild = createRequire(import.meta.url)('esbuild');
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const SRC = join(ROOT, 'src');
@@ -23,23 +24,24 @@ const files = (dir, ext) => readdirSync(dir).filter(f => f.endsWith(ext)).sort()
 const read = f => readFileSync(f, 'utf8');
 const glue = list => list.map(read).join('');
 
+// el juego: módulos ES desde src/js/main.js, unidos por esbuild en una sola función (nada se escapa a la página)
+function bundle(){
+  const out = esbuild.buildSync({
+    entryPoints: [join(SRC, 'js', 'main.js')], bundle: true, format: 'iife', write: false, target: 'esnext',
+    treeShaking: false, legalComments: 'none', charset: 'utf8', logLevel: 'silent',
+  });
+  return out.outputFiles[0].text;
+}
+
 export function build(){
   const page = read(join(SRC, 'index.html'));
   const css = glue(files(join(SRC, 'css'), '.css'));
-  const js = glue(files(join(SRC, 'js', 'fuera'), '.js')) + '(() => {\n' + glue(files(join(SRC, 'js'), '.js')) + '})();\n';
+  const js = glue(files(join(SRC, 'js', 'fuera'), '.js')) + bundle();
   for (const mark of ['<!-- @css -->\n', '<!-- @js -->\n']) if (page.split(mark).length !== 2) throw new Error('src/index.html debe tener la marca ' + mark.trim() + ' una sola vez');
   return page.replace('<!-- @css -->\n', () => css).replace('<!-- @js -->\n', () => js);
 }
 
-// reporte de dependencias entre archivos (ver herramientas/dependencias.mjs)
-export async function deps(){
-  const D = await import('./herramientas/dependencias.mjs');
-  const doc = join(ROOT, 'docs', 'dependencias.md');
-  mkdirSync(dirname(doc), {recursive: true}); writeFileSync(doc, D.summary(D.analyze(SRC)));
-}
-
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]){
-  if (process.argv.includes('--deps')){ await deps(); console.log('✓ docs/dependencias.md al día'); }
   const html = build();
   if (process.argv.includes('--check')){
     const same = existsSync(OUT) && read(OUT) === html;

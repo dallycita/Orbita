@@ -4,6 +4,13 @@
  * estira en arcos y corre más rápido por su borde; dentro se ve el cielo del otro lado.
  * Dato real: la gravedad dobla la luz (Einstein, 1915); así se calculó el agujero de Interstellar.
  */
+import { CX, CY, H, S, W, ctx } from './01-pantalla-y-utilidades.js';
+import { level, lvl, state } from './06-record-y-estado.js';
+import { t, tutorial } from './08-partida-estado.js';
+import { viewInside } from './13-agujero-de-gusano.js';
+import { hazardTip } from './15-peligros.js';
+import { rr } from './16-partida.js';
+import { GLBG } from './32-fondos-9-motor.js';
 
 // BEND_AT[nivel] = [primer, último] nivel de anillo con lente; WH_K es el anillo de la boca del
 // gusano y WH_EXIT el de salida. BEND_R es el radio de Einstein de la lente.
@@ -158,3 +165,40 @@ function drawBendSphere() {
   ctx.fill();
   ctx.restore();
 }
+
+/**
+ * Cambia `bend` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setBend(value) {
+  bend = value;
+  return value;
+}
+
+/**
+ * Cambia `whRip` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setWhRip(value) {
+  whRip = value;
+  return value;
+}
+
+export {
+  BEND_R,
+  WH_EXIT,
+  WH_K,
+  WORM_COL,
+  bend,
+  bendRad,
+  bendUpdate,
+  bendW,
+  drawBendSphere,
+  lensJ,
+  lensP,
+  whRip,
+};

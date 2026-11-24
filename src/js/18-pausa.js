@@ -4,6 +4,27 @@
  * 3·2·1 para no volver de golpe. Sus sonidos usan otro contexto de audio (`pzAC`), porque `AC`
  * está suspendido mientras dura la pausa.
  */
+import { buzz, elPanel, reduceMotion } from './01-pantalla-y-utilidades.js';
+import {
+  AC,
+  ROOT,
+  applyVolumes,
+  saveVolumes,
+  setVolMus,
+  setVolSfx,
+  volGain,
+  volMus,
+  volSfx,
+} from './02-audio.js';
+import { stopMusic } from './05-musica-reproductor.js';
+import { bestOf, level, lvl, rings, setState, state } from './06-record-y-estado.js';
+import { curGoal, setGest, setPending, tutorial } from './08-partida-estado.js';
+import { COIN_RINGS } from './10-ritmo-y-objetos.js';
+import { sesTries, setSesTries, showTry, start } from './16-partida.js';
+import { LEVELS, lvStarsGot, openLevels } from './25-selector-niveles.js';
+import { muted } from './26-pantalla-inicio.js';
+import { setLast } from './36-bucle-principal.js';
+
 let paused = false,
   pzCount = null,
   pzPanelCls = '',
@@ -63,8 +84,8 @@ function pauseGame() {
     return;
   }
   paused = true;
-  gest = null;
-  pending = false;
+  setGest(null);
+  setPending(false);
   try {
     if (AC && AC.state === 'running') {
       AC.suspend();
@@ -382,7 +403,7 @@ function resumeGame() {
     el.innerHTML = '';
     pzSnd('launch');
     paused = false;
-    last = performance.now();
+    setLast(performance.now());
     try {
       if (AC && AC.state === 'suspended') {
         AC.resume();
@@ -404,7 +425,7 @@ function pzLeave() {
   }
   pzClose();
   paused = false;
-  last = performance.now();
+  setLast(performance.now());
   try {
     if (AC && AC.state === 'suspended') {
       AC.resume();
@@ -428,9 +449,9 @@ function pzSetVol(k, v, row) {
     }
   }
   if (k === 'mus') {
-    volMus = v;
+    setVolMus(v);
   } else {
-    volSfx = v;
+    setVolSfx(v);
   }
   if (row) {
     const ln = row.querySelector('.line'),
@@ -477,12 +498,12 @@ function pausePress(e) {
       pzSnd('again');
       pzLeave();
       start();
-      sesTries++;
+      setSesTries(sesTries + 1);
       showTry(0);
     } else if (A === 'levels') {
       pzSnd('levels');
       pzLeave();
-      state = 'menu';
+      setState('menu');
       stopMusic(true);
       openLevels();
     } else if (A === 'mute-mus' || A === 'mute-sfx') {
@@ -508,15 +529,6 @@ function pausePress(e) {
     pzSetVol(pzDrag.k, ((e.clientX - r.left) / r.width) * 100, row);
   }
 }
-window.addEventListener('pointermove', e => {
-  if (
-    !pzDrag ||
-    (e.pointerId !== undefined && pzDrag.id !== undefined && e.pointerId !== pzDrag.id)
-  ) {
-    return;
-  }
-  pzSetVol(pzDrag.k, ((e.clientX - pzDrag.x0) / pzDrag.w) * 100, pzDrag.row);
-});
 const pzEnd = () => {
   if (pzDrag) {
     pzDrag.row.classList.remove('drag');
@@ -525,11 +537,26 @@ const pzEnd = () => {
     buzz(6);
   }
 };
-window.addEventListener('pointerup', pzEnd);
-window.addEventListener('pointercancel', pzEnd);
-// Si se sale de la app o llega una llamada, el juego se pausa solo.
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden && state === 'play' && !paused) {
-    pauseGame();
-  }
-});
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initPause() {
+  window.addEventListener('pointermove', e => {
+    if (
+      !pzDrag ||
+      (e.pointerId !== undefined && pzDrag.id !== undefined && e.pointerId !== pzDrag.id)
+    ) {
+      return;
+    }
+    pzSetVol(pzDrag.k, ((e.clientX - pzDrag.x0) / pzDrag.w) * 100, pzDrag.row);
+  });
+  window.addEventListener('pointerup', pzEnd);
+  window.addEventListener('pointercancel', pzEnd);
+  // Si se sale de la app o llega una llamada, el juego se pausa solo.
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && state === 'play' && !paused) {
+      pauseGame();
+    }
+  });
+}
+
+export { pauseGame, pausePress, paused, pzCount, pzSnd, resumeGame };

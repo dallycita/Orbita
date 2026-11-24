@@ -3,6 +3,24 @@
  * juego), nebulosas y púlsares, los recorridos de los niveles 4 a 8 y la nova de Andrómeda.
  * Varias constantes (COIN_RINGS, NEB_AT, PUL_AT) se completan más abajo en este mismo archivo.
  */
+import { ctx, frac, reduceMotion } from './01-pantalla-y-utilidades.js';
+import { AC, ROOT } from './02-audio.js';
+import { TB, musicOn, musicStart } from './03-musica-ritmos.js';
+import {
+  level,
+  setAppear,
+  setAstFade,
+  setCrossed,
+  setJumpT,
+  setJumpTarget,
+  setJumping,
+  setLevel,
+} from './06-record-y-estado.js';
+import { curGoal, setPending, t } from './08-partida-estado.js';
+import { rr } from './16-partida.js';
+import { lvStarsGot } from './25-selector-niveles.js';
+import { muted } from './26-pantalla-inicio.js';
+import { uiTone } from './28-sonidos-interfaz.js';
 
 /**
  * Fase dentro del golpe actual de la música.
@@ -69,17 +87,10 @@ function obsRad(ring, o) {
 }
 // Estrellas: la moneda del juego. Aparecen en todos los niveles, se ganan en cada partida y se
 // guardan. COIN_RINGS[nivel] = los niveles de anillo que tienen estrella.
-const COIN_RINGS = [
-  new Set([4, 12, 22, 28, 37, 45]),
-  new Set([4, 9, 15, 18, 32, 40]),
-  new Set([4, 9, 15, 17, 31, 43]),
-];
+let COIN_RINGS;
 let wallet = 0,
   runCoins = 0;
-try {
-  wallet = parseInt(localStorage.getItem('orbita_estrellas') || '0', 10) || 0;
-} catch (e) {}
-const elWallet = document.getElementById('wallet');
+let elWallet;
 /**
  * Actualiza el contador de estrellas de la pantalla.
  *
@@ -120,7 +131,6 @@ function updateWallet(pop) {
   }
   updateWallet.last = got;
 }
-updateWallet(false);
 /** Sonido al recoger una estrella: cuatro notas que suben. */
 function coinChime() {
   if (!AC || muted) {
@@ -175,8 +185,8 @@ function drawCoin(x, y, sz, al) {
 // hacia arriba.
 // Púlsares azules: restos de estrellas que explotaron y giran lanzando dos rayos; su radiación te
 // empuja un anillo hacia abajo.
-const OBJ_NEBULA = new Set([3, 6, 10, 14, 18, 25, 33]);
-const OBJ_PULSAR = new Set([22, 23, 26, 30, 34, 41, 42, 45]);
+let OBJ_NEBULA;
+let OBJ_PULSAR;
 let pushing = false,
   pushT = 0,
   pushFrom = 0,
@@ -304,12 +314,12 @@ function starLaunch() {
   if (up <= 0) {
     return;
   }
-  jumping = true;
-  jumpT = 0;
-  jumpTarget = up;
-  crossed = false;
+  setJumping(true);
+  setJumpT(0);
+  setJumpTarget(up);
+  setCrossed(false);
   starBoost = true;
-  pending = false;
+  setPending(false);
 }
 /** El púlsar empuja al jugador un anillo hacia abajo. */
 function starPush() {
@@ -317,11 +327,11 @@ function starPush() {
     return;
   }
   pushFrom = level;
-  level -= 1;
+  setLevel(level - 1);
   pushing = true;
   pushT = 0;
-  appear = 0;
-  astFade = 0;
+  setAppear(0);
+  setAstFade(0);
 }
 // Niveles 4 a 8 (índices 3 a 7): recorridos de tipos de anillo, objetos y dificultad.
 // Cada recorrido es [cantidad, tipo]; courseMaps lo expande a un tipo por nivel de anillo.
@@ -421,41 +431,11 @@ const COURSES_X = {
   ],
 };
 const courseMaps = {};
-for (const i in COURSES_X) {
-  const m = ['clasico'];
-  for (const [n, ty] of COURSES_X[i]) {
-    for (let j = 0; j < n; j++) {
-      m.push(ty);
-    }
-  }
-  while (m.length < 60) {
-    m.push('clasico');
-  }
-  courseMaps[i] = m;
-}
 // multiplicadores por nivel: velocidad de los anillos y del agujero negro
 const RING_MUL = [1, 1, 1.08, 1.1, 1.12, 1.25, 1.4, 1.55];
 const HOLE_MUL = [1, 0.95, 1.05, 1.12, 1.14, 1.25, 1.35, 1.45];
-const NEB_AT = {
-  3: new Set([2, 9, 16, 23, 42]),
-  4: new Set([2, 8, 16, 30, 45]),
-  5: new Set([2, 8, 16, 25, 36]),
-  6: new Set([2, 9, 18, 28]),
-  7: new Set([2, 14, 17, 29]),
-};
-const PUL_AT = {
-  3: new Set([11, 22, 43]),
-  4: new Set([9, 17, 22, 31, 46]),
-  5: new Set([6, 14, 19, 34, 39]),
-  6: new Set([10, 19, 29, 43]),
-  7: new Set([5, 15, 38, 47]),
-};
-COIN_RINGS[3] = new Set([3, 8, 12, 17, 23, 45]);
-COIN_RINGS[4] = new Set([1, 3, 4, 18, 23, 32]);
-COIN_RINGS[5] = new Set([3, 7, 13, 17, 24, 37]);
-COIN_RINGS[6] = new Set([1, 3, 7, 11, 20, 42]);
-COIN_RINGS[7] = new Set([1, 3, 4, 13, 16, 28]);
-updateWallet(false);
+let NEB_AT;
+let PUL_AT;
 /**
  * Cuánto se estira un anillo en un ángulo: por fuerzas de marea (óvalo que gira) o por la onda de
  * la nova.
@@ -523,3 +503,156 @@ function novaPush(ring, ang, tt) {
   }
   return e * (32 + 24 * Math.exp(-d * 1.1));
 } // en el ángulo exacto de la estrella no hay empuje: ella se queda en su lugar
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initBeatObjects() {
+  COIN_RINGS = [
+    new Set([4, 12, 22, 28, 37, 45]),
+    new Set([4, 9, 15, 18, 32, 40]),
+    new Set([4, 9, 15, 17, 31, 43]),
+  ];
+  try {
+    wallet = parseInt(localStorage.getItem('orbita_estrellas') || '0', 10) || 0;
+  } catch (e) {}
+  elWallet = document.getElementById('wallet');
+  updateWallet(false);
+  OBJ_NEBULA = new Set([3, 6, 10, 14, 18, 25, 33]);
+  OBJ_PULSAR = new Set([22, 23, 26, 30, 34, 41, 42, 45]);
+  for (const i in COURSES_X) {
+    const m = ['clasico'];
+    for (const [n, ty] of COURSES_X[i]) {
+      for (let j = 0; j < n; j++) {
+        m.push(ty);
+      }
+    }
+    while (m.length < 60) {
+      m.push('clasico');
+    }
+    courseMaps[i] = m;
+  }
+  NEB_AT = {
+    3: new Set([2, 9, 16, 23, 42]),
+    4: new Set([2, 8, 16, 30, 45]),
+    5: new Set([2, 8, 16, 25, 36]),
+    6: new Set([2, 9, 18, 28]),
+    7: new Set([2, 14, 17, 29]),
+  };
+  PUL_AT = {
+    3: new Set([11, 22, 43]),
+    4: new Set([9, 17, 22, 31, 46]),
+    5: new Set([6, 14, 19, 34, 39]),
+    6: new Set([10, 19, 29, 43]),
+    7: new Set([5, 15, 38, 47]),
+  };
+  COIN_RINGS[3] = new Set([3, 8, 12, 17, 23, 45]);
+  COIN_RINGS[4] = new Set([1, 3, 4, 18, 23, 32]);
+  COIN_RINGS[5] = new Set([3, 7, 13, 17, 24, 37]);
+  COIN_RINGS[6] = new Set([1, 3, 7, 11, 20, 42]);
+  COIN_RINGS[7] = new Set([1, 3, 4, 13, 16, 28]);
+  updateWallet(false);
+}
+
+/**
+ * Cambia `lastBeatIdx` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setLastBeatIdx(value) {
+  lastBeatIdx = value;
+  return value;
+}
+
+/**
+ * Cambia `pushT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setPushT(value) {
+  pushT = value;
+  return value;
+}
+
+/**
+ * Cambia `pushing` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setPushing(value) {
+  pushing = value;
+  return value;
+}
+
+/**
+ * Cambia `runCoins` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setRunCoins(value) {
+  runCoins = value;
+  return value;
+}
+
+/**
+ * Cambia `starBoost` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setStarBoost(value) {
+  starBoost = value;
+  return value;
+}
+
+/**
+ * Cambia `wallet` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setWallet(value) {
+  wallet = value;
+  return value;
+}
+
+export {
+  COIN_RINGS,
+  HOLE_MUL,
+  NEB_AT,
+  NOVA_BAR,
+  OBJ_NEBULA,
+  OBJ_PULSAR,
+  PUL_AT,
+  RING_MUL,
+  bassBreath,
+  beatKick,
+  beatPhase,
+  beatTime,
+  coinChime,
+  courseMaps,
+  drawCoin,
+  drawNebula,
+  drawPulsar,
+  elWallet,
+  lastBeatIdx,
+  novaEnv,
+  novaPush,
+  novaTau,
+  objChime,
+  obsAng,
+  obsRad,
+  placeInGap,
+  pushFrom,
+  pushT,
+  pushing,
+  runCoins,
+  starBoost,
+  starLaunch,
+  starPush,
+  stretchAt,
+  updateWallet,
+  wallet,
+};

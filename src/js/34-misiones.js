@@ -3,6 +3,15 @@
  * Estrellas = habilidad (desbloquean); polvo estelar = constancia (compra). Hay tres misiones
  * diarias que cambian a medianoche. El progreso vive en `MIS` (localStorage `orbita_mis`).
  */
+import { buzz } from './01-pantalla-y-utilidades.js';
+import { AC, ROOT, noise } from './02-audio.js';
+import { PLANETS_P, curPlanet, planetThumb } from './07-planetas.js';
+import { t, tutorial } from './08-partida-estado.js';
+import { COIN_RINGS } from './10-ritmo-y-objetos.js';
+import { LEVELS, lvStarsGot } from './25-selector-niveles.js';
+import { elHome, muted, renderHome } from './26-pantalla-inicio.js';
+import { uiTone } from './28-sonidos-interfaz.js';
+import { PLGL, uiGlass } from './29-planetas-hd.js';
 
 /**
  * Arma el ícono de Misiones del inicio: una constelación de tres estrellas (una por misión del
@@ -507,7 +516,7 @@ function misLeft() {
     String(s - mi * 60).padStart(2, '0')
   );
 }
-const elMis = document.getElementById('missions');
+let elMis;
 /**
  * Abre el panel de Misiones sobre el inicio y actualiza cada segundo la cuenta regresiva (y las
  * misiones si pasa la medianoche con el panel abierto).
@@ -1729,3 +1738,10 @@ function misCanvasDraw(c) {
     glow(cx, cy, R * 0.4, 'rgba(255,194,218,A)', 0.9);
   }
 }
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initMissions() {
+  elMis = document.getElementById('missions');
+}
+
+export { misEvent, misMoons, misOpen, misPlanetDraw, misReady, misWin, openMissions };

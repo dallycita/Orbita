@@ -2,8 +2,31 @@
  * Bucle principal: cada cuadro avanza y dibuja la pantalla actual. Va al final porque usa
  * funciones de casi todos los archivos.
  */
+import { ctx } from './01-pantalla-y-utilidades.js';
+import { state } from './06-record-y-estado.js';
+import { deadT, setT, t } from './08-partida-estado.js';
+import { elWallet } from './10-ritmo-y-objetos.js';
+import { paused } from './18-pausa.js';
+import { update } from './20-logica.js';
+import { astPrebake, render } from './21-dibujo.js';
+import { renderIntro, updateIntro } from './23-intro.js';
+import { renderSplash, updateSplash } from './24-presentacion.js';
+import { elHome } from './26-pantalla-inicio.js';
+import {
+  HOME_IN,
+  homeT,
+  logoSounds,
+  renderHomeIntro,
+  setHomeT,
+  updateHomeShow,
+} from './27-inicio-animacion.js';
+import { renderPlanetsScene } from './29-planetas-hd.js';
+import { drawLevelsBG } from './33-tarjetas-niveles.js';
+import { misOpen, misPlanetDraw } from './34-misiones.js';
+import { MEDIR, medFrame, setMedMid } from './35-medidor.js';
+
 // Momento del cuadro anterior, en milisegundos (`performance.now`).
-let last = performance.now();
+let last;
 /**
  * Un cuadro del juego. El paso de tiempo se limita a 0,05 segundos para que una pausa del
  * navegador no haga saltar la física. Un error en un cuadro se registra sin detener el bucle.
@@ -44,10 +67,10 @@ function frame(now) {
     } else if (state === 'planets') {
       renderPlanetsScene(dt);
     } else if (state === 'levels') {
-      t += dt;
+      setT(t + dt);
       drawLevelsBG();
     } else if (state === 'home' && homeT >= HOME_IN && homeT < HOME_IN + 2.5) {
-      homeT += dt;
+      setHomeT(homeT + dt);
       logoSounds();
       if (
         homeT >= HOME_IN + 0.9 &&
@@ -60,7 +83,7 @@ function frame(now) {
       update(dt);
       render();
     } else if (state === 'home' && homeT < HOME_IN) {
-      homeT += dt;
+      setHomeT(homeT + dt);
       update(dt);
       updateHomeShow(dt);
       renderHomeIntro();
@@ -69,7 +92,7 @@ function frame(now) {
     } else {
       update(dt);
       if (MEDIR) {
-        medMid = performance.now();
+        setMedMid(performance.now());
       }
       render();
     }
@@ -97,4 +120,21 @@ function frame(now) {
     medFrame(now, m0);
   }
 }
-requestAnimationFrame(frame);
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initMainLoop() {
+  last = performance.now();
+}
+
+/**
+ * Cambia `last` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setLast(value) {
+  last = value;
+  return value;
+}
+
+export { frame, last };

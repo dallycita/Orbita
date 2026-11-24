@@ -3,6 +3,7 @@
  * y lóbulos de radio, con los tonos de las fotos de ESO.
  * Es solo texto GLSL: el motor de fondos (32-fondos-9-motor) lo compila junto con lo común.
  */
+
 const GX_CENTAURUS = `// ===================== CENTAURUS A =====================
 // tonos de las fotos de ESO: cuerpo crema-gris #d6c5c1, franja de polvo café con borde naranja, cúmulos azules,
 // regiones rosadas; chorros en rayos X azules (#6a8ad8) y lóbulos naranjas en submilimétrico
@@ -64,3 +65,5 @@ vec3 cenLobes(vec2 q){
   return col;
 }
 `;
+
+export { GX_CENTAURUS };

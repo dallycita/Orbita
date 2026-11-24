@@ -2,6 +2,8 @@
  * Shader GLSL de fondo hecho con una foto real, cuando el nivel tiene una. La foto gira muy
  * despacio y se acerca con la profundidad. Lo usa el motor de fondos (32-fondos-9-motor).
  */
+import { BG_COMMON } from './32-fondos-1-comun.js';
+
 const FS_PHOTO =
   BG_COMMON +
   `
@@ -31,3 +33,5 @@ void main(){
   col *= 1. + uBeat*.08;
   gl_FragColor = vec4(col, 1.);
 }`;
+
+export { FS_PHOTO };

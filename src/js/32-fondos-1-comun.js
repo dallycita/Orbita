@@ -4,6 +4,7 @@
  * es suave) y se copia al lienzo del juego.
  * Es solo texto GLSL: cambiar algo dentro de las plantillas cambia todos los fondos.
  */
+
 // Shader de vértices: un triángulo que cubre toda la pantalla.
 const BG_VS = 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }';
 const BG_COMMON = `
@@ -29,3 +30,5 @@ vec3 stars(vec2 q, float sc, float dens){
   return c;
 }
 `;
+
+export { BG_COMMON, BG_VS };

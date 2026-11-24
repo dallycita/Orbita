@@ -3,6 +3,28 @@
  * dato real, y las funciones para abrir el selector y empezar un nivel.
  * Todos los niveles están abiertos desde el inicio, como en Geometry Dash.
  */
+import { elHud, elPanel } from './01-pantalla-y-utilidades.js';
+import { AC, initAudio } from './02-audio.js';
+import { stopMusic } from './05-musica-reproductor.js';
+import {
+  GOAL,
+  bestOf,
+  setAppear,
+  setBest,
+  setBestRing,
+  setLvl,
+  setState,
+} from './06-record-y-estado.js';
+import { setAllPlanets, setCurPlanet, setMaxPerf, setPlutoOk } from './07-planetas.js';
+import { setAttempts, setHintsShown, setTutorial, setTutorialDone } from './08-partida-estado.js';
+import { setSeenTypes } from './09-recorridos.js';
+import { COIN_RINGS, setWallet, updateWallet } from './10-ritmo-y-objetos.js';
+import { setSesTries, setup } from './16-partida.js';
+import { MENU_HTML, introDrone, setIntroFade, startIntro } from './23-intro.js';
+import { applyMute, openHome, setStoryReturn } from './26-pantalla-inicio.js';
+import { homeAmbience } from './27-inicio-animacion.js';
+import { showStop } from './28-sonidos-interfaz.js';
+import { setLvArts, setLvCanvas } from './33-tarjetas-niveles.js';
 
 /** Los niveles en orden: nombre, dificultad, color, icono, distancia y dato real. */
 const LEVELS = [
@@ -89,105 +111,10 @@ const LEVELS = [
 ];
 /** Si el jugador ya vio la historia de introducción (se guarda en localStorage). */
 let storySeen = false;
-try {
-  storySeen = localStorage.getItem('orbita_p1_historia') === '1';
-} catch (e) {}
-const elLv = document.getElementById('levels');
+let elLv;
 /** Índice del nivel elegido en el selector. */
 let lvIndex = 0;
-const LV_ICONS = {
-  centaurus:
-    '<defs><radialGradient id="g-cen"><stop offset="0" stop-color="#fff2d6"/><stop offset=".5" stop-color="#e8c79a" stop-opacity=".5"/><stop offset="1" stop-color="#d9a76a" stop-opacity="0"/></radialGradient></defs>' +
-    '<path d="M100 100 L60 20 L68 18 Z M100 100 L140 180 L132 182 Z" fill="#9fc6ff" opacity=".45"/><circle cx="100" cy="100" r="62" fill="url(#g-cen)"/>' +
-    '<path d="M38 112 Q100 70 162 88" fill="none" stroke="#2a1a10" stroke-width="16" stroke-linecap="round" opacity=".85"/><path d="M42 110 Q100 74 158 90" fill="none" stroke="#ff8fbf" stroke-width="2" opacity=".5"/>',
-  sombrero:
-    '<defs><radialGradient id="g-som"><stop offset="0" stop-color="#fff6e0"/><stop offset=".45" stop-color="#f0d9b0" stop-opacity=".6"/><stop offset="1" stop-color="#d9b98a" stop-opacity="0"/></radialGradient></defs>' +
-    '<ellipse cx="100" cy="100" rx="70" ry="40" fill="url(#g-som)"/><ellipse cx="100" cy="102" rx="88" ry="16" fill="#c9b08a" opacity=".55"/><ellipse cx="100" cy="106" rx="84" ry="7" fill="#24160d" opacity=".9"/>',
-  m87:
-    '<defs><radialGradient id="g-m87"><stop offset="0" stop-color="#fff4dc"/><stop offset=".4" stop-color="#ffd9a0" stop-opacity=".55"/><stop offset="1" stop-color="#ffb070" stop-opacity="0"/></radialGradient></defs>' +
-    '<circle cx="100" cy="100" r="74" fill="url(#g-m87)"/><path d="M100 100 L176 54 L178 60 Z" fill="#9fc6ff" opacity=".8"/><circle cx="100" cy="100" r="6" fill="#000" stroke="#ff5a1f" stroke-width="2"/>',
-  solar:
-    '<defs><radialGradient id="g-sun"><stop offset="0" stop-color="#fff3cf"/><stop offset=".45" stop-color="#ffd36b"/><stop offset="1" stop-color="#ff9a3d" stop-opacity="0"/></radialGradient></defs>' +
-    '<circle cx="100" cy="100" r="34" fill="url(#g-sun)"/>' +
-    [28, 42, 58, 76, 94]
-      .map(
-        r =>
-          '<circle cx="100" cy="100" r="' +
-          r +
-          '" fill="none" stroke="#ece6d8" stroke-opacity=".16"/>',
-      )
-      .join('') +
-    '<circle cx="100" cy="100" r="14" fill="#ffd36b"/><circle cx="126" cy="88" r="3" fill="#a9a6a0"/><circle cx="66" cy="118" r="4.5" fill="#e3c27a"/>' +
-    '<circle cx="146" cy="128" r="5.5" fill="#3d8bff"/><path d="M143 126 Q146 123 149 126 Q147 130 143 129 Z" fill="#5ccf6b"/><circle cx="48" cy="72" r="4" fill="#c1543a"/>' +
-    '<ellipse cx="170" cy="62" rx="15" ry="4.5" transform="rotate(-18 170 62)" fill="none" stroke="#e6cf8f" stroke-width="2"/><circle cx="170" cy="62" r="7.5" fill="#e6cf8f"/>',
-  andromeda:
-    '<defs><radialGradient id="g-and"><stop offset="0" stop-color="#fff4d6"/><stop offset=".25" stop-color="#e8dcff" stop-opacity=".8"/><stop offset="1" stop-color="#8fa8ff" stop-opacity="0"/></radialGradient></defs>' +
-    '<g transform="rotate(-28 100 100)"><ellipse cx="100" cy="100" rx="88" ry="30" fill="url(#g-and)" opacity=".55"/>' +
-    [84, 66, 48, 30]
-      .map(
-        (r, i) =>
-          '<ellipse cx="100" cy="100" rx="' +
-          r +
-          '" ry="' +
-          r * 0.34 +
-          '" fill="none" stroke="#c9d6ff" stroke-opacity="' +
-          (0.35 + i * 0.12) +
-          '" stroke-width="' +
-          (1.5 + i * 0.4) +
-          '"/>',
-      )
-      .join('') +
-    '<ellipse cx="100" cy="100" rx="16" ry="7" fill="#fff4d6"/></g>' +
-    [
-      [40, 52],
-      [160, 150],
-      [30, 140],
-      [170, 40],
-      [120, 30],
-      [70, 170],
-    ]
-      .map(
-        ([x, y]) => '<circle cx="' + x + '" cy="' + y + '" r="1.4" fill="#ece6d8" opacity=".6"/>',
-      )
-      .join(''),
-  magallanes:
-    '<defs><radialGradient id="g-mag"><stop offset="0" stop-color="#e8f0ff" stop-opacity=".75"/><stop offset="1" stop-color="#8fa8ff" stop-opacity="0"/></radialGradient></defs>' +
-    '<ellipse cx="82" cy="86" rx="62" ry="38" transform="rotate(-18 82 86)" fill="url(#g-mag)"/><ellipse cx="140" cy="140" rx="34" ry="22" transform="rotate(12 140 140)" fill="url(#g-mag)" opacity=".8"/>' +
-    [
-      [70, 80],
-      [92, 92],
-      [60, 98],
-      [100, 72],
-      [84, 104],
-      [132, 138],
-      [146, 144],
-      [140, 130],
-      [52, 74],
-      [112, 88],
-    ]
-      .map(
-        ([x, y], i) =>
-          '<circle cx="' +
-          x +
-          '" cy="' +
-          y +
-          '" r="' +
-          (1.2 + (i % 3) * 0.6) +
-          '" fill="#fff4d6" opacity=".85"/>',
-      )
-      .join(''),
-  remolino:
-    '<defs><radialGradient id="g-rem"><stop offset="0" stop-color="#fff4d6"/><stop offset=".3" stop-color="#d9c8ff" stop-opacity=".6"/><stop offset="1" stop-color="#8fa8ff" stop-opacity="0"/></radialGradient></defs>' +
-    '<circle cx="96" cy="104" r="70" fill="url(#g-rem)" opacity=".45"/>' +
-    '<path d="M96 104 C96 82 126 80 128 104 C131 136 82 146 66 116 C50 84 84 50 124 56 C150 60 168 84 164 110" fill="none" stroke="#c9d6ff" stroke-width="4" stroke-linecap="round" stroke-opacity=".85"/>' +
-    '<path d="M96 104 C96 126 66 128 64 104 C61 72 110 62 126 92 C142 124 108 158 68 152 C42 148 28 124 32 98" fill="none" stroke="#c9d6ff" stroke-width="3" stroke-linecap="round" stroke-opacity=".55"/>' +
-    '<circle cx="96" cy="104" r="8" fill="#fff4d6"/><circle cx="168" cy="44" r="12" fill="url(#g-rem)"/><circle cx="168" cy="44" r="4" fill="#fff4d6"/>',
-  sgr:
-    '<defs><radialGradient id="g-sgr"><stop offset=".45" stop-color="#ff5a1f" stop-opacity=".5"/><stop offset="1" stop-color="#ff5a1f" stop-opacity="0"/></radialGradient></defs>' +
-    '<circle cx="100" cy="100" r="92" fill="url(#g-sgr)"/><circle cx="100" cy="100" r="56" fill="none" stroke="#ffd36b" stroke-width="3" stroke-opacity=".5"/>' +
-    '<circle cx="100" cy="100" r="47" fill="none" stroke="#ff5a1f" stroke-width="12"/><circle cx="100" cy="100" r="40" fill="#000"/>' +
-    '<path d="M60 112 A42 42 0 0 0 140 112" fill="none" stroke="#fff3cf" stroke-width="3" stroke-opacity=".8"/>',
-};
+let LV_ICONS;
 const LV_DATO = [
   'El Sol contiene el 99,8 % de toda la masa del sistema solar.',
   'La Gran Nube de Magallanes tiene unos 30 000 millones de estrellas.',
@@ -338,8 +265,8 @@ function renderLevels() {
     '<div class="foot"><div class="dots">' +
     LEVELS.map(() => '<i></i>').join('') +
     '</div></div>';
-  lvCanvas = elLv.querySelector ? elLv.querySelector('.lvbg') : null;
-  lvArts = elLv.querySelectorAll ? [...elLv.querySelectorAll('.art')] : [];
+  setLvCanvas(elLv.querySelector ? elLv.querySelector('.lvbg') : null);
+  setLvArts(elLv.querySelectorAll ? [...elLv.querySelectorAll('.art')] : []);
   const track = elLv.querySelector ? elLv.querySelector('.track') : null;
   if (!track || !track.addEventListener) {
     return;
@@ -495,18 +422,18 @@ function resetProgress() {
     ].forEach(k => localStorage.removeItem(k));
   } catch (e) {}
   storySeen = false;
-  tutorialDone = true;
-  attempts = 0;
-  bestRing = 0;
-  best = 0;
-  seenTypes = {};
-  hintsShown = 0;
+  setTutorialDone(true);
+  setAttempts(0);
+  setBestRing(0);
+  setBest(0);
+  setSeenTypes({});
+  setHintsShown(0);
   lvIndex = 0;
-  curPlanet = 'tierra';
-  maxPerf = 0;
-  plutoOk = false;
-  allPlanets = false;
-  wallet = 0;
+  setCurPlanet('tierra');
+  setMaxPerf(0);
+  setPlutoOk(false);
+  setAllPlanets(false);
+  setWallet(0);
   updateWallet(false);
   initAudio();
   if (AC && AC.state === 'suspended') {
@@ -515,19 +442,19 @@ function resetProgress() {
   if (elLv) {
     elLv.classList.add('off');
   }
-  storyReturn = null;
+  setStoryReturn(null);
   tutAfterStory = false;
   startIntro();
 }
 /** Abre el selector de niveles: para la música de partida y suena el ambiente del inicio. */
 function openLevels() {
-  tutorial = false;
+  setTutorial(false);
   stopMusic();
   introDrone(false);
   homeAmbience(true);
   applyMute();
   setup();
-  state = 'levels';
+  setState('levels');
   renderLevels();
   if (elLv) {
     elLv.classList.remove('off');
@@ -541,7 +468,7 @@ function openLevels() {
  * @param {number} i Índice del nivel en LEVELS.
  */
 function startLevel(i) {
-  sesTries = 1;
+  setSesTries(1);
   if (!LEVELS[i] || !LEVELS[i].ready) {
     return;
   }
@@ -556,14 +483,173 @@ function startLevel(i) {
   if (elLv) {
     elLv.classList.add('off');
   }
-  lvl = i;
-  tutorial = false;
+  setLvl(i);
+  setTutorial(false);
   pendingTut = false;
   setup();
-  state = 'menu';
-  appear = 0;
-  introFade = 0.5;
+  setState('menu');
+  setAppear(0);
+  setIntroFade(0.5);
   elPanel.innerHTML = MENU_HTML();
   elPanel.classList.add('top');
   elPanel.classList.remove('hide');
 }
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initLevelSelect() {
+  try {
+    storySeen = localStorage.getItem('orbita_p1_historia') === '1';
+  } catch (e) {}
+  elLv = document.getElementById('levels');
+  LV_ICONS = {
+    centaurus:
+      '<defs><radialGradient id="g-cen"><stop offset="0" stop-color="#fff2d6"/><stop offset=".5" stop-color="#e8c79a" stop-opacity=".5"/><stop offset="1" stop-color="#d9a76a" stop-opacity="0"/></radialGradient></defs>' +
+      '<path d="M100 100 L60 20 L68 18 Z M100 100 L140 180 L132 182 Z" fill="#9fc6ff" opacity=".45"/><circle cx="100" cy="100" r="62" fill="url(#g-cen)"/>' +
+      '<path d="M38 112 Q100 70 162 88" fill="none" stroke="#2a1a10" stroke-width="16" stroke-linecap="round" opacity=".85"/><path d="M42 110 Q100 74 158 90" fill="none" stroke="#ff8fbf" stroke-width="2" opacity=".5"/>',
+    sombrero:
+      '<defs><radialGradient id="g-som"><stop offset="0" stop-color="#fff6e0"/><stop offset=".45" stop-color="#f0d9b0" stop-opacity=".6"/><stop offset="1" stop-color="#d9b98a" stop-opacity="0"/></radialGradient></defs>' +
+      '<ellipse cx="100" cy="100" rx="70" ry="40" fill="url(#g-som)"/><ellipse cx="100" cy="102" rx="88" ry="16" fill="#c9b08a" opacity=".55"/><ellipse cx="100" cy="106" rx="84" ry="7" fill="#24160d" opacity=".9"/>',
+    m87:
+      '<defs><radialGradient id="g-m87"><stop offset="0" stop-color="#fff4dc"/><stop offset=".4" stop-color="#ffd9a0" stop-opacity=".55"/><stop offset="1" stop-color="#ffb070" stop-opacity="0"/></radialGradient></defs>' +
+      '<circle cx="100" cy="100" r="74" fill="url(#g-m87)"/><path d="M100 100 L176 54 L178 60 Z" fill="#9fc6ff" opacity=".8"/><circle cx="100" cy="100" r="6" fill="#000" stroke="#ff5a1f" stroke-width="2"/>',
+    solar:
+      '<defs><radialGradient id="g-sun"><stop offset="0" stop-color="#fff3cf"/><stop offset=".45" stop-color="#ffd36b"/><stop offset="1" stop-color="#ff9a3d" stop-opacity="0"/></radialGradient></defs>' +
+      '<circle cx="100" cy="100" r="34" fill="url(#g-sun)"/>' +
+      [28, 42, 58, 76, 94]
+        .map(
+          r =>
+            '<circle cx="100" cy="100" r="' +
+            r +
+            '" fill="none" stroke="#ece6d8" stroke-opacity=".16"/>',
+        )
+        .join('') +
+      '<circle cx="100" cy="100" r="14" fill="#ffd36b"/><circle cx="126" cy="88" r="3" fill="#a9a6a0"/><circle cx="66" cy="118" r="4.5" fill="#e3c27a"/>' +
+      '<circle cx="146" cy="128" r="5.5" fill="#3d8bff"/><path d="M143 126 Q146 123 149 126 Q147 130 143 129 Z" fill="#5ccf6b"/><circle cx="48" cy="72" r="4" fill="#c1543a"/>' +
+      '<ellipse cx="170" cy="62" rx="15" ry="4.5" transform="rotate(-18 170 62)" fill="none" stroke="#e6cf8f" stroke-width="2"/><circle cx="170" cy="62" r="7.5" fill="#e6cf8f"/>',
+    andromeda:
+      '<defs><radialGradient id="g-and"><stop offset="0" stop-color="#fff4d6"/><stop offset=".25" stop-color="#e8dcff" stop-opacity=".8"/><stop offset="1" stop-color="#8fa8ff" stop-opacity="0"/></radialGradient></defs>' +
+      '<g transform="rotate(-28 100 100)"><ellipse cx="100" cy="100" rx="88" ry="30" fill="url(#g-and)" opacity=".55"/>' +
+      [84, 66, 48, 30]
+        .map(
+          (r, i) =>
+            '<ellipse cx="100" cy="100" rx="' +
+            r +
+            '" ry="' +
+            r * 0.34 +
+            '" fill="none" stroke="#c9d6ff" stroke-opacity="' +
+            (0.35 + i * 0.12) +
+            '" stroke-width="' +
+            (1.5 + i * 0.4) +
+            '"/>',
+        )
+        .join('') +
+      '<ellipse cx="100" cy="100" rx="16" ry="7" fill="#fff4d6"/></g>' +
+      [
+        [40, 52],
+        [160, 150],
+        [30, 140],
+        [170, 40],
+        [120, 30],
+        [70, 170],
+      ]
+        .map(
+          ([x, y]) => '<circle cx="' + x + '" cy="' + y + '" r="1.4" fill="#ece6d8" opacity=".6"/>',
+        )
+        .join(''),
+    magallanes:
+      '<defs><radialGradient id="g-mag"><stop offset="0" stop-color="#e8f0ff" stop-opacity=".75"/><stop offset="1" stop-color="#8fa8ff" stop-opacity="0"/></radialGradient></defs>' +
+      '<ellipse cx="82" cy="86" rx="62" ry="38" transform="rotate(-18 82 86)" fill="url(#g-mag)"/><ellipse cx="140" cy="140" rx="34" ry="22" transform="rotate(12 140 140)" fill="url(#g-mag)" opacity=".8"/>' +
+      [
+        [70, 80],
+        [92, 92],
+        [60, 98],
+        [100, 72],
+        [84, 104],
+        [132, 138],
+        [146, 144],
+        [140, 130],
+        [52, 74],
+        [112, 88],
+      ]
+        .map(
+          ([x, y], i) =>
+            '<circle cx="' +
+            x +
+            '" cy="' +
+            y +
+            '" r="' +
+            (1.2 + (i % 3) * 0.6) +
+            '" fill="#fff4d6" opacity=".85"/>',
+        )
+        .join(''),
+    remolino:
+      '<defs><radialGradient id="g-rem"><stop offset="0" stop-color="#fff4d6"/><stop offset=".3" stop-color="#d9c8ff" stop-opacity=".6"/><stop offset="1" stop-color="#8fa8ff" stop-opacity="0"/></radialGradient></defs>' +
+      '<circle cx="96" cy="104" r="70" fill="url(#g-rem)" opacity=".45"/>' +
+      '<path d="M96 104 C96 82 126 80 128 104 C131 136 82 146 66 116 C50 84 84 50 124 56 C150 60 168 84 164 110" fill="none" stroke="#c9d6ff" stroke-width="4" stroke-linecap="round" stroke-opacity=".85"/>' +
+      '<path d="M96 104 C96 126 66 128 64 104 C61 72 110 62 126 92 C142 124 108 158 68 152 C42 148 28 124 32 98" fill="none" stroke="#c9d6ff" stroke-width="3" stroke-linecap="round" stroke-opacity=".55"/>' +
+      '<circle cx="96" cy="104" r="8" fill="#fff4d6"/><circle cx="168" cy="44" r="12" fill="url(#g-rem)"/><circle cx="168" cy="44" r="4" fill="#fff4d6"/>',
+    sgr:
+      '<defs><radialGradient id="g-sgr"><stop offset=".45" stop-color="#ff5a1f" stop-opacity=".5"/><stop offset="1" stop-color="#ff5a1f" stop-opacity="0"/></radialGradient></defs>' +
+      '<circle cx="100" cy="100" r="92" fill="url(#g-sgr)"/><circle cx="100" cy="100" r="56" fill="none" stroke="#ffd36b" stroke-width="3" stroke-opacity=".5"/>' +
+      '<circle cx="100" cy="100" r="47" fill="none" stroke="#ff5a1f" stroke-width="12"/><circle cx="100" cy="100" r="40" fill="#000"/>' +
+      '<path d="M60 112 A42 42 0 0 0 140 112" fill="none" stroke="#fff3cf" stroke-width="3" stroke-opacity=".8"/>',
+  };
+}
+
+/**
+ * Cambia `lvIndex` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setLvIndex(value) {
+  lvIndex = value;
+  return value;
+}
+
+/**
+ * Cambia `pendingTut` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setPendingTut(value) {
+  pendingTut = value;
+  return value;
+}
+
+/**
+ * Cambia `storySeen` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setStorySeen(value) {
+  storySeen = value;
+  return value;
+}
+
+/**
+ * Cambia `tutAfterStory` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setTutAfterStory(value) {
+  tutAfterStory = value;
+  return value;
+}
+
+export {
+  LEVELS,
+  afterSplash,
+  elLv,
+  lvIndex,
+  lvStarsGot,
+  openLevels,
+  pendingTut,
+  resetProgress,
+  startLevel,
+  storySeen,
+  tutAfterStory,
+};

@@ -4,6 +4,57 @@
  * Todo se mide con `introT` (segundos desde el inicio) contra los tiempos `T_*`; las posiciones
  * están en unidades de un sistema de 224 de radio que `SI` escala a la pantalla.
  */
+import {
+  BONE,
+  CX,
+  CY,
+  H,
+  PR,
+  S,
+  SUN,
+  W,
+  ZONES,
+  buzz,
+  chipsHTML,
+  clamp,
+  ctx,
+  elHud,
+  elPanel,
+  reduceMotion,
+  rgba,
+  stars,
+} from './01-pantalla-y-utilidades.js';
+import { AC, master, noise, noiseHit, suck, thump } from './02-audio.js';
+import { lvl, setAppear, setLvl, setState, state } from './06-record-y-estado.js';
+import {
+  flash,
+  holeFlare,
+  pulse,
+  setFlash,
+  setHoleFlare,
+  setPulse,
+  setShake,
+  setT,
+  shake,
+  sunLevel,
+  t,
+  tutorial,
+} from './08-partida-estado.js';
+import { rr } from './16-partida.js';
+import { drawEarth } from './21-dibujo.js';
+import { bhDiskK } from './24-presentacion.js';
+import {
+  LEVELS,
+  openLevels,
+  setStorySeen,
+  setTutAfterStory,
+  tutAfterStory,
+} from './25-selector-niveles.js';
+import { openHome, setStoryReturn, storyReturn } from './26-pantalla-inicio.js';
+import { homeAmbience } from './27-inicio-animacion.js';
+import { PLGL, drawBigPlanet } from './29-planetas-hd.js';
+import { misEvent } from './34-misiones.js';
+
 // Planetas de la intro. r: radio de la órbita y s: tamaño, en unidades de la intro.
 const PLANETS = [
   { n: 'Mercurio', r: 38, s: 3.5, c: '#a9a6a0' },
@@ -60,7 +111,6 @@ function introSetup() {
     }),
   );
 }
-introSetup();
 // true solo la primera vez que se pide cada señal `k`, para disparar sonidos una vez.
 const once = k => (cues[k] ? false : (cues[k] = true));
 const easeIO = x => (x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
@@ -90,9 +140,6 @@ const sunK = () => clamp((introT - T_ARRIVE) / (T_SUN_END - T_ARRIVE), 0, 1);
 // Antes de jugar solo se muestra dónde estás y "toca para escapar"; la ayuda con íconos se muestra
 // hasta que se domina el salto doble (cuenta guardada en `orbita_p1_dobles`).
 let doblesHechos = 0;
-try {
-  doblesHechos = parseInt(localStorage.getItem('orbita_p1_dobles') || '0', 10) || 0;
-} catch (e) {}
 /**
  * Cuenta un salto doble hecho (fuera del tutorial) y avanza la misión de poderes.
  */
@@ -123,7 +170,7 @@ const MENU_HTML = () => {
  */
 function startIntro() {
   homeAmbience(false);
-  state = 'intro';
+  setState('intro');
   introSetup();
   elPanel.classList.add('hide');
   elHud.style.opacity = 0;
@@ -133,7 +180,7 @@ function startIntro() {
 // la escena a la escala del juego. EARTH_W es la velocidad angular de la Tierra en la intro: con
 // la tercera ley de Kepler, proporcional a r^-1,5 respecto de una órbita de 60.
 const introZoomK = () => easeIO(clamp((introT - T_ZOOM) / ZOOM_DUR, 0, 1));
-const EARTH_W = 0.9 * Math.pow(60 / 84, 1.5);
+let EARTH_W;
 const holeGameR = () => Math.max(rr(sunLevel), SUN) * S;
 const zoomZ = () => holeGameR() / (20 * SI);
 const earthEndR = () => (rr(0) * S) / (zoomZ() * SI);
@@ -145,16 +192,16 @@ const zoomF = () => 1 + (zoomZ() - 1) * introZoomK();
  * @param {boolean} skipped true si se saltó; el juego aparece con un fundido más corto.
  */
 function endIntro(skipped) {
-  storySeen = true;
+  setStorySeen(true);
   try {
     localStorage.setItem('orbita_p1_historia', '1');
   } catch (e) {}
   introDrone(false);
-  appear = 0;
+  setAppear(0);
   introFade = skipped ? 0.6 : 0;
   if (storyReturn && !tutAfterStory) {
     const r = storyReturn;
-    storyReturn = null;
+    setStoryReturn(null);
     if (r === 'levels') {
       openLevels();
     } else {
@@ -162,10 +209,10 @@ function endIntro(skipped) {
     }
     return;
   }
-  storyReturn = null;
-  tutAfterStory = false;
-  lvl = 0;
-  state = 'menu';
+  setStoryReturn(null);
+  setTutAfterStory(false);
+  setLvl(0);
+  setState('menu');
   elPanel.innerHTML = MENU_HTML();
   elPanel.classList.add('top');
   elPanel.classList.remove('hide');
@@ -247,11 +294,11 @@ function updateIntro(dt) {
   if (state === 'intro') {
     introT += dt;
   }
-  t += dt;
-  flash = Math.max(0, flash - dt * 2.2);
-  holeFlare = Math.max(0, holeFlare - dt * 1.4);
-  pulse = Math.max(0, pulse - dt * 3.5);
-  shake = Math.max(0, shake - dt * 25);
+  setT(t + dt);
+  setFlash(Math.max(0, flash - dt * 2.2));
+  setHoleFlare(Math.max(0, holeFlare - dt * 1.4));
+  setPulse(Math.max(0, pulse - dt * 3.5));
+  setShake(Math.max(0, shake - dt * 25));
   SI = Math.max(0.4, Math.min(W / 2 / 224, (CY - 80) / 224));
   if (introT >= T_ENTER && once('enter')) {
     noise(1.9, 80, 700, 0.3, 'lowpass');
@@ -259,13 +306,13 @@ function updateIntro(dt) {
   }
   if (introT >= T_ARRIVE && once('arrive')) {
     suck();
-    shake = reduceMotion ? 0 : 6;
+    setShake(reduceMotion ? 0 : 6);
     buzz([30, 30, 30, 30, 60]);
   }
   if (introT >= T_SUN_END && once('disk')) {
-    holeFlare = 1;
-    pulse = 1;
-    flash = 0.5;
+    setHoleFlare(1);
+    setPulse(1);
+    setFlash(0.5);
     thump();
     noise(0.7, 5000, 120, 0.45, 'lowpass');
     buzz(50);
@@ -327,8 +374,8 @@ function updateIntro(dt) {
       }
       if (p.ph >= 1) {
         p.done = true;
-        holeFlare = Math.max(holeFlare, 0.7);
-        pulse = 1;
+        setHoleFlare(Math.max(holeFlare, 0.7));
+        setPulse(1);
         thump();
       }
     } else {
@@ -673,3 +720,36 @@ function renderIntro() {
     ctx.globalAlpha = 1;
   }
 }
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initIntro() {
+  introSetup();
+  try {
+    doblesHechos = parseInt(localStorage.getItem('orbita_p1_dobles') || '0', 10) || 0;
+  } catch (e) {}
+  EARTH_W = 0.9 * Math.pow(60 / 84, 1.5);
+}
+
+/**
+ * Cambia `introFade` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setIntroFade(value) {
+  introFade = value;
+  return value;
+}
+
+export {
+  MENU_HTML,
+  doblesHechos,
+  easeIO,
+  endIntro,
+  introDrone,
+  introFade,
+  noteDouble,
+  renderIntro,
+  startIntro,
+  updateIntro,
+};

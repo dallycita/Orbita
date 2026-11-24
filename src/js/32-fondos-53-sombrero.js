@@ -3,6 +3,7 @@
  * cúmulos globulares, con los colores de la foto del Hubble. `32-fondos-56-final` lo une al
  * shader de fondo. Todo `GX_SOMBRERO` es texto GLSL: sus comentarios son parte del programa.
  */
+
 const GX_SOMBRERO = `// ===================== SOMBRERO M104 =====================
 // Hubble: bulbo plateado con un toque lavanda #d1ccdc, halo gris #8c8687, anillo de polvo café oscuro #2a1e18 con borde
 // cálido #6f5848, y cientos de cúmulos globulares alrededor
@@ -50,3 +51,5 @@ vec3 sombCore(vec2 q){
   return col + vec3(1., .95, .9)*starsD(q, 2.2, .8*exp(-r*5.), 1.) + globs(q*1.3 + 20., .25, .06)*.5;
 }
 `;
+
+export { GX_SOMBRERO };

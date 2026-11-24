@@ -3,6 +3,86 @@
  * estrellas veloces. Los crea al aterrizar, los avanza cada cuadro, detecta si alcanzan al
  * planeta, los dibuja y les pone sonido. Su estado vive en 11-peligros-datos.
  */
+import {
+  BONE,
+  CX,
+  CY,
+  GAP,
+  H,
+  PR,
+  R0,
+  S,
+  W,
+  buzz,
+  clamp,
+  ctx,
+  frac,
+  reduceMotion,
+} from './01-pantalla-y-utilidades.js';
+import { AC, NOISE, ROOT, noise } from './02-audio.js';
+import { TB } from './03-musica-ritmos.js';
+import { camLevel, jumping, level, lvl, pAng, pLevel, rings, state } from './06-record-y-estado.js';
+import { sizeK } from './07-planetas.js';
+import {
+  flash,
+  holeFlare,
+  particles,
+  setFlash,
+  setHoleFlare,
+  setPulse,
+  setShake,
+  setTexts,
+  shake,
+  sunLevel,
+  t,
+  texts,
+  tutorial,
+} from './08-partida-estado.js';
+import { seenTypes } from './09-recorridos.js';
+import {
+  NOVA_BAR,
+  beatKick,
+  beatPhase,
+  beatTime,
+  novaEnv,
+  novaPush,
+  novaTau,
+  obsAng,
+} from './10-ritmo-y-objetos.js';
+import {
+  BEAM_AT,
+  COMET_AT,
+  COMET_TIME,
+  FLARE_AT,
+  SN_AT,
+  beamCount,
+  beams,
+  comets,
+  flareT,
+  flareWarn,
+  hot,
+  hotT,
+  novaSrc,
+  setBeamCount,
+  setBeams,
+  setComets,
+  setFlareT,
+  setFlareWarn,
+  setHot,
+  setHotT,
+  setNovaSrc,
+  setSkyFlash,
+  setSstars,
+  setWaves,
+  skyFlash,
+  sstars,
+  waves,
+} from './11-peligros-datos.js';
+import { rr } from './16-partida.js';
+import { muted } from './26-pantalla-inicio.js';
+import { uiOut, uiTone } from './28-sonidos-interfaz.js';
+import { misEvent } from './34-misiones.js';
+
 // Novas por nivel y anillo: sp es la velocidad de la cáscara (unidades del juego por segundo),
 // per el periodo entre cáscaras en golpes, gaps y gw el número y ancho (radianes) de los huecos,
 // n cuántas cáscaras salen y big marca la gran nova final.
@@ -22,7 +102,7 @@ const NOVA_LIFE = 5.2; // segundos que vive cada cáscara de nova (más en la gr
  * @param {object} s Fuente de nova (de novaSrc); s.big indica la gran nova.
  */
 function novaBurst(s) {
-  shake = Math.max(shake, reduceMotion ? 0 : s.big ? 9 : 3);
+  setShake(Math.max(shake, reduceMotion ? 0 : s.big ? 9 : 3));
   buzz(s.big ? [30, 30, 80] : 18);
   if (AC && !muted) {
     try {
@@ -137,14 +217,14 @@ let waveProx = 0,
   waveBeepT = 0;
 /** Borra todos los peligros activos (al empezar o reiniciar una partida). */
 function hazardsReset() {
-  comets = [];
-  beams = [];
-  flareT = 0;
-  flareWarn = 0;
-  beamCount = 0;
-  waves = [];
-  novaSrc = [];
-  sstars = [];
+  setComets([]);
+  setBeams([]);
+  setFlareT(0);
+  setFlareWarn(0);
+  setBeamCount(0);
+  setWaves([]);
+  setNovaSrc([]);
+  setSstars([]);
 }
 /**
  * Muestra una sola vez (guardado en localStorage) el aviso que explica un peligro nuevo.
@@ -162,7 +242,7 @@ function hazardTip(key, title, sub, col) {
   try {
     localStorage.setItem('orbita_p1_vistos', JSON.stringify(seenTypes));
   } catch (e) {}
-  texts = texts.filter(x => !x.tip);
+  setTexts(texts.filter(x => !x.tip));
   texts.push({ txt: title, x: 0, y: -R0 - 96, life: 2.6, size: 20, col, center: true, tip: true });
   texts.push({
     txt: sub,
@@ -234,7 +314,7 @@ function hazardsOnLand() {
     }
   }
   if (BEAM_AT[lvl] && BEAM_AT[lvl].has(k)) {
-    const tgt = beamCount++ % 2 === 0 ? level + 1 : level;
+    const tgt = (setBeamCount(beamCount + 1) - 1) % 2 === 0 ? level + 1 : level;
     beams.push({ k: tgt, t: 0, warn: 1.2, fire: 0.35, fired: false });
     hazardTip(
       'rayo',
@@ -267,7 +347,7 @@ function hazardsOnLand() {
     novaSpawn(k, NOVA_AT[lvl][k]);
   }
   if (FLARE_AT[lvl] && FLARE_AT[lvl].has(k)) {
-    flareWarn = 0.8;
+    setFlareWarn(0.8);
     hazardTip('llamarada', 'Llamarada', 'El agujero negro te ciega: sigue tu ritmo', '#ffe2b0');
   }
 }
@@ -376,11 +456,11 @@ function waveRelease(w) {
   w.released = true;
   w.k0 = Math.max(sunLevel + 0.35, level - 2.4);
   w.wk = w.k0;
-  shake = Math.max(shake, reduceMotion ? 0 : w.big ? 14 : 6);
-  flash = Math.max(flash, w.big ? 0.55 : 0.25);
+  setShake(Math.max(shake, reduceMotion ? 0 : w.big ? 14 : 6));
+  setFlash(Math.max(flash, w.big ? 0.55 : 0.25));
   buzz(w.big ? [60, 30, 60, 30, 90] : [30, 20, 30]);
   if (w.big) {
-    skyFlash = Math.max(skyFlash, 0.5);
+    setSkyFlash(Math.max(skyFlash, 0.5));
   }
   if (AC && !muted) {
     try {
@@ -447,10 +527,10 @@ function waveBreak(w) {
   w.broken = 0.001;
   const R = rr(w.L);
   if (w.big) {
-    skyFlash = 1;
-    flash = Math.max(flash, 0.6);
-    shake = Math.max(shake, reduceMotion ? 0 : 10);
-    pulse = 1;
+    setSkyFlash(1);
+    setFlash(Math.max(flash, 0.6));
+    setShake(Math.max(shake, reduceMotion ? 0 : 10));
+    setPulse(1);
     buzz([40, 30, 120]);
   }
   for (let i = 0; i < (w.big ? 160 : 64); i++) {
@@ -495,7 +575,7 @@ function waveBreak(w) {
 function waveSafe(w) {
   w.safe = true;
   misEvent('onda');
-  pulse = 1;
+  setPulse(1);
   buzz(10);
   if (AC && !muted) {
     try {
@@ -518,10 +598,10 @@ function waveCatch(w, px, py) {
   if (hot) {
     return 'onda';
   }
-  hot = 1;
-  hotT = 0;
-  shake = reduceMotion ? 0 : 12;
-  flash = 0.45;
+  setHot(1);
+  setHotT(0);
+  setShake(reduceMotion ? 0 : 12);
+  setFlash(0.45);
   buzz([60, 40, 80]);
   for (let i = 0; i < 34; i++) {
     const a = Math.random() * Math.PI * 2,
@@ -581,7 +661,7 @@ function hazardsUpdate(d, px, py) {
   for (const w of waves) {
     w.t += d;
     if (!w.released) {
-      holeFlare = Math.max(holeFlare, 0.2 + 0.4 * Math.abs(Math.sin(w.t * 12)));
+      setHoleFlare(Math.max(holeFlare, 0.2 + 0.4 * Math.abs(Math.sin(w.t * 12))));
       if (w.t >= w.wait) {
         waveRelease(w);
       }
@@ -626,7 +706,7 @@ function hazardsUpdate(d, px, py) {
       }
     }
   }
-  waves = waves.filter(w => !w.over);
+  setWaves(waves.filter(w => !w.over));
   let px0 = 0;
   for (const w of waves) {
     if (w.released && !w.broken && !w.safe && !w.hitDone) {
@@ -655,9 +735,9 @@ function hazardsUpdate(d, px, py) {
     waveBeepT = 0;
   }
   if (hot) {
-    hotT += d;
+    setHotT(hotT + d);
   }
-  skyFlash = Math.max(0, skyFlash - d * 0.9);
+  setSkyFlash(Math.max(0, skyFlash - d * 0.9));
   for (const c of comets) {
     c.t += d;
     if (c.t < c.delay) {
@@ -675,12 +755,12 @@ function hazardsUpdate(d, px, py) {
       }
     }
   }
-  comets = comets.filter(c => c.left > 0 && c.k >= level - 1);
+  setComets(comets.filter(c => c.left > 0 && c.k >= level - 1));
   for (const b of beams) {
     b.t += d;
     if (b.t >= b.warn && !b.fired) {
       b.fired = true;
-      shake = reduceMotion ? 0 : 5;
+      setShake(reduceMotion ? 0 : 5);
       noise(0.35, 5000, 300, 0.35, 'lowpass');
       buzz(30);
     }
@@ -688,16 +768,16 @@ function hazardsUpdate(d, px, py) {
       return 'beam';
     }
   }
-  beams = beams.filter(b => b.t < b.warn + b.fire + 0.3);
+  setBeams(beams.filter(b => b.t < b.warn + b.fire + 0.3));
   if (flareWarn > 0) {
-    flareWarn -= d;
-    holeFlare = Math.max(holeFlare, ((0.8 - Math.max(0, flareWarn)) / 0.8) * 0.7);
+    setFlareWarn(flareWarn - d);
+    setHoleFlare(Math.max(holeFlare, ((0.8 - Math.max(0, flareWarn)) / 0.8) * 0.7));
     if (flareWarn <= 0) {
-      flareT = 0.75;
+      setFlareT(0.75);
       noise(0.5, 7000, 500, 0.3, 'highpass');
     }
   }
-  flareT = Math.max(0, flareT - d);
+  setFlareT(Math.max(0, flareT - d));
   for (const s of sstars) {
     if (level < s.from) {
       continue;
@@ -1069,9 +1149,9 @@ function novaSound() {
   }
   const inBar = ((b % 4) + 4) % 4;
   if (inBar === 0) {
-    shake = Math.max(shake, reduceMotion ? 0 : 4);
+    setShake(Math.max(shake, reduceMotion ? 0 : 4));
     buzz([20, 15, 40]);
-    flash = Math.max(flash, 0.12);
+    setFlash(Math.max(flash, 0.12));
     if (AC && !muted) {
       try {
         const n = AC.currentTime;
@@ -1401,3 +1481,42 @@ function drawFlare() {
   ctx.fillRect(0, 0, W, H);
   ctx.globalAlpha = 1;
 }
+
+/**
+ * Cambia `waveBeepT` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setWaveBeepT(value) {
+  waveBeepT = value;
+  return value;
+}
+
+/**
+ * Cambia `waveProx` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setWaveProx(value) {
+  waveProx = value;
+  return value;
+}
+
+export {
+  NOVA_LIFE,
+  TUNE,
+  drawFlare,
+  drawHazards,
+  drawNova,
+  hazardTip,
+  hazardsOnLand,
+  hazardsReset,
+  hazardsUpdate,
+  novaBurst,
+  novaHit,
+  novaSound,
+  waveBeepT,
+  waveProx,
+};

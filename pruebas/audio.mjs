@@ -63,7 +63,8 @@ const BOT = readFileSync(join(ROOT, 'pruebas', 'bot.js'), 'utf8');
 
 // el mismo mundo falso que la huella visual (azar con semilla, reloj y temporizadores falsos), con sonido encendido
 const INIT = `(() => {
-  let s = 1234567; Math.random = () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0)/4294967296; };
+  window.__rastro = [];
+  let s = 1234567; Math.random = () => { if (window.__RASTRO) window.__rastro.push((new Error().stack.split('\\n')[2] || '').trim().split(' ')[1] + '@' + window.__now); s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0)/4294967296; };
   window.__now = 0; const T0 = Date.UTC(2026, 10, 19, 20, 0, 0); performance.now = () => window.__now;
   const RD = Date; class FD extends RD { constructor(...a){ if (a.length) super(...a); else super(T0 + window.__now); } static now(){ return T0 + window.__now; } } window.Date = FD;
   let id = 0, q = [];
@@ -86,6 +87,17 @@ const INIT = `(() => {
     window.__ACs.push(c); return c;
   };
   window.webkitAudioContext = undefined;
+  // se guardan todos los nodos de sonido: si el navegador limpiara uno sin referencias (por ejemplo un eco que aún
+  // suena), el resultado dependería de cuándo limpia, no del juego
+  window.__keep = []; { const C = BaseAudioContext.prototype; for (const m of Object.getOwnPropertyNames(C).filter(m => m.startsWith('create'))){ const o = C[m]; C[m] = function(...a){ const n = o.apply(this, a); window.__keep.push(n); return n; }; } }
+  if (window.__RASTRO) for (const K of [OscillatorNode, AudioBufferSourceNode]){ const st = K.prototype.start; K.prototype.start = function(when, ...a){ window.__rastro.push('sonido:' + K.name + ':' + (+when || 0).toFixed(5) + ':' + (this.frequency ? this.frequency.value.toFixed(3) : (a[0] || 0).toFixed(5)) + '@' + window.__now); return st.call(this, when, ...a); }; }
+  if (window.__RASTRO){ const P = AudioParam.prototype; for (const m of ['setValueAtTime', 'linearRampToValueAtTime', 'exponentialRampToValueAtTime', 'setTargetAtTime', 'cancelScheduledValues']){ const o = P[m]; P[m] = function(...a){ window.__rastro.push('param:' + m + ':' + a.map(x => (+x).toFixed(5)).join(',') + '@' + window.__now); return o.apply(this, a); }; }
+    const d = Object.getOwnPropertyDescriptor(P, 'value'); Object.defineProperty(P, 'value', {get(){ return d.get.call(this); }, set(v){ window.__rastro.push('param:value:' + (+v).toFixed(5) + '@' + window.__now); d.set.call(this, v); }}); }
+  if (window.__RASTRO){ let nid = 0; const C = BaseAudioContext.prototype; for (const m of Object.getOwnPropertyNames(C).filter(m => m.startsWith('create'))){ const o = C[m]; C[m] = function(...a){ const n = o.apply(this, a); n.__id = m.slice(6) + (++nid); window.__rastro.push('crear:' + n.__id + '@' + window.__now); return n; }; }
+    const cn = AudioNode.prototype.connect; AudioNode.prototype.connect = function(d, ...a){ window.__rastro.push('conectar:' + this.__id + '>' + (d.__id || (d instanceof AudioParam ? 'param' : d.constructor.name)) + '@' + window.__now); return cn.call(this, d, ...a); };
+    for (const [K, props] of [[OscillatorNode, ['type']], [BiquadFilterNode, ['type']], [AudioBufferSourceNode, ['loop', 'buffer']]]) for (const pr of props){ const d = Object.getOwnPropertyDescriptor(K.prototype, pr); Object.defineProperty(K.prototype, pr, {get(){ return d.get.call(this); }, set(v){ window.__rastro.push('prop:' + this.__id + '.' + pr + '=' + (v && v.length ? 'buffer' + v.length : v) + '@' + window.__now); d.set.call(this, v); }}); } }
+  if (window.__RASTRO){ for (const K of [OscillatorNode, AudioBufferSourceNode]){ const sp = K.prototype.stop; K.prototype.stop = function(when){ window.__rastro.push('parar:' + this.__id + ':' + (when === undefined ? 'ya' : (+when).toFixed(6)) + '@' + window.__now); return sp.call(this, when); }; }
+    const dc = AudioNode.prototype.disconnect; AudioNode.prototype.disconnect = function(...a){ window.__rastro.push('desconectar:' + this.__id + '@' + window.__now); return dc.apply(this, a); }; }
   window.__audStep = async () => {
     for (const c of window.__ACs){
       if (c.__v !== 'running' || c.__done) continue;
@@ -179,7 +191,7 @@ async function runClip(c){
   const errs = [];
   pg.on('pageerror', e => errs.push(e.message)); pg.on('console', m => { if (m.type() === 'error' && !m.text().includes('Failed to load resource')) errs.push(m.text()); });
   await pg.route(/fonts\.(googleapis|gstatic)\.com/, r => r.abort());
-  await pg.addInitScript(`window.__AUDIO_LEN = ${c.seconds + 3};`);
+  await pg.addInitScript(`window.__AUDIO_LEN = ${c.seconds + 3}; window.__RASTRO = ${process.env.RASTRO ? 'true' : 'false'};`);
   await pg.addInitScript(INIT);
   await pg.goto('file://' + TMP);
   await pg.evaluate(s => window.__ev(s), BOT);
@@ -188,6 +200,7 @@ async function runClip(c){
     else await pg.evaluate(s => window.__ev(s), FRAMES(a, extra || '', !!bot, !!noFrame));
   }
   if (process.env.MUESTRAS) await pg.evaluate(() => { window.__MUESTRAS = true; });
+  if (process.env.RASTRO) writeFileSync(join(OUT, c.name + '.rastro.txt'), (await pg.evaluate(() => window.__rastro)).join('\n'));
   const motores = await pg.evaluate(() => window.__audFinish());
   if (process.env.MUESTRAS) motores.forEach((m, i) => { writeFileSync(join(OUT, c.name + '.' + (i + 1) + '.f32'), Buffer.from(new Float32Array(m.L.concat(m.R)).buffer)); delete m.L; delete m.R; });
   motores.forEach((m, i) => { writeFileSync(join(OUT, c.name + '.' + (i + 1) + '.firma.json'), JSON.stringify(m.firma)); delete m.firma; });

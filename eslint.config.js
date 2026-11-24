@@ -1,23 +1,7 @@
-// ESLint del juego. Los archivos de src/js comparten un solo ámbito (se unen en un bloque al armar),
-// así que cada archivo recibe como globales lo que usa de los demás, según herramientas/dependencias.mjs:
-// de solo lectura lo que solo lee y escribible lo que cambia. Así ESLint avisa si un archivo usa o cambia
-// algo de otro sin que se note.
+// ESLint del juego: src/js son módulos ES; cada archivo importa lo que usa de los demás, así que un nombre
+// sin importar es un error (no-undef). Los íconos de src/js/fuera/ viven fuera del juego, como script normal.
 import js from '@eslint/js';
 import globals from 'globals';
-import { basename } from 'node:path';
-import { analyze } from './herramientas/dependencias.mjs';
-
-const { files, info } = analyze('src');
-const perFile = files.map(f => {
-  const I = info.get(f);
-  const g = {};
-  for (const [, names] of I.uses) for (const n of names) g[n] = 'readonly';
-  for (const [, names] of I.writes) for (const n of names) g[n] = 'writable';
-  return {
-    files: ['src/js/' + (f.includes('/fuera/') ? 'fuera/' : '') + basename(f)],
-    languageOptions: { globals: g },
-  };
-});
 
 export default [
   js.configs.recommended,
@@ -25,8 +9,9 @@ export default [
     files: ['src/js/**/*.js'],
     languageOptions: {
       ecmaVersion: 'latest',
-      sourceType: 'script',
-      globals: { ...globals.browser },
+      sourceType: 'module',
+      // íconos de las flechas: src/js/fuera/ los define fuera del juego, como script normal
+      globals: { ...globals.browser, ARC_L: 'readonly', ARC_R: 'readonly', CHEV_L: 'readonly', CHEV_R: 'readonly' },
     },
     rules: {
       'no-unused-vars': ['error', { vars: 'local', args: 'none', caughtErrors: 'none' }],
@@ -42,7 +27,10 @@ export default [
       'no-implicit-globals': 'off',
     },
   },
-  ...perFile,
+  {
+    files: ['src/js/fuera/**/*.js'],
+    languageOptions: { sourceType: 'script' },
+  },
   {
     files: ['*.mjs', 'herramientas/**/*.mjs', 'pruebas/**/*.mjs', 'eslint.config.js'],
     languageOptions: { ecmaVersion: 'latest', sourceType: 'module', globals: { ...globals.node } },

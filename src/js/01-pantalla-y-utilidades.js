@@ -3,14 +3,13 @@
  * (W, H, centro CX/CY y escala S de unidades del mundo a píxeles), los colores de cada zona, el
  * cielo de estrellas y utilidades pequeñas (frac, clamp, buzz, rgba).
  */
-const cvs = document.getElementById('c'),
-  ctx = cvs.getContext('2d');
-const elScore = document.getElementById('score'),
-  elBest = document.getElementById('best');
-const elPbar = document.getElementById('pbar'),
-  elPnum = document.getElementById('pnum');
-const elWrap = document.getElementById('scorewrap'),
-  elArcFg = document.querySelector('#arc .fg');
+import { lvl } from './06-record-y-estado.js';
+import { tutorial } from './08-partida-estado.js';
+
+let cvs, ctx;
+let elScore, elBest;
+let elPbar, elPnum;
+let elWrap, elArcFg;
 let hudMode = 'faltan';
 let musicStyle = 'espacial';
 /**
@@ -21,12 +20,6 @@ let musicStyle = 'espacial';
  */
 function chipsHTML() {
   return '';
-}
-{
-  const c0 = document.getElementById('chips0');
-  if (c0) {
-    c0.innerHTML = chipsHTML();
-  }
 }
 /** Marca como activo el botón (.chip) que corresponde a `hudMode` o a `musicStyle`. */
 function refreshChips() {
@@ -39,10 +32,8 @@ function refreshChips() {
       ),
     );
 }
-const elHud = document.getElementById('hud'),
-  elPanel = document.getElementById('panel');
-const reduceMotion =
-  window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let elHud, elPanel;
+let reduceMotion;
 
 // ---- Medidas ----
 // W y H: tamaño del lienzo, en píxeles CSS; DPR: densidad de píxeles (hasta 2); S: píxeles por
@@ -70,8 +61,6 @@ function resize() {
   CX = W / 2;
   CY = H * 0.62;
 }
-window.addEventListener('resize', resize);
-resize();
 
 // ---- Zonas: colores de anillos, asteroides, agujero negro y fondo (cambian cada 25 anillos) ----
 // Color hueso de la interfaz y de los anillos.
@@ -120,12 +109,7 @@ const zoneOf = k =>
 
 // ---- Estrellas del cielo: ángulo (rad), distancia al centro (de 0 a 1,2 del radio del cielo),
 // tamaño (px) y fase del titileo ----
-const stars = Array.from({ length: 140 }, () => ({
-  a: Math.random() * Math.PI * 2,
-  r: Math.sqrt(Math.random()) * 1.2,
-  s: Math.random() * 1.3 + 0.3,
-  tw: Math.random() * 6,
-}));
+let stars;
 
 // ---- Utilidades ----
 /** Parte fraccionaria de x, de 0 a 1 (también para negativos). */
@@ -143,4 +127,91 @@ const buzz = p => {
       navigator.vibrate(p);
     }
   } catch (e) {}
+};
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initScreen() {
+  cvs = document.getElementById('c');
+  ctx = cvs.getContext('2d');
+  elScore = document.getElementById('score');
+  elBest = document.getElementById('best');
+  elPbar = document.getElementById('pbar');
+  elPnum = document.getElementById('pnum');
+  elWrap = document.getElementById('scorewrap');
+  elArcFg = document.querySelector('#arc .fg');
+  {
+    const c0 = document.getElementById('chips0');
+    if (c0) {
+      c0.innerHTML = chipsHTML();
+    }
+  }
+  elHud = document.getElementById('hud');
+  elPanel = document.getElementById('panel');
+  reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.addEventListener('resize', resize);
+  resize();
+  stars = Array.from({ length: 140 }, () => ({
+    a: Math.random() * Math.PI * 2,
+    r: Math.sqrt(Math.random()) * 1.2,
+    s: Math.random() * 1.3 + 0.3,
+    tw: Math.random() * 6,
+  }));
+}
+
+/**
+ * Cambia `hudMode` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setHudMode(value) {
+  hudMode = value;
+  return value;
+}
+
+/**
+ * Cambia `musicStyle` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setMusicStyle(value) {
+  musicStyle = value;
+  return value;
+}
+
+export {
+  BONE,
+  CX,
+  CY,
+  DPR,
+  GAP,
+  H,
+  PR,
+  R0,
+  S,
+  SUN,
+  W,
+  ZONES,
+  buzz,
+  chipsHTML,
+  clamp,
+  ctx,
+  cvs,
+  elArcFg,
+  elBest,
+  elHud,
+  elPanel,
+  elPbar,
+  elPnum,
+  elScore,
+  elWrap,
+  frac,
+  hudMode,
+  musicStyle,
+  reduceMotion,
+  refreshChips,
+  rgba,
+  stars,
+  zoneOf,
 };

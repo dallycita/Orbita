@@ -3,6 +3,8 @@
  * (la Gran Nube, la Tarántula, N44, la Supernova 1987A, el Puente y la Pequeña Nube).
  * Todo es código GLSL dentro de un texto: cambiar algo ahí dentro cambia el juego.
  */
+import { BG_COMMON } from './32-fondos-1-comun.js';
+
 const FS_LMC =
   BG_COMMON +
   `
@@ -232,3 +234,5 @@ void main(){
   col = col/(1. + col*.5);
   gl_FragColor = vec4(col, 1.);
 }`;
+
+export { FS_LMC };

@@ -2,12 +2,44 @@
  * Pantalla de inicio, como en Geometry Dash: se queda hasta que el jugador elige (jugar, planetas,
  * misiones, historia o ajustes). También guarda el silencio general (`muted`).
  */
-const elHome = document.getElementById('home');
+import { elHud, elPanel } from './01-pantalla-y-utilidades.js';
+import { AC, initAudio, outBus } from './02-audio.js';
+import { stopMusic } from './05-musica-reproductor.js';
+import { setState } from './06-record-y-estado.js';
+import { PLANET_SVG, allPlanets, setAllPlanets } from './07-planetas.js';
+import { setTutorial } from './08-partida-estado.js';
+import { setup } from './16-partida.js';
+import { introDrone, startIntro } from './23-intro.js';
+import {
+  elLv,
+  openLevels,
+  resetProgress,
+  setPendingTut,
+  setTutAfterStory,
+  storySeen,
+} from './25-selector-niveles.js';
+import {
+  HOME_BIG,
+  HOME_IN,
+  homeAmbience,
+  homeT,
+  setHomeT,
+  setHsBoost,
+  setHsEvents,
+  setHsFlare,
+  setHsJet,
+  setHsRipple,
+  setHsShake,
+  setLogoT0,
+} from './27-inicio-animacion.js';
+import { showStart, showStop } from './28-sonidos-interfaz.js';
+import { openPlanets } from './29-planetas-hd.js';
+import { misMoons, misReady, openMissions } from './34-misiones.js';
+import { MEDIR, medEl, setMEDIR, setMedEl, setMedPrev } from './35-medidor.js';
+
+let elHome;
 /** Sonido apagado por el jugador (se guarda en localStorage). */
 let muted = false;
-try {
-  muted = localStorage.getItem('orbita_p1_sonido') === '0';
-} catch (e) {}
 /** Aplica `muted` al volumen general de salida. */
 function applyMute() {
   if (AC && outBus) {
@@ -93,7 +125,7 @@ function homeAction(a, b) {
     startIntro();
   } else if (a === 'tut') {
     hideHome();
-    tutAfterStory = true;
+    setTutAfterStory(true);
     startIntro();
   } else if (a === 'cfg') {
     if (sheet) {
@@ -104,21 +136,21 @@ function homeAction(a, b) {
   } else if (a === 'missions') {
     openMissions();
   } else if (a === 'medir') {
-    MEDIR = !MEDIR;
+    setMEDIR(!MEDIR);
     try {
       localStorage.setItem('orbita_medidor', MEDIR ? '1' : '0');
     } catch (e) {}
     if (!MEDIR && medEl) {
       medEl.remove();
-      medEl = null;
+      setMedEl(null);
     }
-    medPrev = 0;
+    setMedPrev(0);
     const v = b.querySelector('b');
     if (v) {
       v.textContent = MEDIR ? 'Sí' : 'No';
     }
   } else if (a === 'allp') {
-    allPlanets = !allPlanets;
+    setAllPlanets(!allPlanets);
     try {
       localStorage.setItem('orbita_p1_todos', allPlanets ? '1' : '0');
     } catch (e) {}
@@ -178,16 +210,16 @@ function openHome(withIntro) {
   if (elLv) {
     elLv.classList.add('off');
   }
-  tutorial = false;
-  pendingTut = false;
+  setTutorial(false);
+  setPendingTut(false);
   introDrone(false);
   setup();
-  state = 'home';
+  setState('home');
   renderHome();
-  homeT = withIntro ? 0 : HOME_IN;
-  logoT0 = withIntro ? HOME_BIG + 0.45 : -99;
-  hsEvents = {};
-  hsFlare = hsBoost = hsShake = hsJet = hsRipple = 0;
+  setHomeT(withIntro ? 0 : HOME_IN);
+  setLogoT0(withIntro ? HOME_BIG + 0.45 : -99);
+  setHsEvents({});
+  setHsFlare(setHsBoost(setHsShake(setHsJet(setHsRipple(0)))));
   if (withIntro) {
     showStart();
   }
@@ -204,3 +236,24 @@ function openHome(withIntro) {
   applyMute();
   homeAmbience(true);
 }
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initHome() {
+  elHome = document.getElementById('home');
+  try {
+    muted = localStorage.getItem('orbita_p1_sonido') === '0';
+  } catch (e) {}
+}
+
+/**
+ * Cambia `storyReturn` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setStoryReturn(value) {
+  storyReturn = value;
+  return value;
+}
+
+export { applyMute, elHome, muted, openHome, renderHome, storyReturn };
