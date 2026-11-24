@@ -146,8 +146,9 @@ import {
 } from './14-lente-gravitacional.js';
 import { NOVA_LIFE, hazardsUpdate, novaBurst, novaHit, novaSound } from './15-peligros.js';
 import { die, eatRings, jump, onLand, rr } from './16-partida.js';
-import { introFade, setIntroFade } from './23-intro.js';
+
 import { GLBG } from './32-fondos-9-motor.js';
+import { introFade, setIntroFade } from './core/screen.js';
 
 /**
  * Avanza el juego un cuadro.

@@ -10,7 +10,8 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const espree = require('espree'), eslintScope = require('eslint-scope');
 const ROOT = join(dirname(new URL(import.meta.url).pathname), '..'), JS = join(ROOT, 'src', 'js');
-const [fromRel, toRel, ...wanted] = process.argv.slice(2);
+const args = process.argv.slice(2), keepInit = args.includes('--con-arranque');
+const [fromRel, toRel, ...wanted] = args.filter(a => a !== '--con-arranque');
 if (!fromRel || !toRel || !wanted.length) { console.error('uso: node herramientas/mover.mjs <origen.js> <destino.js> nombres…'); process.exit(1); }
 const FROM = join(JS, fromRel), TO = join(JS, toRel);
 const parse = code => espree.parse(code, { ecmaVersion: 'latest', sourceType: 'module', range: true, loc: true, comment: true });
@@ -30,7 +31,7 @@ for (const n of wanted) if (ast.body.some(s => (s.type === 'FunctionDeclaration'
 // no mover lo que la función de arranque asigna
 for (const st of ast.body){
   const fn = st.type === 'ExportNamedDeclaration' && st.declaration && st.declaration.type === 'FunctionDeclaration' ? st.declaration : null;
-  if (fn && /^init[A-Z]/.test(fn.id.name) && !wanted.includes(fn.id.name)){
+  if (!keepInit && fn && /^init[A-Z]/.test(fn.id.name) && !wanted.includes(fn.id.name)){
     const body = src.slice(fn.body.range[0], fn.body.range[1]);
     for (const n of wanted) if (new RegExp('(^|[^\\w.$])' + n + '\\s*=[^=]').test(body)) { console.error('✗ ' + n + ' se asigna en ' + fn.id.name + ': moverlo cambiaría el orden al cargar'); process.exit(1); }
   }
@@ -152,6 +153,29 @@ if (exportedNeeded.size){
   const m = dst.match(/export \{([^}]*)\};?/);
   const all = [...new Set([...(m ? m[1].split(',').map(x => x.trim()).filter(Boolean) : []), ...exportedNeeded])].sort();
   dst = m ? dst.replace(m[0], 'export { ' + all.join(', ') + ' };') : dst.replace(/\s*$/, '\n\nexport { ' + all.join(', ') + ' };\n');
+}
+// variables mudadas que se siguen cambiando desde otro archivo: el destino necesita su función setX
+{
+  const declared = new Map();
+  for (const st of parse(dst).body){ const d = st.type === 'ExportNamedDeclaration' && st.declaration ? st.declaration : st;
+    if (d.type === 'VariableDeclaration' && d.kind !== 'const') for (const x of d.declarations) declared.set(x.id.name, true);
+    if (d.type === 'FunctionDeclaration') declared.set(d.id.name, 'fn'); }
+  const writers = [FROM, ...allFiles.filter(f => f !== FROM && f !== TO)];
+  const extra = [];
+  for (const n of moved){
+    if (declared.get(n) !== true || declared.get(setterOf(n)) === 'fn') continue;
+    const re = new RegExp('(^|[^\\w.$])' + n + '\\s*(=[^=>]|\\+=|-=|\\*=|/=|\\+\\+|--)');
+    const isWritten = writers.some(f => re.test(f === FROM ? src : readFileSync(f, 'utf8')));
+    if (!isWritten) continue;
+    extra.push('\n/**\n * Cambia `' + n + '` desde otro módulo (este módulo es su dueño).\n *\n * @param {*} value Valor nuevo.\n * @returns {*} El mismo valor, como el de una asignación.\n */\nfunction ' + setterOf(n) + '(value) {\n  ' + n + ' = value;\n  return value;\n}');
+    exportedNeeded.add(setterOf(n));
+  }
+  if (extra.length){
+    dst = dst.replace(/(\n*export \{[^}]*\};?\s*)?$/, m => '\n' + extra.join('\n') + '\n' + (m.includes('export {') ? m : ''));
+    const m = dst.match(/export \{([^}]*)\};?/);
+    const all = [...new Set([...(m ? m[1].split(',').map(x => x.trim()).filter(Boolean) : []), ...exportedNeeded])].sort();
+    dst = m ? dst.replace(m[0], 'export { ' + all.join(', ') + ' };') : dst.replace(/\s*$/, '\n\nexport { ' + all.join(', ') + ' };\n');
+  }
 }
 // limpiar imports: en el destino, lo movido ya no se importa; en los dos, se quita lo que quedó sin uso
 function pruneImports(code, drop){

@@ -38,7 +38,6 @@ import {
   shake,
   sunLevel,
   t,
-  tutorial,
 } from './08-partida-estado.js';
 import { rr } from './16-partida.js';
 import { drawEarth } from './21-dibujo.js';
@@ -51,11 +50,12 @@ import {
 } from './25-selector-niveles.js';
 import { openHome, setStoryReturn, storyReturn } from './26-pantalla-inicio.js';
 
-import { misEvent } from './34-misiones.js';
 import { LEVELS } from './data/levels.js';
 import { PLGL, drawBigPlanet } from './render/planets.js';
 import { homeAmbience } from './audio/ui-sounds.js';
 import { bhDiskK } from './render/black-hole.js';
+import { setIntroFade } from './core/screen.js';
+import { doblesHechos, setDoblesHechos } from './game/progress.js';
 
 // Planetas de la intro. r: radio de la órbita y s: tamaño, en unidades de la intro.
 const PLANETS = [
@@ -91,7 +91,6 @@ const SUN_COLS = ['#fff3cf', '#ffd36b', '#ff9a3d', '#ff5a1f'];
 let introT = 0;
 let ip = [];
 let iparts = [];
-let introFade = 0;
 let SI = 1;
 let droneNodes = null;
 let cues = {};
@@ -139,22 +138,6 @@ const bhRadius = () => 8 + 12 * clamp((introT - T_ARRIVE) / (T_DISK_END - T_ARRI
 const diskK = () => clamp((introT - 4.8) / (T_DISK_END - 4.8), 0, 1);
 const sunK = () => clamp((introT - T_ARRIVE) / (T_SUN_END - T_ARRIVE), 0, 1);
 
-// Antes de jugar solo se muestra dónde estás y "toca para escapar"; la ayuda con íconos se muestra
-// hasta que se domina el salto doble (cuenta guardada en `orbita_p1_dobles`).
-let doblesHechos = 0;
-/**
- * Cuenta un salto doble hecho (fuera del tutorial) y avanza la misión de poderes.
- */
-function noteDouble() {
-  if (tutorial) {
-    return;
-  }
-  misEvent('power');
-  doblesHechos++;
-  try {
-    localStorage.setItem('orbita_p1_dobles', String(doblesHechos));
-  } catch (e) {}
-}
 // Panel previo a jugar: nivel elegido, invitación a tocar y los avisos de ayuda.
 const MENU_HTML = () => {
   const L = LEVELS[lvl] || LEVELS[0];
@@ -200,7 +183,7 @@ function endIntro(skipped) {
   } catch (e) {}
   introDrone(false);
   setAppear(0);
-  introFade = skipped ? 0.6 : 0;
+  setIntroFade(skipped ? 0.6 : 0);
   if (storyReturn && !tutAfterStory) {
     const r = storyReturn;
     setStoryReturn(null);
@@ -727,31 +710,9 @@ function renderIntro() {
 export function initIntro() {
   introSetup();
   try {
-    doblesHechos = parseInt(localStorage.getItem('orbita_p1_dobles') || '0', 10) || 0;
+    setDoblesHechos(parseInt(localStorage.getItem('orbita_p1_dobles') || '0', 10) || 0);
   } catch (e) {}
   EARTH_W = 0.9 * Math.pow(60 / 84, 1.5);
 }
 
-/**
- * Cambia `introFade` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setIntroFade(value) {
-  introFade = value;
-  return value;
-}
-
-export {
-  MENU_HTML,
-  doblesHechos,
-  easeIO,
-  endIntro,
-  introDrone,
-  introFade,
-  noteDouble,
-  renderIntro,
-  startIntro,
-  updateIntro,
-};
+export { MENU_HTML, easeIO, endIntro, introDrone, renderIntro, startIntro, updateIntro };

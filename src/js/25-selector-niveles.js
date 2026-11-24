@@ -20,7 +20,7 @@ import { setAttempts, setHintsShown, setTutorial, setTutorialDone } from './08-p
 import { setSeenTypes } from './09-recorridos.js';
 import { setWallet, updateWallet } from './10-ritmo-y-objetos.js';
 import { setSesTries, setup } from './16-partida.js';
-import { MENU_HTML, introDrone, setIntroFade, startIntro } from './23-intro.js';
+import { MENU_HTML, introDrone, startIntro } from './23-intro.js';
 import { applyMute, openHome, setStoryReturn } from './26-pantalla-inicio.js';
 
 import { showStop } from './28-sonidos-interfaz.js';
@@ -28,10 +28,11 @@ import { setLvArts, setLvCanvas } from './33-tarjetas-niveles.js';
 import { COIN_RINGS, LEVELS } from './data/levels.js';
 import { homeAmbience } from './audio/ui-sounds.js';
 import { lvStarsGot } from './game/progress.js';
+import { setIntroFade, setPendingTut } from './core/screen.js';
+import { elLv, setElLv } from './core/dom.js';
 
 /** Si el jugador ya vio la historia de introducción (se guarda en localStorage). */
 let storySeen = false;
-let elLv;
 /** Índice del nivel elegido en el selector. */
 let lvIndex = 0;
 let LV_ICONS;
@@ -288,7 +289,6 @@ const levelsUnlocked = () => true; // todos los niveles están abiertos desde el
 // tutAfterStory: al terminar la historia sigue el tutorial ("Repetir tutorial").
 // pendingTut: al tocar en el menú empieza el tutorial en vez de la partida.
 let tutAfterStory = false;
-let pendingTut = false;
 /** Al terminar la pantalla de presentación, abre el inicio. */
 function afterSplash() {
   openHome(true);
@@ -391,7 +391,7 @@ function startLevel(i) {
   }
   setLvl(i);
   setTutorial(false);
-  pendingTut = false;
+  setPendingTut(false);
   setup();
   setState('menu');
   setAppear(0);
@@ -406,7 +406,7 @@ export function initLevelSelect() {
   try {
     storySeen = localStorage.getItem('orbita_p1_historia') === '1';
   } catch (e) {}
-  elLv = document.getElementById('levels');
+  setElLv(document.getElementById('levels'));
   LV_ICONS = {
     centaurus:
       '<defs><radialGradient id="g-cen"><stop offset="0" stop-color="#fff2d6"/><stop offset=".5" stop-color="#e8c79a" stop-opacity=".5"/><stop offset="1" stop-color="#d9a76a" stop-opacity="0"/></radialGradient></defs>' +
@@ -514,17 +514,6 @@ export function setLvIndex(value) {
 }
 
 /**
- * Cambia `pendingTut` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setPendingTut(value) {
-  pendingTut = value;
-  return value;
-}
-
-/**
  * Cambia `storySeen` desde otro módulo (este módulo es su dueño).
  *
  * @param {*} value Valor nuevo.
@@ -546,14 +535,4 @@ export function setTutAfterStory(value) {
   return value;
 }
 
-export {
-  afterSplash,
-  elLv,
-  lvIndex,
-  openLevels,
-  pendingTut,
-  resetProgress,
-  startLevel,
-  storySeen,
-  tutAfterStory,
-};
+export { afterSplash, lvIndex, openLevels, resetProgress, startLevel, storySeen, tutAfterStory };

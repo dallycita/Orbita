@@ -5,10 +5,11 @@
  * Los clics y el paso del puntero sobre botones se escuchan en toda la página desde aquí.
  */
 import { AC, ROOT, master, noiseHit } from './02-audio.js';
-import { paused, pzSnd } from './18-pausa.js';
 
 import { muted } from './core/settings.js';
 import { uiGlass } from './audio/ui-sounds.js';
+import { paused } from './core/screen.js';
+import { pzSnd } from './audio/pause-sounds.js';
 
 let uiBus = null;
 let lastHover = null;

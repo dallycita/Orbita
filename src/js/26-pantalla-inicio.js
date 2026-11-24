@@ -10,26 +10,15 @@ import { allPlanets, setAllPlanets } from './07-planetas.js';
 import { setTutorial } from './08-partida-estado.js';
 import { setup } from './16-partida.js';
 import { introDrone, startIntro } from './23-intro.js';
-import {
-  elLv,
-  openLevels,
-  resetProgress,
-  setPendingTut,
-  setTutAfterStory,
-  storySeen,
-} from './25-selector-niveles.js';
+import { openLevels, resetProgress, setTutAfterStory, storySeen } from './25-selector-niveles.js';
 import {
   HOME_BIG,
-  HOME_IN,
-  homeT,
-  setHomeT,
   setHsBoost,
   setHsEvents,
   setHsFlare,
   setHsJet,
   setHsRipple,
   setHsShake,
-  setLogoT0,
 } from './27-inicio-animacion.js';
 import { showStart, showStop } from './28-sonidos-interfaz.js';
 import { openPlanets } from './29-planetas-hd.js';
@@ -38,6 +27,8 @@ import { MEDIR, medEl, setMEDIR, setMedEl, setMedPrev } from './35-medidor.js';
 import { PLANET_SVG } from './data/planets.js';
 import { loadMute, muted, setMuted } from './core/settings.js';
 import { homeAmbience } from './audio/ui-sounds.js';
+import { HOME_IN, homeT, setHomeT, setLogoT0, setPendingTut } from './core/screen.js';
+import { elLv } from './core/dom.js';
 
 let elHome;
 /** Sonido apagado por el jugador (se guarda en localStorage). */

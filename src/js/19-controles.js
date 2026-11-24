@@ -38,23 +38,26 @@ import {
   upgradeToDouble,
 } from './16-partida.js';
 import { startTutorial } from './17-tutorial.js';
-import { pauseGame, pausePress, paused, pzCount, resumeGame } from './18-pausa.js';
+import { pauseGame, pausePress, pzCount, resumeGame } from './18-pausa.js';
 import { endIntro } from './23-intro.js';
 import { skipSplash, splashT } from './24-presentacion.js';
-import {
-  elLv,
-  openLevels,
-  pendingTut,
-  setLvIndex,
-  setPendingTut,
-  startLevel,
-} from './25-selector-niveles.js';
+import { openLevels, setLvIndex, startLevel } from './25-selector-niveles.js';
 import { elHome, openHome } from './26-pantalla-inicio.js';
-import { HOME_IN, homeT, setHomeT, setLogoT0 } from './27-inicio-animacion.js';
+
 import { showStop } from './28-sonidos-interfaz.js';
 import { planetStep } from './29-planetas-hd.js';
 import { LEVELS } from './data/levels.js';
 import { uiGlass } from './audio/ui-sounds.js';
+import {
+  HOME_IN,
+  homeT,
+  paused,
+  pendingTut,
+  setHomeT,
+  setLogoT0,
+  setPendingTut,
+} from './core/screen.js';
+import { elLv } from './core/dom.js';
 
 /**
  * Atiende un toque o la tecla de acción según la pantalla actual: pausa, botones de los paneles,

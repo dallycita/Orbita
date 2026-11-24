@@ -37,16 +37,13 @@ import {
 import { muted } from './core/settings.js';
 import { drawPlayer } from './render/planets.js';
 import { BR0, BR1, SK, bhCore, bhDiskK, drawLogo, setSfl, sfl } from './render/black-hole.js';
+import { HOME_IN, homeT, logoT0 } from './core/screen.js';
 
 // ---- La demostración: el agujero negro dobla la luz, se come rocas y destroza una estrella ----
 // HOME_BIG: segundo en que el agujero empieza a alejarse; HOME_IN: segundo en que llega a su
 // tamaño de juego (fin de la entrada).
 const HOME_BIG = 6.4;
-const HOME_IN = 8.0;
-let logoT0 = -99;
 let hsRipple = 0;
-let camZoom = 1;
-let homeT = HOME_IN;
 let hsFlare = 0;
 let hsBoost = 0;
 let hsShake = 0;
@@ -523,28 +520,6 @@ function renderHomeIntro() {
 }
 
 /**
- * Cambia `camZoom` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setCamZoom(value) {
-  camZoom = value;
-  return value;
-}
-
-/**
- * Cambia `homeT` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setHomeT(value) {
-  homeT = value;
-  return value;
-}
-
-/**
  * Cambia `hsBoost` desde otro módulo (este módulo es su dueño).
  *
  * @param {*} value Valor nuevo.
@@ -610,22 +585,8 @@ export function setHsShake(value) {
   return value;
 }
 
-/**
- * Cambia `logoT0` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setLogoT0(value) {
-  logoT0 = value;
-  return value;
-}
-
 export {
   HOME_BIG,
-  HOME_IN,
-  camZoom,
-  homeT,
   hsBoost,
   hsEvents,
   hsFlare,
@@ -633,7 +594,6 @@ export {
   hsRipple,
   hsShake,
   logoSounds,
-  logoT0,
   renderHomeIntro,
   updateHomeShow,
 };

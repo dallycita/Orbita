@@ -6,18 +6,20 @@
 import { buzz } from './01-pantalla-y-utilidades.js';
 import { AC, ROOT, noise } from './02-audio.js';
 import { PLANETS_P, curPlanet, planetThumb } from './07-planetas.js';
-import { t, tutorial } from './08-partida-estado.js';
+import { t } from './08-partida-estado.js';
 
 import { elHome, renderHome } from './26-pantalla-inicio.js';
 import { uiTone } from './28-sonidos-interfaz.js';
 
 import { COIN_RINGS, LEVELS } from './data/levels.js';
 
-import { MIS_ACH, MIS_DAILY, MIS_FACT } from './data/missions.js';
+import { MIS_ACH, MIS_FACT } from './data/missions.js';
 import { muted } from './core/settings.js';
 import { PLGL } from './render/planets.js';
 import { uiGlass } from './audio/ui-sounds.js';
 import { lvStarsGot } from './game/progress.js';
+import { MIS, misDef, misLoad, misRoll, misSave, misToday } from './game/missions.js';
+import { on } from './core/events.js';
 
 /**
  * Arma el ícono de Misiones del inicio: una constelación de tres estrellas (una por misión del
@@ -139,161 +141,11 @@ function misCrystal() {
   );
 }
 var misDetail = null;
-var MIS = null;
 var misTab = 'diarias';
 var misTimer = null;
 var misFx = 0;
 var misOpen = false;
 var misSwitch = 0;
-/**
- * Fecha local como texto `AAAA-MM-DD`, que identifica el día de las misiones.
- *
- * @param {number} [off] Días a sumar (por ejemplo -1 para ayer).
- * @returns {string} La fecha.
- */
-function misToday(off) {
-  const d = new Date();
-  if (off) {
-    d.setDate(d.getDate() + off);
-  }
-  return (
-    d.getFullYear() +
-    '-' +
-    String(d.getMonth() + 1).padStart(2, '0') +
-    '-' +
-    String(d.getDate()).padStart(2, '0')
-  );
-}
-/**
- * Carga el progreso guardado la primera vez (con valores por defecto para campos faltantes) y
- * sortea las misiones del día si cambió la fecha.
- *
- * @returns {object} El progreso `MIS`.
- */
-function misLoad() {
-  if (!MIS) {
-    let d = {};
-    try {
-      d = JSON.parse(localStorage.getItem('orbita_mis') || '{}') || {};
-    } catch (e) {
-      d = {};
-    }
-    MIS = Object.assign(
-      {
-        polvo: 0,
-        day: '',
-        daily: [],
-        bonus: false,
-        streak: 0,
-        lastBonus: '',
-        st: { perf: 0, onda: 0 },
-        ach: {},
-        tierraLv: [],
-        planetsWon: [],
-        lvWon: [],
-        andro1: false,
-        sol: false,
-        factSeen: false,
-      },
-      d,
-    );
-  }
-  misRoll();
-  return MIS;
-}
-function misSave() {
-  try {
-    localStorage.setItem('orbita_mis', JSON.stringify(MIS));
-  } catch (e) {}
-}
-/**
- * Sortea las tres misiones del día, una por grupo. El sorteo sale de un hash de la fecha, así que
- * es el mismo durante todo el día aunque se recargue la página.
- */
-function misRoll() {
-  const day = misToday();
-  if (MIS.day === day && MIS.daily.length === 3) {
-    return;
-  }
-  MIS.day = day;
-  MIS.bonus = false;
-  let h = 7;
-  for (const ch of day) {
-    h = (h * 31 + ch.charCodeAt(0)) | 0;
-  }
-  MIS.daily = [0, 1, 2].map(g => {
-    const L = MIS_DAILY.filter(m => m.g === g);
-    return { id: L[Math.abs(h >> (g * 4)) % L.length].id, p: 0, c: false };
-  });
-  misSave();
-}
-const misDef = id => MIS_DAILY.find(m => m.id === id);
-/**
- * Avanza las misiones diarias que esperan este evento y avisa en pantalla si alguna se completa.
- * No cuenta durante el tutorial.
- *
- * @param {string} ev Evento: 'perf', 'streak3', 'reach', 'ring', 'star', 'win', 'onda', 'power'.
- * @param {number} [v] Valor alcanzado, para misiones de mejor marca (`max`); si falta, suma uno.
- */
-function misEvent(ev, v) {
-  if (tutorial) {
-    return;
-  }
-  misLoad();
-  if (ev === 'perf') {
-    MIS.st.perf = (MIS.st.perf || 0) + 1;
-  }
-  if (ev === 'onda') {
-    MIS.st.onda = (MIS.st.onda || 0) + 1;
-  }
-  let newly = false;
-  for (const m of MIS.daily) {
-    const D = misDef(m.id);
-    if (!D || D.ev !== ev || m.c) {
-      continue;
-    }
-    const was = m.p >= D.n;
-    m.p = Math.min(D.n, D.max ? Math.max(m.p, v || 0) : m.p + 1);
-    if (!was && m.p >= D.n) {
-      newly = true;
-    }
-  }
-  misSave();
-  if (newly) {
-    misPing();
-  }
-}
-/**
- * Registra que se escapó de un nivel, para los logros (niveles con la Tierra, planetas usados,
- * Andrómeda en un intento, llegar al Sol) y la misión diaria de ganar.
- *
- * @param {number} lv Índice del nivel ganado.
- * @param {string} [planet] Id del planeta usado; por defecto 'tierra'.
- * @param {number} tries Intentos usados en ese nivel.
- */
-function misWin(lv, planet, tries) {
-  if (tutorial) {
-    return;
-  }
-  misLoad();
-  const add = (arr, x) => {
-    if (!arr.includes(x)) {
-      arr.push(x);
-    }
-  };
-  add(MIS.lvWon, lv);
-  add(MIS.planetsWon, planet || 'tierra');
-  if ((planet || 'tierra') === 'tierra') {
-    add(MIS.tierraLv, lv);
-  }
-  if (lv === 2 && tries === 1) {
-    MIS.andro1 = true;
-  }
-  if (lv === 7) {
-    MIS.sol = true;
-  }
-  misEvent('win');
-}
 /**
  * Aviso durante la partida: el ícono de las misiones aparece un instante arriba con la nueva
  * estrella encendida, con un tono suave.
@@ -1659,6 +1511,8 @@ function misCanvasDraw(c) {
 /** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
 export function initMissions() {
   elMis = document.getElementById('missions');
+  // la lógica de misiones avisa cuando una se completa; aquí se muestra
+  on('missionReady', misPing);
 }
 
-export { misEvent, misMoons, misOpen, misPlanetDraw, misReady, misWin, openMissions };
+export { misMoons, misOpen, misPlanetDraw, misReady, openMissions };
