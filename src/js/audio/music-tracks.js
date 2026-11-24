@@ -6,9 +6,9 @@
  */
 import { buzz, clamp, reduceMotion } from '../core/display.js';
 import { AC, NOISE, ROOT, musicBus, noiseHit, setShaper, shaper } from './engine.js';
-import { level, pLevel, state } from '../core/state.js';
-import { setShake, shake, sunLevel, tutorial } from '../core/run-state.js';
-import { muted } from '../core/settings.js';
+import { run, state } from '../core/state.js';
+import { effects, hole, setShake, tutorialState } from '../core/run-state.js';
+import { settings } from '../core/settings.js';
 
 // Tempo: STEP es una semicorchea y TB un pulso, en segundos.
 const BPM = 140;
@@ -93,7 +93,7 @@ function d808(t0, semi, dur) {
 }
 // Estilos de música, todos al mismo tempo de 140.
 // Anillo que decide cuántas capas suenan; en el menú se escucha completa.
-const lv = () => (state === 'play' ? level : 30);
+const lv = () => (state === 'play' ? run.level : 30);
 // Progresión en Sol# menor: i – VI – III – VII (Sol#m, Mi, Si, Fa#), dos compases cada acorde
 const PROG = [
   [0, [0, 3, 7]],
@@ -268,7 +268,7 @@ function snareSW(t0) {
  * @returns {number} De 0 (lejos o fuera de partida) a 1 (a punto de tragarlo).
  */
 function dangerNow() {
-  return state === 'play' ? clamp((1.7 - (pLevel - sunLevel)) / 1.3, 0, 1) : 0;
+  return state === 'play' ? clamp((1.7 - (run.pLevel - hole.sunLevel)) / 1.3, 0, 1) : 0;
 }
 // Zumbido disonante que tiembla, sube de tono y se acelera con el peligro.
 let tens = null;
@@ -342,7 +342,7 @@ let dangerFlash = 0;
  * @param {number} dt Tiempo desde el cuadro anterior, en segundos.
  */
 function alarmTick(dt) {
-  if (!AC || muted || state !== 'play' || tutorial) {
+  if (!AC || settings.muted || state !== 'play' || tutorialState.tutorial) {
     alarmT = 0;
     alarmWas = 0;
     return;
@@ -448,7 +448,7 @@ function alarmHit(t0, d, first) {
     }
     // vibración y un destello rojo leve en pantalla al ritmo de la alarma
     if (!reduceMotion) {
-      setShake(Math.max(shake, 1.5 + 4 * k));
+      setShake(Math.max(effects.shake, 1.5 + 4 * k));
     }
     buzz(first ? [40, 40, 40] : 18);
     dangerFlash = 0.25 + 0.45 * k;

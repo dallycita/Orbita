@@ -25,17 +25,14 @@ import {
 import { AC, master, noise, noiseHit, suck, thump } from '../audio/engine.js';
 import { setAppear, setLvl, setState, state } from '../core/state.js';
 import {
-  flash,
-  holeFlare,
-  pulse,
+  effects,
+  hole,
   setFlash,
   setHoleFlare,
   setPulse,
   setShake,
   setT,
-  shake,
-  sunLevel,
-  t,
+  time,
 } from '../core/run-state.js';
 
 import { PLGL, drawBigPlanet, drawEarth } from '../render/planets.js';
@@ -152,7 +149,7 @@ function startIntro() {
 // la tercera ley de Kepler, proporcional a r^-1,5 respecto de una órbita de 60.
 const introZoomK = () => easeIO(clamp((introT - T_ZOOM) / ZOOM_DUR, 0, 1));
 let EARTH_W;
-const holeGameR = () => Math.max(rr(sunLevel), SUN) * S;
+const holeGameR = () => Math.max(rr(hole.sunLevel), SUN) * S;
 const zoomZ = () => holeGameR() / (20 * SI);
 const earthEndR = () => (rr(0) * S) / (zoomZ() * SI);
 const zoomF = () => 1 + (zoomZ() - 1) * introZoomK();
@@ -223,11 +220,11 @@ function updateIntro(dt) {
   if (state === 'intro') {
     introT += dt;
   }
-  setT(t + dt);
-  setFlash(Math.max(0, flash - dt * 2.2));
-  setHoleFlare(Math.max(0, holeFlare - dt * 1.4));
-  setPulse(Math.max(0, pulse - dt * 3.5));
-  setShake(Math.max(0, shake - dt * 25));
+  setT(time.t + dt);
+  setFlash(Math.max(0, effects.flash - dt * 2.2));
+  setHoleFlare(Math.max(0, effects.holeFlare - dt * 1.4));
+  setPulse(Math.max(0, effects.pulse - dt * 3.5));
+  setShake(Math.max(0, effects.shake - dt * 25));
   SI = Math.max(0.4, Math.min(W / 2 / 224, (CY - 80) / 224));
   if (introT >= T_ENTER && once('enter')) {
     noise(1.9, 80, 700, 0.3, 'lowpass');
@@ -303,7 +300,7 @@ function updateIntro(dt) {
       }
       if (p.ph >= 1) {
         p.done = true;
-        setHoleFlare(Math.max(holeFlare, 0.7));
+        setHoleFlare(Math.max(effects.holeFlare, 0.7));
         setPulse(1);
         thump();
       }
@@ -367,7 +364,7 @@ function drawPlanet(p, x, y, rad, ph) {
   if (p.earth) {
     drawEarth(0, 0, rad);
   } else if (glId && PLGL.ok()) {
-    drawBigPlanet(glId, 0, 0, rad, t * 0.3, false, 'below');
+    drawBigPlanet(glId, 0, 0, rad, time.t * 0.3, false, 'below');
   } else {
     if (p.ring) {
       ctx.strokeStyle = p.c;
@@ -457,14 +454,14 @@ function renderIntro() {
   ctx.save();
   ctx.fillStyle = z.bg;
   ctx.fillRect(0, 0, W, H);
-  if (shake > 0) {
-    ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
+  if (effects.shake > 0) {
+    ctx.translate((Math.random() - 0.5) * effects.shake, (Math.random() - 0.5) * effects.shake);
   }
   const sr = Math.max(W, H) * 0.62;
   for (const s of stars) {
     const zw = introZoomK(),
       warp = Math.sin(Math.PI * zw);
-    const a = s.a + t * 0.015,
+    const a = s.a + time.t * 0.015,
       rad = s.r * sr * (1 + zw * 0.6),
       x = CX + Math.cos(a) * rad,
       y = CY + Math.sin(a) * rad;
@@ -478,7 +475,7 @@ function renderIntro() {
       ctx.lineTo(x, y);
       ctx.stroke();
     }
-    ctx.globalAlpha = 0.12 + 0.22 * (0.5 + 0.5 * Math.sin(t * 1.3 + s.tw));
+    ctx.globalAlpha = 0.12 + 0.22 * (0.5 + 0.5 * Math.sin(time.t * 1.3 + s.tw));
     ctx.fillStyle = BONE;
     ctx.fillRect(x, y, s.s * 0.8, s.s * 0.8);
   }
@@ -537,7 +534,7 @@ function renderIntro() {
     const zf = zoomF(),
       hx = CX + b.x * SI * zf,
       hy = CY + b.y * SI * zf,
-      hR = bhRadius() * SI * zf * (1 + pulse * 0.06);
+      hR = bhRadius() * SI * zf * (1 + effects.pulse * 0.06);
     if (dk > 0) {
       ctx.globalAlpha = dk;
       const g = ctx.createRadialGradient(hx, hy, hR * 0.9, hx, hy, hR * 2.6);
@@ -563,9 +560,9 @@ function renderIntro() {
     ctx.fill();
     ctx.strokeStyle = dk > 0.5 ? z.s1 : BONE;
     ctx.globalAlpha = 0.55 + 0.45 * dk;
-    ctx.lineWidth = 1.4 + holeFlare * 6;
+    ctx.lineWidth = 1.4 + effects.holeFlare * 6;
     ctx.shadowColor = z.s2;
-    ctx.shadowBlur = dk * (16 + holeFlare * 40);
+    ctx.shadowBlur = dk * (16 + effects.holeFlare * 40);
     ctx.beginPath();
     ctx.arc(hx, hy, hR * 1.01, 0, Math.PI * 2);
     ctx.stroke();
@@ -642,8 +639,8 @@ function renderIntro() {
     ctx.globalAlpha = 1;
   }
   ctx.restore();
-  if (flash > 0) {
-    ctx.globalAlpha = flash * 0.45;
+  if (effects.flash > 0) {
+    ctx.globalAlpha = effects.flash * 0.45;
     ctx.fillStyle = '#fffaf0';
     ctx.fillRect(0, 0, W, H);
     ctx.globalAlpha = 1;

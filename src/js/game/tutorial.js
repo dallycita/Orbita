@@ -5,7 +5,7 @@ import { BONE, R0, buzz, elHud, elPanel, reduceMotion } from '../core/display.js
 import { noise } from '../audio/engine.js';
 import { startMusic, stopMusic } from '../audio/music-player.js';
 import {
-  level,
+  run,
   setCharge,
   setJumpTarget,
   setJumping,
@@ -17,7 +17,8 @@ import {
 } from '../core/state.js';
 import { setShieldLeft, setUsedDouble } from './planets.js';
 import {
-  particles,
+  effects,
+  hole,
   setCanRestart,
   setCulprit,
   setCulpritT,
@@ -34,8 +35,6 @@ import {
   setTutorial,
   setTutorialDone,
   setWinT,
-  sunLevel,
-  texts,
 } from '../core/run-state.js';
 import { setup } from './run.js';
 
@@ -60,7 +59,7 @@ function tutRespawn(x, y) {
   for (let i = 0; i < 24; i++) {
     const a = Math.random() * Math.PI * 2,
       v = 40 + Math.random() * 120;
-    particles.push({
+    effects.particles.push({
       x,
       y,
       vx: Math.cos(a) * v,
@@ -70,21 +69,29 @@ function tutRespawn(x, y) {
       s: 2 + Math.random() * 2,
     });
   }
-  texts.push({ txt: 'Otra vez', x: 0, y: -R0 - 70, life: 1.2, size: 18, col: BONE, center: true });
+  effects.texts.push({
+    txt: 'Otra vez',
+    x: 0,
+    y: -R0 - 70,
+    life: 1.2,
+    size: 18,
+    col: BONE,
+    center: true,
+  });
   setTimeout(() => {
     setState('play');
     setJumping(false);
     setJumpTarget(1);
-    setPLevel(level);
+    setPLevel(run.level);
     setPending(false);
     setGest(null);
     // aleja el agujero negro para que no vuelva a atrapar al jugador enseguida
-    setSunLevel(Math.min(sunLevel, level - 1.6));
-    setLastEaten(Math.floor(sunLevel));
+    setSunLevel(Math.min(hole.sunLevel, run.level - 1.6));
+    setLastEaten(Math.floor(hole.sunLevel));
     setSwallow(null);
     setCulprit(null);
     setCulpritT(0);
-    if (level >= 8) {
+    if (run.level >= 8) {
       setCharge(3);
     }
   }, 700);

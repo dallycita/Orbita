@@ -7,7 +7,7 @@ import { ctx, frac, reduceMotion } from '../core/display.js';
 import { AC, ROOT } from '../audio/engine.js';
 import { TB, musicOn, musicStart } from '../audio/music-tracks.js';
 import {
-  level,
+  run,
   setAppear,
   setAstFade,
   setCrossed,
@@ -16,10 +16,10 @@ import {
   setJumping,
   setLevel,
 } from '../core/state.js';
-import { curGoal, setPending, t } from '../core/run-state.js';
+import { curGoal, setPending, time } from '../core/run-state.js';
 
 import { COIN_RINGS } from '../data/levels.js';
-import { muted } from '../core/settings.js';
+import { settings } from '../core/settings.js';
 import { lvStarsGot } from './progress.js';
 import { uiTone } from '../audio/ui-sounds.js';
 import { rr } from '../core/geometry.js';
@@ -61,7 +61,7 @@ let lastBeatIdx = -1;
 function beatTime() {
   return AC && musicStart >= 0
     ? AC.currentTime - musicStart - (AC.outputLatency || AC.baseLatency || 0)
-    : t;
+    : time.t;
 }
 /**
  * Ángulo real de un asteroide en su anillo. `poff` es lo que el anillo no giró mientras estuvo
@@ -132,7 +132,7 @@ function updateWallet(pop) {
 }
 /** Sonido al recoger una estrella: cuatro notas que suben. */
 function coinChime() {
-  if (!AC || muted) {
+  if (!AC || settings.muted) {
     return;
   }
   try {
@@ -162,7 +162,7 @@ function drawCoin(x, y, sz, al) {
     ctx.arc(x, y, sz * 3, 0, Math.PI * 2);
     ctx.fill();
   }
-  const k = sz * (1.15 + 0.2 * Math.sin(t * 6));
+  const k = sz * (1.15 + 0.2 * Math.sin(time.t * 6));
   ctx.fillStyle = '#ffd36b';
   ctx.beginPath();
   for (let i = 0; i < 10; i++) {
@@ -221,9 +221,9 @@ function placeInGap(ring, extra) {
 function drawNebula(x, y, sz, al) {
   ctx.save();
   for (let i = 0; i < 4; i++) {
-    const ox = Math.cos(i * 1.7 + t * 0.6) * sz * 0.8,
-      oy = Math.sin(i * 2.3 + t * 0.5) * sz * 0.6,
-      r = sz * (1.8 + 0.5 * Math.sin(t * 1.3 + i));
+    const ox = Math.cos(i * 1.7 + time.t * 0.6) * sz * 0.8,
+      oy = Math.sin(i * 2.3 + time.t * 0.5) * sz * 0.6,
+      r = sz * (1.8 + 0.5 * Math.sin(time.t * 1.3 + i));
     const g = ctx.createRadialGradient(x + ox, y + oy, 0, x + ox, y + oy, r);
     if (g && g.addColorStop) {
       g.addColorStop(0, 'rgba(255,120,175,' + 0.5 * al + ')');
@@ -252,7 +252,7 @@ function drawNebula(x, y, sz, al) {
 function drawPulsar(x, y, sz, al) {
   ctx.save();
   ctx.globalAlpha = al;
-  const a = t * 5.5; // gira muy rápido, como un faro
+  const a = time.t * 5.5; // gira muy rápido, como un faro
   for (const sg of [0, Math.PI]) {
     const bx = Math.cos(a + sg),
       by = Math.sin(a + sg),
@@ -291,7 +291,7 @@ function drawPulsar(x, y, sz, al) {
  * @param {boolean} up Notas que suben (nebulosa) o que bajan (púlsar).
  */
 function objChime(up) {
-  if (!AC || muted) {
+  if (!AC || settings.muted) {
     return;
   }
   try {
@@ -302,7 +302,7 @@ function objChime(up) {
 }
 /** La nebulosa lanza al jugador hasta dos anillos hacia arriba, sin pasar la meta. */
 function starLaunch() {
-  const up = Math.min(2, curGoal() - level);
+  const up = Math.min(2, curGoal() - run.level);
   if (up <= 0) {
     return;
   }
@@ -315,11 +315,11 @@ function starLaunch() {
 }
 /** El púlsar empuja al jugador un anillo hacia abajo. */
 function starPush() {
-  if (level <= 0) {
+  if (run.level <= 0) {
     return;
   }
-  pushFrom = level;
-  setLevel(level - 1);
+  pushFrom = run.level;
+  setLevel(run.level - 1);
   pushing = true;
   pushT = 0;
   setAppear(0);

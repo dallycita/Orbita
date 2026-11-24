@@ -6,12 +6,12 @@
 import { buzz } from '../core/display.js';
 import { AC, ROOT, noise } from '../audio/engine.js';
 import { PLANETS_P, curPlanet } from '../game/planets.js';
-import { t } from '../core/run-state.js';
+import { time } from '../core/run-state.js';
 
 import { COIN_RINGS } from '../data/levels.js';
 
 import { MIS_ACH, MIS_FACT } from '../data/missions.js';
-import { muted } from '../core/settings.js';
+import { settings } from '../core/settings.js';
 import { PLGL, planetThumb } from '../render/planets.js';
 import { uiGlass, uiTone } from '../audio/ui-sounds.js';
 import { lvStarsGot } from '../game/progress.js';
@@ -60,7 +60,7 @@ function misPing() {
   // Leer el tamaño fuerza un reflujo para que la animación `.go` vuelva a empezar.
   void el.offsetWidth;
   el.classList.add('go');
-  if (AC && !muted) {
+  if (AC && !settings.muted) {
     try {
       const n = AC.currentTime;
       [19, 24].forEach((sm, i) => uiTone(ROOT * 2 * Math.pow(2, sm / 12), n + i * 0.07, 0.6, 0.03));
@@ -141,7 +141,7 @@ function openMissions() {
  * @param {boolean} up true al abrir, false al cerrar.
  */
 function misWhoosh(up) {
-  if (!AC || muted) {
+  if (!AC || settings.muted) {
     return;
   }
   try {
@@ -180,7 +180,7 @@ function closeMissions() {
  * @param {boolean} big true para el arpegio largo (logros y premio del día).
  */
 function misClaimSound(big) {
-  if (!AC || muted) {
+  if (!AC || settings.muted) {
     return;
   }
   try {
@@ -1033,7 +1033,7 @@ function misBurst(from, amt, big) {
     }
     if (st !== lastStep && k > 0) {
       lastStep = st;
-      if (AC && !muted) {
+      if (AC && !settings.muted) {
         try {
           uiTone(
             ROOT * 2 * Math.pow(2, [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24][st % 11] / 12),
@@ -1054,7 +1054,7 @@ function misBurst(from, amt, big) {
         void w.offsetWidth;
         w.classList.add('pop');
       }
-      if (AC && !muted) {
+      if (AC && !settings.muted) {
         try {
           const n2 = AC.currentTime;
           (big ? [12, 16, 19, 24, 28] : [19, 24, 28]).forEach((sm, i) =>
@@ -1143,7 +1143,7 @@ function misCanvasDraw(c) {
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   g.clearRect(0, 0, w, h);
   const cx = w / 2,
-    cy = h / 2 + Math.sin(t * 0.8) * 1.5,
+    cy = h / 2 + Math.sin(time.t * 0.8) * 1.5,
     R = Math.min(w, h) * 0.3,
     RA = Math.max(w, 600) * 1.4,
     acy = cy + RA;
@@ -1196,7 +1196,7 @@ function misCanvasDraw(c) {
       ox = R * 1.5,
       oy = R * 0.5;
     const moon = (i, front) => {
-      const an = t * 0.5 + i * 2.094,
+      const an = time.t * 0.5 + i * 2.094,
         s2 = Math.sin(an);
       if (s2 > 0 !== front) {
         return;
@@ -1227,7 +1227,14 @@ function misCanvasDraw(c) {
     }
     let res = null;
     try {
-      res = PLGL.render(id, 2 * Rp * dpr, t * 0.35, [-0.55, 0.45, 0.35], [1.1, 1.04, 0.96], t);
+      res = PLGL.render(
+        id,
+        2 * Rp * dpr,
+        time.t * 0.35,
+        [-0.55, 0.45, 0.35],
+        [1.1, 1.04, 0.96],
+        time.t,
+      );
     } catch (e) {}
     if (res) {
       const hh = Rp * res.pad;
@@ -1252,7 +1259,14 @@ function misCanvasDraw(c) {
     }
     let res = null;
     try {
-      res = PLGL.render(id, 2 * R * dpr, t * 0.35, [-0.55, 0.45, 0.35], [1.1, 1.04, 0.96], t);
+      res = PLGL.render(
+        id,
+        2 * R * dpr,
+        time.t * 0.35,
+        [-0.55, 0.45, 0.35],
+        [1.1, 1.04, 0.96],
+        time.t,
+      );
     } catch (e) {}
     if (res) {
       const hh = R * res.pad;
@@ -1270,7 +1284,7 @@ function misCanvasDraw(c) {
     g.save();
     g.translate(cx, cy);
     g.scale(1, 0.55);
-    g.rotate(t * 0.15);
+    g.rotate(time.t * 0.15);
     for (let arm = 0; arm < 2; arm++) {
       for (let i = 0; i < 70; i++) {
         const k = i / 70,
@@ -1288,14 +1302,14 @@ function misCanvasDraw(c) {
   } else if (kind === 'seis') {
     // Seis estrellas en ronda.
     for (let i = 0; i < 6; i++) {
-      const an = -Math.PI / 2 + (i * Math.PI) / 3 + t * 0.2,
+      const an = -Math.PI / 2 + (i * Math.PI) / 3 + time.t * 0.2,
         x = cx + Math.cos(an) * R * 0.85,
         y = cy + Math.sin(an) * R * 0.85 * 0.8;
       glow(x, y, 16, 'rgba(255,211,107,A)', 0.5);
       star4(x, y, 10, '#ffd36b', 1);
     }
   } else if (kind === 'perf100') {
-    const pl = 0.5 + 0.5 * Math.sin(t * 2.4);
+    const pl = 0.5 + 0.5 * Math.sin(time.t * 2.4);
     for (let j = 0; j < 3; j++) {
       g.strokeStyle = 'rgba(255,211,107,' + (0.35 - j * 0.1) + ')';
       g.lineWidth = 2;
@@ -1308,7 +1322,7 @@ function misCanvasDraw(c) {
   } else if (kind === 'ondas20') {
     // La onda de la supernova 1987A, en la Gran Nube de Magallanes.
     for (let j = 0; j < 4; j++) {
-      const u = (t * 0.35 + j / 4) % 1;
+      const u = (time.t * 0.35 + j / 4) % 1;
       g.strokeStyle = 'rgba(255,111,168,' + (1 - u) * 0.8 + ')';
       g.lineWidth = 3 * (1 - u) + 0.5;
       g.beginPath();

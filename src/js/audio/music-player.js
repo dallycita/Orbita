@@ -38,8 +38,8 @@ import {
   tensionOn,
 } from './music-tracks.js';
 import { hzDroneStop, hzS, stepCosmos } from './horizon-track.js';
-import { level, lvl, state } from '../core/state.js';
-import { tutorial } from '../core/run-state.js';
+import { run, state } from '../core/state.js';
+import { tutorialState } from '../core/run-state.js';
 
 /**
  * Programa un paso de la música del estilo actual. A cierta altura de la partida lanza un
@@ -49,7 +49,7 @@ import { tutorial } from '../core/run-state.js';
  * @param {number} t0 Momento en que suena, en segundos del reloj de Web Audio.
  */
 function scheduleStep(s, t0) {
-  if (musicStyle === 'espacial' && state === 'play' && level >= SW_AT) {
+  if (musicStyle === 'espacial' && state === 'play' && run.level >= SW_AT) {
     if (!riserOn && s % 32 === 16) {
       setRiserOn(true);
       riser(t0, 16 * STEP);
@@ -66,7 +66,7 @@ function scheduleStep(s, t0) {
     musicStyle !== 'synthwave' &&
     musicStyle !== 'phonk' &&
     state === 'play' &&
-    level >= 31 &&
+    run.level >= 31 &&
     !andFast
   ) {
     if (!riserOn && s % 32 === 16) {
@@ -122,12 +122,12 @@ function startMusic() {
   }
   try {
     setMusicStyle(
-      !tutorial && state !== 'home' && state !== 'levels'
-        ? lvl >= 3
-          ? 'gal' + lvl
-          : lvl === 1
+      !tutorialState.tutorial && state !== 'home' && state !== 'levels'
+        ? run.lvl >= 3
+          ? 'gal' + run.lvl
+          : run.lvl === 1
             ? 'magallanes'
-            : lvl === 2
+            : run.lvl === 2
               ? 'andromeda'
               : 'cosmos'
         : 'espacial',

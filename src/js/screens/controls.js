@@ -14,17 +14,16 @@ import {
 } from '../core/display.js';
 import { AC, initAudio } from '../audio/engine.js';
 import { startMusic, stopMusic } from '../audio/music-player.js';
-import { charge, jumping, lvl, setState, state } from '../core/state.js';
+import { run, setState, state } from '../core/state.js';
 import { chargeMax } from '../game/planets.js';
 import {
-  canRestart,
-  gest,
-  pending,
+  effects,
+  input,
+  outcome,
   setGest,
   setPending,
   setPendingT,
-  texts,
-  tutorial,
+  tutorialState,
 } from '../core/run-state.js';
 import { pushing } from '../game/beat.js';
 import { wh, whTap } from '../game/wormhole.js';
@@ -107,10 +106,10 @@ function press(e) {
       openLevels();
     } else if (A === 'lvl1') {
       startLevel(0);
-    } else if (A === 'next' && LEVELS[lvl + 1]) {
-      setLvIndex(lvl + 1);
-      startLevel(lvl + 1);
-    } else if (A === 'again' && canRestart) {
+    } else if (A === 'next' && LEVELS[run.lvl + 1]) {
+      setLvIndex(run.lvl + 1);
+      startLevel(run.lvl + 1);
+    } else if (A === 'again' && outcome.canRestart) {
       start();
       setSesTries(sesTries + 1);
       showTry(0);
@@ -173,14 +172,14 @@ function press(e) {
     }
     return;
   }
-  if (state === 'win' && tutorial) {
+  if (state === 'win' && tutorialState.tutorial) {
     return;
   }
   if (state === 'win') {
     return;
   }
   if (state === 'dead') {
-    if (canRestart) {
+    if (outcome.canRestart) {
       start();
     }
     return;
@@ -189,11 +188,11 @@ function press(e) {
     whTap();
     return;
   }
-  if (state === 'play' && !jumping && !pushing) {
+  if (state === 'play' && !run.jumping && !pushing) {
     jump();
     if (e && e.pointerId !== undefined) {
       setGest({ id: e.pointerId, y: e.clientY });
-      if (charge >= chargeMax()) {
+      if (run.charge >= chargeMax()) {
         setPending(true);
         setPendingT(0);
       } // Espera un instante por si es un deslizamiento hacia arriba (salto doble).
@@ -201,7 +200,7 @@ function press(e) {
   }
 }
 const endGest = e => {
-  if (gest && e.pointerId === gest.id) {
+  if (input.gest && e.pointerId === input.gest.id) {
     setGest(null);
     setPending(false);
   }
@@ -214,10 +213,10 @@ function powerKey() {
   if (state !== 'play' || wh) {
     return;
   }
-  if (charge < chargeMax()) {
-    const f = chargeMax() - charge;
-    if (!texts.some(x => x.key === 'faltan')) {
-      texts.push({
+  if (run.charge < chargeMax()) {
+    const f = chargeMax() - run.charge;
+    if (!effects.texts.some(x => x.key === 'faltan')) {
+      effects.texts.push({
         txt: 'Te ' + (f === 1 ? 'falta 1 Perfecto' : 'faltan ' + f + ' Perfectos'),
         x: 0,
         y: -R0 - 30,
@@ -230,7 +229,7 @@ function powerKey() {
     }
     return;
   }
-  if (jumping) {
+  if (run.jumping) {
     upgradeToDouble();
   } else {
     doubleJump();
@@ -241,12 +240,12 @@ function powerKey() {
 export function initControls() {
   // Deslizar más de 22 píxeles hacia arriba durante el toque mejora el salto a salto doble.
   window.addEventListener('pointermove', e => {
-    if (!gest || e.pointerId !== gest.id) {
+    if (!input.gest || e.pointerId !== input.gest.id) {
       return;
     }
-    if (gest.y - e.clientY > 22) {
+    if (input.gest.y - e.clientY > 22) {
       setGest(null);
-      if (pending) {
+      if (input.pending) {
         upgradeToDouble();
       }
       setPending(false);

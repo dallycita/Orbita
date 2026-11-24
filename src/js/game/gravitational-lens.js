@@ -4,8 +4,8 @@
  * estira en arcos y corre más rápido por su borde; dentro se ve el cielo del otro lado.
  * Dato real: la gravedad dobla la luz (Einstein, 1915); así se calculó el agujero de Interstellar.
  */
-import { level, lvl, state } from '../core/state.js';
-import { t, tutorial } from '../core/run-state.js';
+import { run, state } from '../core/state.js';
+import { time, tutorialState } from '../core/run-state.js';
 
 import { hazardTip } from './hazards.js';
 
@@ -37,11 +37,14 @@ function bendUpdate(d) {
   if (bend.fixed) {
     return;
   }
-  const z = BEND_AT[lvl],
-    want = !tutorial && z && level >= z[0] && level <= z[1] && state === 'play' ? 1 : 0;
+  const z = BEND_AT[run.lvl],
+    want =
+      !tutorialState.tutorial && z && run.level >= z[0] && run.level <= z[1] && state === 'play'
+        ? 1
+        : 0;
   if (want && !bend.on) {
     bend.on = true;
-    bend.L = level + 1.5;
+    bend.L = run.level + 1.5;
     bend.a = -Math.PI / 2 + 0.9;
     hazardTip('whVisto', 'Agujero de gusano', 'Salta dentro: es un portal', WORM_COL);
   }
@@ -49,11 +52,12 @@ function bendUpdate(d) {
     bend.on = false;
   }
   bend.str += (want - bend.str) * Math.min(1, d * (want ? 1.2 : 2.2));
-  const lock = want && level === WH_K - 1; // en el último anillo se pone justo en tu camino
-  bend.L += ((want ? level + (lock ? 0.8 : 1.55) : level + 4) - bend.L) * Math.min(1, d * 2.5);
+  const lock = want && run.level === WH_K - 1; // en el último anillo se pone justo en tu camino
+  bend.L +=
+    ((want ? run.level + (lock ? 0.8 : 1.55) : run.level + 4) - bend.L) * Math.min(1, d * 2.5);
   const aT = lock
     ? -Math.PI / 2
-    : -Math.PI / 2 + 0.8 * Math.sin(t * 0.42) + 0.2 * Math.sin(t * 1.1);
+    : -Math.PI / 2 + 0.8 * Math.sin(time.t * 0.42) + 0.2 * Math.sin(time.t * 1.1);
   bend.a +=
     Math.atan2(Math.sin(aT - bend.a), Math.cos(aT - bend.a)) * Math.min(1, d * (lock ? 4 : 2));
 }

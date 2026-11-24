@@ -4,22 +4,46 @@
  * Los récords viven en localStorage con claves `orbita_pN_anillo` y `orbita_pN_intentos`.
  */
 import { elArcFg, elBest, elPbar, elPnum, elScore, elWrap, hudMode } from './display.js';
-import { attempts, curGoal, tutorial } from './run-state.js';
+import { curGoal, tutorialState } from './run-state.js';
 
-let best = 0;
+const records = {
+  best: 0,
+  bestRing: 0,
+  best2: 0,
+  attempts2: 0,
+  best3: 0,
+  attempts3: 0,
+  attempts: 0,
+};
 const saveBest = () => {
   try {
-    localStorage.setItem('orbita_best_v2', String(best));
+    localStorage.setItem('orbita_best_v2', String(records.best));
   } catch (e) {}
 };
-let bestRing = 0;
 const saveBestRing = () => {
   try {
-    localStorage.setItem('orbita_p1_anillo', String(bestRing));
+    localStorage.setItem('orbita_p1_anillo', String(records.bestRing));
   } catch (e) {}
 };
-let runRecord = 0;
-let newRec = false;
+const run = {
+  runRecord: 0,
+  newRec: false,
+  rings: undefined,
+  level: undefined,
+  pLevel: undefined,
+  pAng: undefined,
+  jumping: undefined,
+  jumpT: undefined,
+  combo: undefined,
+  lastLand: undefined,
+  score: undefined,
+  astFade: 0,
+  appear: 1,
+  charge: 0,
+  jumpTarget: 1,
+  crossed: false,
+  lvl: 0,
+};
 /**
  * Actualiza el marcador de anillos: la barra de viaje de arriba (como en Geometry Dash, el
  * planeta avanza del agujero negro a la salida y la marca dorada es el récord), el número y el
@@ -28,8 +52,8 @@ let newRec = false;
 function updateRingHUD() {
   if (elPbar && elPbar.style) {
     const g = curGoal(),
-      v = Math.min(level, g),
-      rec = tutorial ? 0 : Math.min(runRecord, g);
+      v = Math.min(run.level, g),
+      rec = tutorialState.tutorial ? 0 : Math.min(run.runRecord, g);
     elPbar.style.setProperty('--p', ((v / g) * 100).toFixed(2) + '%');
     elPbar.style.setProperty('--r', ((rec / g) * 100).toFixed(2) + '%');
     if (elPbar.classList) {
@@ -43,39 +67,23 @@ function updateRingHUD() {
       }
     }
   }
-  elScore.innerHTML = Math.min(level, curGoal()) + '<small>/ ' + curGoal() + '</small>';
+  elScore.innerHTML = Math.min(run.level, curGoal()) + '<small>/ ' + curGoal() + '</small>';
   elBest.textContent = '';
-  const arc = hudMode === 'arco' && runRecord > 0;
+  const arc = hudMode === 'arco' && run.runRecord > 0;
   elWrap.classList.toggle('arc', arc);
   if (arc) {
-    elArcFg.style.strokeDashoffset = String(276.5 * (1 - Math.min(level / runRecord, 1)));
-    elArcFg.style.stroke = newRec ? 'var(--fg)' : 'var(--sun)';
+    elArcFg.style.strokeDashoffset = String(276.5 * (1 - Math.min(run.level / run.runRecord, 1)));
+    elArcFg.style.stroke = run.newRec ? 'var(--fg)' : 'var(--sun)';
   }
 }
 
 // Pantalla actual: 'pretitle', 'splash', 'intro', 'home', 'planets', 'levels', 'menu',
 // 'play', 'dead' o 'win'.
 let state = 'pretitle';
-let rings;
-let level;
-let pLevel;
-let camLevel;
-let pAng;
-let jumping;
-let jumpT;
-let combo;
-let lastLand;
-let score;
-let astFade = 0;
-let appear = 1;
-let charge = 0;
-let jumpTarget = 1;
-let crossed = false;
-let lvl = 0; // Índice en LEVELS: 0 Sistema solar, 1 Nubes de Magallanes, 2 Andrómeda…
-let best2 = 0;
-let attempts2 = 0;
-let best3 = 0;
-let attempts3 = 0;
+const camera = {
+  camLevel: undefined,
+};
+// Índice en LEVELS: 0 Sistema solar, 1 Nubes de Magallanes, 2 Andrómeda…
 const bestX = {};
 const attX = {};
 /**
@@ -84,7 +92,8 @@ const attX = {};
  * @param {number} i Índice del nivel.
  * @returns {number} Nivel de anillo.
  */
-const bestOf = i => (i >= 3 ? bestX[i] || 0 : i === 2 ? best3 : i === 1 ? best2 : bestRing);
+const bestOf = i =>
+  i >= 3 ? bestX[i] || 0 : i === 2 ? records.best3 : i === 1 ? records.best2 : records.bestRing;
 /**
  * Guarda el mejor anillo de un nivel.
  *
@@ -98,17 +107,17 @@ function setBestOf(i, v) {
       localStorage.setItem('orbita_p' + (i + 1) + '_anillo', String(v));
     } catch (e) {}
   } else if (i === 2) {
-    best3 = v;
+    records.best3 = v;
     try {
       localStorage.setItem('orbita_p3_anillo', String(v));
     } catch (e) {}
   } else if (i === 1) {
-    best2 = v;
+    records.best2 = v;
     try {
       localStorage.setItem('orbita_p2_anillo', String(v));
     } catch (e) {}
   } else {
-    bestRing = v;
+    records.bestRing = v;
     saveBestRing();
   }
 }
@@ -119,27 +128,33 @@ function setBestOf(i, v) {
  * @returns {number} Cantidad de intentos.
  */
 const attemptsOf = i =>
-  i >= 3 ? attX[i] || 0 : i === 2 ? attempts3 : i === 1 ? attempts2 : attempts;
+  i >= 3
+    ? attX[i] || 0
+    : i === 2
+      ? records.attempts3
+      : i === 1
+        ? records.attempts2
+        : records.attempts;
 
 /** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
 export function initRecords() {
   try {
-    best = parseInt(localStorage.getItem('orbita_best_v2') || '0', 10) || 0;
+    records.best = parseInt(localStorage.getItem('orbita_best_v2') || '0', 10) || 0;
   } catch (e) {
-    best = 0;
+    records.best = 0;
   }
   try {
-    bestRing = parseInt(localStorage.getItem('orbita_p1_anillo') || '0', 10) || 0;
+    records.bestRing = parseInt(localStorage.getItem('orbita_p1_anillo') || '0', 10) || 0;
   } catch (e) {
-    bestRing = 0;
+    records.bestRing = 0;
   }
   try {
-    best3 = parseInt(localStorage.getItem('orbita_p3_anillo') || '0', 10) || 0;
-    attempts3 = parseInt(localStorage.getItem('orbita_p3_intentos') || '0', 10) || 0;
+    records.best3 = parseInt(localStorage.getItem('orbita_p3_anillo') || '0', 10) || 0;
+    records.attempts3 = parseInt(localStorage.getItem('orbita_p3_intentos') || '0', 10) || 0;
   } catch (e) {}
   try {
-    best2 = parseInt(localStorage.getItem('orbita_p2_anillo') || '0', 10) || 0;
-    attempts2 = parseInt(localStorage.getItem('orbita_p2_intentos') || '0', 10) || 0;
+    records.best2 = parseInt(localStorage.getItem('orbita_p2_anillo') || '0', 10) || 0;
+    records.attempts2 = parseInt(localStorage.getItem('orbita_p2_intentos') || '0', 10) || 0;
   } catch (e) {}
   for (let i = 3; i < 8; i++) {
     try {
@@ -159,7 +174,7 @@ export function initRecords() {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setAppear(value) {
-  appear = value;
+  run.appear = value;
   return value;
 }
 
@@ -170,7 +185,7 @@ export function setAppear(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setAstFade(value) {
-  astFade = value;
+  run.astFade = value;
   return value;
 }
 
@@ -181,7 +196,7 @@ export function setAstFade(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setAttempts2(value) {
-  attempts2 = value;
+  records.attempts2 = value;
   return value;
 }
 
@@ -192,7 +207,7 @@ export function setAttempts2(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setAttempts3(value) {
-  attempts3 = value;
+  records.attempts3 = value;
   return value;
 }
 
@@ -203,7 +218,7 @@ export function setAttempts3(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setBest(value) {
-  best = value;
+  records.best = value;
   return value;
 }
 
@@ -214,7 +229,7 @@ export function setBest(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setBestRing(value) {
-  bestRing = value;
+  records.bestRing = value;
   return value;
 }
 
@@ -225,7 +240,7 @@ export function setBestRing(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setCamLevel(value) {
-  camLevel = value;
+  camera.camLevel = value;
   return value;
 }
 
@@ -236,7 +251,7 @@ export function setCamLevel(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setCharge(value) {
-  charge = value;
+  run.charge = value;
   return value;
 }
 
@@ -247,7 +262,7 @@ export function setCharge(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setCombo(value) {
-  combo = value;
+  run.combo = value;
   return value;
 }
 
@@ -258,7 +273,7 @@ export function setCombo(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setCrossed(value) {
-  crossed = value;
+  run.crossed = value;
   return value;
 }
 
@@ -269,7 +284,7 @@ export function setCrossed(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setJumpT(value) {
-  jumpT = value;
+  run.jumpT = value;
   return value;
 }
 
@@ -280,7 +295,7 @@ export function setJumpT(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setJumpTarget(value) {
-  jumpTarget = value;
+  run.jumpTarget = value;
   return value;
 }
 
@@ -291,7 +306,7 @@ export function setJumpTarget(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setJumping(value) {
-  jumping = value;
+  run.jumping = value;
   return value;
 }
 
@@ -302,7 +317,7 @@ export function setJumping(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setLastLand(value) {
-  lastLand = value;
+  run.lastLand = value;
   return value;
 }
 
@@ -313,7 +328,7 @@ export function setLastLand(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setLevel(value) {
-  level = value;
+  run.level = value;
   return value;
 }
 
@@ -324,7 +339,7 @@ export function setLevel(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setLvl(value) {
-  lvl = value;
+  run.lvl = value;
   return value;
 }
 
@@ -335,7 +350,7 @@ export function setLvl(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setNewRec(value) {
-  newRec = value;
+  run.newRec = value;
   return value;
 }
 
@@ -346,7 +361,7 @@ export function setNewRec(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setPAng(value) {
-  pAng = value;
+  run.pAng = value;
   return value;
 }
 
@@ -357,7 +372,7 @@ export function setPAng(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setPLevel(value) {
-  pLevel = value;
+  run.pLevel = value;
   return value;
 }
 
@@ -368,7 +383,7 @@ export function setPLevel(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setRings(value) {
-  rings = value;
+  run.rings = value;
   return value;
 }
 
@@ -379,7 +394,7 @@ export function setRings(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setRunRecord(value) {
-  runRecord = value;
+  run.runRecord = value;
   return value;
 }
 
@@ -390,7 +405,7 @@ export function setRunRecord(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setScore(value) {
-  score = value;
+  run.score = value;
   return value;
 }
 
@@ -405,33 +420,26 @@ export function setState(value) {
   return value;
 }
 
+/**
+ * Cambia `attempts` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+function setAttempts(value) {
+  records.attempts = value;
+  return value;
+}
+
 export {
-  appear,
-  astFade,
   attX,
-  attempts2,
-  attempts3,
   attemptsOf,
-  best,
   bestOf,
-  bestRing,
-  camLevel,
-  charge,
-  combo,
-  crossed,
-  jumpT,
-  jumpTarget,
-  jumping,
-  lastLand,
-  level,
-  lvl,
-  newRec,
-  pAng,
-  pLevel,
-  rings,
-  runRecord,
+  camera,
+  records,
+  run,
   saveBest,
-  score,
+  setAttempts,
   setBestOf,
   state,
   updateRingHUD,

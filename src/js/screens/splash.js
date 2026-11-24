@@ -7,7 +7,7 @@
 import { BONE, CX, CY, H, W, buzz, clamp, ctx, elHud, elPanel, stars } from '../core/display.js';
 import { AC, NOISE, ROOT, master, noiseHit } from '../audio/engine.js';
 import { setState, state } from '../core/state.js';
-import { flash, setFlash, setT, t } from '../core/run-state.js';
+import { effects, setFlash, setT, time } from '../core/run-state.js';
 import { afterSplash } from './levels.js';
 import {
   BR1,
@@ -139,11 +139,11 @@ function skipSplash() {
  * @param {number} dt Tiempo del cuadro, en segundos.
  */
 function updateSplash(dt) {
-  setT(t + dt);
+  setT(time.t + dt);
   if (state === 'splash') {
     splashT += dt;
   }
-  setFlash(Math.max(0, flash - dt * 2));
+  setFlash(Math.max(0, effects.flash - dt * 2));
   setSfl(Math.max(0, sfl - dt * 1.3));
   if (state === 'splash' && !sflared && splashT >= 5.5) {
     sflared = true;
@@ -166,9 +166,9 @@ function renderSplash() {
   ctx.fillRect(0, 0, W, H);
   const sr = Math.max(W, H) * 0.62;
   for (const s of stars) {
-    const x = CX + Math.cos(s.a + t * 0.004) * s.r * sr,
-      y = CY + Math.sin(s.a + t * 0.004) * s.r * sr;
-    ctx.globalAlpha = 0.1 + 0.2 * (0.5 + 0.5 * Math.sin(t * 1.3 + s.tw));
+    const x = CX + Math.cos(s.a + time.t * 0.004) * s.r * sr,
+      y = CY + Math.sin(s.a + time.t * 0.004) * s.r * sr;
+    ctx.globalAlpha = 0.1 + 0.2 * (0.5 + 0.5 * Math.sin(time.t * 1.3 + s.tw));
     ctx.fillStyle = BONE;
     ctx.fillRect(x, y, s.s * 0.8, s.s * 0.8);
   }
@@ -249,8 +249,8 @@ function renderSplash() {
     ctx.globalAlpha = 1;
   }
   ctx.restore();
-  if (flash > 0) {
-    ctx.globalAlpha = flash * 0.4;
+  if (effects.flash > 0) {
+    ctx.globalAlpha = effects.flash * 0.4;
     ctx.fillStyle = '#fffaf0';
     ctx.fillRect(0, 0, W, H);
     ctx.globalAlpha = 1;

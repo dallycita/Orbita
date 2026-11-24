@@ -7,14 +7,14 @@
 import { buzz, elPanel, reduceMotion } from '../core/display.js';
 import { AC, applyVolumes, saveVolumes } from '../audio/engine.js';
 import { stopMusic } from '../audio/music-player.js';
-import { bestOf, level, lvl, rings, setState, state } from '../core/state.js';
-import { curGoal, setGest, setPending, tutorial } from '../core/run-state.js';
+import { bestOf, run, setState, state } from '../core/state.js';
+import { curGoal, setGest, setPending, tutorialState } from '../core/run-state.js';
 
 import { sesTries, setSesTries, showTry, start } from '../game/run.js';
 import { openLevels } from './levels.js';
 
 import { COIN_RINGS, LEVELS } from '../data/levels.js';
-import { setVolMus, setVolSfx, volMus, volSfx } from '../core/settings.js';
+import { setVolMus, setVolSfx, settings } from '../core/settings.js';
 import { lvStarsGot } from '../game/progress.js';
 import { paused, setPaused } from '../core/screen.js';
 import { setLast } from '../core/clock.js';
@@ -87,12 +87,12 @@ function pauseGame() {
   buzz(12);
   pzSnd('open');
   const g = curGoal(),
-    v = Math.min(level, g),
-    bst = tutorial ? 0 : Math.min(bestOf(lvl), g),
-    L = LEVELS[lvl] || LEVELS[0];
-  const cr = !tutorial && COIN_RINGS[lvl] ? [...COIN_RINGS[lvl]] : [],
-    gotS = new Set(lvStarsGot(lvl));
-  for (const [k, r] of rings) {
+    v = Math.min(run.level, g),
+    bst = tutorialState.tutorial ? 0 : Math.min(bestOf(run.lvl), g),
+    L = LEVELS[run.lvl] || LEVELS[0];
+  const cr = !tutorialState.tutorial && COIN_RINGS[run.lvl] ? [...COIN_RINGS[run.lvl]] : [],
+    gotS = new Set(lvStarsGot(run.lvl));
+  for (const [k, r] of run.rings) {
     if (r.coin && r.coin.got) {
       gotS.add(k);
     }
@@ -102,7 +102,7 @@ function pauseGame() {
   elPanel.className = 'wscr pzp';
   elPanel.innerHTML =
     '<div class="title wtit">Pausa</div><div class="wtries">' +
-    (tutorial ? 'Tutorial' : L.name) +
+    (tutorialState.tutorial ? 'Tutorial' : L.name) +
     ' · anillo ' +
     v +
     ' de ' +
@@ -143,8 +143,8 @@ function pauseGame() {
     PZ_ICO.lv +
     '</button></div>' +
     '<div class="pz-sl">' +
-    pzVolHTML('mus', PZ_ICO.mus, 'Música', volMus) +
-    pzVolHTML('sfx', PZ_ICO.sfx, 'SFX', volSfx) +
+    pzVolHTML('mus', PZ_ICO.mus, 'Música', settings.volMus) +
+    pzVolHTML('sfx', PZ_ICO.sfx, 'SFX', settings.volSfx) +
     '</div>';
   if (document.body && document.body.classList) {
     document.body.classList.add('paused');
@@ -301,7 +301,7 @@ function pausePress(e) {
       openLevels();
     } else if (A === 'mute-mus' || A === 'mute-sfx') {
       const k = A.slice(5),
-        cur = k === 'mus' ? volMus : volSfx;
+        cur = k === 'mus' ? settings.volMus : settings.volSfx;
       if (cur > 0) {
         pzPrev[k] = cur;
         pzSnd('mute');

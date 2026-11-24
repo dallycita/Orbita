@@ -8,26 +8,14 @@ import { SCALE, cowbell, noise, sub, suck, thump } from '../audio/engine.js';
 import { startMusic, stopMusic } from '../audio/music-player.js';
 import {
   attX,
-  attempts2,
-  attempts3,
   attemptsOf,
-  best,
   bestOf,
-  charge,
-  jumpT,
-  jumpTarget,
-  jumping,
-  level,
-  lvl,
-  newRec,
-  pAng,
-  pLevel,
-  rings,
-  runRecord,
+  records,
+  run,
   saveBest,
-  score,
   setAppear,
   setAstFade,
+  setAttempts,
   setAttempts2,
   setAttempts3,
   setBest,
@@ -66,18 +54,11 @@ import {
 } from './planets.js';
 import {
   PERFECT,
-  attempts,
-  burns,
   curGoal,
-  hintsShown,
-  jumpClear,
-  lastEaten,
-  particles,
-  perfCount,
+  effects,
+  hole,
+  outcome,
   pipFlash,
-  pulse,
-  readyHintDone,
-  setAttempts,
   setBurns,
   setCanRestart,
   setChargeFlash,
@@ -108,12 +89,7 @@ import {
   setTrail,
   setTutorial,
   setWinT,
-  shake,
-  showHint,
-  streak,
-  sunLevel,
-  texts,
-  tutorial,
+  tutorialState,
 } from '../core/run-state.js';
 import { SEED, ringType, seenTypes, setRngState } from './courses.js';
 import {
@@ -229,28 +205,28 @@ function start() {
   setState('play');
   setWinT(0);
   setPerfCount(0);
-  if (lvl >= 3) {
-    attX[lvl] = (attX[lvl] || 0) + 1;
+  if (run.lvl >= 3) {
+    attX[run.lvl] = (attX[run.lvl] || 0) + 1;
     try {
-      localStorage.setItem('orbita_p' + (lvl + 1) + '_intentos', String(attX[lvl]));
+      localStorage.setItem('orbita_p' + (run.lvl + 1) + '_intentos', String(attX[run.lvl]));
     } catch (e) {}
-  } else if (lvl === 2) {
-    setAttempts3(attempts3 + 1);
+  } else if (run.lvl === 2) {
+    setAttempts3(records.attempts3 + 1);
     try {
-      localStorage.setItem('orbita_p3_intentos', String(attempts3));
+      localStorage.setItem('orbita_p3_intentos', String(records.attempts3));
     } catch (e) {}
-  } else if (lvl === 1) {
-    setAttempts2(attempts2 + 1);
+  } else if (run.lvl === 1) {
+    setAttempts2(records.attempts2 + 1);
     try {
-      localStorage.setItem('orbita_p2_intentos', String(attempts2));
+      localStorage.setItem('orbita_p2_intentos', String(records.attempts2));
     } catch (e) {}
   } else {
-    setAttempts(attempts + 1);
+    setAttempts(records.attempts + 1);
     try {
-      localStorage.setItem('orbita_p1_intentos', String(attempts));
+      localStorage.setItem('orbita_p1_intentos', String(records.attempts));
     } catch (e) {}
   }
-  setRunRecord(bestOf(lvl));
+  setRunRecord(bestOf(run.lvl));
   setNewRec(false);
   updateRingHUD();
   elHud.style.opacity = 1;
@@ -277,13 +253,13 @@ function start() {
  * @returns {number} Distancia entre bordes, en unidades del juego (999 si no hay ninguno).
  */
 function clearance(k, onlyApproaching) {
-  const ring = rings.get(k);
+  const ring = run.rings.get(k);
   if (!ring) {
     return 999;
   }
   const R = rr(k),
-    px = Math.cos(pAng) * R,
-    py = Math.sin(pAng) * R;
+    px = Math.cos(run.pAng) * R,
+    py = Math.sin(run.pAng) * R;
   let m = 999;
   for (const o of ring.obs) {
     if (o.gone) {
@@ -291,7 +267,7 @@ function clearance(k, onlyApproaching) {
     }
     const oa = obsAng(ring, o);
     if (onlyApproaching) {
-      const diff = Math.atan2(Math.sin(oa - pAng), Math.cos(oa - pAng));
+      const diff = Math.atan2(Math.sin(oa - run.pAng), Math.cos(oa - run.pAng));
       if (diff * (o.dir || 1) * ring.w * (ring.sgn || 1) >= 0) {
         continue;
       }
@@ -310,24 +286,24 @@ function clearance(k, onlyApproaching) {
  */
 function upgradeToDouble() {
   if (
-    !jumping ||
-    jumpTarget !== 1 ||
-    charge < chargeMax() ||
-    level + 2 > curGoal() ||
-    (tutorial && level < 8) ||
+    !run.jumping ||
+    run.jumpTarget !== 1 ||
+    run.charge < chargeMax() ||
+    run.level + 2 > curGoal() ||
+    (tutorialState.tutorial && run.level < 8) ||
     wh ||
-    ['gusano', 'orbita'].includes(ringType(level + 1)) ||
-    ['gusano', 'orbita'].includes(ringType(level + 2))
+    ['gusano', 'orbita'].includes(ringType(run.level + 1)) ||
+    ['gusano', 'orbita'].includes(ringType(run.level + 2))
   ) {
     return;
   }
-  if (!tutorial && curPlanet && curPlanet !== 'tierra') {
+  if (!tutorialState.tutorial && curPlanet && curPlanet !== 'tierra') {
     usePower(true);
     return;
   }
   // Busca el punto del salto doble con la misma altura que el simple (la curva es
   // 1 - (1 - p)^3 y el doble recorre dos anillos), para que el planeta no dé un brinco.
-  const p1 = Math.min(jumpT / jumpDur(), 1),
+  const p1 = Math.min(run.jumpT / jumpDur(), 1),
     e1 = 1 - Math.pow(1 - p1, 3);
   const p2 = 1 - Math.cbrt(1 - e1 / 2);
   setJumpTarget(2);
@@ -347,20 +323,20 @@ function upgradeToDouble() {
  * planetas y muestra la pantalla de victoria.
  */
 function win() {
-  if (tutorial) {
+  if (tutorialState.tutorial) {
     emit('tutorialWin');
     return;
   }
   const before = unlockedIds();
-  misWin(lvl, curPlanet, sesTries);
+  misWin(run.lvl, curPlanet, sesTries);
   setState('win');
   setWinT(0);
   setCanRestart(false);
   setFlash(0.6);
   setShake(reduceMotion ? 0 : 8);
   setPulse(1);
-  if (level > bestOf(lvl)) {
-    setBestOf(lvl, level);
+  if (run.level > bestOf(run.lvl)) {
+    setBestOf(run.lvl, run.level);
   }
   saveRunStats();
   if (!usedDouble) {
@@ -370,8 +346,8 @@ function win() {
     } catch (e) {}
   }
   const rescued = rescuedPlanets(before).length > 0;
-  if (score > best) {
-    setBest(score);
+  if (run.score > records.best) {
+    setBest(run.score);
     saveBest();
   }
   stopMusic();
@@ -379,10 +355,10 @@ function win() {
   buzz([40, 60, 40, 60, 120]);
   elHud.style.opacity = 0;
   setTimeout(() => {
-    const cr = COIN_RINGS[lvl] ? [...COIN_RINGS[lvl]] : [],
-      gotR = lvStarsGot(lvl),
+    const cr = COIN_RINGS[run.lvl] ? [...COIN_RINGS[run.lvl]] : [],
+      gotR = lvStarsGot(run.lvl),
       nSt = cr.filter(k => gotR.includes(k)).length,
-      nx = LEVELS[lvl + 1];
+      nx = LEVELS[run.lvl + 1];
     elPanel.classList.remove('top');
     elPanel.classList.add('wscr');
     const ICO_RE =
@@ -391,7 +367,7 @@ function win() {
       '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6" fill="currentColor"/><circle cx="12" cy="12" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="9.6" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".55"/></svg>';
     const ICO_PLAY =
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>';
-    const tries = attemptsOf(lvl);
+    const tries = attemptsOf(run.lvl);
     elPanel.innerHTML =
       '<div class="title wtit">Escapaste</div>' +
       '<div class="wtries">' +
@@ -449,17 +425,17 @@ function win() {
 function doubleJump() {
   if (
     state !== 'play' ||
-    jumping ||
-    charge < chargeMax() ||
-    level + 2 > curGoal() ||
-    (tutorial && level < 8) ||
+    run.jumping ||
+    run.charge < chargeMax() ||
+    run.level + 2 > curGoal() ||
+    (tutorialState.tutorial && run.level < 8) ||
     wh ||
-    ['gusano', 'orbita'].includes(ringType(level + 1)) ||
-    ['gusano', 'orbita'].includes(ringType(level + 2))
+    ['gusano', 'orbita'].includes(ringType(run.level + 1)) ||
+    ['gusano', 'orbita'].includes(ringType(run.level + 2))
   ) {
     return;
   }
-  if (!tutorial && curPlanet && curPlanet !== 'tierra') {
+  if (!tutorialState.tutorial && curPlanet && curPlanet !== 'tierra') {
     usePower(false);
     return;
   }
@@ -480,11 +456,11 @@ function jump() {
   setJumping(true);
   setJumpT(0);
   setJumpTarget(1);
-  if (periLeft > 0 && !tutorial) {
+  if (periLeft > 0 && !tutorialState.tutorial) {
     setPeriLeft(periLeft - 1);
     setJumpT(99);
     setGhostT(0.12);
-    pfx.push({ k: 'destello', t: 0, a: pAng, l0: pLevel });
+    pfx.push({ k: 'destello', t: 0, a: run.pAng, l0: run.pLevel });
     noise(0.12, 6000, 9000, 0.2, 'highpass');
   }
   setJumpClear(999);
@@ -497,22 +473,22 @@ function jump() {
  * @param {boolean} isDouble true si se llegó con un salto doble.
  */
 function onLand(isDouble) {
-  const z = zoneOf(level);
-  const perfect = !isDouble && Math.min(jumpClear, clearance(level, false)) < PERFECT;
+  const z = zoneOf(run.level);
+  const perfect = !isDouble && Math.min(outcome.jumpClear, clearance(run.level, false)) < PERFECT;
   let gain = isDouble ? Math.max(2, lastJT) : 1;
   if (perfect) {
-    setStreak(Math.min(streak + 1, 5));
-    gain = 1 + streak;
-    setPerfCount(perfCount + 1);
+    setStreak(Math.min(outcome.streak + 1, 5));
+    gain = 1 + outcome.streak;
+    setPerfCount(outcome.perfCount + 1);
     misEvent('perf');
-    if (streak >= 3) {
+    if (outcome.streak >= 3) {
       misEvent('streak3');
     }
   } else if (!isDouble) {
     setStreak(0);
   }
   if (isDouble && !starBoost) {
-    texts.push({
+    effects.texts.push({
       txt: lastJT === 3 ? 'Monte Olimpo +3' : 'Salto doble +2',
       x: 0,
       y: -R0 - 26,
@@ -522,14 +498,14 @@ function onLand(isDouble) {
     });
   }
   if (lastJT === 3) {
-    pfx.push({ k: 'crater', t: 0, a: pAng });
-    const pr = rr(level),
-      x0 = Math.cos(pAng) * pr,
-      y0 = Math.sin(pAng) * pr;
+    pfx.push({ k: 'crater', t: 0, a: run.pAng });
+    const pr = rr(run.level),
+      x0 = Math.cos(run.pAng) * pr,
+      y0 = Math.sin(run.pAng) * pr;
     for (let i = 0; i < 40; i++) {
-      const a = pAng + (Math.PI / 2) * (i % 2 ? 1 : -1) + (Math.random() - 0.5) * 0.7,
+      const a = run.pAng + (Math.PI / 2) * (i % 2 ? 1 : -1) + (Math.random() - 0.5) * 0.7,
         v = 50 + Math.random() * 140;
-      particles.push({
+      effects.particles.push({
         x: x0,
         y: y0,
         vx: Math.cos(a) * v,
@@ -543,19 +519,19 @@ function onLand(isDouble) {
   }
   setLastJT(1);
   setStarBoost(false);
-  if (perfect && charge < chargeMax()) {
-    setCharge(charge + 1);
-    pipFlash[charge - 1] = 1;
-    if (charge === chargeMax()) {
+  if (perfect && run.charge < chargeMax()) {
+    setCharge(run.charge + 1);
+    pipFlash[run.charge - 1] = 1;
+    if (run.charge === chargeMax()) {
       powerReadySound();
       buzz([20, 40, 20, 40, 60]);
       setChargeFlash(1);
-      if (!readyHintDone) {
+      if (!tutorialState.readyHintDone) {
         setReadyHintDone(true);
         try {
           localStorage.setItem('orbita_p1_poderlisto', '1');
         } catch (e) {}
-        texts.push({
+        effects.texts.push({
           txt: '¡Poder listo!',
           x: 0,
           y: -R0 - 96,
@@ -564,7 +540,7 @@ function onLand(isDouble) {
           col: '#ffd36b',
           center: true,
         });
-        texts.push({
+        effects.texts.push({
           txt: 'Desliza hacia arriba (o tecla D)',
           x: 0,
           y: -R0 - 76,
@@ -574,31 +550,31 @@ function onLand(isDouble) {
           center: true,
         });
       }
-      setShowHint(hintsShown < 3);
-      if (showHint) {
+      setShowHint(tutorialState.hintsShown < 3);
+      if (tutorialState.showHint) {
         setHintT(2.2);
-        setHintsShown(hintsShown + 1);
+        setHintsShown(tutorialState.hintsShown + 1);
         try {
-          localStorage.setItem('orbita_p1_pista', String(hintsShown));
+          localStorage.setItem('orbita_p1_pista', String(tutorialState.hintsShown));
         } catch (e) {}
       }
     }
   }
-  setScore(score + gain);
-  if (!tutorial) {
+  setScore(run.score + gain);
+  if (!tutorialState.tutorial) {
     misEvent('ring');
-    misEvent('reach', level);
+    misEvent('reach', run.level);
   }
   thump();
-  setPulse(Math.max(pulse, 0.6));
+  setPulse(Math.max(effects.pulse, 0.6));
   setLandPop(1);
   setAstFade(1);
   setAppear(0);
-  if (!tutorial && runRecord > 0 && level > runRecord && !newRec) {
+  if (!tutorialState.tutorial && run.runRecord > 0 && run.level > run.runRecord && !run.newRec) {
     setNewRec(true);
     setFlash(0.4);
     buzz([30, 40, 30]);
-    texts.push({
+    effects.texts.push({
       txt: '¡Nuevo récord!',
       x: 0,
       y: -R0 - 70,
@@ -611,17 +587,24 @@ function onLand(isDouble) {
   }
   updateRingHUD();
   if (perfect) {
-    cowbell(SCALE[Math.min(3 + streak, SCALE.length - 1)] + (streak >= 5 ? 12 : 0));
-    texts.push({ txt: 'Perfecto +' + gain, x: 0, y: -R0 - 26, life: 1, size: 16, col: z.s2 });
+    cowbell(SCALE[Math.min(3 + outcome.streak, SCALE.length - 1)] + (outcome.streak >= 5 ? 12 : 0));
+    effects.texts.push({
+      txt: 'Perfecto +' + gain,
+      x: 0,
+      y: -R0 - 26,
+      life: 1,
+      size: 16,
+      col: z.s2,
+    });
     setTimeScale(0.4);
     setSlowTimer(0.1);
     buzz(15);
   } else {
-    cowbell(SCALE[level % 3]);
+    cowbell(SCALE[run.level % 3]);
   }
-  if (level % 25 === 0) {
-    texts.push({
-      txt: 'Zona ' + (level / 25 + 1),
+  if (run.level % 25 === 0) {
+    effects.texts.push({
+      txt: 'Zona ' + (run.level / 25 + 1),
       x: 0,
       y: -R0 - 64,
       life: 1.6,
@@ -633,8 +616,8 @@ function onLand(isDouble) {
     buzz(20);
   }
   ensureRings();
-  const nt = ringType(level + 1);
-  if (nt !== ringType(level) && TYPE_INFO[nt] && (seenTypes[nt] || 0) < 3) {
+  const nt = ringType(run.level + 1);
+  if (nt !== ringType(run.level) && TYPE_INFO[nt] && (seenTypes[nt] || 0) < 3) {
     seenTypes[nt] = (seenTypes[nt] || 0) + 1;
     try {
       localStorage.setItem('orbita_p1_vistos', JSON.stringify(seenTypes));
@@ -642,53 +625,60 @@ function onLand(isDouble) {
     // Sin texto: el anillo de tipo distinto destella para avisar que algo cambia (se aprende
     // jugando, como en Geometry Dash).
     {
-      const nr = rings.get(level + 1);
+      const nr = run.rings.get(run.level + 1);
       if (nr) {
         nr.flash = 1;
       }
     }
     buzz(12);
   }
-  if (tutorial && level === 8) {
+  if (tutorialState.tutorial && run.level === 8) {
     setCharge(3);
     pipFlash[0] = pipFlash[1] = pipFlash[2] = 1;
     setChargeFlash(1);
     powerReadySound();
-    texts.push({ txt: 'Salto doble cargado', x: 0, y: -R0 - 48, life: 1.6, size: 14, col: BONE });
+    effects.texts.push({
+      txt: 'Salto doble cargado',
+      x: 0,
+      y: -R0 - 48,
+      life: 1.6,
+      size: 14,
+      col: BONE,
+    });
   }
   hazardsOnLand();
   {
-    const nr2 = rings.get(level + 1);
+    const nr2 = run.rings.get(run.level + 1);
     if (nr2 && nr2.type === 'orbita') {
       nr2.phase = 0;
     }
   } // el hueco del siguiente empieza a girar desde que llegas
-  const sr0 = rings.get(level);
+  const sr0 = run.rings.get(run.level);
   const near = it => {
     const sa = it.a + sr0.phase - (sr0.poff || 0),
-      dd = Math.atan2(Math.sin(sa - pAng), Math.cos(sa - pAng));
-    return Math.abs(dd) * rr(level) < 22;
+      dd = Math.atan2(Math.sin(sa - run.pAng), Math.cos(sa - run.pAng));
+    return Math.abs(dd) * rr(run.level) < 22;
   };
-  const px0 = Math.cos(pAng) * rr(level),
-    py0 = Math.sin(pAng) * rr(level);
+  const px0 = Math.cos(run.pAng) * rr(run.level),
+    py0 = Math.sin(run.pAng) * rr(run.level);
   // estrella (moneda)
   if (sr0 && sr0.coin && !sr0.coin.got && near(sr0.coin)) {
     sr0.coin.got = true;
     setWallet(wallet + 1);
     setRunCoins(runCoins + 1);
-    if (!tutorial) {
+    if (!tutorialState.tutorial) {
       misEvent('star');
     }
     try {
       localStorage.setItem('orbita_estrellas', String(wallet));
     } catch (e) {}
-    if (!tutorial) {
-      const set = lvStarsGot(lvl);
-      if (!set.includes(level)) {
-        set.push(level);
+    if (!tutorialState.tutorial) {
+      const set = lvStarsGot(run.lvl);
+      if (!set.includes(run.level)) {
+        set.push(run.level);
         try {
           const all = JSON.parse(localStorage.getItem('orbita_lvstars') || '{}');
-          all[lvl] = set;
+          all[run.lvl] = set;
           localStorage.setItem('orbita_lvstars', JSON.stringify(all));
         } catch (e) {}
       }
@@ -696,11 +686,11 @@ function onLand(isDouble) {
     updateWallet(true);
     coinChime();
     buzz(15);
-    texts.push({ txt: '+1 ★', x: 0, y: -R0 - 48, life: 1.2, size: 16, col: '#ffd36b' });
+    effects.texts.push({ txt: '+1 ★', x: 0, y: -R0 - 48, life: 1.2, size: 16, col: '#ffd36b' });
     for (let i = 0; i < 18; i++) {
       const a = Math.random() * Math.PI * 2,
         v = 40 + Math.random() * 100;
-      particles.push({
+      effects.particles.push({
         x: px0,
         y: py0,
         vx: Math.cos(a) * v,
@@ -715,7 +705,7 @@ function onLand(isDouble) {
       try {
         localStorage.setItem('orbita_p1_vistos', JSON.stringify(seenTypes));
       } catch (e) {}
-      texts.push({
+      effects.texts.push({
         txt: 'Estrellas: se guardan para personalizar tus planetas',
         x: 0,
         y: -R0 - 76,
@@ -734,7 +724,7 @@ function onLand(isDouble) {
     for (let i = 0; i < 24; i++) {
       const a = Math.random() * Math.PI * 2,
         v = 40 + Math.random() * 120;
-      particles.push({
+      effects.particles.push({
         x: px0,
         y: py0,
         vx: Math.cos(a) * v,
@@ -745,7 +735,7 @@ function onLand(isDouble) {
       });
     }
     if (pul) {
-      texts.push({
+      effects.texts.push({
         txt: 'Radiación de púlsar: −1 anillo',
         x: 0,
         y: -R0 - 48,
@@ -761,7 +751,7 @@ function onLand(isDouble) {
       updateRingHUD();
       return;
     } else {
-      texts.push({
+      effects.texts.push({
         txt: 'Energía de nebulosa: +2 anillos',
         x: 0,
         y: -R0 - 48,
@@ -771,23 +761,23 @@ function onLand(isDouble) {
       });
       objChime(true);
       buzz([10, 30, 10]);
-      setScore(score + 2);
+      setScore(run.score + 2);
       updateRingHUD();
-      if (level < curGoal()) {
+      if (run.level < curGoal()) {
         starLaunch();
         return;
       }
     }
   }
   // presentar cada cosa nueva la primera vez que aparece
-  const nx = rings.get(level + 1);
+  const nx = run.rings.get(run.level + 1);
   if (nx && nx.coin && !seenTypes.monedaVista) {
     seenTypes.monedaVista = 1;
     try {
       localStorage.setItem('orbita_p1_vistos', JSON.stringify(seenTypes));
     } catch (e) {}
     {
-      const nr = rings.get(level + 1);
+      const nr = run.rings.get(run.level + 1);
       if (nr) {
         nr.flash = 1;
       }
@@ -802,7 +792,7 @@ function onLand(isDouble) {
         localStorage.setItem('orbita_p1_vistos', JSON.stringify(seenTypes));
       } catch (e) {}
       {
-        const nr = rings.get(level + 1);
+        const nr = run.rings.get(run.level + 1);
         if (nr) {
           nr.flash = 1;
         }
@@ -810,23 +800,23 @@ function onLand(isDouble) {
       buzz(12);
     }
   }
-  if (wh && wh.ph === 'orb' && level >= WH_EXIT) {
+  if (wh && wh.ph === 'orb' && run.level >= WH_EXIT) {
     whStartOut();
     return;
   }
-  if (level >= curGoal()) {
+  if (run.level >= curGoal()) {
     win();
   }
 }
 /** Marca como quemados los anillos que ya alcanzó el agujero negro (en el nivel 2, sacude). */
 function eatRings() {
-  while (lastEaten + 1 <= sunLevel) {
-    setLastEaten(lastEaten + 1);
-    if (lastEaten >= 1) {
-      burns.push({ k: lastEaten, life: 1 });
+  while (hole.lastEaten + 1 <= hole.sunLevel) {
+    setLastEaten(hole.lastEaten + 1);
+    if (hole.lastEaten >= 1) {
+      effects.burns.push({ k: hole.lastEaten, life: 1 });
     }
-    if (lvl === 2 && state === 'play' && !reduceMotion) {
-      setShake(Math.max(shake, 3.5));
+    if (run.lvl === 2 && state === 'play' && !reduceMotion) {
+      setShake(Math.max(effects.shake, 3.5));
     }
   }
 }
@@ -840,7 +830,7 @@ function eatRings() {
  * @param {object} [who] Objeto culpable, que se resalta un momento.
  */
 function die(x, y, cause, who) {
-  if (tutorial) {
+  if (tutorialState.tutorial) {
     emit('tutorialRespawn', x, y);
     return;
   }
@@ -868,7 +858,7 @@ function die(x, y, cause, who) {
     for (let i = 0; i < 80; i++) {
       const a = Math.random() * Math.PI * 2,
         v = 50 + Math.random() * 260;
-      particles.push({
+      effects.particles.push({
         x,
         y,
         vx: Math.cos(a) * v,
@@ -883,15 +873,15 @@ function die(x, y, cause, who) {
     sub();
     buzz([40, 30, 90]);
   }
-  const prevRing = bestOf(lvl),
-    reached = level,
+  const prevRing = bestOf(run.lvl),
+    reached = run.level,
     before = unlockedIds();
-  if (score > best) {
-    setBest(score);
+  if (run.score > records.best) {
+    setBest(run.score);
     saveBest();
   }
-  if (reached > bestOf(lvl)) {
-    setBestOf(lvl, reached);
+  if (reached > bestOf(run.lvl)) {
+    setBestOf(run.lvl, reached);
   }
   saveRunStats();
   const rescued = rescuedPlanets(before).length > 0;

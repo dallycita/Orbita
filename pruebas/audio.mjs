@@ -11,6 +11,7 @@
 // El azar tiene semilla fija y el dibujo corre igual que en la huella visual.
 // Por escena guarda: la huella de las muestras de cada motor creado (en orden) y, para ubicar diferencias, el volumen
 // cada 100 ms.
+import { testHook } from './nombres.mjs';
 import { createRequire } from 'node:module';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
@@ -61,7 +62,7 @@ mkdirSync(OUT, {recursive: true});
 let html = readFileSync(SRC, 'utf8');
 const HOOK = 'requestAnimationFrame(frame);\n})();';
 if (html.split(HOOK).length !== 2) throw new Error('no encuentro el final del bucle en ' + SRC);
-html = html.replace(HOOK, 'window.__ev = s => eval(s);\n})();');
+html = html.replace(HOOK, () => testHook() + '\n})();');
 const TMP = join(OUT, '_juego.html'); writeFileSync(TMP, html);
 const BOT = readFileSync(join(ROOT, 'pruebas', 'bot.js'), 'utf8');
 

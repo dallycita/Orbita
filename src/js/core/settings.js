@@ -4,11 +4,13 @@
  */
 
 // Silencio general: true apaga todo el sonido del juego.
-let muted = false;
+const settings = {
+  muted: false,
+  volMus: 100,
+  volSfx: 100,
+};
 
 // Volumen de la música y de los efectos (de 0 a 100), guardados en el navegador.
-let volMus = 100;
-let volSfx = 100;
 
 /** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
 function initAudioSettings() {
@@ -16,10 +18,10 @@ function initAudioSettings() {
     const a = localStorage.getItem('orbita_vol_mus'),
       b = localStorage.getItem('orbita_vol_sfx');
     if (a !== null) {
-      volMus = Math.max(0, Math.min(100, +a || 0));
+      settings.volMus = Math.max(0, Math.min(100, +a || 0));
     }
     if (b !== null) {
-      volSfx = Math.max(0, Math.min(100, +b || 0));
+      settings.volSfx = Math.max(0, Math.min(100, +b || 0));
     }
   } catch (e) {}
 }
@@ -31,7 +33,7 @@ function initAudioSettings() {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 function setVolMus(value) {
-  volMus = value;
+  settings.volMus = value;
   return value;
 }
 
@@ -42,14 +44,14 @@ function setVolMus(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 function setVolSfx(value) {
-  volSfx = value;
+  settings.volSfx = value;
   return value;
 }
 
 /** Lee del navegador si el jugador dejó el juego en silencio. */
 function loadMute() {
   try {
-    muted = localStorage.getItem('orbita_p1_sonido') === '0';
+    settings.muted = localStorage.getItem('orbita_p1_sonido') === '0';
   } catch (e) {}
 }
 
@@ -60,8 +62,8 @@ function loadMute() {
  * @returns {boolean} El mismo valor.
  */
 function setMuted(value) {
-  muted = value;
+  settings.muted = value;
   return value;
 }
 
-export { initAudioSettings, loadMute, muted, setMuted, setVolMus, setVolSfx, volMus, volSfx };
+export { initAudioSettings, loadMute, setMuted, setVolMus, setVolSfx, settings };

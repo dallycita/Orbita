@@ -22,19 +22,8 @@ import {
   tensionSet,
 } from '../audio/music-tracks.js';
 import {
-  appear,
-  astFade,
-  camLevel,
-  charge,
-  crossed,
-  jumpT,
-  jumpTarget,
-  jumping,
-  level,
-  lvl,
-  pAng,
-  pLevel,
-  rings,
+  camera,
+  run,
   setAppear,
   setAstFade,
   setCamLevel,
@@ -49,21 +38,11 @@ import {
 } from '../core/state.js';
 import { catchMargin, chargeMax, jumpDur, sizeK } from './planets.js';
 import {
-  burns,
-  chargeFlash,
-  culpritT,
-  deadT,
-  debris,
-  flash,
-  hintT,
-  holeFlare,
-  landPop,
-  particles,
-  pending,
-  pendingT,
+  effects,
+  hole,
+  input,
+  outcome,
   pipFlash,
-  pulse,
-  readyT,
   setBurns,
   setChargeFlash,
   setCulpritT,
@@ -84,16 +63,8 @@ import {
   setTexts,
   setTimeScale,
   setWinT,
-  shake,
-  slowTimer,
-  sunLevel,
-  swallow,
-  t,
-  texts,
-  timeScale,
-  trail,
-  tutorial,
-  winT,
+  time,
+  tutorialState,
 } from '../core/run-state.js';
 import {
   HOLE_MUL,
@@ -148,16 +119,16 @@ import { rr } from '../core/geometry.js';
  */
 function update(dt) {
   // tiempo real: cámara lenta, sacudida, destello
-  if (slowTimer > 0) {
-    setSlowTimer(slowTimer - dt);
+  if (time.slowTimer > 0) {
+    setSlowTimer(time.slowTimer - dt);
   } else {
-    setTimeScale(timeScale + (1 - timeScale) * Math.min(1, dt * 5));
+    setTimeScale(time.timeScale + (1 - time.timeScale) * Math.min(1, dt * 5));
   }
-  setCulpritT(Math.max(0, culpritT - dt));
-  setHintT(Math.max(0, hintT - dt));
-  if (pending) {
-    setPendingT(pendingT + dt);
-    if (pendingT > 0.09) {
+  setCulpritT(Math.max(0, outcome.culpritT - dt));
+  setHintT(Math.max(0, tutorialState.hintT - dt));
+  if (input.pending) {
+    setPendingT(input.pendingT + dt);
+    if (input.pendingT > 0.09) {
       setPending(false);
     }
   }
@@ -165,14 +136,14 @@ function update(dt) {
   if (bi !== lastBeatIdx) {
     setLastBeatIdx(bi);
     if (bi >= 0 && bi % 2 === 0 && state === 'play' && !reduceMotion) {
-      const pr0 = rr(pLevel),
-        x0 = Math.cos(pAng) * pr0,
-        y0 = Math.sin(pAng) * pr0,
-        gold = charge >= chargeMax();
+      const pr0 = rr(run.pLevel),
+        x0 = Math.cos(run.pAng) * pr0,
+        y0 = Math.sin(run.pAng) * pr0,
+        gold = run.charge >= chargeMax();
       for (let i = 0; i < 4; i++) {
         const a = Math.random() * Math.PI * 2,
           v = 30 + Math.random() * 40;
-        particles.push({
+        effects.particles.push({
           x: x0,
           y: y0,
           vx: Math.cos(a) * v,
@@ -187,14 +158,14 @@ function update(dt) {
   for (let i = 0; i < 10; i++) {
     pipFlash[i] = Math.max(0, pipFlash[i] - dt * 3);
   }
-  setChargeFlash(Math.max(0, chargeFlash - dt * 1.6));
-  setReadyT(charge >= chargeMax() && state === 'play' ? readyT + dt : 0);
-  setAstFade(Math.max(0, astFade - dt * 5));
-  setAppear(Math.min(1, appear + dt * 5));
-  setLandPop(Math.max(0, landPop - dt * 6));
-  setShake(Math.max(0, shake - dt * 40));
-  setFlash(Math.max(0, flash - dt * 2.6));
-  setPulse(Math.max(0, pulse - dt * 3.5));
+  setChargeFlash(Math.max(0, effects.chargeFlash - dt * 1.6));
+  setReadyT(run.charge >= chargeMax() && state === 'play' ? effects.readyT + dt : 0);
+  setAstFade(Math.max(0, run.astFade - dt * 5));
+  setAppear(Math.min(1, run.appear + dt * 5));
+  setLandPop(Math.max(0, effects.landPop - dt * 6));
+  setShake(Math.max(0, effects.shake - dt * 40));
+  setFlash(Math.max(0, effects.flash - dt * 2.6));
+  setPulse(Math.max(0, effects.pulse - dt * 3.5));
   if (AC) {
     while (kickQueue.length && AC.currentTime >= kickQueue[0]) {
       kickQueue.shift();
@@ -209,13 +180,13 @@ function update(dt) {
     setFlash(0.35);
     setPulse(1);
     buzz([20, 30, 40]);
-    texts.push({
+    effects.texts.push({
       txt: switchMsg,
       x: 0,
       y: -R0 - 96,
       life: 1.6,
       size: 20,
-      col: zoneOf(level).s2,
+      col: zoneOf(run.level).s2,
       center: true,
     });
   }
@@ -226,15 +197,15 @@ function update(dt) {
   }
   alarmTick(dt);
   setDangerFlash(Math.max(0, dangerFlash - dt * 2.2));
-  const d = dt * timeScale;
-  setT(t + d);
+  const d = dt * time.timeScale;
+  setT(time.t + d);
   powerUpdate(dt, d);
-  const curR = rings.get(level),
+  const curR = run.rings.get(run.level),
     frozen =
-      state === 'play' && !jumping && curR && curR.type === 'arrastre'
-        ? rings.get(level + 1)
+      state === 'play' && !run.jumping && curR && curR.type === 'arrastre'
+        ? run.rings.get(run.level + 1)
         : null;
-  for (const r of rings.values()) {
+  for (const r of run.rings.values()) {
     if (r.tid !== undefined) {
       r.tid += (r.tv || 0.5) * d;
     }
@@ -251,7 +222,7 @@ function update(dt) {
       continue;
     } // Neptuno: el viento sostiene el hueco encima de ti un momento
     if (r.type === 'marea') {
-      r.phase += r.w * (1 + 0.8 * Math.sin(t * 1.4 + r.ws)) * d;
+      r.phase += r.w * (1 + 0.8 * Math.sin(time.t * 1.4 + r.ws)) * d;
       if (fz) {
         r.poff = (r.poff || 0) + r.phase - ph0;
       }
@@ -263,7 +234,7 @@ function update(dt) {
       if (r.ft >= r.fp) {
         r.ft = 0;
         r.sgn *= -1;
-        if (rings.get(level + 1) === r && state === 'play') {
+        if (run.rings.get(run.level + 1) === r && state === 'play') {
           r.flash = 1;
           noise(0.06, 3000, 900, 0.12, 'bandpass');
         }
@@ -279,10 +250,10 @@ function update(dt) {
     }
   }
 
-  if (lvl === 2 && !tutorial) {
+  if (run.lvl === 2 && !tutorialState.tutorial) {
     novaSound();
   }
-  bendUpdate(dt * timeScale);
+  bendUpdate(dt * time.timeScale);
   if (whShock) {
     whShock.t += dt;
     if (whShock.t > 1.1) {
@@ -301,67 +272,79 @@ function update(dt) {
   if (state === 'play' && wh && wh.ph !== 'orb') {
     whTrans(dt);
   } else if (state === 'play') {
-    advanceJourney(d, 0.35 + (jumping ? 1.1 : 0) + (andFast ? 0.35 : 0), Math.min(1, level / GOAL));
-    const bt = andFast ? 3 : level >= 28 ? 2 : level >= 15 ? 1 : 0;
+    advanceJourney(
+      d,
+      0.35 + (run.jumping ? 1.1 : 0) + (andFast ? 0.35 : 0),
+      Math.min(1, run.level / GOAL),
+    );
+    const bt = andFast ? 3 : run.level >= 28 ? 2 : run.level >= 15 ? 1 : 0;
     setJourneyBand(bt, d);
     if (wh && wh.ph === 'orb') {
       // dentro del gusano: giras tú sobre el anillo, y la corriente te lanza en el golpe
-      setPAng(Math.atan2(Math.sin(pAng + wh.dir * ORB_W * d), Math.cos(pAng + wh.dir * ORB_W * d)));
+      setPAng(
+        Math.atan2(
+          Math.sin(run.pAng + wh.dir * ORB_W * d),
+          Math.cos(run.pAng + wh.dir * ORB_W * d),
+        ),
+      );
       const bi = Math.floor(beatTime() / TB);
-      if (!jumping && level < WH_EXIT && bi >= wh.nextB) {
+      if (!run.jumping && run.level < WH_EXIT && bi >= wh.nextB) {
         jump();
         wh.gapB = whGap();
         wh.nextB = bi + wh.gapB;
         setPulse(1);
       }
-    } else if (!jumping && !pushing) {
-      const cr = rings.get(level);
+    } else if (!run.jumping && !pushing) {
+      const cr = run.rings.get(run.level);
       if (cr && cr.type === 'arrastre') {
-        setPAng(pAng + cr.w * d);
+        setPAng(run.pAng + cr.w * d);
       } else {
-        const df = Math.atan2(Math.sin(-Math.PI / 2 - pAng), Math.cos(-Math.PI / 2 - pAng));
+        const df = Math.atan2(Math.sin(-Math.PI / 2 - run.pAng), Math.cos(-Math.PI / 2 - run.pAng));
         if (Math.abs(df) > 0.0005) {
-          setPAng(pAng + df * Math.min(1, d * 5));
+          setPAng(run.pAng + df * Math.min(1, d * 5));
         }
       }
-      setPAng(Math.atan2(Math.sin(pAng), Math.cos(pAng)));
+      setPAng(Math.atan2(Math.sin(run.pAng), Math.cos(run.pAng)));
     }
     if (pushing) {
       setPushT(pushT + d);
       const pp = Math.min(pushT / 0.32, 1);
-      setPLevel(pushFrom + (level - pushFrom) * (1 - Math.pow(1 - pp, 3)));
+      setPLevel(pushFrom + (run.level - pushFrom) * (1 - Math.pow(1 - pp, 3)));
       if (pp >= 1) {
         setPushing(false);
-        setPLevel(level);
+        setPLevel(run.level);
       }
     }
-    if (jumping) {
-      const dur = jumpTarget >= 2 ? 0.24 + (jumpTarget - 2) * 0.1 : jumpDur();
-      setJumpT(jumpT + d);
-      const p = Math.min(jumpT / dur, 1);
-      setPLevel(level + jumpTarget * (1 - Math.pow(1 - p, 3)));
+    if (run.jumping) {
+      const dur = run.jumpTarget >= 2 ? 0.24 + (run.jumpTarget - 2) * 0.1 : jumpDur();
+      setJumpT(run.jumpT + d);
+      const p = Math.min(run.jumpT / dur, 1);
+      setPLevel(run.level + run.jumpTarget * (1 - Math.pow(1 - p, 3)));
       if (
-        jumpTarget >= 2 &&
-        ((!crossed && pLevel >= level + 1) ||
-          (jumpTarget === 3 && crossed === true && pLevel >= level + 2 && setCrossed(2)))
+        run.jumpTarget >= 2 &&
+        ((!run.crossed && run.pLevel >= run.level + 1) ||
+          (run.jumpTarget === 3 &&
+            run.crossed === true &&
+            run.pLevel >= run.level + 2 &&
+            setCrossed(2)))
       ) {
         // la Tierra atraviesa el anillo y lo rompe
         setCrossed(true);
         setShake(reduceMotion ? 0 : 6);
         setPulse(1);
-        const R = rr(level + 1),
-          cx0 = Math.cos(pAng) * R,
-          cy0 = Math.sin(pAng) * R;
+        const R = rr(run.level + 1),
+          cx0 = Math.cos(run.pAng) * R,
+          cy0 = Math.sin(run.pAng) * R;
         for (let i = 0; i < 34; i++) {
           const a = Math.random() * Math.PI * 2,
             v = 60 + Math.random() * 200;
-          particles.push({
+          effects.particles.push({
             x: cx0,
             y: cy0,
             vx: Math.cos(a) * v,
             vy: Math.sin(a) * v,
             life: 0.6 + Math.random() * 0.6,
-            col: i % 2 ? BONE : zoneOf(level).s2,
+            col: i % 2 ? BONE : zoneOf(run.level).s2,
             s: 2 + Math.random() * 3,
           });
         }
@@ -369,49 +352,51 @@ function update(dt) {
       }
       if (p >= 1) {
         setJumping(false);
-        setLevel(level + jumpTarget);
-        setPLevel(level);
-        setLastJT(jumpTarget);
-        onLand(jumpTarget >= 2);
+        setLevel(run.level + run.jumpTarget);
+        setPLevel(run.level);
+        setLastJT(run.jumpTarget);
+        onLand(run.jumpTarget >= 2);
         setJumpTarget(1);
       }
     }
-    setCamLevel(camLevel + (level - camLevel) * Math.min(1, d * 6));
+    setCamLevel(camera.camLevel + (run.level - camera.camLevel) * Math.min(1, d * 6));
     // El agujero negro crece y se come los anillos; si el planeta se queda quieto, lo alcanza.
     // Si el planeta se aleja más de 2,4 anillos, acelera para no quedarse atrás.
-    const gap = pLevel - sunLevel;
+    const gap = run.pLevel - hole.sunLevel;
     // en el tutorial avanza muy lento
-    let sp = (tutorial ? 0.1 : 0.2 + Math.min(level * 0.006, 0.26)) * (HOLE_MUL[lvl] || 1);
+    let sp =
+      (tutorialState.tutorial ? 0.1 : 0.2 + Math.min(run.level * 0.006, 0.26)) *
+      (HOLE_MUL[run.lvl] || 1);
     if (gap > 2.4) {
       sp += (gap - 2.4) * 1.15;
     }
     if (!(wh && wh.ph === 'orb')) {
-      setSunLevel(sunLevel + sp * d);
+      setSunLevel(hole.sunLevel + sp * d);
     } // dentro del gusano el agujero negro no te puede seguir
     eatRings();
-    if (sunLevel >= pLevel - catchMargin()) {
-      const pr0 = rr(pLevel);
-      die(Math.cos(pAng) * pr0, Math.sin(pAng) * pr0, 'sun');
+    if (hole.sunLevel >= run.pLevel - catchMargin()) {
+      const pr0 = rr(run.pLevel);
+      die(Math.cos(run.pAng) * pr0, Math.sin(run.pAng) * pr0, 'sun');
       return;
     }
-    trail.push({ a: pAng, l: pLevel });
-    if (trail.length > 22) {
-      trail.shift();
+    effects.trail.push({ a: run.pAng, l: run.pLevel });
+    if (effects.trail.length > 22) {
+      effects.trail.shift();
     }
 
-    const pr = rr(pLevel),
-      [px, py] = lensP(Math.cos(pAng) * pr, Math.sin(pAng) * pr);
-    if (!wh && bend.on && jumping && level === WH_K - 1) {
+    const pr = rr(run.pLevel),
+      [px, py] = lensP(Math.cos(run.pAng) * pr, Math.sin(run.pAng) * pr);
+    if (!wh && bend.on && run.jumping && run.level === WH_K - 1) {
       // saltas dentro de la boca
       const [bx, by] = bendW();
-      if (Math.hypot(Math.cos(pAng) * pr - bx, Math.sin(pAng) * pr - by) < BEND_R * 0.8) {
+      if (Math.hypot(Math.cos(run.pAng) * pr - bx, Math.sin(run.pAng) * pr - by) < BEND_R * 0.8) {
         whEnter();
         return;
       }
     }
-    const check = jumping && jumpTarget === 1 && !pending ? [level + 1] : [];
+    const check = run.jumping && run.jumpTarget === 1 && !input.pending ? [run.level + 1] : [];
     for (const k of check) {
-      const ring = rings.get(k);
+      const ring = run.rings.get(k);
       if (!ring) {
         continue;
       }
@@ -441,7 +426,7 @@ function update(dt) {
           if (caronteSaves(px, py, ox, oy)) {
             break;
           }
-          die(px, py, k === level ? 'hit' : 'jump', { k, o });
+          die(px, py, k === run.level ? 'hit' : 'jump', { k, o });
           return;
         }
       }
@@ -459,10 +444,10 @@ function update(dt) {
         novaSrc.filter(s => !(bt > s.b0 + (s.n - 1) * s.P + NOVA_LIFE * (s.big ? 1.6 : 1) + 0.2)),
       );
       if (
-        jumping &&
-        jumpTarget === 1 &&
-        !pending &&
-        novaHit(px, py, bt, camLevel) &&
+        run.jumping &&
+        run.jumpTarget === 1 &&
+        !input.pending &&
+        novaHit(px, py, bt, camera.camLevel) &&
         ghostT <= 0 &&
         shieldT <= 0
       ) {
@@ -480,41 +465,41 @@ function update(dt) {
       }
     }
   } else {
-    setCamLevel(camLevel + (level - camLevel) * Math.min(1, d * 6));
-    if (state === 'dead' && sunLevel < level + 3 && (!swallow || swallow.done)) {
-      setSunLevel(sunLevel + 0.9 * d);
+    setCamLevel(camera.camLevel + (run.level - camera.camLevel) * Math.min(1, d * 6));
+    if (state === 'dead' && hole.sunLevel < run.level + 3 && (!hole.swallow || hole.swallow.done)) {
+      setSunLevel(hole.sunLevel + 0.9 * d);
       eatRings();
     }
   }
   if (state === 'dead') {
-    setDeadT(deadT + d);
+    setDeadT(outcome.deadT + d);
     advanceJourney(d, 0);
   }
   if (state === 'win') {
-    setWinT(winT + dt);
-    advanceJourney(dt, 2 + winT * 4, 1);
+    setWinT(outcome.winT + dt);
+    advanceJourney(dt, 2 + outcome.winT * 4, 1);
     setJourneyBand(3, dt);
-    setPLevel(pLevel + dt * (1.2 + winT * 4));
-    setSunLevel(sunLevel - dt * (0.6 + winT * 0.8));
-    trail.push({ a: pAng, l: pLevel });
-    if (trail.length > 30) {
-      trail.shift();
+    setPLevel(run.pLevel + dt * (1.2 + outcome.winT * 4));
+    setSunLevel(hole.sunLevel - dt * (0.6 + outcome.winT * 0.8));
+    effects.trail.push({ a: run.pAng, l: run.pLevel });
+    if (effects.trail.length > 30) {
+      effects.trail.shift();
     }
   }
-  setHoleFlare(Math.max(0, holeFlare - dt * 1.4));
+  setHoleFlare(Math.max(0, effects.holeFlare - dt * 1.4));
   setIntroFade(Math.max(0, introFade - dt * 1.6));
-  if (swallow && !swallow.done) {
-    swallow.p = Math.min(1, swallow.p + dt / 1.8);
-    const p = swallow.p,
-      hw = Math.max(rr(sunLevel), SUN);
-    swallow.r = swallow.r0 + (hw * 0.88 - swallow.r0) * Math.pow(p, 2.2);
-    swallow.a += (1.1 + 9 * p * p) * dt;
+  if (hole.swallow && !hole.swallow.done) {
+    hole.swallow.p = Math.min(1, hole.swallow.p + dt / 1.8);
+    const p = hole.swallow.p,
+      hw = Math.max(rr(hole.sunLevel), SUN);
+    hole.swallow.r = hole.swallow.r0 + (hw * 0.88 - hole.swallow.r0) * Math.pow(p, 2.2);
+    hole.swallow.a += (1.1 + 9 * p * p) * dt;
     if (Math.random() < 0.35 + p) {
-      const a = swallow.a,
-        ex = Math.cos(a) * swallow.r,
-        ey = Math.sin(a) * swallow.r,
+      const a = hole.swallow.a,
+        ex = Math.cos(a) * hole.swallow.r,
+        ey = Math.sin(a) * hole.swallow.r,
         v = 60 + Math.random() * 70;
-      particles.push({
+      effects.particles.push({
         x: ex,
         y: ey,
         vx: -Math.sin(a) * v - Math.cos(a) * 30,
@@ -525,7 +510,7 @@ function update(dt) {
       });
     }
     if (p >= 1) {
-      swallow.done = true;
+      hole.swallow.done = true;
       setFlash(0.7);
       setPulse(1);
       setHoleFlare(1);
@@ -536,7 +521,7 @@ function update(dt) {
     }
   }
 
-  for (const p of particles) {
+  for (const p of effects.particles) {
     const len = Math.hypot(p.x, p.y) || 1;
     p.vx += (-p.x / len) * 140 * d;
     p.vy += (-p.y / len) * 140 * d;
@@ -545,23 +530,23 @@ function update(dt) {
     p.x += p.vx * d;
     p.y += p.vy * d;
     p.life -= d * 0.8;
-    if (len < Math.max(rr(sunLevel), SUN)) {
+    if (len < Math.max(rr(hole.sunLevel), SUN)) {
       p.life -= d * 3;
     }
   }
-  setParticles(particles.filter(p => p.life > 0));
-  for (const tx of texts) {
+  setParticles(effects.particles.filter(p => p.life > 0));
+  for (const tx of effects.texts) {
     tx.life -= dt;
     if (!tx.center) {
       tx.y -= dt * 22;
     }
   }
-  setTexts(texts.filter(tx => tx.life > 0));
-  for (const b of burns) {
+  setTexts(effects.texts.filter(tx => tx.life > 0));
+  for (const b of effects.burns) {
     b.life -= dt * 1.6;
   }
-  const hw = Math.max(rr(sunLevel), SUN);
-  for (const db of debris) {
+  const hw = Math.max(rr(hole.sunLevel), SUN);
+  for (const db of effects.debris) {
     db.r -= (14 + 1400 / Math.max(db.r, 10)) * dt;
     db.a += (0.4 + 70 / Math.max(db.r, 10)) * dt;
     if (db.r < hw) {
@@ -569,7 +554,7 @@ function update(dt) {
       db.a = Math.random() * Math.PI * 2;
     }
   }
-  setBurns(burns.filter(b => b.life > 0));
+  setBurns(effects.burns.filter(b => b.life > 0));
 }
 
 export { update };

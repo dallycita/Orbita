@@ -1,8 +1,8 @@
 /**
  * Colores de cada zona del camino según la galaxia y el anillo en que vas.
  */
-import { lvl } from '../core/state.js';
-import { tutorial } from '../core/run-state.js';
+import { run } from '../core/state.js';
+import { tutorialState } from '../core/run-state.js';
 import { BONE } from '../core/display.js';
 
 const ZONES = [
@@ -32,11 +32,11 @@ const ZONE_LV = {
  * @returns {object} Zona {ring, ast, s1, s2, bg}.
  */
 const zoneOf = k =>
-  lvl >= 3 && !tutorial
-    ? ZONE_LV[lvl]
-    : lvl === 1 && !tutorial
+  run.lvl >= 3 && !tutorialState.tutorial
+    ? ZONE_LV[run.lvl]
+    : run.lvl === 1 && !tutorialState.tutorial
       ? ZONE_MAG
-      : lvl === 2 && !tutorial
+      : run.lvl === 2 && !tutorialState.tutorial
         ? ZONE_AND
         : ZONES[Math.floor(k / 25) % ZONES.length];
 

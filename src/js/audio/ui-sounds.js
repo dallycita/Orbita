@@ -3,7 +3,7 @@
  * inicio, el zumbido de la historia y los sonidos del espectáculo del inicio.
  */
 import { AC, ROOT, master, noiseHit } from './engine.js';
-import { muted } from '../core/settings.js';
+import { settings } from '../core/settings.js';
 import { echoBus } from './music-tracks.js';
 
 /**
@@ -12,7 +12,7 @@ import { echoBus } from './music-tracks.js';
  * @param {number} dir Dirección: negativo baja, positivo sube.
  */
 function uiGlass(dir) {
-  if (!AC || muted) {
+  if (!AC || settings.muted) {
     return;
   }
   try {
@@ -41,7 +41,7 @@ function homeAmbience(on) {
     if (on && !amb) {
       const g = AC.createGain();
       g.gain.setValueAtTime(0.0001, n);
-      g.gain.exponentialRampToValueAtTime(muted ? 0.0001 : 0.9, n + 2.5);
+      g.gain.exponentialRampToValueAtTime(settings.muted ? 0.0001 : 0.9, n + 2.5);
       g.connect(master);
       const nodes = [];
       const lp = AC.createBiquadFilter();
@@ -179,7 +179,7 @@ function uiTone(f, t0, dur, gain, type) {
  * máximo una cada 0,06 segundos).
  */
 function uiHover() {
-  if (!AC || muted || AC.state !== 'running') {
+  if (!AC || settings.muted || AC.state !== 'running') {
     return;
   }
   try {
@@ -201,7 +201,7 @@ function uiHover() {
  * @param {string} kind 'play' para los botones de jugar; cualquier otro valor, el sonido suave.
  */
 function uiClick(kind) {
-  if (!AC || muted) {
+  if (!AC || settings.muted) {
     return;
   }
   try {
@@ -254,7 +254,7 @@ let bed = null;
 function showOut() {
   if (!showBus) {
     showBus = AC.createGain();
-    showBus.gain.value = muted ? 0 : 1;
+    showBus.gain.value = settings.muted ? 0 : 1;
     showBus.connect(master);
   }
   return showBus;
@@ -272,7 +272,7 @@ function showStart() {
     const n = AC.currentTime;
     showStop(0.05);
     showBus = AC.createGain();
-    showBus.gain.setValueAtTime(muted ? 0 : 1, n);
+    showBus.gain.setValueAtTime(settings.muted ? 0 : 1, n);
     showBus.connect(master);
     const g = AC.createGain();
     g.gain.setValueAtTime(0.0001, n);
@@ -352,7 +352,7 @@ function showStop(fade) {
  * @param {number} pan Posición estéreo inicial, de -1 (izquierda) a 1 (derecha); termina al centro.
  */
 function rockIn(dur, pan) {
-  if (!AC || muted) {
+  if (!AC || settings.muted) {
     return;
   }
   try {
@@ -403,7 +403,7 @@ function rockIn(dur, pan) {
  * @param {number} dur Duración, en segundos.
  */
 function bigSuck(dur) {
-  if (!AC || muted) {
+  if (!AC || settings.muted) {
     return;
   }
   try {
@@ -507,7 +507,7 @@ function perseusVoice(dest, n) {
  * crece y se apaga de golpe (el "ringdown" tras la fusión).
  */
 function gwChirp() {
-  if (!AC || muted) {
+  if (!AC || settings.muted) {
     return;
   }
   try {

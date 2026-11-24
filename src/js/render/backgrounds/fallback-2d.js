@@ -5,7 +5,7 @@
  * con un giro muy lento y estrellas que titilan encima. Los colores siguen las fotos reales.
  */
 import { CX, CY, H, W, clamp, ctx } from '../../core/display.js';
-import { t } from '../../core/run-state.js';
+import { time } from '../../core/run-state.js';
 
 // ---- Dentro de Andrómeda: toda la pantalla es la galaxia (colores reales) ----
 // Núcleo amarillo-blanco de estrellas viejas, brazos espirales azules de estrellas jóvenes,
@@ -167,7 +167,7 @@ function drawAndromeda() {
   const c = buildAndromeda();
   ctx.save();
   if (c) {
-    const a = Math.sin(t * 0.025) * 0.025; // la galaxia gira tan lento que apenas se nota
+    const a = Math.sin(time.t * 0.025) * 0.025; // la galaxia gira tan lento que apenas se nota
     ctx.translate(W / 2, H / 2);
     ctx.rotate(a);
     ctx.scale(1.07, 1.07);
@@ -179,7 +179,7 @@ function drawAndromeda() {
   }
   ctx.restore();
   for (const s of AND_TW) {
-    ctx.globalAlpha = 0.25 + 0.6 * Math.max(0, Math.sin(t * 1.7 + s.p));
+    ctx.globalAlpha = 0.25 + 0.6 * Math.max(0, Math.sin(time.t * 1.7 + s.p));
     ctx.fillStyle = '#e8f0ff';
     ctx.fillRect(s.x * W, s.y * H, 1.8, 1.8);
   }
@@ -376,7 +376,7 @@ function drawMagallanes() {
   const c = buildMagallanes();
   ctx.save();
   if (c) {
-    const a = Math.sin(t * 0.03) * 0.02;
+    const a = Math.sin(time.t * 0.03) * 0.02;
     ctx.translate(W / 2, H / 2);
     ctx.rotate(a);
     ctx.scale(1.07, 1.07);
@@ -388,7 +388,7 @@ function drawMagallanes() {
   }
   ctx.restore();
   for (const s of AND_TW) {
-    ctx.globalAlpha = 0.25 + 0.6 * Math.max(0, Math.sin(t * 1.9 + s.p));
+    ctx.globalAlpha = 0.25 + 0.6 * Math.max(0, Math.sin(time.t * 1.9 + s.p));
     ctx.fillStyle = '#e8f4ff';
     ctx.fillRect(((s.x + 0.37) % 1) * W, ((s.y + 0.21) % 1) * H, 1.8, 1.8);
   }
@@ -720,7 +720,7 @@ function drawGalBG(i) {
   const c = bgCache[key];
   ctx.save();
   if (c) {
-    const a = Math.sin(t * 0.025) * 0.02;
+    const a = Math.sin(time.t * 0.025) * 0.02;
     ctx.translate(W / 2, H / 2);
     ctx.rotate(a);
     ctx.scale(1.07, 1.07);
@@ -732,7 +732,7 @@ function drawGalBG(i) {
   }
   ctx.restore();
   for (const s of AND_TW) {
-    ctx.globalAlpha = 0.25 + 0.6 * Math.max(0, Math.sin(t * 1.6 + s.p + i));
+    ctx.globalAlpha = 0.25 + 0.6 * Math.max(0, Math.sin(time.t * 1.6 + s.p + i));
     ctx.fillStyle = '#eef3ff';
     ctx.fillRect(((s.x + i * 0.13) % 1) * W, ((s.y + i * 0.29) % 1) * H, 1.8, 1.8);
   }

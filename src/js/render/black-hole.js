@@ -2,7 +2,7 @@
  * El agujero negro y el logo de la presentación: el disco de acreción, su núcleo y las letras.
  */
 import { BONE, clamp, ctx } from '../core/display.js';
-import { t } from '../core/run-state.js';
+import { time } from '../core/run-state.js';
 
 // true cuando la letra Unbounded ya cargó; antes, el logo se dibuja con la letra del sistema
 let splashFont = false;
@@ -335,7 +335,7 @@ const BHGL = (() => {
     gl.uniform1f(U.uK, k);
     gl.uniform1f(U.uR0, f0);
     gl.uniform1f(U.uR1, f1);
-    gl.uniform1f(U.uT, t);
+    gl.uniform1f(U.uT, time.t);
     gl.uniform1f(U.uAlpha, alpha);
     gl.uniform1f(U.uPart, part);
     gl.uniform1f(U.uScale, sc);
@@ -476,7 +476,7 @@ let sfl = 0;
 function bbright(th, r, r0, r1) {
   const rad = 1 - (r - r0) / (r1 - r0),
     dop = 0.5 - 0.5 * Math.cos(th),
-    s = 0.82 + 0.18 * Math.sin(th * 5 + (r / r0) * 10 - t * 2.4 * Math.pow(r0 / r, 1.5));
+    s = 0.82 + 0.18 * Math.sin(th * 5 + (r / r0) * 10 - time.t * 2.4 * Math.pow(r0 / r, 1.5));
   return (0.25 + 0.75 * Math.pow(rad, 0.8)) * (0.4 + 0.6 * dop) * s;
 }
 

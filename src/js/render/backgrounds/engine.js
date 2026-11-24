@@ -5,7 +5,7 @@
  * usa el fondo 2D. La interfaz pública es el objeto `GLBG`.
  */
 import { CX, CY, H, S, SUN, W, ctx } from '../../core/display.js';
-import { sunLevel, t } from '../../core/run-state.js';
+import { hole, time } from '../../core/run-state.js';
 
 import { BG_VS } from './common.js';
 import { FS_AND, FS_AND2 } from './andromeda.js';
@@ -214,9 +214,9 @@ const GLBG = (() => {
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     // El agujero negro y su anillo de Einstein (la luz se dobla más cerca de él).
-    const Rg = Math.max(rr(sunLevel), SUN) * S;
+    const Rg = Math.max(rr(hole.sunLevel), SUN) * S;
     gl.uniform2f(p.U.uRes, w, h);
-    gl.uniform1f(p.U.uT, t);
+    gl.uniform1f(p.U.uT, time.t);
     gl.uniform1f(p.U.uFlow, flow);
     gl.uniform1f(p.U.uBeat, opts.beat || 0);
     if (p.U.uJour) {

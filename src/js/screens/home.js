@@ -25,7 +25,7 @@ import { openPlanets } from './planets.js';
 import { openMissions } from './missions.js';
 import { MEDIR, medEl, setMEDIR, setMedEl, setMedPrev } from './perf-meter.js';
 import { PLANET_SVG } from '../data/planets.js';
-import { loadMute, muted, setMuted } from '../core/settings.js';
+import { loadMute, setMuted, settings } from '../core/settings.js';
 import { homeAmbience, introDrone, showStart, showStop } from '../audio/ui-sounds.js';
 import {
   HOME_IN,
@@ -76,7 +76,7 @@ function renderHome() {
     '<div class="row"><button type="button" class="sm" data-h="story">Historia</button><button type="button" class="sm" data-h="cfg">Ajustes</button></div>' +
     '<div class="sheet" role="dialog" aria-label="Ajustes"><h3>Ajustes</h3>' +
     '<button type="button" class="opt" data-h="snd"><span>Sonido</span><b>' +
-    (muted ? 'Apagado' : 'Encendido') +
+    (settings.muted ? 'Apagado' : 'Encendido') +
     '</b></button>' +
     '<button type="button" class="opt" data-h="allp"><span>Todos los planetas (pruebas)</span><b>' +
     (allPlanets ? 'Sí' : 'No') +
@@ -158,14 +158,14 @@ function homeAction(a, b) {
       sheet.classList.remove('on');
     }
   } else if (a === 'snd') {
-    setMuted(!muted);
+    setMuted(!settings.muted);
     try {
-      localStorage.setItem('orbita_p1_sonido', muted ? '0' : '1');
+      localStorage.setItem('orbita_p1_sonido', settings.muted ? '0' : '1');
     } catch (e) {}
     applyMute();
     const v = b.querySelector('b');
     if (v) {
-      v.textContent = muted ? 'Apagado' : 'Encendido';
+      v.textContent = settings.muted ? 'Apagado' : 'Encendido';
     }
   } else if (a === 'reset') {
     const v = b.querySelector('b');

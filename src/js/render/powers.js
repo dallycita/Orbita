@@ -3,9 +3,9 @@
  * la escena de cada poder. La lógica de los poderes está en game/powers.js.
  */
 import { CX, CY, H, PR, S, SUN, W, clamp, ctx, frac, rgba } from '../core/display.js';
-import { level, pAng, pLevel, rings, state } from '../core/state.js';
+import { run, state } from '../core/state.js';
 import { curP, curPlanet, jumpDur, pst, sizeK } from '../game/planets.js';
-import { particles, sunLevel, t, tutorial } from '../core/run-state.js';
+import { effects, hole, time, tutorialState } from '../core/run-state.js';
 import { beatTime, obsAng, obsRad } from '../game/beat.js';
 import { PLGL, drawCaronte, drawPlayer } from './planets.js';
 import { rr } from '../core/geometry.js';
@@ -35,7 +35,7 @@ import { noise } from '../audio/engine.js';
  * de la Luna sobre el agujero negro.
  */
 function drawPowerScene() {
-  const sunW = Math.max(rr(sunLevel), SUN) * S;
+  const sunW = Math.max(rr(hole.sunLevel), SUN) * S;
   for (const f of pfx) {
     if (f.k === 'empujon' && f.t < 1.4) {
       // Júpiter: su magnetosfera (la estructura más grande del sistema solar) se infla y golpea al
@@ -153,7 +153,7 @@ function drawPowerScene() {
         continue;
       }
       const r0 = rr(f.l0) * S,
-        r1 = rr(level) * S,
+        r1 = rr(run.level) * S,
         ca = Math.cos(f.a),
         sa = Math.sin(f.a),
         nx = -sa,
@@ -218,13 +218,13 @@ function drawPowerScene() {
       // Marte: columna de polvo y rocas de la erupción
       if (f.t < 0.05 && !f.done) {
         f.done = 1;
-        const pr = rr(pLevel),
-          x0 = Math.cos(pAng) * pr,
-          y0 = Math.sin(pAng) * pr;
+        const pr = rr(run.pLevel),
+          x0 = Math.cos(run.pAng) * pr,
+          y0 = Math.sin(run.pAng) * pr;
         for (let i = 0; i < 70; i++) {
-          const a = pAng + Math.PI + (Math.random() - 0.5) * 1.1,
+          const a = run.pAng + Math.PI + (Math.random() - 0.5) * 1.1,
             v = 60 + Math.random() * 240;
-          particles.push({
+          effects.particles.push({
             x: x0,
             y: y0,
             vx: Math.cos(a) * v,
@@ -238,7 +238,7 @@ function drawPowerScene() {
     } else if (f.k === 'crater' && f.t < 1) {
       // Marte: al caer, un anillo de polvo como el borde de un cráter
       const u = f.t,
-        pr = rr(level) * S,
+        pr = rr(run.level) * S,
         x = CX + Math.cos(f.a) * pr,
         y = CY + Math.sin(f.a) * pr,
         e = 1 - Math.pow(1 - u, 3);
@@ -337,10 +337,10 @@ function drawPowerScene() {
       // anillo de arriba
     }
     const u = f.t / 1.4,
-      pr = rr(pLevel) * S,
-      R1 = rr(level + 1) * S,
-      x = CX + Math.cos(pAng) * pr,
-      y = CY + Math.sin(pAng) * pr,
+      pr = rr(run.pLevel) * S,
+      R1 = rr(run.level + 1) * S,
+      x = CX + Math.cos(run.pAng) * pr,
+      y = CY + Math.sin(run.pAng) * pr,
       k = Math.min(1, f.t / 0.12) * (1 - u);
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
@@ -359,14 +359,14 @@ function drawPowerScene() {
         reach = Math.min(1, u * 1.8) * (0.45 + 0.65 * h1);
       const rad = pr + (R1 - pr) * reach * 1.15,
         ang =
-          pAng +
+          run.pAng +
           (h2 - 0.5) * 1.1 * (0.4 + reach) +
           f.t * 0.35 * (0.5 + h1) +
-          Math.sin(t * 2 + i) * 0.04,
+          Math.sin(time.t * 2 + i) * 0.04,
         bx = CX + Math.cos(ang) * rad,
         by = CY + Math.sin(ang) * rad,
         // giran en un solo sentido, como la superrotación de Venus
-        br = (9 + 14 * h1) * S * (0.5 + reach) * (1 + 0.25 * Math.sin(t * 3 + i));
+        br = (9 + 14 * h1) * S * (0.5 + reach) * (1 + 0.25 * Math.sin(time.t * 3 + i));
       blobs.push([bx, by, br]);
       const cg = ctx.createRadialGradient(bx - br * 0.25, by - br * 0.25, br * 0.1, bx, by, br);
       cg.addColorStop(0, 'rgba(255,236,170,' + 0.5 * k + ')');
@@ -419,22 +419,22 @@ function drawPowerScene() {
   if (predT > 0 && state === 'play') {
     // Neptuno: sus vientos (los más rápidos del sistema solar) recorren el anillo y forman un
     // remolino donde estará cada asteroide
-    const ring = rings.get(level + 1);
+    const ring = run.rings.get(run.level + 1);
     if (ring) {
-      const R = rr(level + 1) * S,
+      const R = rr(run.level + 1) * S,
         dt2 = jumpDur(),
         k = Math.min(1, predT / 0.4, (3 - predT) / 0.12),
         ft = 3 - predT,
         span = Math.PI * Math.min(1, ft / 0.45),
         sg = Math.sign((ring.w || 1) * (ring.sgn || 1)) || 1;
       let hit = false;
-      const vis = a => Math.abs(Math.atan2(Math.sin(a - pAng), Math.cos(a - pAng))) < span;
+      const vis = a => Math.abs(Math.atan2(Math.sin(a - run.pAng), Math.cos(a - run.pAng))) < span;
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
       ctx.lineCap = 'round';
       for (let i = 0; i < 30; i++) {
         // ráfagas
-        const a = hsh(i, 1) * Math.PI * 2 + t * (2.4 + 1.6 * hsh(i, 2)) * sg,
+        const a = hsh(i, 1) * Math.PI * 2 + time.t * (2.4 + 1.6 * hsh(i, 2)) * sg,
           len = 0.16 + 0.3 * hsh(i, 3),
           rq = R + (hsh(i, 4) - 0.5) * 18 * S;
         if (!vis(a)) {
@@ -453,7 +453,7 @@ function drawPowerScene() {
       }
       if (span < Math.PI) {
         for (const sd of [-1, 1]) {
-          const a = pAng + sd * span,
+          const a = run.pAng + sd * span,
             x = CX + Math.cos(a) * R,
             y = CY + Math.sin(a) * R,
             g = ctx.createRadialGradient(x, y, 0, x, y, 26 * S);
@@ -481,7 +481,8 @@ function drawPowerScene() {
           y = CY + Math.sin(oa) * R,
           rad = obsRad(ring, o) * S * 1.1;
         if (
-          Math.abs(Math.atan2(Math.sin(oa - pAng), Math.cos(oa - pAng))) * rr(level + 1) <
+          Math.abs(Math.atan2(Math.sin(oa - run.pAng), Math.cos(oa - run.pAng))) *
+            rr(run.level + 1) <
           PR * sizeK() + obsRad(ring, o) * 0.66
         ) {
           hit = true;
@@ -494,7 +495,7 @@ function drawPowerScene() {
         if (ctx.setLineDash) {
           ctx.setLineDash([3, 6]);
         }
-        ctx.lineDashOffset = -t * 40;
+        ctx.lineDashOffset = -time.t * 40;
         ctx.globalAlpha = 0.4 * k;
         ctx.strokeStyle = '#9cc0ff';
         ctx.lineWidth = 1.2;
@@ -519,7 +520,7 @@ function drawPowerScene() {
           ctx.beginPath();
           for (let j = 0; j <= 18; j++) {
             const s2 = j / 18,
-              an = (arm * Math.PI * 2) / 3 + s2 * 2.8 - t * 5 * sg,
+              an = (arm * Math.PI * 2) / 3 + s2 * 2.8 - time.t * 5 * sg,
               rq = rad * (0.4 + 1.5 * s2);
             j
               ? ctx.lineTo(Math.cos(an) * rq, Math.sin(an) * rq * 0.62)
@@ -562,7 +563,7 @@ function drawPowerScene() {
       ctx.strokeStyle = hit ? '#ff7a6b' : '#8ff0c0';
       ctx.lineWidth = 3.5;
       ctx.beginPath();
-      ctx.arc(CX, CY, R, pAng - 0.09, pAng + 0.09);
+      ctx.arc(CX, CY, R, run.pAng - 0.09, run.pAng + 0.09);
       ctx.stroke(); // verde: puedes saltar · rojo: espera
       ctx.restore();
     }
@@ -587,7 +588,8 @@ function drawPowerScene() {
     ctx.fillStyle = '#081030';
     ctx.fillRect(0, 0, W, H);
     for (let i = 0; i < 46; i++) {
-      ctx.globalAlpha = cover * k * (0.35 + 0.5 * hsh(i, 3)) * (0.7 + 0.3 * Math.sin(t * 3 + i));
+      ctx.globalAlpha =
+        cover * k * (0.35 + 0.5 * hsh(i, 3)) * (0.7 + 0.3 * Math.sin(time.t * 3 + i));
       ctx.fillStyle = i % 5 ? '#ffffff' : '#cfd9ff';
       const s2 = 1 + (hsh(i, 4) > 0.85 ? 1 : 0);
       ctx.fillRect(hsh(i, 1) * W, hsh(i, 2) * H, s2, s2);
@@ -603,7 +605,7 @@ function drawPowerScene() {
     ctx.arc(CX, CY, mr * 2.6, 0, Math.PI * 2);
     ctx.fill(); // la corona
     for (let i = 0; i < 9; i++) {
-      const a = (i / 9) * Math.PI * 2 + hsh(i, 8) * 0.6 + t * 0.05,
+      const a = (i / 9) * Math.PI * 2 + hsh(i, 8) * 0.6 + time.t * 0.05,
         l = mr * (1.5 + 1.3 * hsh(i, 5)),
         w = 0.16 + 0.14 * hsh(i, 6); // serpentinas de la corona: suaves y de largos distintos
       const gg = ctx.createLinearGradient(
@@ -638,7 +640,7 @@ function drawPowerScene() {
     let res = null;
     try {
       res = PLGL.ok()
-        ? PLGL.render('luna', mr * 2 * 1.4, t * 0.1, [0, 0, -1], [0.25, 0.27, 0.35], t)
+        ? PLGL.render('luna', mr * 2 * 1.4, time.t * 0.1, [0, 0, -1], [0.25, 0.27, 0.35], time.t)
         : null;
     } catch (e) {
       res = null;
@@ -699,7 +701,7 @@ function drawPowerScene() {
           break;
         }
         const a = a0 + (j - 2.5) * 0.1,
-          fl = 0.6 + 0.4 * Math.sin(t * 40 + j * 2.3);
+          fl = 0.6 + 0.4 * Math.sin(time.t * 40 + j * 2.3);
         if (hsh(j, 11) < 0.25) {
           continue;
         } // las perlas de Baily: luz que pasa entre las montañas de la Luna
@@ -762,7 +764,7 @@ function drawAurora(px, py, r, tt) {
   for (const pole of [-1, 1]) {
     const cy = py + pole * r * 0.84,
       w = pole < 0 ? 1 : 0.8,
-      fl = 0.75 + 0.25 * Math.sin(t * 23 + pole * 3) * Math.sin(t * 7.7);
+      fl = 0.75 + 0.25 * Math.sin(time.t * 23 + pole * 3) * Math.sin(time.t * 7.7);
     const g = ctx.createRadialGradient(px, cy, 0, px, cy, r * 0.95);
     g.addColorStop(0, 'rgba(190,170,255,' + 0.55 * k * w * fl + ')');
     g.addColorStop(0.5, 'rgba(120,110,255,' + 0.22 * k * w + ')');
@@ -776,7 +778,7 @@ function drawAurora(px, py, r, tt) {
       const th = (i / 22) * Math.PI * 2,
         ox = px + Math.cos(th) * r * 0.42,
         oy = cy + Math.sin(th) * r * 0.11,
-        h = r * (0.06 + 0.14 * hsh(i, pole)) * (0.6 + 0.4 * Math.sin(t * 17 + i * 1.7));
+        h = r * (0.06 + 0.14 * hsh(i, pole)) * (0.6 + 0.4 * Math.sin(time.t * 17 + i * 1.7));
       ctx.globalAlpha = 0.28 * k * w;
       ctx.strokeStyle = i % 3 ? '#9b8cff' : '#d6ccff';
       ctx.lineWidth = Math.max(1.5, r * 0.12);
@@ -817,7 +819,7 @@ function drawSolarFire(px, py, r) {
   let k = Math.min(1, (BURN_DUR - burnT) / 0.2, 0.3 + burnT / 0.6);
   // Parpadea cuando se va a apagar.
   if (burnT < 0.45) {
-    k *= 0.72 + 0.28 * Math.sin(t * 28);
+    k *= 0.72 + 0.28 * Math.sin(time.t * 28);
   }
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
@@ -833,8 +835,8 @@ function drawSolarFire(px, py, r) {
   ctx.fill('evenodd');
   for (let i = 0; i < 7; i++) {
     // serpentinas de la corona: largas, suaves y desiguales
-    const a = (i / 7) * Math.PI * 2 + t * 0.12 + hsh(i, 1) * 0.7,
-      L = r * (1.6 + 2.2 * hsh(i, 2)) * (1 + 0.1 * Math.sin(t * 2.3 + i)),
+    const a = (i / 7) * Math.PI * 2 + time.t * 0.12 + hsh(i, 1) * 0.7,
+      L = r * (1.6 + 2.2 * hsh(i, 2)) * (1 + 0.1 * Math.sin(time.t * 2.3 + i)),
       w = r * (0.35 + 0.25 * hsh(i, 3));
     const gg = ctx.createLinearGradient(
       px + Math.cos(a) * r,
@@ -854,9 +856,9 @@ function drawSolarFire(px, py, r) {
   }
   for (let i = 0; i < 5; i++) {
     // protuberancias: arcos de plasma que salen del borde y vuelven a caer
-    const a0 = (i / 5) * Math.PI * 2 + t * 0.25 + hsh(i, 5),
+    const a0 = (i / 5) * Math.PI * 2 + time.t * 0.25 + hsh(i, 5),
       sp = 0.3 + 0.22 * hsh(i, 6),
-      h = r * (0.3 + 0.4 * hsh(i, 7)) * (0.7 + 0.3 * Math.sin(t * 1.9 + i * 2));
+      h = r * (0.3 + 0.4 * hsh(i, 7)) * (0.7 + 0.3 * Math.sin(time.t * 1.9 + i * 2));
     const x1 = px + Math.cos(a0 - sp) * r * 0.97,
       y1 = py + Math.sin(a0 - sp) * r * 0.97,
       x2 = px + Math.cos(a0 + sp) * r * 0.97,
@@ -886,7 +888,7 @@ function drawSolarFire(px, py, r) {
       wx = (px - CX) / S,
       wy = (py - CY) / S,
       rs = r / S; // viento solar
-    particles.push({
+    effects.particles.push({
       x: wx + Math.cos(a) * rs * 1.05,
       y: wy + Math.sin(a) * rs * 1.05,
       vx: Math.cos(a) * v,
@@ -909,7 +911,7 @@ function drawSolarFire(px, py, r) {
 function drawSodiumTail(px, py, r0) {
   const r = Math.max(r0, 7 * S),
     a = Math.atan2(py - CY, px - CX),
-    L = r * (13 + Math.sin(t * 5) * 0.6),
+    L = r * (13 + Math.sin(time.t * 5) * 0.6),
     bend = r * 2.6;
   ctx.save();
   ctx.translate(px, py);
@@ -946,7 +948,7 @@ function drawSodiumTail(px, py, r0) {
   } // átomos de sodio que corren por la cola
   for (let i = 0; i < 4; i++) {
     const sp = (i - 1.5) * r * 0.3;
-    ctx.lineDashOffset = -t * r * 14 - i * r * 0.5;
+    ctx.lineDashOffset = -time.t * r * 14 - i * r * 0.5;
     ctx.globalAlpha = 0.16;
     ctx.strokeStyle = '#ffe2a0';
     ctx.beginPath();
@@ -964,7 +966,7 @@ function drawSodiumTail(px, py, r0) {
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   for (let i = 0; i < periLeft; i++) {
-    const b = t * 7 + i * Math.PI,
+    const b = time.t * 7 + i * Math.PI,
       x = px + Math.cos(b) * r * 1.55,
       y = py + Math.sin(b) * r * 1.55; // un punto de luz por cada salto instantáneo que te queda
     const g = ctx.createRadialGradient(x, y, 0, x, y, r * 0.5);
@@ -1018,7 +1020,7 @@ function drawPowerFx(px, py, rad) {
         for (let i = 0; i < 22; i++) {
           const a = Math.random() * Math.PI * 2,
             v = 50 + Math.random() * 120;
-          particles.push({
+          effects.particles.push({
             x: wx,
             y: wy,
             vx: Math.cos(a) * v,
@@ -1081,7 +1083,7 @@ function drawPowerFx(px, py, rad) {
       heatHaze(px, py, r, '#ffc98a', Math.min(1, f.t / 0.1) * (1 - f.t / 1.2));
     }
   }
-  if (!tutorial && state === 'play') {
+  if (!tutorialState.tutorial && state === 'play') {
     const frag = clamp(-pst().res / 50, 0, 1),
       k = strainNow();
     if (k > 0.02) {
@@ -1107,7 +1109,7 @@ function drawPowerFx(px, py, rad) {
       ctx.strokeStyle = '#ffd9a0';
       ctx.lineWidth = 1.5 + 2.5 * k;
       ctx.beginPath();
-      ctx.arc(px, py, r * (1.05 + 0.05 * Math.sin(t * 30)), a - 1.3, a + 1.3);
+      ctx.arc(px, py, r * (1.05 + 0.05 * Math.sin(time.t * 30)), a - 1.3, a + 1.3);
       ctx.stroke();
       ctx.restore();
       if (frag > 0.4 && k > 0.35) {
@@ -1143,7 +1145,7 @@ function drawPowerFx(px, py, rad) {
         const wx = (px - CX) / S,
           wy = (py - CY) / S,
           b = a + (Math.random() - 0.5) * 1.6;
-        particles.push({
+        effects.particles.push({
           x: wx + Math.cos(b) * PR * sizeK(),
           y: wy + Math.sin(b) * PR * sizeK(),
           vx: Math.cos(a) * 40 + (Math.random() - 0.5) * 30,
@@ -1211,7 +1213,7 @@ function drawRingPower(ring, R, alpha) {
     const el = (ring.frz0 || 3) - ring.frozenT - ((ring.frz0 || 3) > 3.3 ? 0.18 : 0),
       gr = clamp(el / 0.55, 0, 1),
       span = Math.PI * (1 - Math.pow(1 - gr, 2)),
-      c = ring.frzA !== undefined ? ring.frzA : pAng,
+      c = ring.frzA !== undefined ? ring.frzA : run.pAng,
       kk = Math.min(1, ring.frozenT / 0.25) * alpha;
     if (span > 0.01) {
       ctx.save();
@@ -1357,7 +1359,7 @@ function drawRingPower(ring, R, alpha) {
         const a = c + (Math.random() * 2 - 1) * span,
           v = 30 + Math.random() * 110,
           d = Math.random() < 0.5 ? 1 : -1;
-        particles.push({
+        effects.particles.push({
           x: Math.cos(a) * Rw,
           y: Math.sin(a) * Rw,
           vx: Math.cos(a) * v * d + (Math.random() - 0.5) * 40,
@@ -1406,7 +1408,7 @@ function drawRingPower(ring, R, alpha) {
     ctx.globalCompositeOperation = 'lighter';
     ctx.lineCap = 'round';
     for (let i = 0; i < 16; i++) {
-      const a = (ring.off || 0) + (i * Math.PI) / 8 + t * 2,
+      const a = (ring.off || 0) + (i * Math.PI) / 8 + time.t * 2,
         rr2 = Rs + ((i % 3) - 1) * 7;
       ctx.globalAlpha = ring.windT * 0.6 * alpha;
       ctx.strokeStyle = i % 2 ? '#9cc0ff' : '#dbe8ff';

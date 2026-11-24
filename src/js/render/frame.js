@@ -5,8 +5,8 @@
  * juego solo se copian, así va rápido incluso en celulares.
  */
 import { CX, CY, H, S, W, clamp, ctx } from '../core/display.js';
-import { camLevel, jumping, level, pLevel, setCamLevel, state } from '../core/state.js';
-import { t } from '../core/run-state.js';
+import { camera, run, setCamLevel, state } from '../core/state.js';
+import { time } from '../core/run-state.js';
 import { WH_IN, WH_OUT, drawInside, wh, whShock } from '../game/wormhole.js';
 import { renderScene } from './scene.js';
 
@@ -24,25 +24,29 @@ let camT = 0;
  * segundo). Fuera de la partida, o tras una pausa larga, se iguala a camLevel.
  */
 function camViewStep() {
-  const dt = t - camT;
-  camT = t;
+  const dt = time.t - camT;
+  camT = time.t;
   const live =
     (state === 'play' || state === 'dead') &&
     !wh &&
     dt >= 0 &&
     dt < 0.1 &&
-    Math.abs(camView - camLevel) < 1.5;
+    Math.abs(camView - camera.camLevel) < 1.5;
   if (!live) {
-    camView = camLevel;
+    camView = camera.camLevel;
     camVel = 0;
     return;
   }
   const W0 = 9,
-    goal = jumping ? pLevel : level;
+    goal = run.jumping ? run.pLevel : run.level;
   camVel += (W0 * W0 * (goal - camView) - 2 * W0 * camVel) * dt;
   camView += camVel * dt;
-  if (!jumping && Math.abs(level - camLevel) < 0.002 && Math.abs(camView - camLevel) < 0.002) {
-    camView = camLevel;
+  if (
+    !run.jumping &&
+    Math.abs(run.level - camera.camLevel) < 0.002 &&
+    Math.abs(camView - camera.camLevel) < 0.002
+  ) {
+    camView = camera.camLevel;
     camVel = 0;
   }
 }
@@ -52,7 +56,7 @@ function camViewStep() {
  */
 function render() {
   camViewStep();
-  const camL = camLevel;
+  const camL = camera.camLevel;
   setCamLevel(camView);
   try {
     renderFrame();

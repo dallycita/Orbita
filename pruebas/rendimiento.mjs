@@ -3,6 +3,7 @@
 // Por cada escena guarda: ms por cuadro (lógica / dibujo / total, mediana y percentil 95), pausas del recolector de
 // basura (GC) y las funciones donde se va el tiempo (profiler de Chrome). Sirve para comparar un cambio contra otro
 // en esta misma máquina: los números absolutos no son los de un celular (aquí no hay tarjeta gráfica real).
+import { testHook } from './nombres.mjs';
 import { createRequire } from 'node:module';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
@@ -13,7 +14,7 @@ const OUT = resolve(process.argv[2] || 'rendimiento'), SRC = resolve(process.arg
 mkdirSync(OUT, {recursive: true});
 let html = readFileSync(SRC, 'utf8');
 const HOOK = 'requestAnimationFrame(frame);\n})();';
-html = html.replace(HOOK, 'window.__ev = s => eval(s);\n})();');
+html = html.replace(HOOK, () => testHook() + '\n})();');
 const TMP = join(OUT, '_juego.html'); writeFileSync(TMP, html);
 const BOT = readFileSync(join(ROOT, 'pruebas', 'bot.js'), 'utf8');
 

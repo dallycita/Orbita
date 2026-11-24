@@ -3,9 +3,9 @@
  * Caronte, la Tierra y las miniaturas.
  */
 import { CX, CY, H, PR, S, W, ctx, frac, rgba } from '../core/display.js';
-import { pAng, state } from '../core/state.js';
+import { run, state } from '../core/state.js';
 import { PLANETS_P, curPlanet, sizeK } from '../game/planets.js';
-import { particles, t, tutorial } from '../core/run-state.js';
+import { effects, time, tutorialState } from '../core/run-state.js';
 import { hot, hotT } from '../game/hazard-state.js';
 import {
   caronteOn,
@@ -612,7 +612,7 @@ function drawBigPlanet(id, cx, cy, R, rot, locked, light) {
     Lv = [-0.78, 0.42, 0.48];
     LC = [1.12, 1.06, 0.98];
   }
-  const res = PLGL.render(id, 2 * R * sc, rot, Lv, LC, t);
+  const res = PLGL.render(id, 2 * R * sc, rot, Lv, LC, time.t);
   if (!res) {
     return drawBigPlanet2D(id, cx, cy, R, rot, locked, light);
   }
@@ -643,7 +643,7 @@ function drawBigPlanet(id, cx, cy, R, rot, locked, light) {
  * @param {number} rad Radio base, en píxeles de pantalla (se multiplica por sizeK()).
  */
 function drawPlayer(px, py, rad) {
-  if (!tutorial) {
+  if (!tutorialState.tutorial) {
     // un halo oscuro detrás de tu planeta para que siempre se despegue del fondo
     const r0 = rad * sizeK(),
       g = ctx.createRadialGradient(px, py, r0 * 0.8, px, py, r0 * 2.6);
@@ -657,24 +657,24 @@ function drawPlayer(px, py, rad) {
     }
   }
   const r = rad * sizeK();
-  if (curPlanet === 'pluton' && !tutorial) {
+  if (curPlanet === 'pluton' && !tutorialState.tutorial) {
     drawCaronteBack(px, py);
   } // Caronte, cuando pasa por detrás
   setRingBoostNow(
-    curPlanet === 'saturno' && shieldT > 0 && !tutorial
+    curPlanet === 'saturno' && shieldT > 0 && !tutorialState.tutorial
       ? Math.min(1 - Math.pow(1 - Math.min(1, (1.5 - shieldT) / 0.28), 3), shieldT / 0.35)
       : 0,
   );
   if (curPlanet === 'tierra' || !curPlanet) {
     drawEarth(px, py, r);
   } else {
-    drawBigPlanet(curPlanet, px, py, r, t * 0.6, false, 'below');
+    drawBigPlanet(curPlanet, px, py, r, time.t * 0.6, false, 'below');
   }
   setRingBoostNow(0);
-  if (waveProx > 0.05 && !tutorial && state === 'play') {
+  if (waveProx > 0.05 && !tutorialState.tutorial && state === 'play') {
     // aviso: la onda está por alcanzarte
     const k = waveProx,
-      pl = 0.5 + 0.5 * Math.sin(t * 18);
+      pl = 0.5 + 0.5 * Math.sin(time.t * 18);
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = k * (0.55 + 0.45 * pl);
@@ -701,7 +701,7 @@ function drawPlayer(px, py, rad) {
       ctx.restore();
     }
   }
-  if (hot && !tutorial) {
+  if (hot && !tutorialState.tutorial) {
     drawHot(px, py, r);
   }
 }
@@ -801,7 +801,7 @@ function planetRing(id, cx, cy, R, half, locked) {
     for (let i = 0; i < 110; i++) {
       const rq = 1.48 + 0.62 * hsh(i, 1),
         w = 4.2 * Math.pow(1.5 / rq, 1.5),
-        a = hsh(i, 2) * Math.PI * 2 + t * w,
+        a = hsh(i, 2) * Math.PI * 2 + time.t * w,
         sz = R * (0.025 + 0.04 * hsh(i, 3));
       ctx.globalAlpha = (0.35 + 0.55 * hsh(i, 4)) * bst;
       ctx.fillStyle = i % 4 ? '#fff6e2' : '#d9ecff';
@@ -812,7 +812,7 @@ function planetRing(id, cx, cy, R, half, locked) {
     ctx.globalCompositeOperation = 'source-over';
     ctx.lineCap = 'round';
     for (let i = 0; i < 4; i++) {
-      const a = i * 1.7 + t * 4.2 * Math.pow(1.5 / 1.75, 1.5);
+      const a = i * 1.7 + time.t * 4.2 * Math.pow(1.5 / 1.75, 1.5);
       ctx.globalAlpha = 0.22 * bst;
       ctx.strokeStyle = '#3c3228';
       ctx.lineWidth = R * 0.1; // los "rayos" oscuros que Voyager y Cassini vieron en los anillos
@@ -822,7 +822,7 @@ function planetRing(id, cx, cy, R, half, locked) {
       ctx.stroke();
     }
     ctx.globalCompositeOperation = 'lighter';
-    const ga = t * 2.4;
+    const ga = time.t * 2.4;
     ctx.globalAlpha = 0.7 * bst;
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = R * 0.05;
@@ -963,7 +963,7 @@ function drawBigPlanet2D(id, cx, cy, R, rot, locked, light) {
  */
 function drawHot(px, py, r) {
   const k = Math.min(1, hotT / 0.4),
-    pl = 0.5 + 0.5 * Math.sin(t * 6);
+    pl = 0.5 + 0.5 * Math.sin(time.t * 6);
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   const g = ctx.createRadialGradient(px, py, r * 0.1, px, py, r * 3.4);
@@ -983,8 +983,8 @@ function drawHot(px, py, r) {
   ctx.arc(px, py, r + 1.5, 0, Math.PI * 2);
   ctx.stroke();
   for (let i = 0; i < 6; i++) {
-    const a = t * (1.5 + i * 0.3) + i * 1.7;
-    if (Math.sin(t * 9 + i * 3) < 0.6) {
+    const a = time.t * (1.5 + i * 0.3) + i * 1.7;
+    if (Math.sin(time.t * 9 + i * 3) < 0.6) {
       continue;
     } // chispas en la atmósfera
     ctx.globalAlpha = 0.9 * k;
@@ -999,7 +999,7 @@ function drawHot(px, py, r) {
     const ox = (px - CX) / S,
       oy = (py - CY) / S,
       L = Math.hypot(ox, oy) || 1;
-    particles.push({
+    effects.particles.push({
       x: ox + (Math.random() - 0.5) * 4,
       y: oy + (Math.random() - 0.5) * 4,
       vx: (ox / L) * 18 + (Math.random() - 0.5) * 10,
@@ -1064,7 +1064,7 @@ function drawCaronteBack(px, py) {
  */
 function drawEarth(px, py, rad) {
   if (PLGL.ok() && rad > 0.5) {
-    drawBigPlanet('tierra', px, py, rad, t * 0.35, false, 'below');
+    drawBigPlanet('tierra', px, py, rad, time.t * 0.35, false, 'below');
     ctx.strokeStyle = 'rgba(143,208,255,.35)';
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -1085,14 +1085,14 @@ function drawEarth(px, py, rad) {
   ctx.clip();
   ctx.fillStyle = '#4fa35a';
   for (const c of CONT) {
-    const x = px + (frac(c.x + t * 0.06) * 2.8 - 1.4) * rad;
+    const x = px + (frac(c.x + time.t * 0.06) * 2.8 - 1.4) * rad;
     ctx.beginPath();
     ctx.ellipse(x, py + c.y * rad, c.w * rad, c.h * rad, 0.3, 0, Math.PI * 2);
     ctx.fill();
   }
   ctx.fillStyle = 'rgba(255,255,255,.8)';
   for (const c of CLOUD) {
-    const x = px + (frac(c.x + t * 0.11) * 2.8 - 1.4) * rad;
+    const x = px + (frac(c.x + time.t * 0.11) * 2.8 - 1.4) * rad;
     ctx.beginPath();
     ctx.ellipse(x, py + c.y * rad, c.w * rad, 0.09 * rad, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -1129,10 +1129,10 @@ function drawCaronte(cx, cy, cr, al) {
       res = PLGL.render(
         'luna',
         2 * cr * 2,
-        t * 0.3,
-        [-Math.cos(pAng) * 0.8, Math.sin(pAng) * 0.8, 0.6],
+        time.t * 0.3,
+        [-Math.cos(run.pAng) * 0.8, Math.sin(run.pAng) * 0.8, 0.6],
         [1.3, 1.18, 1.08],
-        t,
+        time.t,
       );
     }
   } catch (e) {

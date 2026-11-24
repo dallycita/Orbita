@@ -20,9 +20,9 @@ import {
 } from '../core/display.js';
 import { AC, ROOT, noiseHit } from '../audio/engine.js';
 import { echoBus } from '../audio/music-tracks.js';
-import { sunLevel, t } from '../core/run-state.js';
+import { hole, time } from '../core/run-state.js';
 
-import { muted } from '../core/settings.js';
+import { settings } from '../core/settings.js';
 import { drawPlayer } from '../render/planets.js';
 import { BR0, BR1, SK, bhCore, bhDiskK, drawLogo, setSfl, sfl } from '../render/black-hole.js';
 import { HOME_IN, homeT, logoT0 } from '../core/screen.js';
@@ -81,7 +81,7 @@ function hsLow(f0, f1, dur, gain) {
  *   traga).
  */
 function hsSound(kind) {
-  if (!AC || muted) {
+  if (!AC || settings.muted) {
     return;
   }
   try {
@@ -186,7 +186,7 @@ function glassNote(f, t0, dur, gain) {
  * cuadro; `hsEvents` evita repetir cada sonido.
  */
 function logoSounds() {
-  if (!(logoT0 > 0) || !AC || muted) {
+  if (!(logoT0 > 0) || !AC || settings.muted) {
     return;
   }
   const lp = homeT - logoT0,
@@ -309,7 +309,7 @@ function renderHomeIntro() {
     ctx.translate((Math.random() - 0.5) * hsShake, (Math.random() - 0.5) * hsShake);
   }
   const Rbig = Math.min(W, H) * 0.24 * (1 + 0.04 * clamp(T / HOME_BIG, 0, 1)),
-    Rg = Math.max(rr(sunLevel), SUN) * S;
+    Rg = Math.max(rr(hole.sunLevel), SUN) * S;
   const R = Rbig + (Rg - Rbig) * p,
     cx = W / 2 + (CX - W / 2) * p,
     cy = H * 0.47 + (CY - H * 0.47) * p;
@@ -318,7 +318,7 @@ function renderHomeIntro() {
   const sr = Math.max(W, H) * 0.62,
     RE = R * 1.7;
   for (const s of stars) {
-    const a = s.a + t * 0.015;
+    const a = s.a + time.t * 0.015;
     let x = CX + Math.cos(a) * s.r * sr,
       y = CY + Math.sin(a) * s.r * sr;
     const dx = x - cx,
@@ -331,7 +331,7 @@ function renderHomeIntro() {
     x = cx + (dx / d) * dl;
     y = cy + (dy / d) * dl;
     const tang = clamp((RE * 1.3) / d, 0, 1) * (1 - p);
-    ctx.globalAlpha = 0.14 + 0.3 * (0.5 + 0.5 * Math.sin(t * 1.3 + s.tw)) + 0.3 * tang;
+    ctx.globalAlpha = 0.14 + 0.3 * (0.5 + 0.5 * Math.sin(time.t * 1.3 + s.tw)) + 0.3 * tang;
     ctx.fillStyle = BONE;
     if (tang > 0.25) {
       ctx.save();
@@ -378,7 +378,7 @@ function renderHomeIntro() {
       ctx.fillStyle = jg;
       ctx.beginPath();
       ctx.moveTo(cx - w0, cy);
-      ctx.lineTo(cx - w1 * (0.8 + 0.2 * Math.sin(t * 40)), y1);
+      ctx.lineTo(cx - w1 * (0.8 + 0.2 * Math.sin(time.t * 40)), y1);
       ctx.lineTo(cx + w1, y1);
       ctx.lineTo(cx + w0, cy);
       ctx.closePath();

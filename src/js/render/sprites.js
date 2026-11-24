@@ -3,9 +3,9 @@
  * Las rocas se preparan una vez en imágenes pequeñas y luego solo se copian.
  */
 import { BONE, CX, CY, DPR, PR, S, ctx, frac } from '../core/display.js';
-import { charge } from '../core/state.js';
+import { run } from '../core/state.js';
 import { chargeMax, sizeK } from '../game/planets.js';
-import { chargeFlash, hintT, particles, pipFlash, readyT, t, tutorial } from '../core/run-state.js';
+import { effects, pipFlash, time, tutorialState } from '../core/run-state.js';
 import { wh, whShock } from '../game/wormhole.js';
 import { bend } from '../game/gravitational-lens.js';
 import { doblesHechos } from '../game/progress.js';
@@ -62,11 +62,11 @@ function drawAst(x, y, r, seed, rot, col, alpha) {
  * @param {number} py Posición vertical del planeta, en píxeles de pantalla.
  */
 function drawPowerAura(px, py) {
-  if (charge < chargeMax()) {
+  if (run.charge < chargeMax()) {
     return;
   }
   const rad = PR * S * 1.15 * sizeK(),
-    beat = 0.5 + 0.5 * Math.sin(readyT * 6),
+    beat = 0.5 + 0.5 * Math.sin(effects.readyT * 6),
     R = rad * (2.1 + 0.35 * beat);
   const g = ctx.createRadialGradient(px, py, rad * 0.8, px, py, R);
   if (g && g.addColorStop) {
@@ -77,12 +77,12 @@ function drawPowerAura(px, py) {
     ctx.arc(px, py, R, 0, Math.PI * 2);
     ctx.fill();
   }
-  if (chargeFlash > 0) {
-    ctx.globalAlpha = chargeFlash * 0.8;
+  if (effects.chargeFlash > 0) {
+    ctx.globalAlpha = effects.chargeFlash * 0.8;
     ctx.strokeStyle = '#fff1c4';
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(px, py, rad * (1.3 + (1 - chargeFlash) * 2.5), 0, Math.PI * 2);
+    ctx.arc(px, py, rad * (1.3 + (1 - effects.chargeFlash) * 2.5), 0, Math.PI * 2);
     ctx.stroke();
     ctx.globalAlpha = 1;
   }
@@ -99,7 +99,7 @@ function drawPowerAura(px, py) {
 function drawCharge(px, py, z) {
   const rad = PR * S * 1.15 * sizeK(),
     cm = chargeMax(),
-    ready = charge >= cm,
+    ready = run.charge >= cm,
     R = rad + 5,
     gap = 0.22,
     seg = (Math.PI * 2) / cm;
@@ -108,14 +108,14 @@ function drawCharge(px, py, z) {
     // Con muchos Perfectos (Plutón) un solo arco que se llena se lee mejor que muchas rayitas.
     const fl = Math.max(...pipFlash),
       a0 = -Math.PI / 2,
-      a1 = a0 + Math.PI * 2 * Math.min(1, charge / cm);
+      a1 = a0 + Math.PI * 2 * Math.min(1, run.charge / cm);
     ctx.globalAlpha = 0.22;
     ctx.strokeStyle = BONE;
     ctx.lineWidth = 2.6;
     ctx.beginPath();
     ctx.arc(px, py, R, 0, Math.PI * 2);
     ctx.stroke();
-    if (charge > 0) {
+    if (run.charge > 0) {
       ctx.globalAlpha = ready ? 0.95 : 0.85;
       ctx.strokeStyle = '#ffd36b';
       ctx.lineWidth = 2.6 + fl * 2.2;
@@ -140,7 +140,7 @@ function drawCharge(px, py, z) {
     for (let i = 0; i < cm; i++) {
       const a0 = -Math.PI / 2 + i * seg + gap / 2,
         a1 = a0 + seg - gap,
-        on = i < charge;
+        on = i < run.charge;
       ctx.globalAlpha = on ? (ready ? 0.95 : 0.85) : 0.22;
       ctx.strokeStyle = on ? '#ffd36b' : BONE;
       ctx.lineWidth = 2.6 + pipFlash[i] * 2.2;
@@ -154,7 +154,7 @@ function drawCharge(px, py, z) {
     const a = Math.random() * Math.PI * 2,
       wx = (px - CX) / S,
       wy = (py - CY) / S;
-    particles.push({
+    effects.particles.push({
       x: wx + Math.cos(a) * PR * 1.1,
       y: wy + Math.sin(a) * PR * 1.1,
       vx: Math.cos(a) * 25,
@@ -165,10 +165,10 @@ function drawCharge(px, py, z) {
     });
   }
   // Mientras se aprende el salto doble (menos de 3 usados), una flecha sube sobre el planeta.
-  const learn = !tutorial && doblesHechos < 3;
-  if (ready && (learn || hintT > 0) && !wh && !whShock && !bend.on) {
-    const a0 = learn ? 1 : Math.min(1, hintT),
-      cyc = (t * 1.4) % 1,
+  const learn = !tutorialState.tutorial && doblesHechos < 3;
+  if (ready && (learn || tutorialState.hintT > 0) && !wh && !whShock && !bend.on) {
+    const a0 = learn ? 1 : Math.min(1, tutorialState.hintT),
+      cyc = (time.t * 1.4) % 1,
       y0 = py - rad - 12;
     for (let k = 0; k < 2; k++) {
       const ph = (cyc + k * 0.5) % 1,

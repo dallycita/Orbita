@@ -3,11 +3,19 @@
  * listas de efectos en pantalla. Solo declara variables; las cambian muchos archivos.
  */
 import { GOAL } from '../data/levels.js';
+import { records, setAttempts } from './state.js';
 
 // winT: segundos desde que se ganó; perfCount: saltos perfectos; attempts: intentos guardados
-let winT = 0;
-let perfCount = 0;
-let attempts = 0;
+const outcome = {
+  winT: 0,
+  perfCount: 0,
+  streak: 0,
+  jumpClear: 999,
+  culprit: null,
+  culpritT: 0,
+  deadT: 0,
+  canRestart: false,
+};
 // Tutorial: los primeros 10 anillos de la huida, una cosa a la vez.
 // TUT_TYPES da el tipo de cada anillo y TUT_TIPS el consejo que se muestra en él.
 const TUT_GOAL = 10;
@@ -35,87 +43,81 @@ const TUT_TIPS = [
   '¡Sigue!',
   'Una barrera sin huecos. Desliza hacia arriba para el salto doble.',
 ];
-let tutorial = false;
-let tutorialDone = true; // el tutorial no se impone al empezar: se aprende jugando
+const tutorialState = {
+  tutorial: false,
+  tutorialDone: true,
+  readyHintDone: false,
+  hintsShown: 0,
+  showHint: false,
+  hintT: 0,
+};
+// el tutorial no se impone al empezar: se aprende jugando
 /**
  * Meta de la partida actual.
  *
  * @returns {number} Nivel de anillo que hay que alcanzar (TUT_GOAL en el tutorial).
  */
-const curGoal = () => (tutorial ? TUT_GOAL : GOAL);
+const curGoal = () => (tutorialState.tutorial ? TUT_GOAL : GOAL);
 // brillo de cada marca de carga del poder al llenarse, de 0 a 1
 const pipFlash = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-let readyT = 0;
-let chargeFlash = 0;
-let readyHintDone = false;
+const effects = {
+  readyT: 0,
+  chargeFlash: 0,
+  holeFlare: 0,
+  landPop: 0,
+  shake: 0,
+  flash: 0,
+  pulse: 0,
+  particles: [],
+  trail: [],
+  texts: [],
+  burns: [],
+  debris: undefined,
+};
 // gest: gesto en curso; pending: salto pedido que espera 0,09 s por si el gesto es un
 // deslizamiento (salto doble); pendingT: segundos que lleva esperando
-let gest = null;
-let pending = false;
-let pendingT = 0;
-let hintsShown = 0;
-let showHint = false;
-let hintT = 0;
-let swallow = null;
-let holeFlare = 0;
-let streak = 0;
-let jumpClear = 999;
-let culprit = null;
-let culpritT = 0;
-let landPop = 0;
+const input = {
+  gest: null,
+  pending: false,
+  pendingT: 0,
+};
+const hole = {
+  swallow: null,
+  sunLevel: -1.6,
+  lastEaten: -2,
+};
 // holgura máxima con los asteroides para que un salto cuente como perfecto
 const PERFECT = 12;
 // t: reloj del juego, en segundos; timeScale y slowTimer: cámara lenta
-let t = 0;
-let timeScale = 1;
-let slowTimer = 0;
-let shake = 0;
-let flash = 0;
-let pulse = 0;
-let deadT = 0;
-let canRestart = false;
-let particles = [];
-let trail = [];
-let texts = [];
-let burns = [];
+const time = {
+  t: 0,
+  timeScale: 1,
+  slowTimer: 0,
+};
 // sunLevel: nivel de anillo hasta donde llega el agujero negro; lastEaten: último anillo tragado
-let sunLevel = -1.6;
-let lastEaten = -2;
 // restos que caen en espiral hacia el agujero negro (ángulo en radianes y distancia)
-let debris;
 // duración base de un salto entre anillos, en segundos (jumpDur la ajusta según el planeta)
 const JUMP_DUR = 0.12;
 
 /** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
 export function initRunState() {
   try {
-    attempts = parseInt(localStorage.getItem('orbita_p1_intentos') || '0', 10) || 0;
+    setAttempts(parseInt(localStorage.getItem('orbita_p1_intentos') || '0', 10) || 0);
   } catch (e) {
-    attempts = 0;
+    setAttempts(0);
   }
   try {
-    readyHintDone = localStorage.getItem('orbita_p1_poderlisto') === '1';
+    tutorialState.readyHintDone = localStorage.getItem('orbita_p1_poderlisto') === '1';
   } catch (e) {}
   try {
-    hintsShown = parseInt(localStorage.getItem('orbita_p1_pista') || '0', 10) || 0;
+    tutorialState.hintsShown = parseInt(localStorage.getItem('orbita_p1_pista') || '0', 10) || 0;
   } catch (e) {
-    hintsShown = 0;
+    tutorialState.hintsShown = 0;
   }
-  debris = Array.from({ length: 60 }, () => ({
+  effects.debris = Array.from({ length: 60 }, () => ({
     a: Math.random() * Math.PI * 2,
     r: 60 + Math.random() * 180,
   }));
-}
-
-/**
- * Cambia `attempts` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setAttempts(value) {
-  attempts = value;
-  return value;
 }
 
 /**
@@ -125,7 +127,7 @@ export function setAttempts(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setBurns(value) {
-  burns = value;
+  effects.burns = value;
   return value;
 }
 
@@ -136,7 +138,7 @@ export function setBurns(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setCanRestart(value) {
-  canRestart = value;
+  outcome.canRestart = value;
   return value;
 }
 
@@ -147,7 +149,7 @@ export function setCanRestart(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setChargeFlash(value) {
-  chargeFlash = value;
+  effects.chargeFlash = value;
   return value;
 }
 
@@ -158,7 +160,7 @@ export function setChargeFlash(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setCulprit(value) {
-  culprit = value;
+  outcome.culprit = value;
   return value;
 }
 
@@ -169,7 +171,7 @@ export function setCulprit(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setCulpritT(value) {
-  culpritT = value;
+  outcome.culpritT = value;
   return value;
 }
 
@@ -180,7 +182,7 @@ export function setCulpritT(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setDeadT(value) {
-  deadT = value;
+  outcome.deadT = value;
   return value;
 }
 
@@ -191,7 +193,7 @@ export function setDeadT(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setFlash(value) {
-  flash = value;
+  effects.flash = value;
   return value;
 }
 
@@ -202,7 +204,7 @@ export function setFlash(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setGest(value) {
-  gest = value;
+  input.gest = value;
   return value;
 }
 
@@ -213,7 +215,7 @@ export function setGest(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setHintT(value) {
-  hintT = value;
+  tutorialState.hintT = value;
   return value;
 }
 
@@ -224,7 +226,7 @@ export function setHintT(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setHintsShown(value) {
-  hintsShown = value;
+  tutorialState.hintsShown = value;
   return value;
 }
 
@@ -235,7 +237,7 @@ export function setHintsShown(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setHoleFlare(value) {
-  holeFlare = value;
+  effects.holeFlare = value;
   return value;
 }
 
@@ -246,7 +248,7 @@ export function setHoleFlare(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setJumpClear(value) {
-  jumpClear = value;
+  outcome.jumpClear = value;
   return value;
 }
 
@@ -257,7 +259,7 @@ export function setJumpClear(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setLandPop(value) {
-  landPop = value;
+  effects.landPop = value;
   return value;
 }
 
@@ -268,7 +270,7 @@ export function setLandPop(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setLastEaten(value) {
-  lastEaten = value;
+  hole.lastEaten = value;
   return value;
 }
 
@@ -279,7 +281,7 @@ export function setLastEaten(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setParticles(value) {
-  particles = value;
+  effects.particles = value;
   return value;
 }
 
@@ -290,7 +292,7 @@ export function setParticles(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setPending(value) {
-  pending = value;
+  input.pending = value;
   return value;
 }
 
@@ -301,7 +303,7 @@ export function setPending(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setPendingT(value) {
-  pendingT = value;
+  input.pendingT = value;
   return value;
 }
 
@@ -312,7 +314,7 @@ export function setPendingT(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setPerfCount(value) {
-  perfCount = value;
+  outcome.perfCount = value;
   return value;
 }
 
@@ -323,7 +325,7 @@ export function setPerfCount(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setPulse(value) {
-  pulse = value;
+  effects.pulse = value;
   return value;
 }
 
@@ -334,7 +336,7 @@ export function setPulse(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setReadyHintDone(value) {
-  readyHintDone = value;
+  tutorialState.readyHintDone = value;
   return value;
 }
 
@@ -345,7 +347,7 @@ export function setReadyHintDone(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setReadyT(value) {
-  readyT = value;
+  effects.readyT = value;
   return value;
 }
 
@@ -356,7 +358,7 @@ export function setReadyT(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setShake(value) {
-  shake = value;
+  effects.shake = value;
   return value;
 }
 
@@ -367,7 +369,7 @@ export function setShake(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setShowHint(value) {
-  showHint = value;
+  tutorialState.showHint = value;
   return value;
 }
 
@@ -378,7 +380,7 @@ export function setShowHint(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setSlowTimer(value) {
-  slowTimer = value;
+  time.slowTimer = value;
   return value;
 }
 
@@ -389,7 +391,7 @@ export function setSlowTimer(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setStreak(value) {
-  streak = value;
+  outcome.streak = value;
   return value;
 }
 
@@ -400,7 +402,7 @@ export function setStreak(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setSunLevel(value) {
-  sunLevel = value;
+  hole.sunLevel = value;
   return value;
 }
 
@@ -411,7 +413,7 @@ export function setSunLevel(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setSwallow(value) {
-  swallow = value;
+  hole.swallow = value;
   return value;
 }
 
@@ -422,7 +424,7 @@ export function setSwallow(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setT(value) {
-  t = value;
+  time.t = value;
   return value;
 }
 
@@ -433,7 +435,7 @@ export function setT(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setTexts(value) {
-  texts = value;
+  effects.texts = value;
   return value;
 }
 
@@ -444,7 +446,7 @@ export function setTexts(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setTimeScale(value) {
-  timeScale = value;
+  time.timeScale = value;
   return value;
 }
 
@@ -455,7 +457,7 @@ export function setTimeScale(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setTrail(value) {
-  trail = value;
+  effects.trail = value;
   return value;
 }
 
@@ -466,7 +468,7 @@ export function setTrail(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setTutorial(value) {
-  tutorial = value;
+  tutorialState.tutorial = value;
   return value;
 }
 
@@ -477,7 +479,7 @@ export function setTutorial(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setTutorialDone(value) {
-  tutorialDone = value;
+  tutorialState.tutorialDone = value;
   return value;
 }
 
@@ -488,7 +490,7 @@ export function setTutorialDone(value) {
  * @returns {*} El mismo valor, como el de una asignación.
  */
 export function setWinT(value) {
-  winT = value;
+  outcome.winT = value;
   return value;
 }
 
@@ -497,42 +499,12 @@ export {
   PERFECT,
   TUT_TIPS,
   TUT_TYPES,
-  attempts,
-  burns,
-  canRestart,
-  chargeFlash,
-  culprit,
-  culpritT,
   curGoal,
-  deadT,
-  debris,
-  flash,
-  gest,
-  hintT,
-  hintsShown,
-  holeFlare,
-  jumpClear,
-  landPop,
-  lastEaten,
-  particles,
-  pending,
-  pendingT,
-  perfCount,
+  effects,
+  hole,
+  input,
+  outcome,
   pipFlash,
-  pulse,
-  readyHintDone,
-  readyT,
-  shake,
-  showHint,
-  slowTimer,
-  streak,
-  sunLevel,
-  swallow,
-  t,
-  texts,
-  timeScale,
-  trail,
-  tutorial,
-  tutorialDone,
-  winT,
+  time,
+  tutorialState,
 };

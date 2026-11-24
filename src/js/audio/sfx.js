@@ -3,12 +3,12 @@
  */
 import { AC, NOISE, ROOT, master } from './engine.js';
 
-import { muted } from '../core/settings.js';
+import { settings } from '../core/settings.js';
 import { uiOut, uiTone } from './ui-sounds.js';
 
 /** Sonido del poder listo: un arpegio brillante que sube y un destello. */
 function powerReadySound() {
-  if (!AC || muted) {
+  if (!AC || settings.muted) {
     return;
   }
   try {

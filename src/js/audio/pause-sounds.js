@@ -3,7 +3,7 @@
  * motor de sonido, porque el del juego se suspende durante la pausa.
  */
 import { ROOT, volGain } from './engine.js';
-import { muted, volSfx } from '../core/settings.js';
+import { settings } from '../core/settings.js';
 
 let pzAC = null;
 
@@ -50,7 +50,7 @@ function pzCtx() {
   if (pzAC.state === 'suspended') {
     pzAC.resume();
   }
-  pzBus.gain.value = volGain(volSfx);
+  pzBus.gain.value = volGain(settings.volSfx);
   return pzAC;
 }
 
@@ -147,7 +147,7 @@ function pzSub(t0, f0, f1, dur, gain) {
  *   'slide'.
  */
 function pzSnd(kind, v) {
-  if (muted) {
+  if (settings.muted) {
     return;
   }
   try {

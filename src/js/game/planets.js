@@ -3,8 +3,8 @@
  * elegido y cómo sus estadísticas cambian el juego (tamaño, salto, resistencia, carga).
  * Las estadísticas st son porcentajes respecto a la Tierra; el balance se revisa con simulaciones.
  */
-import { bestOf, bestRing } from '../core/state.js';
-import { JUMP_DUR, perfCount } from '../core/run-state.js';
+import { bestOf, records } from '../core/state.js';
+import { JUMP_DUR, outcome } from '../core/run-state.js';
 
 import { GOAL } from '../data/levels.js';
 
@@ -57,8 +57,8 @@ function markNewPlanets() {
 }
 /** Guarda el récord de Perfectos en una partida, que desbloquea a Mercurio y Urano. */
 function saveRunStats() {
-  if (perfCount > maxPerf) {
-    maxPerf = perfCount;
+  if (outcome.perfCount > maxPerf) {
+    maxPerf = outcome.perfCount;
     try {
       localStorage.setItem('orbita_p1_maxperf', String(maxPerf));
     } catch (e) {}
@@ -226,7 +226,7 @@ const PLANETS_P = [
     col: '#d0603f',
     desc: 'El planeta rojo, cubierto de óxido de hierro. Tiene el volcán más alto del sistema solar.',
     how: 'Rescátalo llegando al anillo 20 del Sistema solar',
-    ok: () => bestRing >= 20,
+    ok: () => records.bestRing >= 20,
     d: '6779 km',
     v: '24,1 km/s',
     rho: '3,93 g/cm³',
@@ -262,7 +262,7 @@ const PLANETS_P = [
     col: '#e6cf8f',
     desc: 'Sus anillos son de hielo y roca, y es tan poco denso que flotaría en el agua.',
     how: 'Rescátalo completando el Sistema solar',
-    ok: () => bestRing >= GOAL,
+    ok: () => records.bestRing >= GOAL,
     d: '116 460 km',
     v: '9,7 km/s',
     rho: '0,69 g/cm³',
@@ -298,7 +298,7 @@ const PLANETS_P = [
     col: '#3f6fd6',
     desc: 'El planeta más lejano del Sol, con los vientos más rápidos del sistema solar: unos 2000 km/h.',
     how: 'Rescátalo llegando al anillo 30 del Sistema solar',
-    ok: () => bestRing >= 30,
+    ok: () => records.bestRing >= 30,
     d: '49 244 km',
     v: '5,4 km/s',
     rho: '1,64 g/cm³',

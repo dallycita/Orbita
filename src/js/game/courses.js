@@ -2,8 +2,8 @@
  * Recorridos fijos de los niveles 1 a 3: qué tipo de anillo hay en cada posición, y el generador
  * aleatorio con semilla fija que hace que cada partida sea igual.
  */
-import { lvl } from '../core/state.js';
-import { TUT_TYPES, tutorial } from '../core/run-state.js';
+import { run } from '../core/state.js';
+import { TUT_TYPES, tutorialState } from '../core/run-state.js';
 import { courseMaps } from './beat.js';
 import { COURSE, COURSE2, COURSE3, courseMap, courseMap2, courseMap3 } from '../data/courses.js';
 import { GOAL } from '../data/levels.js';
@@ -30,13 +30,17 @@ function rng() {
  * @returns {string} Tipo de anillo.
  */
 const ringType = k =>
-  tutorial
+  tutorialState.tutorial
     ? TUT_TYPES[k] || 'vacio'
     : k === GOAL
       ? 'muralla'
-      : (lvl >= 3 ? courseMaps[lvl] : lvl === 2 ? courseMap3 : lvl === 1 ? courseMap2 : courseMap)[
-          Math.min(k, 59)
-        ];
+      : (run.lvl >= 3
+          ? courseMaps[run.lvl]
+          : run.lvl === 2
+            ? courseMap3
+            : run.lvl === 1
+              ? courseMap2
+              : courseMap)[Math.min(k, 59)];
 // Tipos de anillo ya presentados al jugador, guardados en `orbita_p1_vistos`.
 let seenTypes = {};
 

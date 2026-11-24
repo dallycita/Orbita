@@ -4,7 +4,7 @@
  * `AC` es null hasta el primer toque (`initAudio`) o si el navegador no tiene audio: todo lo que
  * suena debe comprobarlo.
  */
-import { muted, volMus, volSfx } from '../core/settings.js';
+import { settings } from '../core/settings.js';
 
 let AC = null;
 let master = null;
@@ -28,15 +28,15 @@ function applyVolumes() {
   }
   try {
     const n = AC.currentTime;
-    master.gain.setTargetAtTime(volGain(volSfx), n, 0.03);
-    musVol.gain.setTargetAtTime(volGain(volMus), n, 0.03);
+    master.gain.setTargetAtTime(volGain(settings.volSfx), n, 0.03);
+    musVol.gain.setTargetAtTime(volGain(settings.volMus), n, 0.03);
   } catch (e) {}
 }
 /** Guarda `volMus` y `volSfx` en el navegador. */
 function saveVolumes() {
   try {
-    localStorage.setItem('orbita_vol_mus', String(Math.round(volMus)));
-    localStorage.setItem('orbita_vol_sfx', String(Math.round(volSfx)));
+    localStorage.setItem('orbita_vol_mus', String(Math.round(settings.volMus)));
+    localStorage.setItem('orbita_vol_sfx', String(Math.round(settings.volSfx)));
   } catch (e) {}
 }
 /**
@@ -51,15 +51,15 @@ function initAudio() {
   try {
     AC = new (window.AudioContext || window.webkitAudioContext)();
     outBus = AC.createGain();
-    outBus.gain.value = typeof muted !== 'undefined' && muted ? 0 : 0.6;
+    outBus.gain.value = typeof settings.muted !== 'undefined' && settings.muted ? 0 : 0.6;
     const comp = AC.createDynamicsCompressor();
     outBus.connect(comp);
     comp.connect(AC.destination);
     master = AC.createGain();
-    master.gain.value = volGain(volSfx);
+    master.gain.value = volGain(settings.volSfx);
     master.connect(outBus); // todos los efectos (SFX) entran aquí
     musVol = AC.createGain();
-    musVol.gain.value = volGain(volMus);
+    musVol.gain.value = volGain(settings.volMus);
     musVol.connect(outBus);
     musicBus = AC.createGain();
     musicBus.gain.value = 0.0001;
@@ -243,7 +243,7 @@ export function setShaper(value) {
 function applyMute() {
   if (AC && outBus) {
     try {
-      outBus.gain.setValueAtTime(muted ? 0 : 0.6, AC.currentTime);
+      outBus.gain.setValueAtTime(settings.muted ? 0 : 0.6, AC.currentTime);
     } catch (e) {}
   }
 }

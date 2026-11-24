@@ -4,7 +4,7 @@
  * el código (lógica y dibujo) y los tirones (cuadros de más de 25 ms) de los últimos 10 s.
  * Si los ms entre cuadros son altos pero el código tarda poco, el límite es la tarjeta gráfica.
  */
-import { particles } from '../core/run-state.js';
+import { effects } from '../core/run-state.js';
 
 let MEDIR = false;
 let medEl = null;
@@ -86,7 +86,7 @@ function medFrame(now, t0) {
     'tirones ' +
     medJank.length +
     ' en 10 s   partículas ' +
-    particles.length;
+    effects.particles.length;
 }
 
 /** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */

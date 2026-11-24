@@ -4,7 +4,7 @@
  */
 import { AC, ROOT } from '../audio/engine.js';
 
-import { muted } from '../core/settings.js';
+import { settings } from '../core/settings.js';
 import { uiOut, uiTone } from '../audio/ui-sounds.js';
 import { elPl } from '../core/dom.js';
 
@@ -103,7 +103,7 @@ function applyScanBars() {
 }
 /** Sonido del escáner: un barrido que sube y un arpegio corto. */
 function uiScan() {
-  if (!AC || muted) {
+  if (!AC || settings.muted) {
     return;
   }
   try {

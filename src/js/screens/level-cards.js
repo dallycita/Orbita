@@ -5,7 +5,7 @@
  * planetas, el Sol, los agujeros negros) se dibuja encima en 2D a resolución completa.
  */
 import { H, W, ctx } from '../core/display.js';
-import { t } from '../core/run-state.js';
+import { time } from '../core/run-state.js';
 
 import { LEVELS } from '../data/levels.js';
 import { drawBigPlanet } from '../render/planets.js';
@@ -251,7 +251,7 @@ const LVGL = (() => {
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     gl.uniform2f(U.uRes, cw, ch);
-    gl.uniform1f(U.uT, t);
+    gl.uniform1f(U.uT, time.t);
     gl.uniform1f(U.uKA, ka);
     gl.uniform1f(U.uKB, kb);
     gl.uniform1f(U.uMix, mix);
@@ -359,7 +359,7 @@ function lvGlow(x, y, r, col, a) {
  */
 function lvPoints(list, cx, cy, S, col, size) {
   for (const p of list) {
-    const tw = 0.6 + 0.4 * Math.sin(t * 2 + p.b * 40);
+    const tw = 0.6 + 0.4 * Math.sin(time.t * 2 + p.b * 40);
     ctx.globalAlpha = (0.35 + 0.65 * p.b) * tw * lvA;
     ctx.fillStyle = col;
     const s = size * (0.6 + p.b);
@@ -407,7 +407,7 @@ function lvSpike(x, y, r, a) {
  * @returns {number[]} [x, y] respecto al foco, en la misma unidad que a.
  */
 function lvKepler(a, e, w, P, M0) {
-  const M = (2 * Math.PI * t) / P + M0;
+  const M = (2 * Math.PI * time.t) / P + M0;
   let E = M;
   for (let i = 0; i < 6; i++) {
     E -= (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
@@ -454,7 +454,7 @@ function lvCrisp(k, cx, cy, S, alpha) {
     }
     const pls = LV_PL.map(([id, r], i) => {
       const a = 0.3 + i * 0.17,
-        ang = t * (0.9 / Math.pow(a / 0.3, 1.5)) * 0.35 + i * 1.9;
+        ang = time.t * (0.9 / Math.pow(a / 0.3, 1.5)) * 0.35 + i * 1.9;
       return {
         id,
         r: r * S,
@@ -468,7 +468,10 @@ function lvCrisp(k, cx, cy, S, alpha) {
         dy = cy - p.y,
         L = Math.hypot(dx, dy) || 1;
       ctx.globalAlpha = alpha;
-      drawBigPlanet(p.id, p.x, p.y, Math.max(2, p.r), t * 0.6, false, { x: dx / L, y: dy / L });
+      drawBigPlanet(p.id, p.x, p.y, Math.max(2, p.r), time.t * 0.6, false, {
+        x: dx / L,
+        y: dy / L,
+      });
     };
     pls.filter(p => !p.front).forEach(drawPl);
     // el Sol: disco nítido con borde más oscuro y manchas que hierven
@@ -488,11 +491,11 @@ function lvCrisp(k, cx, cy, S, alpha) {
     ctx.arc(cx, cy, Rs, 0, Math.PI * 2);
     ctx.clip();
     for (let i = 0; i < 26; i++) {
-      const a = i * 2.39996 + t * 0.05 * ((i % 3) - 1),
+      const a = i * 2.39996 + time.t * 0.05 * ((i % 3) - 1),
         rr = Math.sqrt((i + 0.5) / 26) * Rs * 0.95,
         x = cx + Math.cos(a) * rr,
         y = cy + Math.sin(a) * rr,
-        p = 0.5 + 0.5 * Math.sin(t * 1.5 + i * 1.7);
+        p = 0.5 + 0.5 * Math.sin(time.t * 1.5 + i * 1.7);
       lvGlow(
         x,
         y,
@@ -506,7 +509,7 @@ function lvCrisp(k, cx, cy, S, alpha) {
   } else if (k === 1) {
     lvPoints(lvSets[1], cx, cy, S, '#e8f0ff', 1.4);
     for (let i = 0; i < 9; i++) {
-      const a = i * 0.7 + t * 0.1,
+      const a = i * 0.7 + time.t * 0.1,
         r = (i % 3) * 0.012 * S;
       lvSpike(
         cx + 0.28 * S + Math.cos(a) * r,
@@ -536,7 +539,7 @@ function lvCrisp(k, cx, cy, S, alpha) {
     for (let i = 0; i < 48; i++) {
       const a0 = (i / 48) * Math.PI * 2,
         a1 = a0 + (Math.PI * 2) / 48 + 0.01,
-        br = 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(a0)) + 0.1 * Math.sin(t * 1.3 + a0 * 2);
+        br = 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(a0)) + 0.1 * Math.sin(time.t * 1.3 + a0 * 2);
       ctx.globalAlpha = alpha * Math.min(1, br);
       ctx.strokeStyle =
         'rgb(255,' + Math.round(110 + 90 * br) + ',' + Math.round(40 + 60 * br) + ')';
@@ -645,9 +648,10 @@ function drawLevelsBG() {
   // Estrellas nítidas en dos profundidades, con paralaje: al deslizar, las lejanas se mueven poco
   // y las cercanas más.
   for (const s of lvStars) {
-    const x = (((s.x * W - t * (s.d < 0.5 ? 2 : 5) - pos * W * (0.05 + 0.22 * s.d)) % W) + W) % W,
+    const x =
+        (((s.x * W - time.t * (s.d < 0.5 ? 2 : 5) - pos * W * (0.05 + 0.22 * s.d)) % W) + W) % W,
       y = s.y * H;
-    ctx.globalAlpha = (0.25 + 0.5 * s.d) * (0.65 + 0.35 * Math.sin(t * s.sp + s.tw));
+    ctx.globalAlpha = (0.25 + 0.5 * s.d) * (0.65 + 0.35 * Math.sin(time.t * s.sp + s.tw));
     ctx.fillStyle = s.c;
     ctx.fillRect(x, y, s.s, s.s);
   }

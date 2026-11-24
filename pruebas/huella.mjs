@@ -6,6 +6,7 @@
 // no hay audio (el ritmo usa el tiempo del juego) y las letras de Google no se cargan (ambas corridas usan las mismas).
 // Guarda por cada escena: una captura (PNG), el estilo calculado de cada elemento de la página y, en las partidas,
 // el estado del juego cuadro a cuadro.
+import { testHook } from './nombres.mjs';
 import { createRequire } from 'node:module';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
@@ -81,7 +82,7 @@ mkdirSync(OUT, {recursive: true});
 let html = readFileSync(SRC, 'utf8');
 const HOOK = 'requestAnimationFrame(frame);\n})();';
 if (html.split(HOOK).length !== 2) throw new Error('no encuentro el final del bucle en ' + SRC);
-html = html.replace(HOOK, 'window.__ev = s => eval(s);\n})();');   // la prueba mueve el juego cuadro a cuadro
+html = html.replace(HOOK, () => testHook() + '\n})();');   // la prueba mueve el juego cuadro a cuadro
 const TMP = join(OUT, '_juego.html'); writeFileSync(TMP, html);
 const BOT = readFileSync(join(ROOT, 'pruebas', 'bot.js'), 'utf8');
 

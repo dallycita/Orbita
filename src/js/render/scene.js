@@ -21,40 +21,16 @@ import {
   stars,
 } from '../core/display.js';
 import { dangerFlash, dangerNow } from '../audio/music-tracks.js';
-import {
-  appear,
-  astFade,
-  charge,
-  jumping,
-  level,
-  lvl,
-  pAng,
-  pLevel,
-  rings,
-  runRecord,
-  state,
-} from '../core/state.js';
+import { run, state } from '../core/state.js';
 import { chargeMax } from '../game/planets.js';
 import {
   TUT_TIPS,
-  burns,
-  culprit,
-  culpritT,
   curGoal,
-  debris,
-  flash,
-  holeFlare,
-  landPop,
-  particles,
-  pulse,
-  shake,
-  sunLevel,
-  swallow,
-  t,
-  texts,
-  trail,
-  tutorial,
-  winT,
+  effects,
+  hole,
+  outcome,
+  time,
+  tutorialState,
 } from '../core/run-state.js';
 import {
   bassBreath,
@@ -97,14 +73,14 @@ import { drawBendSphere } from './lens.js';
  * Lo llama 21-dibujo en cada cuadro de juego.
  */
 function renderScene() {
-  const z = zoneOf(level);
+  const z = zoneOf(run.level);
   ctx.save();
   ctx.fillStyle = z.bg;
   ctx.fillRect(0, 0, W, H);
-  if (shake > 0) {
-    ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
+  if (effects.shake > 0) {
+    ctx.translate((Math.random() - 0.5) * effects.shake, (Math.random() - 0.5) * effects.shake);
   }
-  if (lvl === 2 && !tutorial && !reduceMotion) {
+  if (run.lvl === 2 && !tutorialState.tutorial && !reduceMotion) {
     setCamZoom(camZoom + (1 + 0.05 * dangerNow() - camZoom) * 0.06);
     ctx.translate(CX, CY);
     ctx.scale(camZoom, camZoom);
@@ -113,14 +89,14 @@ function renderScene() {
 
   // estrellas (en Andrómeda, la galaxia entera ocupa el cielo)
   const sr = Math.max(W, H) * 0.62;
-  const ww = state === 'win' ? Math.min(1, winT / 1.2) : 0;
+  const ww = state === 'win' ? Math.min(1, outcome.winT / 1.2) : 0;
   const andro =
-    lvl >= 1 &&
-    !tutorial &&
+    run.lvl >= 1 &&
+    !tutorialState.tutorial &&
     (state === 'play' || state === 'dead' || state === 'win' || state === 'menu');
   const solar =
-    lvl === 0 &&
-    !tutorial &&
+    run.lvl === 0 &&
+    !tutorialState.tutorial &&
     (state === 'play' || state === 'dead' || state === 'win' || state === 'menu');
   let lw = null;
   if (bend.str > 0.01 && !viewInside) {
@@ -131,16 +107,16 @@ function renderScene() {
     GLBG.draw('mw', { beat: beatKick(), wh: lw });
   }
   if (andro) {
-    if (lvl === 1) {
+    if (run.lvl === 1) {
       if (!GLBG.draw('lmc', { beat: beatKick() })) {
         drawMagallanes();
       }
-    } else if (lvl === 2) {
+    } else if (run.lvl === 2) {
       if (!GLBG.draw('and2', { beat: beatKick() }) && !GLBG.draw('and', { beat: beatKick() })) {
         drawAndromeda();
       }
-    } else if (lvl >= 3 && GLBG.draw('gx', { beat: beatKick(), kind: lvl, wh: lw })) {
-    } else if (lvl === 4) {
+    } else if (run.lvl >= 3 && GLBG.draw('gx', { beat: beatKick(), kind: run.lvl, wh: lw })) {
+    } else if (run.lvl === 4) {
       const src = remolinoSource();
       if (
         !src ||
@@ -153,13 +129,13 @@ function renderScene() {
           zoom: REMOLINO_PHOTO ? 1.2 : 1.05,
         })
       ) {
-        drawGalBG(lvl);
+        drawGalBG(run.lvl);
       }
     } else {
-      drawGalBG(lvl);
+      drawGalBG(run.lvl);
     }
   }
-  if (skyFlash > 0 && lvl === 1) {
+  if (skyFlash > 0 && run.lvl === 1) {
     // la Gran Nube se ilumina con la explosión
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
@@ -175,8 +151,8 @@ function renderScene() {
   }
   if ((!andro && !solar) || ww > 0) {
     for (const s of stars) {
-      const a = s.a + t * 0.015,
-        rad = s.r * sr * (1 + ww * frac(winT * 0.35 + s.tw) * 0.8),
+      const a = s.a + time.t * 0.015,
+        rad = s.r * sr * (1 + ww * frac(outcome.winT * 0.35 + s.tw) * 0.8),
         x = CX + Math.cos(a) * rad,
         y = CY + Math.sin(a) * rad;
       if (ww > 0) {
@@ -189,7 +165,7 @@ function renderScene() {
         ctx.lineTo(x, y);
         ctx.stroke();
       }
-      ctx.globalAlpha = 0.12 + 0.22 * (0.5 + 0.5 * Math.sin(t * 1.3 + s.tw));
+      ctx.globalAlpha = 0.12 + 0.22 * (0.5 + 0.5 * Math.sin(time.t * 1.3 + s.tw));
       ctx.fillStyle = BONE;
       ctx.fillRect(x, y, s.s * 0.8, s.s * 0.8);
     }
@@ -197,9 +173,9 @@ function renderScene() {
   ctx.globalAlpha = 1;
 
   // agujero negro: crece desde el centro y se traga los anillos
-  const sunW = Math.max(rr(sunLevel), SUN),
+  const sunW = Math.max(rr(hole.sunLevel), SUN),
     // bhWob: el empujón de Júpiter lo hace temblar
-    sunR = (sunW + pulse * 2) * S * (1 + 0.07 * Math.sin(t * 38) * bhWob);
+    sunR = (sunW + effects.pulse * 2) * S * (1 + 0.07 * Math.sin(time.t * 38) * bhWob);
   const g = ctx.createRadialGradient(CX, CY, sunR * 0.9, CX, CY, sunR * 2.5);
   g.addColorStop(0, 'rgba(255,90,31,.32)');
   g.addColorStop(0.35, 'rgba(255,90,31,.08)');
@@ -209,7 +185,7 @@ function renderScene() {
   ctx.arc(CX, CY, sunR * 2.5, 0, Math.PI * 2);
   ctx.fill();
   // restos cayendo en espiral
-  for (const db of debris) {
+  for (const db of effects.debris) {
     ctx.globalAlpha = 0.22 * clamp((db.r - sunW) / 40, 0, 1);
     ctx.fillStyle = BONE;
     ctx.fillRect(
@@ -220,9 +196,9 @@ function renderScene() {
     );
   }
   ctx.globalAlpha = 1;
-  brandHole(CX, CY, sunR, 1, pulse * 0.35 + holeFlare);
+  brandHole(CX, CY, sunR, 1, effects.pulse * 0.35 + effects.holeFlare);
   // anillos que el agujero negro acaba de tragarse: se estiran y caen dentro
-  for (const b of burns) {
+  for (const b of effects.burns) {
     const R = sunW * S * (1 + 0.3 * b.life);
     ctx.globalAlpha = b.life * 0.8;
     ctx.strokeStyle = z.s1;
@@ -236,7 +212,7 @@ function renderScene() {
   const bk = state === 'play' || state === 'menu' ? beatKick() : 0,
     bb = state === 'play' ? bassBreath() : 0;
   if (bk > 0.01 || bb > 0.01) {
-    const zg = zoneOf(level),
+    const zg = zoneOf(run.level),
       gr = ctx.createRadialGradient(CX, CY, 0, CX, CY, Math.max(W, H) * 0.75);
     if (gr && gr.addColorStop) {
       gr.addColorStop(0, rgba(zg.s1, 0.05 * bb + 0.07 * bk));
@@ -246,30 +222,30 @@ function renderScene() {
     }
   }
   // anillos y asteroides
-  const keys = [...rings.keys()].sort((a, b) => a - b);
+  const keys = [...run.rings.keys()].sort((a, b) => a - b);
   for (const k of keys) {
     const R = rr(k);
-    if (k <= sunLevel || R < sunW + 2) {
+    if (k <= hole.sunLevel || R < sunW + 2) {
       continue;
     }
-    const ring = rings.get(k),
+    const ring = run.rings.get(k),
       zc = zoneOf(k);
     let alpha;
-    if (k < level) {
+    if (k < run.level) {
       alpha = clamp((R - SUN) / (R0 - SUN), 0, 1) * 0.35;
     } else {
-      alpha = [1, 0.85, 0.14, 0.07, 0.04, 0.02, 0.01][Math.min(k - level, 6)];
+      alpha = [1, 0.85, 0.14, 0.07, 0.04, 0.02, 0.01][Math.min(k - run.level, 6)];
     }
     alpha *= clamp((226 - R) / 30, 0, 1);
     if (alpha <= 0.01) {
       continue;
     }
-    const cur = k === level && state !== 'dead';
-    const rb = k <= level + 1 ? bk : 0;
+    const cur = k === run.level && state !== 'dead';
+    const rb = k <= run.level + 1 ? bk : 0;
     ctx.globalAlpha = Math.min(1, alpha * (cur ? 0.9 : 0.55) + rb * 0.35 * alpha);
     ctx.strokeStyle = zc.ring;
-    ctx.lineWidth = (cur ? 2 : 1) + (cur ? pulse * 1.2 : 0) + rb * 1.3;
-    if (lvl === 2 && !tutorial) {
+    ctx.lineWidth = (cur ? 2 : 1) + (cur ? effects.pulse * 1.2 : 0) + rb * 1.3;
+    if (run.lvl === 2 && !tutorialState.tutorial) {
       // órbita de luz: un halo suave y una línea fina y brillante
       const ga = ctx.globalAlpha,
         lw = ctx.lineWidth;
@@ -300,7 +276,7 @@ function renderScene() {
         ctx.arc(CX, CY, R * S, 0, Math.PI * 2);
       }
     };
-    if (!tutorial && k >= level) {
+    if (!tutorialState.tutorial && k >= run.level) {
       // contorno oscuro detrás y el anillo en blanco firme, para que se lea sobre cielos claros
       const ga = ctx.globalAlpha,
         lw = ctx.lineWidth,
@@ -317,14 +293,14 @@ function renderScene() {
         ringPath();
         ctx.stroke();
       }
-      ctx.strokeStyle = cur || k === level + 1 ? '#ffffff' : ss;
+      ctx.strokeStyle = cur || k === run.level + 1 ? '#ffffff' : ss;
       ctx.globalAlpha = Math.min(1, ga * (cur ? 1.15 : 1.35));
       ctx.lineWidth = lw * (cur ? 1.3 : 1.25);
     }
     ringPath();
     ctx.stroke();
     ctx.globalAlpha = alpha;
-    if (ring.type === 'arrastre' && k >= level && k <= level + 1) {
+    if (ring.type === 'arrastre' && k >= run.level && k <= run.level + 1) {
       ctx.strokeStyle = '#c9a0ff';
       ctx.lineWidth = 2.5;
       ctx.globalAlpha = alpha * 0.8;
@@ -337,7 +313,7 @@ function renderScene() {
       }
       ctx.globalAlpha = alpha;
     }
-    if (ring.flash > 0 && k === level + 1) {
+    if (ring.flash > 0 && k === run.level + 1) {
       ctx.globalAlpha = ring.flash;
       ctx.strokeStyle = zc.s2;
       ctx.lineWidth = 3;
@@ -349,13 +325,13 @@ function renderScene() {
     // asteroides visibles solo en el anillo al que vas a saltar
     let aA = 0,
       sc = 1;
-    if (k === level + 1) {
-      aA = appear;
-      sc = 0.4 + 0.6 * appear;
-    } else if (k === level && astFade > 0) {
-      aA = astFade;
-      sc = 0.5 + 0.5 * astFade;
-    } else if (wh && wh.ph === 'orb' && k === level + 2 && ring.type === 'orbita') {
+    if (k === run.level + 1) {
+      aA = run.appear;
+      sc = 0.4 + 0.6 * run.appear;
+    } else if (k === run.level && run.astFade > 0) {
+      aA = run.astFade;
+      sc = 0.5 + 0.5 * run.astFade;
+    } else if (wh && wh.ph === 'orb' && k === run.level + 2 && ring.type === 'orbita') {
       aA = 0.3;
       sc = 0.8;
     }
@@ -365,7 +341,7 @@ function renderScene() {
           continue;
         }
         if (o.melt) {
-          const u = Math.min(1, (t - o.melt) / (o.burn ? 0.16 : 0.7)),
+          const u = Math.min(1, (time.t - o.melt) / (o.burn ? 0.16 : 0.7)),
             oa = obsAng(ring, o),
             x = CX + Math.cos(oa) * R * S,
             y = CY + Math.sin(oa) * R * S,
@@ -396,7 +372,7 @@ function renderScene() {
           ctx.rotate(ba);
           ctx.scale(1 + 0.9 * u * u, 1 - 0.25 * u);
           ctx.rotate(-ba);
-          drawAst(0, 0, rr4, o.seed, t * 0.8 + o.seed, zc.ast, (1 - u * 0.8) * aA);
+          drawAst(0, 0, rr4, o.seed, time.t * 0.8 + o.seed, zc.ast, (1 - u * 0.8) * aA);
           ctx.globalCompositeOperation = 'lighter';
           const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rr4 * (1.6 + u));
           g.addColorStop(
@@ -414,7 +390,7 @@ function renderScene() {
             const wx = (x - CX) / S,
               wy = (y - CY) / S,
               v = 30 + Math.random() * 50;
-            particles.push({
+            effects.particles.push({
               x: wx,
               y: wy,
               vx: Math.cos(ba) * v + (Math.random() - 0.5) * 20,
@@ -438,7 +414,7 @@ function renderScene() {
           ctx.rotate(ang);
           ctx.scale(mr, Math.min(mt, 3.2));
           ctx.rotate(-ang);
-          drawAst(0, 0, obsRad(ring, o) * S * sc, o.seed, t * 0.8 + o.seed, zc.ast, aA);
+          drawAst(0, 0, obsRad(ring, o) * S * sc, o.seed, time.t * 0.8 + o.seed, zc.ast, aA);
           ctx.restore();
         } else {
           drawAst(
@@ -446,25 +422,33 @@ function renderScene() {
             CY + ly * S,
             obsRad(ring, o) * S * sc,
             o.seed,
-            t * 0.8 + o.seed,
+            time.t * 0.8 + o.seed,
             zc.ast,
             aA,
           );
         }
       }
     }
-    if (k >= level && k <= level + 2 && (ring.frozenT > 0 || ring.revT > 0 || ring.windT > 0)) {
-      drawRingPower(ring, R, Math.max(alpha, k === level + 2 ? 0.5 : alpha));
+    if (
+      k >= run.level &&
+      k <= run.level + 2 &&
+      (ring.frozenT > 0 || ring.revT > 0 || ring.windT > 0)
+    ) {
+      drawRingPower(ring, R, Math.max(alpha, k === run.level + 2 ? 0.5 : alpha));
     }
-    if (ring.type === 'nova' && !tutorial && k >= level && k <= level + 2) {
+    if (ring.type === 'nova' && !tutorialState.tutorial && k >= run.level && k <= run.level + 2) {
       drawNova(
         ring,
         R,
-        k === level + 1 ? Math.max(aA, 0.0) : k === level ? Math.max(0.25, aA) : 0.35 * alpha,
-        k === level + 1,
+        k === run.level + 1
+          ? Math.max(aA, 0.0)
+          : k === run.level
+            ? Math.max(0.25, aA)
+            : 0.35 * alpha,
+        k === run.level + 1,
       );
     }
-    if (aA > 0.01 && k === level + 1) {
+    if (aA > 0.01 && k === run.level + 1) {
       if (ring.obj && !ring.obj.got) {
         const sa = ring.obj.a + ring.phase - (ring.poff || 0),
           ox = CX + Math.cos(sa) * R * S,
@@ -484,12 +468,12 @@ function renderScene() {
   ctx.globalAlpha = 1;
 
   // la salida del sistema solar
-  if (state === 'play' && curGoal() > level) {
+  if (state === 'play' && curGoal() > run.level) {
     const R = rr(curGoal()),
       vis = clamp((262 - R) / 44, 0, 1);
     if (vis > 0.01) {
       const Rs = R * S,
-        bt = 0.5 + 0.5 * Math.sin(t * 5);
+        bt = 0.5 + 0.5 * Math.sin(time.t * 5);
       ctx.globalAlpha = vis * (0.6 + 0.35 * bt);
       ctx.strokeStyle = z.s2;
       ctx.lineWidth = 2.5;
@@ -504,8 +488,8 @@ function renderScene() {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.font = '700 12px Unbounded, system-ui, sans-serif';
-      const fl = curGoal() - level,
-        nm = tutorial ? 'Meta' : 'Salida';
+      const fl = curGoal() - run.level,
+        nm = tutorialState.tutorial ? 'Meta' : 'Salida';
       ctx.fillText(
         fl === 1 ? nm + ' · ¡el último!' : nm + ' · faltan ' + fl,
         CX + Math.cos(la) * (Rs + 16),
@@ -515,12 +499,12 @@ function renderScene() {
     }
   }
   // tu récord (donde caíste la última vez) marcado en el recorrido, en azul como la Tierra
-  if (state === 'play' && runRecord > level && runRecord < GOAL) {
-    const R = rr(runRecord),
+  if (state === 'play' && run.runRecord > run.level && run.runRecord < GOAL) {
+    const R = rr(run.runRecord),
       vis = clamp((250 - R) / 40, 0, 1);
     if (vis > 0.01 && R > sunW + 2) {
       const Rs = R * S,
-        bt = 0.5 + 0.5 * Math.sin(t * 4);
+        bt = 0.5 + 0.5 * Math.sin(time.t * 4);
       ctx.globalAlpha = vis * (0.5 + 0.3 * bt);
       ctx.strokeStyle = '#8fd0ff';
       ctx.lineWidth = 2;
@@ -540,30 +524,30 @@ function renderScene() {
     }
   }
   // marca de dónde vas a caer: justo encima de ti
-  if (state === 'play' && !jumping) {
-    const Rn = rr(level + 1) * S;
+  if (state === 'play' && !run.jumping) {
+    const Rn = rr(run.level + 1) * S;
     ctx.strokeStyle = BONE;
     ctx.globalAlpha = 0.85;
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(CX, CY, Rn, pAng - 0.07, pAng + 0.07);
+    ctx.arc(CX, CY, Rn, run.pAng - 0.07, run.pAng + 0.07);
     ctx.stroke();
     ctx.globalAlpha = 1;
   }
   // el asteroide que te mató, señalado
-  if (culprit && culpritT > 0) {
-    const ring = rings.get(culprit.k);
+  if (outcome.culprit && outcome.culpritT > 0) {
+    const ring = run.rings.get(outcome.culprit.k);
     if (ring) {
-      const oa = obsAng(ring, culprit.o),
-        R = rr(culprit.k) * S;
-      ctx.globalAlpha = Math.min(1, culpritT);
+      const oa = obsAng(ring, outcome.culprit.o),
+        R = rr(outcome.culprit.k) * S;
+      ctx.globalAlpha = Math.min(1, outcome.culpritT);
       ctx.strokeStyle = z.s2;
       ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.arc(
         CX + Math.cos(oa) * R,
         CY + Math.sin(oa) * R,
-        Math.max(1, (culprit.o.r + 7) * S),
+        Math.max(1, (outcome.culprit.o.r + 7) * S),
         0,
         Math.PI * 2,
       );
@@ -579,15 +563,15 @@ function renderScene() {
   // estela y jugador
   if (state !== 'dead' && !hideEarth) {
     if (!bend.fixed) {
-      for (let i = 1; i < trail.length; i++) {
-        const p0 = trail[i - 1],
-          p1 = trail[i],
+      for (let i = 1; i < effects.trail.length; i++) {
+        const p0 = effects.trail[i - 1],
+          p1 = effects.trail[i],
           r0 = rr(p0.l) * S,
           r1 = rr(p1.l) * S;
-        const rdy = state === 'play' && charge >= chargeMax();
-        ctx.globalAlpha = (i / trail.length) * (rdy ? 0.6 : 0.3);
+        const rdy = state === 'play' && run.charge >= chargeMax();
+        ctx.globalAlpha = (i / effects.trail.length) * (rdy ? 0.6 : 0.3);
         ctx.strokeStyle = rdy ? '#ffd36b' : '#8fd0ff';
-        ctx.lineWidth = (i / trail.length) * PR * (rdy ? 2 : 1.4) * S;
+        ctx.lineWidth = (i / effects.trail.length) * PR * (rdy ? 2 : 1.4) * S;
         ctx.lineCap = 'round';
         ctx.beginPath();
         const [ax, ay] = lensP((Math.cos(p0.a) * r0) / S, (Math.sin(p0.a) * r0) / S),
@@ -598,9 +582,10 @@ function renderScene() {
       }
     }
     ctx.globalAlpha = 1;
-    const onM = !jumping && rings.get(level) && rings.get(level).type === 'marea';
-    const pr = rr(pLevel) * S * (onM ? stretchAt(rings.get(level), pAng) : 1),
-      [lpx, lpy] = lensP((Math.cos(pAng) * pr) / S, (Math.sin(pAng) * pr) / S),
+    const onM =
+      !run.jumping && run.rings.get(run.level) && run.rings.get(run.level).type === 'marea';
+    const pr = rr(run.pLevel) * S * (onM ? stretchAt(run.rings.get(run.level), run.pAng) : 1),
+      [lpx, lpy] = lensP((Math.cos(run.pAng) * pr) / S, (Math.sin(run.pAng) * pr) / S),
       px = CX + lpx * S,
       py = CY + lpy * S;
     if (state === 'play') {
@@ -610,7 +595,7 @@ function renderScene() {
       drawPowerAura(px, py);
     }
     if (bend.str > 0.01 && !viewInside) {
-      const [mt, mr, ang] = lensJ((Math.cos(pAng) * pr) / S, (Math.sin(pAng) * pr) / S);
+      const [mt, mr, ang] = lensJ((Math.cos(run.pAng) * pr) / S, (Math.sin(run.pAng) * pr) / S);
       ctx.save();
       ctx.translate(px, py);
       ctx.rotate(ang);
@@ -619,7 +604,7 @@ function renderScene() {
       drawPlayer(
         0,
         0,
-        PR * S * 1.15 * (jumping ? 1.1 : 1) * (1 + landPop * 0.25) * (1 + 0.08 * bk),
+        PR * S * 1.15 * (run.jumping ? 1.1 : 1) * (1 + effects.landPop * 0.25) * (1 + 0.08 * bk),
       );
       ctx.restore();
     } else {
@@ -634,7 +619,7 @@ function renderScene() {
       drawPlayer(
         0,
         0,
-        PR * S * 1.15 * (jumping ? 1.1 : 1) * (1 + landPop * 0.25) * (1 + 0.08 * bk),
+        PR * S * 1.15 * (run.jumping ? 1.1 : 1) * (1 + effects.landPop * 0.25) * (1 + 0.08 * bk),
       );
       ctx.restore();
     }
@@ -643,11 +628,11 @@ function renderScene() {
       drawCharge(px, py, z);
     }
   }
-  if (swallow && !swallow.done) {
-    const p = swallow.p,
-      sr = swallow.r * S;
-    const px = CX + Math.cos(swallow.a) * sr,
-      py = CY + Math.sin(swallow.a) * sr;
+  if (hole.swallow && !hole.swallow.done) {
+    const p = hole.swallow.p,
+      sr = hole.swallow.r * S;
+    const px = CX + Math.cos(hole.swallow.a) * sr,
+      py = CY + Math.sin(hole.swallow.a) * sr;
     const rad = PR * S * 1.15 * (1 - 0.5 * p);
     ctx.save();
     ctx.translate(px, py);
@@ -667,7 +652,7 @@ function renderScene() {
   }
 
   // partículas
-  for (const p of particles) {
+  for (const p of effects.particles) {
     ctx.globalAlpha = clamp(p.life, 0, 1);
     ctx.fillStyle = p.col;
     if (p.s > 1.8) {
@@ -684,7 +669,7 @@ function renderScene() {
   // textos flotantes
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  for (const tx of texts) {
+  for (const tx of effects.texts) {
     ctx.globalAlpha = clamp(tx.life, 0, 1);
     ctx.font = '900 ' + tx.size + 'px Unbounded, system-ui, sans-serif';
     ctx.fillStyle = tx.col;
@@ -695,7 +680,7 @@ function renderScene() {
   ctx.restore();
 
   if (state === 'play') {
-    const danger = clamp((1.1 - (pLevel - sunLevel)) / 0.8, 0, 1);
+    const danger = clamp((1.1 - (run.pLevel - hole.sunLevel)) / 0.8, 0, 1);
     if (danger > 0) {
       const vg = ctx.createRadialGradient(
         W / 2,
@@ -706,25 +691,25 @@ function renderScene() {
         Math.max(W, H) * 0.75,
       );
       vg.addColorStop(0, 'rgba(255,40,70,0)');
-      vg.addColorStop(1, 'rgba(255,40,70,' + danger * (0.35 + 0.15 * Math.sin(t * 14)) + ')');
+      vg.addColorStop(1, 'rgba(255,40,70,' + danger * (0.35 + 0.15 * Math.sin(time.t * 14)) + ')');
       ctx.fillStyle = vg;
       ctx.fillRect(0, 0, W, H);
     }
   }
-  if (flash > 0) {
-    ctx.globalAlpha = flash * 0.35;
+  if (effects.flash > 0) {
+    ctx.globalAlpha = effects.flash * 0.35;
     ctx.fillStyle = '#fffaf0';
     ctx.fillRect(0, 0, W, H);
     ctx.globalAlpha = 1;
   }
-  if (tutorial && state === 'play' && TUT_TIPS[level]) {
+  if (tutorialState.tutorial && state === 'play' && TUT_TIPS[run.level]) {
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = BONE;
     let fs = 16;
     ctx.font = '500 ' + fs + 'px Unbounded, system-ui, sans-serif';
-    const tip = TUT_TIPS[level],
+    const tip = TUT_TIPS[run.level],
       m = ctx.measureText ? ctx.measureText(tip) : null,
       w = (m && m.width) || 0;
     if (w > W - 48) {

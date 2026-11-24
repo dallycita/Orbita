@@ -21,22 +21,18 @@ import {
 } from '../core/display.js';
 import { AC, NOISE, ROOT, noise } from '../audio/engine.js';
 import { TB } from '../audio/music-tracks.js';
-import { camLevel, jumping, level, lvl, pAng, pLevel, rings, state } from '../core/state.js';
+import { camera, run, state } from '../core/state.js';
 import { sizeK } from './planets.js';
 import {
-  flash,
-  holeFlare,
-  particles,
+  effects,
+  hole,
   setFlash,
   setHoleFlare,
   setPulse,
   setShake,
   setTexts,
-  shake,
-  sunLevel,
-  t,
-  texts,
-  tutorial,
+  time,
+  tutorialState,
 } from '../core/run-state.js';
 import { seenTypes } from './courses.js';
 import {
@@ -75,7 +71,7 @@ import {
 } from './hazard-state.js';
 
 import { BEAM_AT, COMET_AT, COMET_TIME, FLARE_AT, SN_AT } from '../data/hazards.js';
-import { muted } from '../core/settings.js';
+import { settings } from '../core/settings.js';
 import { misEvent } from './missions.js';
 import { uiOut, uiTone } from '../audio/ui-sounds.js';
 import { rr } from '../core/geometry.js';
@@ -99,9 +95,9 @@ const NOVA_LIFE = 5.2; // segundos que vive cada cáscara de nova (más en la gr
  * @param {object} s Fuente de nova (de novaSrc); s.big indica la gran nova.
  */
 function novaBurst(s) {
-  setShake(Math.max(shake, reduceMotion ? 0 : s.big ? 9 : 3));
+  setShake(Math.max(effects.shake, reduceMotion ? 0 : s.big ? 9 : 3));
   buzz(s.big ? [30, 30, 80] : 18);
-  if (AC && !muted) {
+  if (AC && !settings.muted) {
     try {
       const n = AC.currentTime;
       noise(s.big ? 1.2 : 0.5, 7000, 900, s.big ? 0.26 : 0.14, 'highpass');
@@ -239,9 +235,18 @@ function hazardTip(key, title, sub, col) {
   try {
     localStorage.setItem('orbita_p1_vistos', JSON.stringify(seenTypes));
   } catch (e) {}
-  setTexts(texts.filter(x => !x.tip));
-  texts.push({ txt: title, x: 0, y: -R0 - 96, life: 2.6, size: 20, col, center: true, tip: true });
-  texts.push({
+  setTexts(effects.texts.filter(x => !x.tip));
+  effects.texts.push({
+    txt: title,
+    x: 0,
+    y: -R0 - 96,
+    life: 2.6,
+    size: 20,
+    col,
+    center: true,
+    tip: true,
+  });
+  effects.texts.push({
     txt: sub,
     x: 0,
     y: -R0 - 76,
@@ -257,28 +262,28 @@ function hazardTip(key, title, sub, col) {
  * (cometas, chorros, ondas de supernova, novas y llamaradas). No hace nada en el tutorial.
  */
 function hazardsOnLand() {
-  if (tutorial) {
+  if (tutorialState.tutorial) {
     return;
   }
-  const k = level;
-  if (COMET_AT[lvl] && COMET_AT[lvl].has(k)) {
+  const k = run.level;
+  if (COMET_AT[run.lvl] && COMET_AT[run.lvl].has(k)) {
     const sg = Math.random() < 0.5 ? -1 : 1,
       span = 2.7,
-      T = COMET_TIME[lvl] || 2.5;
+      T = COMET_TIME[run.lvl] || 2.5;
     comets.push({
-      k: level,
+      k: run.level,
       sg,
-      ang: pAng - sg * span,
+      ang: run.pAng - sg * span,
       w: span / T,
       t: 0,
       delay: 0.55,
       left: span + 1.2,
     });
-    if (lvl === 7) {
+    if (run.lvl === 7) {
       comets.push({
-        k: level,
+        k: run.level,
         sg: -sg,
-        ang: pAng + sg * span,
+        ang: run.pAng + sg * span,
         w: span / T,
         t: 0,
         delay: 0.55,
@@ -292,7 +297,7 @@ function hazardsOnLand() {
       );
     }
     hazardTip('cometa', 'Cometa', 'Viene por tu anillo: salta antes de que te alcance', '#bfe6ff');
-    if (AC && !muted) {
+    if (AC && !settings.muted) {
       try {
         const n = AC.currentTime,
           o = AC.createOscillator(),
@@ -310,8 +315,8 @@ function hazardsOnLand() {
       } catch (e) {}
     }
   }
-  if (BEAM_AT[lvl] && BEAM_AT[lvl].has(k)) {
-    const tgt = (setBeamCount(beamCount + 1) - 1) % 2 === 0 ? level + 1 : level;
+  if (BEAM_AT[run.lvl] && BEAM_AT[run.lvl].has(k)) {
+    const tgt = (setBeamCount(beamCount + 1) - 1) % 2 === 0 ? run.level + 1 : run.level;
     beams.push({ k: tgt, t: 0, warn: 1.2, fire: 0.35, fired: false });
     hazardTip(
       'rayo',
@@ -319,7 +324,7 @@ function hazardsOnLand() {
       'No estés en el anillo que brilla cuando dispare',
       '#9fd4ff',
     );
-    if (AC && !muted) {
+    if (AC && !settings.muted) {
       try {
         const n = AC.currentTime,
           o = AC.createOscillator(),
@@ -337,13 +342,13 @@ function hazardsOnLand() {
       } catch (e) {}
     }
   }
-  if (SN_AT[lvl] && SN_AT[lvl][k] && !waves.some(w => !w.over)) {
-    spawnWave(k + SN_AT[lvl][k], SN_AT[lvl][k]);
+  if (SN_AT[run.lvl] && SN_AT[run.lvl][k] && !waves.some(w => !w.over)) {
+    spawnWave(k + SN_AT[run.lvl][k], SN_AT[run.lvl][k]);
   }
-  if (NOVA_AT[lvl] && NOVA_AT[lvl][k]) {
-    novaSpawn(k, NOVA_AT[lvl][k]);
+  if (NOVA_AT[run.lvl] && NOVA_AT[run.lvl][k]) {
+    novaSpawn(k, NOVA_AT[run.lvl][k]);
   }
-  if (FLARE_AT[lvl] && FLARE_AT[lvl].has(k)) {
+  if (FLARE_AT[run.lvl] && FLARE_AT[run.lvl].has(k)) {
     setFlareWarn(0.8);
     hazardTip('llamarada', 'Llamarada', 'El agujero negro te ciega: sigue tu ritmo', '#ffe2b0');
   }
@@ -394,7 +399,7 @@ function spawnWave(L, reach) {
   const secs =
     (reach === 1 ? 2.6 : reach === 2 ? 4.2 : 5.4) *
     (learn ? 1.45 : 1) *
-    (TUNE[lvl] ? TUNE[lvl].wv : 1);
+    (TUNE[run.lvl] ? TUNE[run.lvl].wv : 1);
   const T = Math.max(2, Math.round(secs / TB)) * TB; // y llega al límite en otro golpe
   waves.push({
     big,
@@ -420,7 +425,7 @@ function spawnWave(L, reach) {
       f: 2 + Math.random() * 5,
     })),
   });
-  if (AC && !muted) {
+  if (AC && !settings.muted) {
     try {
       // un rumor grave que crece hasta el golpe de salida
       const n = AC.currentTime,
@@ -451,15 +456,15 @@ function spawnWave(L, reach) {
  */
 function waveRelease(w) {
   w.released = true;
-  w.k0 = Math.max(sunLevel + 0.35, level - 2.4);
+  w.k0 = Math.max(hole.sunLevel + 0.35, run.level - 2.4);
   w.wk = w.k0;
-  setShake(Math.max(shake, reduceMotion ? 0 : w.big ? 14 : 6));
-  setFlash(Math.max(flash, w.big ? 0.55 : 0.25));
+  setShake(Math.max(effects.shake, reduceMotion ? 0 : w.big ? 14 : 6));
+  setFlash(Math.max(effects.flash, w.big ? 0.55 : 0.25));
   buzz(w.big ? [60, 30, 60, 30, 90] : [30, 20, 30]);
   if (w.big) {
     setSkyFlash(Math.max(skyFlash, 0.5));
   }
-  if (AC && !muted) {
+  if (AC && !settings.muted) {
     try {
       const n = AC.currentTime,
         o = AC.createOscillator(),
@@ -525,15 +530,15 @@ function waveBreak(w) {
   const R = rr(w.L);
   if (w.big) {
     setSkyFlash(1);
-    setFlash(Math.max(flash, 0.6));
-    setShake(Math.max(shake, reduceMotion ? 0 : 10));
+    setFlash(Math.max(effects.flash, 0.6));
+    setShake(Math.max(effects.shake, reduceMotion ? 0 : 10));
     setPulse(1);
     buzz([40, 30, 120]);
   }
   for (let i = 0; i < (w.big ? 160 : 64); i++) {
     const a = (i / 64) * Math.PI * 2 + Math.random() * 0.08,
       v = 25 + Math.random() * 55;
-    particles.push({
+    effects.particles.push({
       x: Math.cos(a) * R,
       y: Math.sin(a) * R,
       vx: Math.cos(a) * v,
@@ -543,7 +548,7 @@ function waveBreak(w) {
       s: 1.2 + Math.random() * 2.2,
     });
   }
-  if (AC && !muted) {
+  if (AC && !settings.muted) {
     try {
       if (w.whine) {
         const n = AC.currentTime;
@@ -574,7 +579,7 @@ function waveSafe(w) {
   misEvent('onda');
   setPulse(1);
   buzz(10);
-  if (AC && !muted) {
+  if (AC && !settings.muted) {
     try {
       [12, 19].forEach((sm, i) =>
         uiTone(ROOT * 2 * Math.pow(2, sm / 12), AC.currentTime + i * 0.05, 0.5, 0.035),
@@ -603,7 +608,7 @@ function waveCatch(w, px, py) {
   for (let i = 0; i < 34; i++) {
     const a = Math.random() * Math.PI * 2,
       v = 40 + Math.random() * 130;
-    particles.push({
+    effects.particles.push({
       x: px,
       y: py,
       vx: Math.cos(a) * v,
@@ -613,7 +618,7 @@ function waveCatch(w, px, py) {
       s: 1.5 + Math.random() * 2.5,
     });
   }
-  if (AC && !muted) {
+  if (AC && !settings.muted) {
     try {
       const n = AC.currentTime,
         src = AC.createBufferSource();
@@ -658,7 +663,7 @@ function hazardsUpdate(d, px, py) {
   for (const w of waves) {
     w.t += d;
     if (!w.released) {
-      setHoleFlare(Math.max(holeFlare, 0.2 + 0.4 * Math.abs(Math.sin(w.t * 12))));
+      setHoleFlare(Math.max(effects.holeFlare, 0.2 + 0.4 * Math.abs(Math.sin(w.t * 12))));
       if (w.t >= w.wait) {
         waveRelease(w);
       }
@@ -675,10 +680,10 @@ function hazardsUpdate(d, px, py) {
           w.trail.shift();
         }
       }
-      if (!w.safe && !w.hitDone && pLevel >= w.L - 0.02) {
+      if (!w.safe && !w.hitDone && run.pLevel >= w.L - 0.02) {
         waveSafe(w);
       }
-      if (!w.safe && !w.hitDone && w.wk >= pLevel - 0.04) {
+      if (!w.safe && !w.hitDone && w.wk >= run.pLevel - 0.04) {
         const r = waveCatch(w, px, py);
         if (r) {
           return r;
@@ -707,7 +712,7 @@ function hazardsUpdate(d, px, py) {
   let px0 = 0;
   for (const w of waves) {
     if (w.released && !w.broken && !w.safe && !w.hitDone) {
-      px0 = Math.max(px0, clamp(1 - (pLevel - w.wk) / 1.3, 0, 1));
+      px0 = Math.max(px0, clamp(1 - (run.pLevel - w.wk) / 1.3, 0, 1));
     }
   }
   waveProx += (px0 - waveProx) * Math.min(1, d * 10);
@@ -715,7 +720,7 @@ function hazardsUpdate(d, px, py) {
     waveBeepT -= d;
     if (waveBeepT <= 0) {
       waveBeepT = 0.42 - 0.32 * waveProx; // un pitido que se acelera mientras se acerca
-      if (AC && !muted) {
+      if (AC && !settings.muted) {
         try {
           uiTone(
             ROOT * 4 * Math.pow(2, (hot ? 3 : 0) / 12),
@@ -743,7 +748,7 @@ function hazardsUpdate(d, px, py) {
     const st = c.w * d;
     c.ang += c.sg * st;
     c.left -= st;
-    if (Math.abs(pLevel - c.k) < 0.4) {
+    if (Math.abs(run.pLevel - c.k) < 0.4) {
       const R = rr(c.k),
         x = Math.cos(c.ang) * R,
         y = Math.sin(c.ang) * R;
@@ -752,7 +757,7 @@ function hazardsUpdate(d, px, py) {
       }
     }
   }
-  setComets(comets.filter(c => c.left > 0 && c.k >= level - 1));
+  setComets(comets.filter(c => c.left > 0 && c.k >= run.level - 1));
   for (const b of beams) {
     b.t += d;
     if (b.t >= b.warn && !b.fired) {
@@ -761,14 +766,14 @@ function hazardsUpdate(d, px, py) {
       noise(0.35, 5000, 300, 0.35, 'lowpass');
       buzz(30);
     }
-    if (b.t >= b.warn && b.t < b.warn + b.fire && Math.abs(pLevel - b.k) < 0.45) {
+    if (b.t >= b.warn && b.t < b.warn + b.fire && Math.abs(run.pLevel - b.k) < 0.45) {
       return 'beam';
     }
   }
   setBeams(beams.filter(b => b.t < b.warn + b.fire + 0.3));
   if (flareWarn > 0) {
     setFlareWarn(flareWarn - d);
-    setHoleFlare(Math.max(holeFlare, ((0.8 - Math.max(0, flareWarn)) / 0.8) * 0.7));
+    setHoleFlare(Math.max(effects.holeFlare, ((0.8 - Math.max(0, flareWarn)) / 0.8) * 0.7));
     if (flareWarn <= 0) {
       setFlareT(0.75);
       noise(0.5, 7000, 500, 0.3, 'highpass');
@@ -776,15 +781,15 @@ function hazardsUpdate(d, px, py) {
   }
   setFlareT(Math.max(0, flareT - d));
   for (const s of sstars) {
-    if (level < s.from) {
+    if (run.level < s.from) {
       continue;
     }
-    const [x, y] = keplerPos(s, t);
+    const [x, y] = keplerPos(s, time.t);
     s.trail.push([x, y]);
     if (s.trail.length > 14) {
       s.trail.shift();
     }
-    if (jumping && Math.hypot(px - x, py - y) < hitR + 4.5) {
+    if (run.jumping && Math.hypot(px - x, py - y) < hitR + 4.5) {
       return 'sstar';
     }
   }
@@ -807,11 +812,11 @@ function waveShape(w, R, i, N, wob) {
   return (
     R +
     wob *
-      (0.35 * Math.sin(2 * th + p[0] + t * 0.5) +
-        0.25 * Math.sin(5 * th + p[1] - t * 0.9) +
-        0.2 * Math.sin(11 * th + p[2] + t * 1.7) +
-        0.12 * Math.sin(23 * th + p[0] * 2 - t * 2.6) +
-        0.08 * Math.sin(41 * th + p[1] * 3 + t * 3.3))
+      (0.35 * Math.sin(2 * th + p[0] + time.t * 0.5) +
+        0.25 * Math.sin(5 * th + p[1] - time.t * 0.9) +
+        0.2 * Math.sin(11 * th + p[2] + time.t * 1.7) +
+        0.12 * Math.sin(23 * th + p[0] * 2 - time.t * 2.6) +
+        0.08 * Math.sin(41 * th + p[1] * 3 + time.t * 3.3))
   );
 }
 /**
@@ -829,7 +834,7 @@ function drawWave(w) {
     const RL = rr(w.L) * S,
       fl = w.broken ? Math.max(0, 1 - w.broken * 1.4) : 1;
     if (RL > 10) {
-      const urg = w.safe ? 0 : waveProx * (0.5 + 0.5 * Math.sin(t * 22));
+      const urg = w.safe ? 0 : waveProx * (0.5 + 0.5 * Math.sin(time.t * 22));
       ctx.globalAlpha = (0.18 + 0.2 * bk + 0.45 * urg) * fl;
       ctx.strokeStyle = w.safe ? '#ffe7a8' : '#ff6fa8';
       ctx.lineWidth = (7 + 6 * urg) * S;
@@ -840,20 +845,20 @@ function drawWave(w) {
       ctx.strokeStyle = w.safe ? '#fff3d0' : '#ffc2da';
       ctx.lineWidth = 2.6 * S;
       ctx.setLineDash([10 * S, 7 * S]);
-      ctx.lineDashOffset = -t * 24;
+      ctx.lineDashOffset = -time.t * 24;
       ctx.beginPath();
       ctx.arc(CX, CY, RL, 0, Math.PI * 2);
       ctx.stroke();
       ctx.setLineDash([]);
       if (w.learn && !w.safe && !w.hitDone && state === 'play') {
         // la primera vez: una flecha dorada señala "sube"
-        const pr = rr(pLevel) * S,
-          ox = Math.cos(pAng),
-          oy = Math.sin(pAng),
+        const pr = rr(run.pLevel) * S,
+          ox = Math.cos(run.pAng),
+          oy = Math.sin(run.pAng),
           tx = -oy,
           ty = ox;
         for (let j = 0; j < 2; j++) {
-          const ph = frac(t * 1.6 + j * 0.5),
+          const ph = frac(time.t * 1.6 + j * 0.5),
             d0 = pr + (18 + ph * (RL - pr - 26)) * 1,
             hx = CX + ox * d0,
             hy = CY + oy * d0;
@@ -933,7 +938,7 @@ function drawWave(w) {
       ctx.strokeStyle = j % 2 ? '#c94bd8' : '#ff6fa8';
       ctx.lineWidth = (3.2 - j * 0.5) * S;
       ctx.setLineDash([(18 + j * 9) * S, (7 + j * 11) * S, (6 + j * 3) * S, (12 + j * 5) * S]);
-      ctx.lineDashOffset = j * 37 + t * (j % 2 ? 9 : -7);
+      ctx.lineDashOffset = j * 37 + time.t * (j % 2 ? 9 : -7);
       path((5 + j * 7) * S, wob * (1.4 + j * 0.5));
       ctx.stroke();
     } // filamentos rotos detrás del frente
@@ -953,7 +958,7 @@ function drawWave(w) {
     for (let i = 0; i < 26; i++) {
       const th = (i / 26) * Math.PI * 2 + w.ph[0] + 0.13 * Math.sin(i * 3.7),
         r2 = waveShape(w, R, (th / (Math.PI * 2)) * N, N, wob),
-        L = (5 + 22 * Math.pow(0.5 + 0.5 * Math.sin(i * 7.3 + t * 1.3), 3)) * S;
+        L = (5 + 22 * Math.pow(0.5 + 0.5 * Math.sin(i * 7.3 + time.t * 1.3), 3)) * S;
       ctx.globalAlpha = 0.12 * A;
       ctx.strokeStyle = '#ff9cc4';
       ctx.lineWidth = 1.2 * S;
@@ -964,11 +969,11 @@ function drawWave(w) {
     }
     // nudos brillantes, como las "perlas" del anillo de la 1987A
     for (const kn of w.knots) {
-      const th = kn.a + t * 0.05,
+      const th = kn.a + time.t * 0.05,
         r2 = waveShape(w, R, (th / (Math.PI * 2)) * N, N, wob),
         x = CX + Math.cos(th) * r2,
         y = CY + Math.sin(th) * r2,
-        tw = 0.55 + 0.45 * Math.sin(t * kn.f + kn.s * 20);
+        tw = 0.55 + 0.45 * Math.sin(time.t * kn.f + kn.s * 20);
       const gg = ctx.createRadialGradient(x, y, 0, x, y, 7 * S);
       if (gg && gg.addColorStop) {
         gg.addColorStop(0, 'rgba(255,255,255,1)');
@@ -1096,7 +1101,7 @@ function drawNova(ring, Rw, a, next) {
       ctx.strokeStyle = on ? (charge === 3 ? '#ffffff' : '#bfe0ff') : '#bfe0ff';
       ctx.lineWidth = (on && charge === 3 ? 3.6 : 2.8) * S;
       ctx.beginPath();
-      ctx.arc(x, y, rc + (charge === 3 ? Math.sin(t * 30) * 1.2 * S : 0), a1, a2);
+      ctx.arc(x, y, rc + (charge === 3 ? Math.sin(time.t * 30) * 1.2 * S : 0), a1, a2);
       ctx.stroke();
     }
     ctx.restore();
@@ -1130,7 +1135,7 @@ let novaBeat = -1; // último golpe en que sonó la nova; -1 si no hay nova en e
  * al empezar el compás, el estallido. Se llama cada cuadro.
  */
 function novaSound() {
-  const nr = rings.get(level + 1);
+  const nr = run.rings.get(run.level + 1);
   if (!nr || nr.type !== 'nova' || state !== 'play') {
     novaBeat = -1;
     return;
@@ -1146,10 +1151,10 @@ function novaSound() {
   }
   const inBar = ((b % 4) + 4) % 4;
   if (inBar === 0) {
-    setShake(Math.max(shake, reduceMotion ? 0 : 4));
+    setShake(Math.max(effects.shake, reduceMotion ? 0 : 4));
     buzz([20, 15, 40]);
-    setFlash(Math.max(flash, 0.12));
-    if (AC && !muted) {
+    setFlash(Math.max(effects.flash, 0.12));
+    if (AC && !settings.muted) {
       try {
         const n = AC.currentTime;
         noise(0.6, 9000, 1800, 0.22, 'highpass');
@@ -1169,7 +1174,7 @@ function novaSound() {
         o.stop(n + 0.55);
       } catch (e) {}
     }
-  } else if (AC && !muted) {
+  } else if (AC && !settings.muted) {
     try {
       uiTone(
         ROOT * 2 * Math.pow(2, [0, 7, 12][inBar - 1] / 12),
@@ -1187,7 +1192,7 @@ function drawNovaShells() {
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   ctx.lineCap = 'round';
-  for (const sh of novaShells(bt, camLevel)) {
+  for (const sh of novaShells(bt, camera.camLevel)) {
     const life = NOVA_LIFE * (sh.s.big ? 1.6 : 1),
       fade = Math.min(1, sh.age / 0.25) * Math.pow(1 - sh.age / life, 0.8),
       cx = CX + sh.cx * S,
@@ -1248,7 +1253,7 @@ function drawNovaShells() {
       if (i % 2) {
         continue;
       }
-      const tw = 0.5 + 0.5 * Math.sin(t * 3 + i * 1.7),
+      const tw = 0.5 + 0.5 * Math.sin(time.t * 3 + i * 1.7),
         kg = ctx.createRadialGradient(x, y, 0, x, y, 7 * S);
       if (kg && kg.addColorStop) {
         kg.addColorStop(0, 'rgba(240,255,245,.95)');
@@ -1264,7 +1269,7 @@ function drawNovaShells() {
   }
   // la estrella: blanca con halo verde, se hincha antes de cada estallido
   for (const s of novaSrc) {
-    const Rk = R0 + (s.k - camLevel) * GAP,
+    const Rk = R0 + (s.k - camera.camLevel) * GAP,
       x = CX + Math.cos(s.ang) * Rk * S,
       y = CY + Math.sin(s.ang) * Rk * S;
     const ph = (((bt - s.b0) % s.P) + s.P) % s.P,
@@ -1306,7 +1311,7 @@ function drawHazards() {
   }
   // órbitas y estrellas veloces
   for (const s of sstars) {
-    if (level < s.from) {
+    if (run.level < s.from) {
       continue;
     }
     ctx.globalAlpha = 0.12;
@@ -1334,7 +1339,7 @@ function drawHazards() {
       ctx.arc(CX + x * S, CY + y * S, 2.5 * S * (i / s.trail.length), 0, Math.PI * 2);
       ctx.fill();
     });
-    const [x, y] = keplerPos(s, t),
+    const [x, y] = keplerPos(s, time.t),
       sx = CX + x * S,
       sy = CY + y * S;
     const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, 10 * S);
@@ -1382,9 +1387,9 @@ function drawHazards() {
       continue;
     }
     const fade = Math.min(1, c.left / 0.6);
-    if (c.k === level && !jumping) {
+    if (c.k === run.level && !run.jumping) {
       const a0 = c.ang,
-        a1 = pAng,
+        a1 = run.pAng,
         fl = c.t < c.delay ? 0.5 + 0.5 * Math.sin(c.t * 30) : 0.55;
       ctx.globalAlpha = 0.35 * fl * fade;
       ctx.strokeStyle = '#bfe6ff';

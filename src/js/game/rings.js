@@ -3,8 +3,8 @@
  * los huecos del agujero de gusano.
  */
 import { TB } from '../audio/music-tracks.js';
-import { level, lvl, rings } from '../core/state.js';
-import { JUMP_DUR, curGoal, t, tutorial } from '../core/run-state.js';
+import { run } from '../core/state.js';
+import { JUMP_DUR, curGoal, time, tutorialState } from '../core/run-state.js';
 import { ringType, rng } from './courses.js';
 import { RING_MUL, placeInGap } from './beat.js';
 import { TUNE } from './hazards.js';
@@ -78,8 +78,13 @@ function makeRing(k) {
   }
   if (type === 'muralla') {
     // anillo casi lleno con uno o dos huecos
-    const gaps = lvl >= 6 && !tutorial ? 1 : 2,
-      hg = lvl === 5 && !tutorial ? 0.38 : !tutorial && TUNE[lvl] ? TUNE[lvl].hg : 0.46,
+    const gaps = run.lvl >= 6 && !tutorialState.tutorial ? 1 : 2,
+      hg =
+        run.lvl === 5 && !tutorialState.tutorial
+          ? 0.38
+          : !tutorialState.tutorial && TUNE[run.lvl]
+            ? TUNE[run.lvl].hg
+            : 0.46,
       stepA = 0.22;
     for (let a = 0; a < Math.PI * 2 - 1e-6; a += stepA) {
       let inGap = false;
@@ -94,7 +99,8 @@ function makeRing(k) {
         obs.push({ a: base + a, r: 9, seed: rng() * 100 });
       }
     }
-    ring.w = dir * Math.min(0.5 + k * 0.006, 0.8) * (!tutorial ? RING_MUL[lvl] : 1);
+    ring.w =
+      dir * Math.min(0.5 + k * 0.006, 0.8) * (!tutorialState.tutorial ? RING_MUL[run.lvl] : 1);
   } else if (type === 'respiracion') {
     // 16 asteroides que se encogen en cada golpe: grandes cierran el anillo y chicos dejan pasar
     // a la Tierra con margen. El giro va con la música: en cada golpe en que se encogen hay un
@@ -119,13 +125,15 @@ function makeRing(k) {
     ring.w = dir * 0.22;
   } else if (type === 'contragiro') {
     // dos arcos que giran en sentidos opuestos
-    const m = !tutorial && TUNE[lvl] ? TUNE[lvl].arc : 10,
+    const m = !tutorialState.tutorial && TUNE[run.lvl] ? TUNE[run.lvl].arc : 10,
       stepA = 0.22;
     for (let i = 0; i < m; i++) {
       obs.push({ a: base + i * stepA, r: 9, seed: rng() * 100, dir: 1 });
       obs.push({ a: base + Math.PI + i * stepA, r: 9, seed: rng() * 100, dir: -1 });
     }
-    ring.w = Math.min(0.42 + k * 0.005, 0.7) * (!tutorial && TUNE[lvl] ? TUNE[lvl].cg(k) : 1);
+    ring.w =
+      Math.min(0.42 + k * 0.005, 0.7) *
+      (!tutorialState.tutorial && TUNE[run.lvl] ? TUNE[run.lvl].cg(k) : 1);
   } else if (type === 'escalera') {
     // todos los anillos del bloque giran igual y con el hueco alineado: se pueden encadenar
     let bs = k;
@@ -149,7 +157,7 @@ function makeRing(k) {
       }
     }
     ring.w = bdir * 0.8;
-    ring.phase = ring.w * t;
+    ring.phase = ring.w * time.t;
   } else if (type === 'marea' || type === 'arrastre') {
     // marea: acelera y frena y se deforma en óvalo · arrastre: el espacio te lleva consigo
     const n = k < 20 ? 2 : 3;
@@ -166,7 +174,7 @@ function makeRing(k) {
         type === 'marea' ? 0.6 + k * 0.006 : 0.5 + k * 0.005,
         type === 'marea' ? 0.95 : 0.8,
       ) *
-      (!tutorial ? RING_MUL[lvl] : 1);
+      (!tutorialState.tutorial ? RING_MUL[run.lvl] : 1);
     ring.tid = rng() * Math.PI;
     ring.tv = 0.45 + rng() * 0.3;
     ring.ws = rng() * 6;
@@ -187,7 +195,7 @@ function makeRing(k) {
     ring.flash = 0;
   } else {
     const size = () => (k < 20 ? 9 : 9 + rng() * 1.5);
-    const n = (k < 12 ? 1 : k < 32 ? 2 : 3) + (lvl >= 5 && !tutorial ? 1 : 0);
+    const n = (k < 12 ? 1 : k < 32 ? 2 : 3) + (run.lvl >= 5 && !tutorialState.tutorial ? 1 : 0);
     const sp = Math.min(0.55 + k * 0.01, 1.05) * (0.85 + rng() * 0.3);
     for (let i = 0; i < n; i++) {
       obs.push({
@@ -196,16 +204,19 @@ function makeRing(k) {
         seed: rng() * 100,
       });
     }
-    ring.w = dir * sp * (!tutorial ? RING_MUL[lvl] : 1);
+    ring.w = dir * sp * (!tutorialState.tutorial ? RING_MUL[run.lvl] : 1);
   }
-  if (!tutorial && (type === 'clasico' || type === 'muralla' || type === 'respiracion')) {
-    const nebS = lvl === 2 ? OBJ_NEBULA : NEB_AT[lvl],
-      pulS = lvl === 2 ? OBJ_PULSAR : PUL_AT[lvl];
+  if (
+    !tutorialState.tutorial &&
+    (type === 'clasico' || type === 'muralla' || type === 'respiracion')
+  ) {
+    const nebS = run.lvl === 2 ? OBJ_NEBULA : NEB_AT[run.lvl],
+      pulS = run.lvl === 2 ? OBJ_PULSAR : PUL_AT[run.lvl];
     if (nebS && nebS.has(k)) {
       ring.obj = placeInGap(ring, { kind: 'nebula' });
     } else if (pulS && pulS.has(k)) {
       ring.obj = placeInGap(ring, { kind: 'pulsar' });
-    } else if (COIN_RINGS[lvl] && COIN_RINGS[lvl].has(k)) {
+    } else if (COIN_RINGS[run.lvl] && COIN_RINGS[run.lvl].has(k)) {
       ring.coin = placeInGap(ring, {});
     }
   }
@@ -214,14 +225,14 @@ function makeRing(k) {
 
 /** Crea los anillos que faltan cerca del planeta (hasta 6 arriba) y borra los de muy abajo. */
 function ensureRings() {
-  for (let k = Math.max(0, level - 3); k <= Math.min(level + 6, curGoal()); k++) {
-    if (!rings.has(k)) {
-      rings.set(k, makeRing(k));
+  for (let k = Math.max(0, run.level - 3); k <= Math.min(run.level + 6, curGoal()); k++) {
+    if (!run.rings.has(k)) {
+      run.rings.set(k, makeRing(k));
     }
   }
-  for (const k of [...rings.keys()]) {
-    if (k < level - 3) {
-      rings.delete(k);
+  for (const k of [...run.rings.keys()]) {
+    if (k < run.level - 3) {
+      run.rings.delete(k);
     }
   }
 }

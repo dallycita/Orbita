@@ -4,7 +4,7 @@
  */
 import { ctx } from './core/display.js';
 import { state } from './core/state.js';
-import { deadT, setT, t } from './core/run-state.js';
+import { outcome, setT, time } from './core/run-state.js';
 import { elWallet } from './game/beat.js';
 
 import { update } from './game/update.js';
@@ -62,7 +62,7 @@ function frame(now) {
     } else if (state === 'planets') {
       renderPlanetsScene(dt);
     } else if (state === 'levels') {
-      setT(t + dt);
+      setT(time.t + dt);
       drawLevelsBG();
     } else if (state === 'home' && homeT >= HOME_IN && homeT < HOME_IN + 2.5) {
       setHomeT(homeT + dt);
@@ -100,7 +100,7 @@ function frame(now) {
       state === 'levels' ||
       state === 'win' ||
       paused ||
-      (state === 'dead' && deadT > 0.6) ||
+      (state === 'dead' && outcome.deadT > 0.6) ||
       (state === 'home' && homeT >= HOME_IN + 2.5)
     ) {
       astPrebake();

@@ -7,14 +7,7 @@
 import { CX, CY, PR, R0, S, buzz, clamp, ctx, frac, reduceMotion } from '../core/display.js';
 import { AC, ROOT, SCALE, cowbell, noise, sub } from '../audio/engine.js';
 import {
-  charge,
-  jumpT,
-  jumpTarget,
-  jumping,
-  level,
-  pAng,
-  pLevel,
-  rings,
+  run,
   setCharge,
   setCrossed,
   setJumpT,
@@ -36,9 +29,8 @@ import {
 } from './planets.js';
 import {
   curGoal,
-  flash,
-  lastEaten,
-  particles,
+  effects,
+  hole,
   setFlash,
   setHoleFlare,
   setLastEaten,
@@ -50,16 +42,12 @@ import {
   setSunLevel,
   setTexts,
   setTimeScale,
-  shake,
-  slowTimer,
-  sunLevel,
-  t,
-  texts,
-  tutorial,
+  time,
+  tutorialState,
 } from '../core/run-state.js';
 import { obsAng } from './beat.js';
 
-import { muted } from '../core/settings.js';
+import { settings } from '../core/settings.js';
 
 import { uiTone } from '../audio/ui-sounds.js';
 import { rr } from '../core/geometry.js';
@@ -82,11 +70,11 @@ let ringBoostNow = 0;
  * @returns {number} Estiramiento, de 0 a 1 (0 fuera de partida o en el tutorial).
  */
 function strainNow() {
-  if (tutorial || state !== 'play') {
+  if (tutorialState.tutorial || state !== 'play') {
     return 0;
   }
   const frag = clamp(-pst().res / 50, 0, 1),
-    near = clamp((1.5 - (pLevel - sunLevel - catchMargin())) / 1.1, 0, 1);
+    near = clamp((1.5 - (run.pLevel - hole.sunLevel - catchMargin())) / 1.1, 0, 1);
   return near * (0.25 + 0.75 * frag);
 }
 function powerName() {
@@ -104,7 +92,7 @@ function powerShout(col) {
   pfx.push({ k: 'ignite', t: 0, col: col || '#ffd36b' });
   setPulse(1);
   try {
-    if (AC && !muted) {
+    if (AC && !settings.muted) {
       const n = AC.currentTime;
       [0, 5, 12].forEach((sm, i) =>
         uiTone(
@@ -132,8 +120,10 @@ function powerShout(col) {
       );
     }
   } catch (e) {}
-  setTexts(texts.filter(x => !x.tip && x.key !== 'pow' && x.y !== -R0 - 96 && x.y !== -R0 - 76));
-  texts.push({
+  setTexts(
+    effects.texts.filter(x => !x.tip && x.key !== 'pow' && x.y !== -R0 - 96 && x.y !== -R0 - 76),
+  );
+  effects.texts.push({
     txt: powerName(),
     x: 0,
     y: -R0 - 96,
@@ -153,8 +143,8 @@ function powerShout(col) {
 function usePower(mid) {
   const id = curPlanet;
   if (id === 'pluton') {
-    if (!texts.some(x => x.key === 'pow')) {
-      texts.push({
+    if (!effects.texts.some(x => x.key === 'pow')) {
+      effects.texts.push({
         txt: shieldLeft > 0 ? 'Caronte está listo: te salvará una vez' : 'Caronte ya te salvó',
         x: 0,
         y: -R0 - 30,
@@ -173,12 +163,12 @@ function usePower(mid) {
   setUsedDouble(true);
   noteDouble();
   buzz([15, 30, 25]);
-  const nr = rings.get(level + 1);
+  const nr = run.rings.get(run.level + 1);
   if (id === 'marte') {
     // Monte Olimpo: salto triple
-    const up = Math.min(3, curGoal() - level);
+    const up = Math.min(3, curGoal() - run.level);
     if (mid) {
-      const p1 = Math.min(jumpT / jumpDur(), 1),
+      const p1 = Math.min(run.jumpT / jumpDur(), 1),
         e1 = 1 - Math.pow(1 - p1, 3);
       setJumpT((1 - Math.cbrt(1 - e1 / up)) * (0.24 + (up - 2) * 0.1));
     } else {
@@ -204,7 +194,7 @@ function usePower(mid) {
     periLeft = 2;
     if (mid) {
       periLeft = 1;
-      pfx.push({ k: 'destello', t: 0, a: pAng, l0: pLevel });
+      pfx.push({ k: 'destello', t: 0, a: run.pAng, l0: run.pLevel });
       setJumpT(99);
       ghostT = 0.15;
     }
@@ -218,13 +208,15 @@ function usePower(mid) {
       const near = nr.obs
         .filter(o => !o.melt && !o.star)
         .map(o => [
-          Math.abs(Math.atan2(Math.sin(obsAng(nr, o) - pAng), Math.cos(obsAng(nr, o) - pAng))),
+          Math.abs(
+            Math.atan2(Math.sin(obsAng(nr, o) - run.pAng), Math.cos(obsAng(nr, o) - run.pAng)),
+          ),
           o,
         ])
         .sort((a, b) => a[0] - b[0])
         .slice(0, 2);
       for (const [, o] of near) {
-        o.melt = t;
+        o.melt = time.t;
       }
       nr.heatT = 1;
     }
@@ -233,10 +225,10 @@ function usePower(mid) {
     powerShout('#ffb070');
   } else if (id === 'jupiter') {
     // Empujón gravitacional: aleja al agujero negro
-    setSunLevel(Math.max(-1.6, sunLevel - 0.4));
-    setLastEaten(Math.min(lastEaten, Math.floor(sunLevel)));
+    setSunLevel(Math.max(-1.6, hole.sunLevel - 0.4));
+    setLastEaten(Math.min(hole.lastEaten, Math.floor(hole.sunLevel)));
     // El resto del empujón y el temblor del agujero negro llegan con la onda (ver powerUpdate).
-    pfx.push({ k: 'empujon', t: 0, a: pAng, l: pLevel, left: 0.8 });
+    pfx.push({ k: 'empujon', t: 0, a: run.pAng, l: run.pLevel, left: 0.8 });
     sub();
     noise(0.8, 2500, 120, 0.4, 'lowpass');
     powerShout('#f0c08a');
@@ -252,15 +244,15 @@ function usePower(mid) {
     if (nr) {
       nr.frozenT = 3;
       nr.frz0 = 3;
-      nr.frzA = pAng;
+      nr.frzA = run.pAng;
       nr.shat = 0;
     }
     {
-      const n2 = rings.get(level + 2);
+      const n2 = run.rings.get(run.level + 2);
       if (n2) {
         n2.frozenT = 3.6;
         n2.frz0 = 3.6;
-        n2.frzA = pAng;
+        n2.frzA = run.pAng;
         n2.shat = 0;
       }
     }
@@ -301,10 +293,10 @@ function usePower(mid) {
  * @param {number} y Posición vertical del choque, en píxeles de pantalla.
  */
 function vaporize(ring, o, x, y) {
-  o.melt = t;
+  o.melt = time.t;
   o.burn = 1;
-  setShake(Math.max(shake, reduceMotion ? 0 : 4));
-  setFlash(Math.max(flash, 0.12));
+  setShake(Math.max(effects.shake, reduceMotion ? 0 : 4));
+  setFlash(Math.max(effects.flash, 0.12));
   buzz([12]);
   const wx = (x - CX) / S,
     wy = (y - CY) / S;
@@ -312,7 +304,7 @@ function vaporize(ring, o, x, y) {
   for (let i = 0; i < 34; i++) {
     const a = Math.random() * Math.PI * 2,
       v = 60 + Math.random() * 190;
-    particles.push({
+    effects.particles.push({
       x: wx,
       y: wy,
       vx: Math.cos(a) * v,
@@ -336,7 +328,12 @@ function vaporize(ring, o, x, y) {
  * @returns {boolean} Verdadero si Caronte salvó al planeta.
  */
 function caronteSaves(x, y, tx, ty) {
-  if (tutorial || curPlanet !== 'pluton' || shieldLeft <= 0 || charge < chargeMax()) {
+  if (
+    tutorialState.tutorial ||
+    curPlanet !== 'pluton' ||
+    shieldLeft <= 0 ||
+    run.charge < chargeMax()
+  ) {
     return false;
   }
   const ta = tx !== undefined ? Math.atan2(ty - y, tx - x) : Math.atan2(-y, -x);
@@ -344,7 +341,7 @@ function caronteSaves(x, y, tx, ty) {
   setShieldLeft(0);
   setCharge(0);
   ghostT = 0.9;
-  setSunLevel(Math.min(pLevel - catchMargin() - 0.6, sunLevel + 0.6));
+  setSunLevel(Math.min(run.pLevel - catchMargin() - 0.6, hole.sunLevel + 0.6));
   setFlash(0.4);
   setShake(reduceMotion ? 0 : 8);
   buzz([30, 20, 60]);
@@ -356,7 +353,7 @@ function caronteSaves(x, y, tx, ty) {
     for (let i = 0; i < 46; i++) {
       const a = ta + (Math.random() - 0.5) * 2.6,
         v = 50 + Math.random() * 210;
-      particles.push({
+      effects.particles.push({
         x: cx,
         y: cy,
         vx: Math.cos(a) * v,
@@ -367,7 +364,7 @@ function caronteSaves(x, y, tx, ty) {
       });
     }
   }
-  texts.push({
+  effects.texts.push({
     txt: '¡Caronte te salvó!',
     x: 0,
     y: -R0 - 96,
@@ -379,7 +376,7 @@ function caronteSaves(x, y, tx, ty) {
   return true;
 }
 /** Ángulo de Caronte en su órbita alrededor de Plutón, en radianes. */
-const caronteAng = () => t * 2.2;
+const caronteAng = () => time.t * 2.2;
 /**
  * Saturno: con los anillos protectores, la roca que toca al planeta rebota en el disco de hielo y
  * salta en chispas.
@@ -391,7 +388,7 @@ function ringSpark(x, y) {
   for (let i = 0; i < 26; i++) {
     const a = Math.random() * Math.PI * 2,
       v = 40 + Math.random() * 150;
-    particles.push({
+    effects.particles.push({
       x,
       y,
       vx: Math.cos(a) * v,
@@ -402,7 +399,7 @@ function ringSpark(x, y) {
     });
   }
   try {
-    if (AC && !muted) {
+    if (AC && !settings.muted) {
       [19, 24].forEach((sm, i) =>
         uiTone(ROOT * 2 * Math.pow(2, sm / 12), AC.currentTime + i * 0.04, 0.4, 0.03),
       );
@@ -423,10 +420,10 @@ function powerUpdate(dt, d) {
   burnT = Math.max(0, burnT - dt);
   eclipseT = Math.max(0, eclipseT - dt);
   predT = Math.max(0, predT - dt);
-  if (eclipseT > 0 && slowTimer > 0) {
+  if (eclipseT > 0 && time.slowTimer > 0) {
     setTimeScale(0.42);
   }
-  for (const r of rings.values()) {
+  for (const r of run.rings.values()) {
     if (r.revT) {
       r.revT = Math.max(0, r.revT - dt * 1.2);
     }
@@ -437,18 +434,18 @@ function powerUpdate(dt, d) {
       r.heatT = Math.max(0, r.heatT - dt * 0.9);
     }
     for (const o of r.obs) {
-      if (o.melt && !o.gone && t - o.melt > (o.burn ? 0.16 : 0.7)) {
+      if (o.melt && !o.gone && time.t - o.melt > (o.burn ? 0.16 : 0.7)) {
         o.gone = true;
         if (o.burn) {
           continue;
         }
-        const R = rr(r.k !== undefined ? r.k : level + 1),
+        const R = rr(r.k !== undefined ? r.k : run.level + 1),
           oa = obsAng(r, o);
         // Gotas de roca fundida que caen hacia el agujero negro.
         for (let i = 0; i < 30; i++) {
           const a = Math.random() * Math.PI * 2,
             v = 15 + Math.random() * 70;
-          particles.push({
+          effects.particles.push({
             x: Math.cos(oa) * R,
             y: Math.sin(oa) * R,
             vx: Math.cos(a) * v,
@@ -484,8 +481,8 @@ function powerUpdate(dt, d) {
       }
       const q = Math.min(f.left, dt * 2.8);
       f.left -= q;
-      setSunLevel(Math.max(-1.6, sunLevel - q));
-      setLastEaten(Math.min(lastEaten, Math.floor(sunLevel)));
+      setSunLevel(Math.max(-1.6, hole.sunLevel - q));
+      setLastEaten(Math.min(hole.lastEaten, Math.floor(hole.sunLevel)));
     }
     if (f.k === 'arder' && burnT > 0) {
       f.t = Math.min(f.t, 0.5);
@@ -493,14 +490,14 @@ function powerUpdate(dt, d) {
   }
   pfx = pfx.filter(f => f.t < (f.k === 'arder' ? 1.2 : f.k === 'viento' ? 3.2 : 1.6));
   bhWob = Math.max(0, bhWob - dt * 1.1);
-  if (jumping && jumpTarget === 3 && state === 'play' && Math.random() < 0.9) {
+  if (run.jumping && run.jumpTarget === 3 && state === 'play' && Math.random() < 0.9) {
     // Marte: la tormenta de polvo que deja el salto
-    const pr = rr(pLevel),
-      x = Math.cos(pAng) * pr,
-      y = Math.sin(pAng) * pr,
-      a = pAng + Math.PI + (Math.random() - 0.5) * 1.2,
+    const pr = rr(run.pLevel),
+      x = Math.cos(run.pAng) * pr,
+      y = Math.sin(run.pAng) * pr,
+      a = run.pAng + Math.PI + (Math.random() - 0.5) * 1.2,
       v = 20 + Math.random() * 60;
-    particles.push({
+    effects.particles.push({
       x,
       y,
       vx: Math.cos(a) * v + (Math.random() - 0.5) * 40,
@@ -528,8 +525,8 @@ const smst = (a, b, x) => {
 };
 /** @returns {number[]} Posición [x, y] del planeta, en píxeles de pantalla. */
 function plPos() {
-  const pr = rr(pLevel) * S;
-  return [CX + Math.cos(pAng) * pr, CY + Math.sin(pAng) * pr];
+  const pr = rr(run.pLevel) * S;
+  return [CX + Math.cos(run.pAng) * pr, CY + Math.sin(run.pAng) * pr];
 }
 /**
  * Traza un copo de hielo: estrella de seis puntas con el trazo actual.
@@ -571,8 +568,8 @@ function heatHaze(px, py, r, col, k) {
       const th = (j / 48) * Math.PI * 2,
         rq =
           r * (1.22 + 0.16 * i) +
-          Math.sin(th * 7 + t * 13 + i * 2) * r * 0.045 +
-          Math.sin(th * 3 - t * 9) * r * 0.03;
+          Math.sin(th * 7 + time.t * 13 + i * 2) * r * 0.045 +
+          Math.sin(th * 3 - time.t * 9) * r * 0.03;
       j
         ? ctx.lineTo(px + Math.cos(th) * rq, py + Math.sin(th) * rq)
         : ctx.moveTo(px + Math.cos(th) * rq, py + Math.sin(th) * rq);
@@ -608,8 +605,8 @@ function caronteOn() {
   return (
     curPlanet === 'pluton' &&
     shieldLeft > 0 &&
-    charge >= chargeMax() &&
-    !tutorial &&
+    run.charge >= chargeMax() &&
+    !tutorialState.tutorial &&
     state === 'play'
   );
 }

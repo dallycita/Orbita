@@ -2,7 +2,7 @@
  * Lógica de las misiones diarias y los logros: avance, cobro, racha y lo que se guarda (orbita_mis).
  * Cuando una misión se completa avisa con el aviso missionReady; la pantalla de misiones lo muestra.
  */
-import { tutorial } from '../core/run-state.js';
+import { tutorialState } from '../core/run-state.js';
 import { MIS_ACH, MIS_DAILY } from '../data/missions.js';
 import { emit } from '../core/events.js';
 import { PLANETS_P } from './planets.js';
@@ -107,7 +107,7 @@ const misDef = id => MIS_DAILY.find(m => m.id === id);
  * @param {number} [v] Valor alcanzado, para misiones de mejor marca (`max`); si falta, suma uno.
  */
 function misEvent(ev, v) {
-  if (tutorial) {
+  if (tutorialState.tutorial) {
     return;
   }
   misLoad();
@@ -144,7 +144,7 @@ function misEvent(ev, v) {
  * @param {number} tries Intentos usados en ese nivel.
  */
 function misWin(lv, planet, tries) {
-  if (tutorial) {
+  if (tutorialState.tutorial) {
     return;
   }
   misLoad();
@@ -260,7 +260,7 @@ function misStarsBest() {
  * Cuenta un salto doble hecho (fuera del tutorial) y avanza la misión de poderes.
  */
 function noteDouble() {
-  if (tutorial) {
+  if (tutorialState.tutorial) {
     return;
   }
   misEvent('power');

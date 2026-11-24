@@ -7,9 +7,9 @@ import { BONE, H, W, ctx, cvs, rgba, stars } from '../core/display.js';
 import { AC } from '../audio/engine.js';
 import { setState, state } from '../core/state.js';
 import { PLANETS_P, curPlanet, planetOk, setCurPlanet } from '../game/planets.js';
-import { setT, t } from '../core/run-state.js';
+import { setT, time } from '../core/run-state.js';
 
-import { muted } from '../core/settings.js';
+import { settings } from '../core/settings.js';
 import {
   STAT_ROWS,
   applyScanBars,
@@ -49,7 +49,7 @@ const pGeom = () => ({ R0: Math.min(W * 0.2, H * 0.15), cx0: W / 2, cy0: H * 0.3
  * @param {number} dt Tiempo desde el cuadro anterior, en segundos.
  */
 function renderPlanetsScene(dt) {
-  setT(t + dt);
+  setT(time.t + dt);
   pSwap = Math.max(0, pSwap - dt * 3.2);
   const target = scanOn ? 1 : 0;
   setScanK(scanK + (target - scanK) * Math.min(1, dt * 4.2));
@@ -77,10 +77,10 @@ function renderPlanetsScene(dt) {
   ctx.fillRect(0, 0, W, H);
   const sr = Math.max(W, H) * 0.62;
   for (const s of stars) {
-    const a = s.a + t * 0.01,
+    const a = s.a + time.t * 0.01,
       x = W / 2 + Math.cos(a) * s.r * sr,
       y = H * 0.4 + Math.sin(a) * s.r * sr;
-    ctx.globalAlpha = 0.15 + 0.35 * (0.5 + 0.5 * Math.sin(t * 1.3 + s.tw));
+    ctx.globalAlpha = 0.15 + 0.35 * (0.5 + 0.5 * Math.sin(time.t * 1.3 + s.tw));
     ctx.fillStyle = BONE;
     ctx.fillRect(x, y, s.s * 0.8, s.s * 0.8);
   }
@@ -96,7 +96,7 @@ function renderPlanetsScene(dt) {
     (1 - pSwap * 0.15) *
     (1 - 0.55 * scanK);
   const cx = W / 2 + pDir * pSwap * W * 0.25,
-    cy = H * 0.38 * (1 - scanK) + H * 0.165 * scanK + Math.sin(t * 0.8) * 4 * (1 - scanK);
+    cy = H * 0.38 * (1 - scanK) + H * 0.165 * scanK + Math.sin(time.t * 0.8) * 4 * (1 - scanK);
   drawBigPlanet(P.id, cx, cy, R, pRot, locked && hide, 'left');
   // la línea del escáner recorre el planeta
   if (scanOn && scanLineT > 0 && scanLineT < 1) {
@@ -138,7 +138,7 @@ function drawPlanetOrbit(dt, P) {
   const G = pGeom(),
     R0 = G.R0 * (1 - 0.3 * pSK),
     cx0 = G.cx0,
-    cy0 = G.cy0 - G.R0 * 0.12 * pSK + Math.sin(t * 0.8) * 3 * (1 - pSK);
+    cy0 = G.cy0 - G.R0 * 0.12 * pSK + Math.sin(time.t * 0.8) * 3 * (1 - pSK);
   const RA = Math.max(W, H) * 1.25,
     yTop = H * 0.45,
     acx = W / 2,
@@ -218,7 +218,7 @@ function drawPlanetOrbit(dt, P) {
     if (Q.id === curPlanet && fade > 0.05) {
       // marca dorada bajo el planeta que estás usando
       const my = it.y + rr0 * (Q.id === 'saturno' ? 0.95 : 1.22) + 6,
-        a0 = fade * (0.75 + 0.25 * Math.sin(t * 3));
+        a0 = fade * (0.75 + 0.25 * Math.sin(time.t * 3));
       ctx.save();
       ctx.globalAlpha = a0 * 0.35;
       ctx.fillStyle = '#ffd36b';
@@ -261,12 +261,12 @@ function drawPlanetOrbit(dt, P) {
     ctx.strokeStyle = '#8fd0ff';
     ctx.lineWidth = 1.2;
     ctx.setLineDash([2, 7]);
-    ctx.lineDashOffset = -t * 12;
+    ctx.lineDashOffset = -time.t * 12;
     ctx.beginPath();
     ctx.arc(0, 0, Rr, 0, Math.PI * 2);
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.rotate(t * 0.35);
+    ctx.rotate(time.t * 0.35);
     ctx.globalAlpha = 0.9 * k;
     ctx.strokeStyle = '#ffa155';
     ctx.lineWidth = 2.2;
@@ -277,7 +277,7 @@ function drawPlanetOrbit(dt, P) {
     ctx.beginPath();
     ctx.arc(0, 0, Rr, Math.PI - 0.5, Math.PI + 0.1);
     ctx.stroke();
-    ctx.rotate(-t * 0.35);
+    ctx.rotate(-time.t * 0.35);
     ctx.globalAlpha = 0.7 * k;
     ctx.strokeStyle = '#ece6d8';
     ctx.lineWidth = 1.4;
@@ -527,7 +527,7 @@ function renderPlanets() {
       try {
         localStorage.setItem('orbita_p1_planeta', curPlanet);
       } catch (e) {}
-      if (AC && !muted) {
+      if (AC && !settings.muted) {
         try {
           const n = AC.currentTime;
           uiTone(880, n, 0.14, 0.05);
@@ -550,7 +550,7 @@ function renderPlanets() {
     ps.addEventListener('click', () => {
       pScan = !pScan;
       pScanT = 0;
-      if (pScan && AC && !muted) {
+      if (pScan && AC && !settings.muted) {
         try {
           const n = AC.currentTime,
             o = AC.createOscillator(),

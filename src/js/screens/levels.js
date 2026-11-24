@@ -6,9 +6,17 @@
 import { elHud, elPanel } from '../core/display.js';
 import { AC, applyMute, initAudio } from '../audio/engine.js';
 import { stopMusic } from '../audio/music-player.js';
-import { bestOf, setAppear, setBest, setBestRing, setLvl, setState } from '../core/state.js';
+import {
+  bestOf,
+  setAppear,
+  setAttempts,
+  setBest,
+  setBestRing,
+  setLvl,
+  setState,
+} from '../core/state.js';
 import { setAllPlanets, setCurPlanet, setMaxPerf, setPlutoOk } from '../game/planets.js';
-import { setAttempts, setHintsShown, setTutorial, setTutorialDone } from '../core/run-state.js';
+import { setHintsShown, setTutorial, setTutorialDone } from '../core/run-state.js';
 import { setSeenTypes } from '../game/courses.js';
 import { setWallet, updateWallet } from '../game/beat.js';
 import { setSesTries, setup } from '../game/run.js';

@@ -24,11 +24,8 @@ import {
 import { AC, ROOT, master, noise, noiseHit, thump } from '../audio/engine.js';
 import { TB, dKick, echoBus, impact } from '../audio/music-tracks.js';
 import {
-  camLevel,
-  level,
-  pAng,
-  pLevel,
-  score,
+  camera,
+  run,
   setAppear,
   setCamLevel,
   setJumpTarget,
@@ -42,7 +39,8 @@ import {
 } from '../core/state.js';
 import { sizeK } from './planets.js';
 import {
-  particles,
+  effects,
+  hole,
   setBurns,
   setFlash,
   setLastEaten,
@@ -52,17 +50,15 @@ import {
   setSunLevel,
   setTexts,
   setTrail,
-  sunLevel,
-  t,
-  texts,
-  tutorial,
+  time,
+  tutorialState,
 } from '../core/run-state.js';
 import { seenTypes } from './courses.js';
 import { beatKick, beatTime } from './beat.js';
 import { WH_K, WORM_COL, bend, bendW, lensP, setBend, setWhRip } from './gravitational-lens.js';
 import { hazardTip } from './hazards.js';
 
-import { muted } from '../core/settings.js';
+import { settings } from '../core/settings.js';
 import { misEvent } from './missions.js';
 import { advanceJourney } from '../core/journey.js';
 import { GOAL } from '../data/levels.js';
@@ -74,7 +70,7 @@ import { ensureRings } from './rings.js';
  *
  * @returns {number} Golpes de música.
  */
-const whGap = () => (level + 1 < 34 ? 4 : 3);
+const whGap = () => (run.level + 1 < 34 ? 4 : 3);
 // ORB_W: velocidad de giro sobre el anillo, en radianes por segundo; WH_IN y WH_OUT: duración
 // del portal de entrada y de salida, en segundos.
 const ORB_W = 1.75;
@@ -88,7 +84,7 @@ let whShock = null;
  * @param {number} dur Duración, en segundos.
  */
 function whPull(dur) {
-  if (!AC || muted) {
+  if (!AC || settings.muted) {
     return;
   }
   try {
@@ -122,7 +118,7 @@ function whPull(dur) {
 }
 /** Sonido de salida: un golpe con eco. */
 function whBoom() {
-  if (!AC || muted) {
+  if (!AC || settings.muted) {
     return;
   }
   try {
@@ -153,20 +149,20 @@ const WH_G = 46; // cuánto crece la boca al entrar (hasta cubrir toda la pantal
  */
 function whEnter() {
   const [wx, wy] = bendW(),
-    pr = rr(pLevel);
+    pr = rr(run.pLevel);
   wh = {
     ph: 'in',
     t: 0,
     dir: 1,
-    ex: Math.cos(pAng) * pr,
-    ey: Math.sin(pAng) * pr,
+    ex: Math.cos(run.pAng) * pr,
+    ey: Math.sin(run.pAng) * pr,
     wx,
     wy,
     nextB: 0,
   };
   setJumping(false);
   setPending(false);
-  setTexts(texts.filter(x => !x.tip));
+  setTexts(effects.texts.filter(x => !x.tip));
   bend.fixed = true;
   bend.str = 1;
   bend.grow = 1;
@@ -183,10 +179,10 @@ function whInDone() {
   setPAng(-Math.PI / 2);
   setJumpTarget(1);
   setTrail([]); // del otro lado el planeta aparece sobre el anillo WH_K, sin estela
-  setScore(score + 1);
-  if (!tutorial) {
+  setScore(run.score + 1);
+  if (!tutorialState.tutorial) {
     misEvent('ring');
-    misEvent('reach', level);
+    misEvent('reach', run.level);
   }
   updateRingHUD();
   ensureRings();
@@ -211,7 +207,7 @@ function whStartOut() {
   wh.ph = 'out';
   wh.t = 0;
   // la otra boca queda justo detrás de ti y te escupe hacia afuera
-  setBend({ str: 1, a: pAng, L: level - 0.55, on: true, grow: WH_G, fixed: true });
+  setBend({ str: 1, a: run.pAng, L: run.level - 0.55, on: true, grow: WH_G, fixed: true });
   setShake(reduceMotion ? 0 : 6);
   buzz([30, 40, 60]);
   whBoom();
@@ -226,8 +222,8 @@ function whOutDone() {
   setBend({ str: 0, a: -Math.PI / 2, L: 0, on: false, grow: 1, fixed: false });
   setWhRip({ t: 0, x: wx, y: wy });
   whShock = { t: 0, cx: CX + wx * S, cy: CY + wy * S };
-  setSunLevel(Math.min(sunLevel, level - 2.2));
-  setLastEaten(Math.floor(sunLevel));
+  setSunLevel(Math.min(hole.sunLevel, run.level - 2.2));
+  setLastEaten(Math.floor(hole.sunLevel));
   setBurns([]);
   setPulse(1);
   setShake(reduceMotion ? 0 : 7);
@@ -236,7 +232,7 @@ function whOutDone() {
   for (let i = 0; i < 40; i++) {
     const a = Math.random() * Math.PI * 2,
       v = 50 + Math.random() * 200;
-    particles.push({
+    effects.particles.push({
       x: wx,
       y: wy,
       vx: Math.cos(a) * v,
@@ -246,7 +242,7 @@ function whOutDone() {
       s: 1.5 + Math.random() * 2,
     });
   }
-  texts.push({
+  effects.texts.push({
     txt: '¡Saliste del gusano!',
     x: 0,
     y: -R0 - 72,
@@ -260,7 +256,7 @@ function whOutDone() {
     try {
       localStorage.setItem('orbita_p1_vistos', JSON.stringify(seenTypes));
     } catch (e) {}
-    texts.push({
+    effects.texts.push({
       txt: 'Dato real: la relatividad los permite,',
       x: 0,
       y: -R0 - 140,
@@ -269,7 +265,7 @@ function whOutDone() {
       col: BONE,
       center: true,
     });
-    texts.push({
+    effects.texts.push({
       txt: 'pero nadie ha visto uno todavía',
       x: 0,
       y: -R0 - 126,
@@ -298,8 +294,8 @@ function whTap() {
  */
 function whTrans(dt) {
   wh.t += dt;
-  advanceJourney(dt, 1.5 + 3 * clamp(wh.t / WH_IN, 0, 1), Math.min(1, level / GOAL));
-  setCamLevel(camLevel + (level - camLevel) * Math.min(1, dt * 6));
+  advanceJourney(dt, 1.5 + 3 * clamp(wh.t / WH_IN, 0, 1), Math.min(1, run.level / GOAL));
+  setCamLevel(camera.camLevel + (run.level - camera.camLevel) * Math.min(1, dt * 6));
   if (wh.ph === 'in') {
     const p = clamp(wh.t / WH_IN, 0, 1),
       q = clamp(p / 0.5, 0, 1),
@@ -310,10 +306,10 @@ function whTrans(dt) {
       // la Tierra cae hacia su centro (y la lente la estira en arco)
       y = wh.ey + (wh.wy - wh.ey) * qe;
     setPAng(Math.atan2(y, x));
-    setPLevel((Math.hypot(x, y) - R0) / GAP + camLevel);
+    setPLevel((Math.hypot(x, y) - R0) / GAP + camera.camLevel);
     if (Math.random() < 0.6) {
       const [lx, ly] = lensP(x, y);
-      particles.push({
+      effects.particles.push({
         x: lx,
         y: ly,
         vx: (wh.wx - lx) * 2,
@@ -387,7 +383,7 @@ function drawInside(al) {
   const bt = beatTime(),
     bk = beatKick(),
     D = Math.hypot(W, H) * 0.5,
-    r0 = D * (0.8 + 0.015 * Math.sin(t * 1.3)) + bk * 4;
+    r0 = D * (0.8 + 0.015 * Math.sin(time.t * 1.3)) + bk * 4;
   ctx.save();
   ctx.globalAlpha = al * 0.1;
   ctx.fillStyle = '#5a46d6';
@@ -397,7 +393,7 @@ function drawInside(al) {
   ctx.lineCap = 'round';
   for (let i = 0; i < 44; i++) {
     const a = i * 2.399 + 0.4,
-      u = frac(t * 0.55 + frac(Math.sin(i * 12.9898) * 43758.5453) + bk * 0.02),
+      u = frac(time.t * 0.55 + frac(Math.sin(i * 12.9898) * 43758.5453) + bk * 0.02),
       r = (((R0 * 0.8 + u * (D - R0 * 0.8)) * S) / 1.6) * 1.6;
     ctx.globalAlpha = al * Math.sin(Math.PI * u) * 0.22;
     ctx.strokeStyle = i % 3 ? WORM_COL : '#ffffff';
@@ -409,7 +405,7 @@ function drawInside(al) {
   }
   // luz de afuera que da vueltas en el borde de la garganta (la misma imagen, repetida)
   for (let i = 0; i < 18; i++) {
-    const a = (i / 18) * Math.PI * 2 + t * 0.35 * (i % 2 ? 1 : -1);
+    const a = (i / 18) * Math.PI * 2 + time.t * 0.35 * (i % 2 ? 1 : -1);
     ctx.globalAlpha = al * 0.16;
     ctx.strokeStyle = i % 2 ? '#9fd8ff' : '#ffb3e6';
     ctx.lineWidth = 2.5;
@@ -433,7 +429,7 @@ function drawInside(al) {
     return;
   }
   // hacia dónde giras: tres flechitas delante de la Tierra, sobre tu anillo
-  const R = rr(pLevel) * S,
+  const R = rr(run.pLevel) * S,
     fl = wh.flipT || 0;
   ctx.save();
   ctx.lineCap = 'round';
@@ -441,7 +437,7 @@ function drawInside(al) {
   ctx.strokeStyle = WORM_COL;
   ctx.lineWidth = 2.2;
   for (let i = 0; i < 3; i++) {
-    const a = pAng + wh.dir * (0.2 + i * 0.1),
+    const a = run.pAng + wh.dir * (0.2 + i * 0.1),
       x = CX + Math.cos(a) * R,
       y = CY + Math.sin(a) * R,
       tx = -Math.sin(a) * wh.dir,
@@ -460,8 +456,8 @@ function drawInside(al) {
   // música
   const gB = wh.gapB || 2,
     ph = clamp((bt / TB - (wh.nextB - gB)) / gB, 0, 1),
-    ex = CX + Math.cos(pAng) * R,
-    ey = CY + Math.sin(pAng) * R,
+    ex = CX + Math.cos(run.pAng) * R,
+    ey = CY + Math.sin(run.pAng) * R,
     rr3 = PR * S * 1.15 * sizeK() + 6;
   ctx.globalAlpha = 0.9;
   ctx.strokeStyle = WORM_COL;
