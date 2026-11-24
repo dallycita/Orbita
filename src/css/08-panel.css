@@ -192,7 +192,7 @@
   stroke-linejoin: round;
 }
 #panel .wstars .on svg {
-  fill: #ffd36b;
+  fill: var(--gold);
   stroke: #ffe7a8;
   filter: drop-shadow(0 0 6px rgba(255, 211, 107, 0.7));
 }
@@ -263,7 +263,7 @@
   border-radius: 50%;
   border: 0;
   background: var(--sun);
-  color: #fff;
+  color: var(--white);
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -317,7 +317,7 @@
 }
 #panel .mlv::before {
   content: '▸ ';
-  color: #ffa155;
+  color: var(--amber);
   letter-spacing: 0;
 }
 #panel .mgo {

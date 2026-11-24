@@ -45,7 +45,7 @@ body.paused #wallet {
   border-radius: 50%;
   background: #000;
   box-shadow:
-    0 0 0 1.5px #ff5a1f,
+    0 0 0 1.5px var(--sun),
     0 0 10px rgba(255, 90, 31, 0.7);
 }
 .pz-trip .exit {
@@ -82,7 +82,12 @@ body.paused #wallet {
   height: 10px;
   margin: -5px 0 0 -5px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #8fc4ff, #2f6fd8 60%, #123a7a);
+  background: radial-gradient(
+    circle at 35% 35%,
+    var(--blue-light),
+    var(--blue) 60%,
+    var(--blue-deep)
+  );
   box-shadow: 0 0 8px rgba(143, 208, 255, 0.9);
 }
 .pz-trip .rec {
@@ -93,7 +98,7 @@ body.paused #wallet {
   height: 14px;
   margin-left: -1px;
   border-radius: 1px;
-  background: #ffd36b;
+  background: var(--gold);
   box-shadow: 0 0 7px rgba(255, 211, 107, 0.85);
 }
 .pz-trip .rec::after {
@@ -107,7 +112,7 @@ body.paused #wallet {
     ui-monospace,
     monospace;
   letter-spacing: 0.2em;
-  color: #ffd36b;
+  color: var(--gold);
 }
 .pz-sl {
   display: flex;
@@ -169,7 +174,7 @@ body.paused #wallet {
     monospace;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #ece6d8;
+  color: var(--fg);
 }
 .pz-vol .line {
   position: relative;
@@ -205,7 +210,12 @@ body.paused #wallet {
   height: 18px;
   margin: -9px 0 0 -9px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #8fc4ff, #2f6fd8 60%, #123a7a);
+  background: radial-gradient(
+    circle at 35% 35%,
+    var(--blue-light),
+    var(--blue) 60%,
+    var(--blue-deep)
+  );
   box-shadow:
     0 0 0 4px rgba(143, 208, 255, 0.22),
     0 0 16px rgba(143, 208, 255, 1);
@@ -238,7 +248,7 @@ body.paused #wallet {
     400 11px 'Space Mono',
     ui-monospace,
     monospace;
-  color: #fff;
+  color: var(--white);
 }
 /* al seguir: cuenta 3 · 2 · 1 sobre la partida, al ritmo */
 #pzcount {
@@ -259,7 +269,7 @@ body.paused #wallet {
     600 clamp(64px, 22vw, 110px)/1 'Unbounded',
     system-ui,
     sans-serif;
-  color: #ece6d8;
+  color: var(--fg);
   text-shadow:
     0 0 34px rgba(255, 161, 85, 0.55),
     0 0 2px rgba(255, 255, 255, 0.6);

@@ -90,7 +90,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #ffd36b;
+  color: var(--gold);
   font:
     500 14px 'Unbounded',
     system-ui,
@@ -110,14 +110,14 @@
 #missions .mwal .st {
   width: 13px;
   height: 13px;
-  fill: #ffd36b;
+  fill: var(--gold);
   filter: drop-shadow(0 0 4px rgba(255, 211, 107, 0.6));
 }
 #missions .mwal .c {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #9ff0e4;
+  color: var(--teal);
   font:
     500 12.5px 'Unbounded',
     system-ui,
@@ -162,7 +162,7 @@
   color: rgba(236, 230, 216, 0.4);
 }
 #missions .mtabs button.on {
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .mtabs button.on::after {
   content: '';
@@ -172,8 +172,8 @@
   bottom: -1px;
   height: 2px;
   border-radius: 2px;
-  background: #ff8a3d;
-  box-shadow: 0 0 10px #ff8a3d;
+  background: var(--orange);
+  box-shadow: 0 0 10px var(--orange);
 }
 #missions .mtabs i {
   display: inline-block;
@@ -181,7 +181,7 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #ff8a3d;
+  background: var(--orange);
   vertical-align: 2px;
 }
 #missions .mr {
@@ -200,7 +200,7 @@
     500 15px/1.3 'Unbounded',
     system-ui,
     sans-serif;
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .mr p {
   margin-top: 6px;
@@ -215,12 +215,12 @@
     500 14px 'Unbounded',
     system-ui,
     sans-serif;
-  color: #9ff0e4;
+  color: var(--teal);
   letter-spacing: 0.02em;
   flex: none;
 }
 #missions .rw.ok {
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .rw.dim {
   color: rgba(236, 230, 216, 0.35);
@@ -236,8 +236,8 @@
   display: block;
   height: 100%;
   border-radius: 2px;
-  background: #ff8a3d;
-  box-shadow: 0 0 6px #ff8a3d;
+  background: var(--orange);
+  box-shadow: 0 0 6px var(--orange);
 }
 #missions .mr.got {
   opacity: 0.35;
@@ -249,7 +249,7 @@
   gap: 8px;
   padding: 11px 16px;
   border-radius: 999px;
-  border: 1.5px solid #ff8a3d;
+  border: 1.5px solid var(--orange);
   cursor: pointer;
   background:
     radial-gradient(
@@ -258,7 +258,7 @@
       rgba(255, 120, 40, 0.05) 55%,
       rgba(9, 11, 22, 0.95) 80%
     ),
-    #0a0c17;
+    var(--night);
   box-shadow: 0 0 18px rgba(255, 120, 40, 0.28);
   color: #fff4ea;
   font:
@@ -270,7 +270,7 @@
 }
 #missions .claim em {
   font-style: normal;
-  color: #9ff0e4;
+  color: var(--teal);
   letter-spacing: 0.02em;
 }
 #missions .mstreak .l {
@@ -284,7 +284,7 @@
 }
 #missions .mstreak .l b {
   font-weight: 400;
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .dots {
   display: flex;
@@ -298,8 +298,8 @@
   background: rgba(236, 230, 216, 0.16);
 }
 #missions .dots b.on {
-  background: #ff8a3d;
-  box-shadow: 0 0 8px #ff8a3d;
+  background: var(--orange);
+  box-shadow: 0 0 8px var(--orange);
 }
 #missions .dots span {
   margin-left: 6px;
@@ -307,7 +307,7 @@
     500 11px 'Unbounded',
     system-ui,
     sans-serif;
-  color: #9ff0e4;
+  color: var(--teal);
 }
 #missions .mplanet {
   display: block;
@@ -369,7 +369,7 @@
     monospace;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #9ff0e4;
+  color: var(--teal);
 }
 #missions .mfact.out {
   opacity: 0;
@@ -436,7 +436,7 @@
   overflow: visible;
 }
 #misping .lit {
-  filter: drop-shadow(0 0 5px #ff8a3d);
+  filter: drop-shadow(0 0 5px var(--orange));
 }
 #misping.go {
   animation: misPing 1.9s ease-out both;
@@ -457,7 +457,7 @@
 }
 #missions .mhead em {
   font-style: normal;
-  color: #8fd0ff;
+  color: var(--sky);
 }
 #missions .mcards {
   display: flex;
@@ -483,7 +483,7 @@
     500 13px/1.35 'Unbounded',
     system-ui,
     sans-serif;
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .mc p {
   margin-top: 4px;
@@ -529,8 +529,8 @@
   display: block;
   height: 100%;
   border-radius: 4px;
-  background: linear-gradient(90deg, #ff5a1f, #ffa155);
-  box-shadow: 0 0 8px #ff8a3d;
+  background: linear-gradient(90deg, var(--sun), var(--amber));
+  box-shadow: 0 0 8px var(--orange);
 }
 #missions .mc .mbar small {
   font:
@@ -549,7 +549,7 @@
     500 13px 'Unbounded',
     system-ui,
     sans-serif;
-  color: #9ff0e4;
+  color: var(--teal);
 }
 #missions .mc .rw span {
   display: flex;
@@ -576,7 +576,7 @@
   opacity: 0.42;
 }
 #missions .mc.got .rw {
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .mc .claim {
   padding: 10px 14px;
@@ -620,7 +620,7 @@
 }
 #missions .mstreak b {
   font-weight: 400;
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .mstreak .days {
   display: flex;
@@ -632,8 +632,8 @@
   background: rgba(236, 230, 216, 0.12);
 }
 #missions .mstreak .days b.on {
-  background: #ff8a3d;
-  box-shadow: 0 0 6px #ff8a3d;
+  background: var(--orange);
+  box-shadow: 0 0 6px var(--orange);
 }
 #missions .mc.flash {
   animation: misFlash 0.9s ease-out;
@@ -696,7 +696,7 @@
     600 26px/1 'Unbounded',
     system-ui,
     sans-serif;
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .mhero .ha .cr {
   width: 17px;
@@ -720,7 +720,7 @@
     500 14px/1.3 'Unbounded',
     system-ui,
     sans-serif;
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .mhero .mbar {
   margin-top: 9px;
@@ -739,8 +739,8 @@
   display: block;
   height: 100%;
   border-radius: 4px;
-  background: linear-gradient(90deg, #ff5a1f, #ffa155);
-  box-shadow: 0 0 8px #ff8a3d;
+  background: linear-gradient(90deg, var(--sun), var(--amber));
+  box-shadow: 0 0 8px var(--orange);
 }
 #missions .mhero .mbar small {
   font:
@@ -760,7 +760,7 @@
   background: rgba(236, 230, 216, 0.14);
 }
 #missions .mhero .hseg b.on {
-  background: #9ff0e4;
+  background: var(--teal);
   box-shadow: 0 0 8px rgba(63, 199, 184, 0.8);
 }
 #missions .mhero .rw {
@@ -772,7 +772,7 @@
     500 13px 'Unbounded',
     system-ui,
     sans-serif;
-  color: #9ff0e4;
+  color: var(--teal);
 }
 #missions .mhero .rw span {
   display: flex;
@@ -804,7 +804,7 @@
   stroke-width: 1.6;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke: color-mix(in srgb, var(--mc) 70%, #fff);
+  stroke: color-mix(in srgb, var(--mc) 70%, var(--white));
 }
 #missions .mstreak {
   margin-top: 22px;
@@ -829,7 +829,7 @@
     system-ui,
     sans-serif;
   letter-spacing: 0.02em;
-  color: #9ff0e4;
+  color: var(--teal);
   text-transform: none;
 }
 @media (max-width: 370px) {
@@ -947,7 +947,7 @@
     600 24px/1.2 'Unbounded',
     system-ui,
     sans-serif;
-  color: #ece6d8;
+  color: var(--fg);
   max-width: 300px;
 }
 #missions .mdd {
@@ -980,8 +980,8 @@
 #missions .mdprog u {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, #ff5a1f, #ffa155);
-  box-shadow: 0 0 8px #ff8a3d;
+  background: linear-gradient(90deg, var(--sun), var(--amber));
+  box-shadow: 0 0 8px var(--orange);
 }
 #missions .mdprog b {
   display: flex;
@@ -992,7 +992,7 @@
     system-ui,
     sans-serif;
   letter-spacing: 0.02em;
-  color: #9ff0e4;
+  color: var(--teal);
 }
 #missions .claim.big {
   margin-top: 22px;
@@ -1011,7 +1011,7 @@
     monospace;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #9ff0e4;
+  color: var(--teal);
 }
 #missions .mdf {
   margin-top: 24px;

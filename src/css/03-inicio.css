@@ -58,7 +58,7 @@
   transform: translateX(-50%);
   font-size: 11px;
   letter-spacing: 0.08em;
-  color: #8fd0ff;
+  color: var(--sky);
   white-space: nowrap;
 }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
@@ -116,7 +116,7 @@
   border-radius: 50%;
   border: 0;
   background: var(--sun);
-  color: #fff;
+  color: var(--white);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -230,11 +230,11 @@
   overflow: visible;
 }
 #home .plan.mis .plabel {
-  color: #8fd0ff;
+  color: var(--sky);
 }
 #home .plan.mis .lit {
   animation: misLit 2.4s ease-in-out infinite;
-  filter: drop-shadow(0 0 2px #ff8a3d);
+  filter: drop-shadow(0 0 2px var(--orange));
 }
 #home .plan.mis.new::after {
   top: 4px;
@@ -286,6 +286,6 @@
 }
 @keyframes misLit {
   50% {
-    filter: drop-shadow(0 0 4px #ff8a3d) drop-shadow(0 0 8px #ff8a3d);
+    filter: drop-shadow(0 0 4px var(--orange)) drop-shadow(0 0 8px var(--orange));
   }
 }

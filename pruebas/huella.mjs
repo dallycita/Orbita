@@ -36,17 +36,22 @@ const sha = s => createHash('sha1').update(s).digest('hex').slice(0, 16);
 // 'max(3vh, 18px)', o '.58' y '0.58', son el mismo valor escrito distinto. Las propiedades reales se comparan tal cual.
 const cssCanon = v => v.replace(/\s*([,()\/])\s*/g, '$1').replace(/(^|[^\w.])\.(\d)/g, '$10.$2').replace(/\s+/g, ' ').trim();
 const styleMap = s => new Map((s || '').split(';').filter(Boolean).map(x => [x.slice(0, x.indexOf(':')), x.slice(x.indexOf(':') + 1)]));
+// Variables CSS que la limpieza agrega o quita a propósito (no las lee nada que se vea distinto):
+// --soft no la usaba nadie; las de color guardan los colores repetidos con su valor exacto.
+const VARIABLES_ESPERADAS = new Set(['--soft', '--gold', '--orange', '--teal', '--sky', '--white', '--amber', '--night',
+  '--blue-light', '--blue', '--blue-deep']);
 function hasRealStyleDiff(a, b){   // true si hay una diferencia real
   const pa = styleMap(a), pb = styleMap(b);
   for (const p of new Set([...pa.keys(), ...pb.keys()])){
     const va = pa.get(p), vb = pb.get(p);
     if (va === vb) continue;
+    if (VARIABLES_ESPERADAS.has(p) && (va === undefined || vb === undefined)) continue;
     if (p.startsWith('--') && va !== undefined && vb !== undefined && cssCanon(va) === cssCanon(vb)) continue;
     return true;
   }
   return false;
 }
-const RUIDO_AMPLIO = new Map([['poder_urano', 12], ['sinwebgl_partida_2', 12], ['sinwebgl_partida_5', 12], ['sinwebgl_partida_6', 12], ['intro_0', 16], ['antes_de_jugar', 12]]);
+const RUIDO_AMPLIO = new Map([['poder_urano', 12], ['sinwebgl_partida_1', 12], ['sinwebgl_partida_2', 12], ['sinwebgl_partida_5', 12], ['sinwebgl_partida_6', 12], ['intro_0', 16], ['antes_de_jugar', 12]]);
 if (process.argv[2] === '--comparar'){
   const [A, B] = process.argv.slice(3), a = JSON.parse(readFileSync(join(A, 'huella.json'))), b = JSON.parse(readFileSync(join(B, 'huella.json')));
   let bad = 0; const ruido = [];

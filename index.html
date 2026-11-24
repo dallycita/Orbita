@@ -14,6 +14,16 @@
   --fg: #ece6d8;
   --muted: #8b8f9e;
   --sun: #ff5a1f;
+  --gold: #ffd36b;
+  --orange: #ff8a3d;
+  --teal: #9ff0e4;
+  --sky: #8fd0ff;
+  --white: #fff;
+  --amber: #ffa155;
+  --night: #0a0c17;
+  --blue-light: #8fc4ff;
+  --blue: #2f6fd8;
+  --blue-deep: #123a7a;
   box-sizing: border-box;
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -80,7 +90,7 @@ canvas {
   transition: stroke 0.25s;
 }
 .arrow .arc .hot {
-  stroke: #ffa155;
+  stroke: var(--amber);
   stroke-width: 1.9;
   transform-origin: 26px 26px;
   filter: drop-shadow(0 0 3px rgba(255, 150, 70, 0.75));
@@ -115,7 +125,7 @@ canvas {
   transition: stroke 0.25s;
 }
 .back .arc .hot {
-  stroke: #ffa155;
+  stroke: var(--amber);
   stroke-width: 1.9;
   transform-origin: 26px 26px;
   filter: drop-shadow(0 0 3px rgba(255, 150, 70, 0.75));
@@ -210,7 +220,7 @@ canvas {
   transform: translateX(-50%);
   font-size: 11px;
   letter-spacing: 0.08em;
-  color: #8fd0ff;
+  color: var(--sky);
   white-space: nowrap;
 }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
@@ -268,7 +278,7 @@ canvas {
   border-radius: 50%;
   border: 0;
   background: var(--sun);
-  color: #fff;
+  color: var(--white);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -382,11 +392,11 @@ canvas {
   overflow: visible;
 }
 #home .plan.mis .plabel {
-  color: #8fd0ff;
+  color: var(--sky);
 }
 #home .plan.mis .lit {
   animation: misLit 2.4s ease-in-out infinite;
-  filter: drop-shadow(0 0 2px #ff8a3d);
+  filter: drop-shadow(0 0 2px var(--orange));
 }
 #home .plan.mis.new::after {
   top: 4px;
@@ -438,7 +448,7 @@ canvas {
 }
 @keyframes misLit {
   50% {
-    filter: drop-shadow(0 0 4px #ff8a3d) drop-shadow(0 0 8px #ff8a3d);
+    filter: drop-shadow(0 0 4px var(--orange)) drop-shadow(0 0 8px var(--orange));
   }
 }
 /* selector de niveles (galaxias) */
@@ -691,7 +701,7 @@ canvas {
   margin-left: -2.5px;
   border-radius: 50%;
   background: #cfe6ff;
-  box-shadow: 0 0 6px #8fd0ff;
+  box-shadow: 0 0 6px var(--sky);
   transform-origin: 2.5px 32px;
   animation: navmoon 6s linear infinite;
 }
@@ -828,7 +838,7 @@ canvas {
   font-size: 16px;
 }
 #levels .page.done .play {
-  background: linear-gradient(180deg, #ffd36b, #f0a43a);
+  background: linear-gradient(180deg, var(--gold), #f0a43a);
 }
 #levels .tries {
   position: relative;
@@ -906,9 +916,9 @@ canvas {
   background: conic-gradient(
     from 0deg,
     rgba(255, 90, 31, 0) 0deg,
-    #ff5a1f 70deg,
+    var(--sun) 70deg,
     #ffe2b0 110deg,
-    #ff5a1f 150deg,
+    var(--sun) 150deg,
     rgba(255, 90, 31, 0) 220deg,
     rgba(255, 90, 31, 0.25) 300deg,
     rgba(255, 90, 31, 0) 360deg
@@ -928,7 +938,7 @@ canvas {
       rgba(255, 90, 31, 0.08) 55%,
       rgba(9, 11, 22, 0.96) 80%
     ),
-    #0a0c17;
+    var(--night);
 }
 #levels .play .pin {
   align-items: center;
@@ -939,9 +949,9 @@ canvas {
   background: conic-gradient(
     from 0deg,
     rgba(255, 211, 107, 0) 0deg,
-    #ffd36b 70deg,
+    var(--gold) 70deg,
     #fff3cf 110deg,
-    #ffd36b 150deg,
+    var(--gold) 150deg,
     rgba(255, 211, 107, 0) 220deg,
     rgba(255, 211, 107, 0.25) 300deg,
     rgba(255, 211, 107, 0) 360deg
@@ -955,7 +965,7 @@ canvas {
       rgba(255, 200, 90, 0.06) 55%,
       rgba(9, 11, 22, 0.96) 80%
     ),
-    #0a0c17;
+    var(--night);
 }
 #levels .play[disabled]::before {
   animation: none;
@@ -1012,7 +1022,7 @@ canvas {
   border-radius: 50%;
   background: #000;
   box-shadow:
-    0 0 0 1.5px #ff5a1f,
+    0 0 0 1.5px var(--sun),
     0 0 10px rgba(255, 90, 31, 0.7);
 }
 #levels .trip .exit {
@@ -1047,16 +1057,21 @@ canvas {
   height: 10px;
   margin: -5px 0 0 -5px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #8fc4ff, #2f6fd8 60%, #123a7a);
+  background: radial-gradient(
+    circle at 35% 35%,
+    var(--blue-light),
+    var(--blue) 60%,
+    var(--blue-deep)
+  );
   box-shadow: 0 0 8px rgba(143, 208, 255, 0.9);
 }
 #levels .page.done .trip .line i {
-  background: linear-gradient(90deg, rgba(255, 211, 107, 0.2), #ffd36b);
+  background: linear-gradient(90deg, rgba(255, 211, 107, 0.2), var(--gold));
   box-shadow: 0 0 8px rgba(255, 211, 107, 0.6);
 }
 #levels .page.done .trip .exit {
   border-style: solid;
-  border-color: #ffd36b;
+  border-color: var(--gold);
   background: rgba(255, 211, 107, 0.25);
   box-shadow: 0 0 10px rgba(255, 211, 107, 0.6);
 }
@@ -1071,7 +1086,7 @@ canvas {
 }
 #levels .tripinfo em {
   font-style: normal;
-  color: #ffd36b;
+  color: var(--gold);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -1165,9 +1180,9 @@ canvas {
   background: conic-gradient(
     from 0deg,
     rgba(255, 90, 31, 0) 0deg,
-    #ff5a1f 70deg,
+    var(--sun) 70deg,
     #ffe2b0 110deg,
-    #ff5a1f 150deg,
+    var(--sun) 150deg,
     rgba(255, 90, 31, 0) 220deg,
     rgba(255, 90, 31, 0.25) 300deg,
     rgba(255, 90, 31, 0) 360deg
@@ -1186,7 +1201,7 @@ canvas {
       rgba(255, 90, 31, 0.08) 55%,
       rgba(9, 11, 22, 0.96) 80%
     ),
-    #0a0c17;
+    var(--night);
 }
 #levels .play .pin {
   position: relative;
@@ -1203,9 +1218,9 @@ canvas {
   background: conic-gradient(
     from 0deg,
     rgba(255, 211, 107, 0) 0deg,
-    #ffd36b 70deg,
+    var(--gold) 70deg,
     #fff3cf 110deg,
-    #ffd36b 150deg,
+    var(--gold) 150deg,
     rgba(255, 211, 107, 0) 220deg,
     rgba(255, 211, 107, 0.25) 300deg,
     rgba(255, 211, 107, 0) 360deg
@@ -1219,7 +1234,7 @@ canvas {
       rgba(255, 200, 90, 0.06) 55%,
       rgba(9, 11, 22, 0.96) 80%
     ),
-    #0a0c17;
+    var(--night);
 }
 #levels .play[disabled] {
   color: var(--muted);
@@ -1401,10 +1416,10 @@ canvas {
 }
 #levels .stb.on {
   border-color: rgba(255, 211, 107, 0.55);
-  color: #ffd36b;
+  color: var(--gold);
 }
 #levels .stb.on path {
-  fill: #ffd36b;
+  fill: var(--gold);
   stroke: #ffe7a8;
 }
 #levels .dist {
@@ -1787,7 +1802,7 @@ canvas {
 #planets .pname {
   font-size: clamp(28px, 8vw, 40px);
   font-weight: 500;
-  color: #fff;
+  color: var(--white);
   line-height: 1.1;
 }
 #planets .pdesc {
@@ -1795,7 +1810,7 @@ canvas {
   max-width: 32ch;
   font-size: 14px;
   line-height: 1.6;
-  color: #fff;
+  color: var(--white);
   opacity: 0.9;
   font-weight: 400;
 }
@@ -1813,7 +1828,7 @@ canvas {
   border-radius: 999px;
   border: 0;
   background: var(--sun);
-  color: #fff;
+  color: var(--white);
   font-size: 14px;
   font-weight: 500;
 }
@@ -1828,7 +1843,7 @@ canvas {
   border-radius: 999px;
   border: 1px solid rgba(143, 208, 255, 0.55);
   background: rgba(13, 18, 32, 0.5);
-  color: #8fd0ff;
+  color: var(--sky);
   font-size: 12px;
   letter-spacing: 0.12em;
 }
@@ -1884,12 +1899,12 @@ canvas {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 1.5px solid #8fd0ff;
+  border: 1.5px solid var(--sky);
   opacity: 0;
   transition: opacity 0.3s;
 }
 #planets .spips i.on {
-  background: #8fd0ff;
+  background: var(--sky);
 }
 #planets .spower {
   width: 100%;
@@ -1915,7 +1930,7 @@ canvas {
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  color: #fff;
+  color: var(--white);
   opacity: 0.9;
   font-weight: 400;
 }
@@ -1925,7 +1940,7 @@ canvas {
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   background: transparent;
-  color: #fff;
+  color: var(--white);
   font-size: 12px;
   letter-spacing: 0.08em;
 }
@@ -1971,7 +1986,7 @@ canvas {
 }
 #planets .arrow::after {
   border-radius: 50%;
-  box-shadow: 0 0 6px #8fd0ff;
+  box-shadow: 0 0 6px var(--sky);
   transform-origin: 2.5px 32px;
   animation: navmoon 6s linear infinite;
 }
@@ -2171,7 +2186,7 @@ canvas {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #fff4ea;
-  border: 1.5px solid #ff8a3d;
+  border: 1.5px solid var(--orange);
   background:
     radial-gradient(
       120% 160% at 50% 135%,
@@ -2179,12 +2194,12 @@ canvas {
       rgba(255, 120, 40, 0.05) 55%,
       rgba(9, 11, 22, 0.95) 80%
     ),
-    #0a0c17;
+    var(--night);
   box-shadow: 0 0 24px rgba(255, 120, 40, 0.3);
 }
 #planets .po .pbtn.on {
   border-color: rgba(255, 211, 107, 0.5);
-  color: #ffd36b;
+  color: var(--gold);
   background: rgba(255, 211, 107, 0.06);
   box-shadow: none;
   cursor: default;
@@ -2206,7 +2221,7 @@ canvas {
   padding: 0;
   border: 0;
   background: none;
-  color: #8fd0ff;
+  color: var(--sky);
   pointer-events: auto;
 }
 #planets .pscan svg {
@@ -2234,7 +2249,7 @@ canvas {
   transform: rotate(45deg);
 }
 #planets .pscan.on {
-  color: #ffa155;
+  color: var(--amber);
 }
 #planets .pscan.on svg {
   box-shadow:
@@ -2366,7 +2381,7 @@ canvas {
   animation: plIn 0.4s 0.65s ease-out forwards;
 }
 #planets .ppowd span {
-  color: #ffd36b;
+  color: var(--gold);
 }
 /* poder sin pastilla: icono propio + nombre entre dos líneas finas */
 #planets .ppow {
@@ -2381,7 +2396,7 @@ canvas {
     monospace;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #ffd36b;
+  color: var(--gold);
 }
 #planets .ppow::before,
 #planets .ppow::after {
@@ -2397,13 +2412,13 @@ canvas {
   width: 16px;
   height: 16px;
   fill: none;
-  stroke: #ffd36b;
+  stroke: var(--gold);
   stroke-width: 1.6;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 #planets .ppow svg .f {
-  fill: #ffd36b;
+  fill: var(--gold);
   stroke: none;
 }
 #planets .ppow.off {
@@ -2436,8 +2451,8 @@ canvas {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #ffd36b;
-  box-shadow: 0 0 10px #ffd36b;
+  background: var(--gold);
+  box-shadow: 0 0 10px var(--gold);
   animation: puPulse 1.6s ease-in-out infinite;
 }
 @keyframes poIn {
@@ -2564,7 +2579,7 @@ canvas {
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #ffd36b;
+  color: var(--gold);
   font:
     500 14px 'Unbounded',
     system-ui,
@@ -2584,14 +2599,14 @@ canvas {
 #missions .mwal .st {
   width: 13px;
   height: 13px;
-  fill: #ffd36b;
+  fill: var(--gold);
   filter: drop-shadow(0 0 4px rgba(255, 211, 107, 0.6));
 }
 #missions .mwal .c {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #9ff0e4;
+  color: var(--teal);
   font:
     500 12.5px 'Unbounded',
     system-ui,
@@ -2636,7 +2651,7 @@ canvas {
   color: rgba(236, 230, 216, 0.4);
 }
 #missions .mtabs button.on {
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .mtabs button.on::after {
   content: '';
@@ -2646,8 +2661,8 @@ canvas {
   bottom: -1px;
   height: 2px;
   border-radius: 2px;
-  background: #ff8a3d;
-  box-shadow: 0 0 10px #ff8a3d;
+  background: var(--orange);
+  box-shadow: 0 0 10px var(--orange);
 }
 #missions .mtabs i {
   display: inline-block;
@@ -2655,7 +2670,7 @@ canvas {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #ff8a3d;
+  background: var(--orange);
   vertical-align: 2px;
 }
 #missions .mr {
@@ -2674,7 +2689,7 @@ canvas {
     500 15px/1.3 'Unbounded',
     system-ui,
     sans-serif;
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .mr p {
   margin-top: 6px;
@@ -2689,12 +2704,12 @@ canvas {
     500 14px 'Unbounded',
     system-ui,
     sans-serif;
-  color: #9ff0e4;
+  color: var(--teal);
   letter-spacing: 0.02em;
   flex: none;
 }
 #missions .rw.ok {
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .rw.dim {
   color: rgba(236, 230, 216, 0.35);
@@ -2710,8 +2725,8 @@ canvas {
   display: block;
   height: 100%;
   border-radius: 2px;
-  background: #ff8a3d;
-  box-shadow: 0 0 6px #ff8a3d;
+  background: var(--orange);
+  box-shadow: 0 0 6px var(--orange);
 }
 #missions .mr.got {
   opacity: 0.35;
@@ -2723,7 +2738,7 @@ canvas {
   gap: 8px;
   padding: 11px 16px;
   border-radius: 999px;
-  border: 1.5px solid #ff8a3d;
+  border: 1.5px solid var(--orange);
   cursor: pointer;
   background:
     radial-gradient(
@@ -2732,7 +2747,7 @@ canvas {
       rgba(255, 120, 40, 0.05) 55%,
       rgba(9, 11, 22, 0.95) 80%
     ),
-    #0a0c17;
+    var(--night);
   box-shadow: 0 0 18px rgba(255, 120, 40, 0.28);
   color: #fff4ea;
   font:
@@ -2744,7 +2759,7 @@ canvas {
 }
 #missions .claim em {
   font-style: normal;
-  color: #9ff0e4;
+  color: var(--teal);
   letter-spacing: 0.02em;
 }
 #missions .mstreak .l {
@@ -2758,7 +2773,7 @@ canvas {
 }
 #missions .mstreak .l b {
   font-weight: 400;
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .dots {
   display: flex;
@@ -2772,8 +2787,8 @@ canvas {
   background: rgba(236, 230, 216, 0.16);
 }
 #missions .dots b.on {
-  background: #ff8a3d;
-  box-shadow: 0 0 8px #ff8a3d;
+  background: var(--orange);
+  box-shadow: 0 0 8px var(--orange);
 }
 #missions .dots span {
   margin-left: 6px;
@@ -2781,7 +2796,7 @@ canvas {
     500 11px 'Unbounded',
     system-ui,
     sans-serif;
-  color: #9ff0e4;
+  color: var(--teal);
 }
 #missions .mplanet {
   display: block;
@@ -2843,7 +2858,7 @@ canvas {
     monospace;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #9ff0e4;
+  color: var(--teal);
 }
 #missions .mfact.out {
   opacity: 0;
@@ -2910,7 +2925,7 @@ canvas {
   overflow: visible;
 }
 #misping .lit {
-  filter: drop-shadow(0 0 5px #ff8a3d);
+  filter: drop-shadow(0 0 5px var(--orange));
 }
 #misping.go {
   animation: misPing 1.9s ease-out both;
@@ -2931,7 +2946,7 @@ canvas {
 }
 #missions .mhead em {
   font-style: normal;
-  color: #8fd0ff;
+  color: var(--sky);
 }
 #missions .mcards {
   display: flex;
@@ -2957,7 +2972,7 @@ canvas {
     500 13px/1.35 'Unbounded',
     system-ui,
     sans-serif;
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .mc p {
   margin-top: 4px;
@@ -3003,8 +3018,8 @@ canvas {
   display: block;
   height: 100%;
   border-radius: 4px;
-  background: linear-gradient(90deg, #ff5a1f, #ffa155);
-  box-shadow: 0 0 8px #ff8a3d;
+  background: linear-gradient(90deg, var(--sun), var(--amber));
+  box-shadow: 0 0 8px var(--orange);
 }
 #missions .mc .mbar small {
   font:
@@ -3023,7 +3038,7 @@ canvas {
     500 13px 'Unbounded',
     system-ui,
     sans-serif;
-  color: #9ff0e4;
+  color: var(--teal);
 }
 #missions .mc .rw span {
   display: flex;
@@ -3050,7 +3065,7 @@ canvas {
   opacity: 0.42;
 }
 #missions .mc.got .rw {
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .mc .claim {
   padding: 10px 14px;
@@ -3094,7 +3109,7 @@ canvas {
 }
 #missions .mstreak b {
   font-weight: 400;
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .mstreak .days {
   display: flex;
@@ -3106,8 +3121,8 @@ canvas {
   background: rgba(236, 230, 216, 0.12);
 }
 #missions .mstreak .days b.on {
-  background: #ff8a3d;
-  box-shadow: 0 0 6px #ff8a3d;
+  background: var(--orange);
+  box-shadow: 0 0 6px var(--orange);
 }
 #missions .mc.flash {
   animation: misFlash 0.9s ease-out;
@@ -3170,7 +3185,7 @@ canvas {
     600 26px/1 'Unbounded',
     system-ui,
     sans-serif;
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .mhero .ha .cr {
   width: 17px;
@@ -3194,7 +3209,7 @@ canvas {
     500 14px/1.3 'Unbounded',
     system-ui,
     sans-serif;
-  color: #ece6d8;
+  color: var(--fg);
 }
 #missions .mhero .mbar {
   margin-top: 9px;
@@ -3213,8 +3228,8 @@ canvas {
   display: block;
   height: 100%;
   border-radius: 4px;
-  background: linear-gradient(90deg, #ff5a1f, #ffa155);
-  box-shadow: 0 0 8px #ff8a3d;
+  background: linear-gradient(90deg, var(--sun), var(--amber));
+  box-shadow: 0 0 8px var(--orange);
 }
 #missions .mhero .mbar small {
   font:
@@ -3234,7 +3249,7 @@ canvas {
   background: rgba(236, 230, 216, 0.14);
 }
 #missions .mhero .hseg b.on {
-  background: #9ff0e4;
+  background: var(--teal);
   box-shadow: 0 0 8px rgba(63, 199, 184, 0.8);
 }
 #missions .mhero .rw {
@@ -3246,7 +3261,7 @@ canvas {
     500 13px 'Unbounded',
     system-ui,
     sans-serif;
-  color: #9ff0e4;
+  color: var(--teal);
 }
 #missions .mhero .rw span {
   display: flex;
@@ -3278,7 +3293,7 @@ canvas {
   stroke-width: 1.6;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke: color-mix(in srgb, var(--mc) 70%, #fff);
+  stroke: color-mix(in srgb, var(--mc) 70%, var(--white));
 }
 #missions .mstreak {
   margin-top: 22px;
@@ -3303,7 +3318,7 @@ canvas {
     system-ui,
     sans-serif;
   letter-spacing: 0.02em;
-  color: #9ff0e4;
+  color: var(--teal);
   text-transform: none;
 }
 @media (max-width: 370px) {
@@ -3421,7 +3436,7 @@ canvas {
     600 24px/1.2 'Unbounded',
     system-ui,
     sans-serif;
-  color: #ece6d8;
+  color: var(--fg);
   max-width: 300px;
 }
 #missions .mdd {
@@ -3454,8 +3469,8 @@ canvas {
 #missions .mdprog u {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, #ff5a1f, #ffa155);
-  box-shadow: 0 0 8px #ff8a3d;
+  background: linear-gradient(90deg, var(--sun), var(--amber));
+  box-shadow: 0 0 8px var(--orange);
 }
 #missions .mdprog b {
   display: flex;
@@ -3466,7 +3481,7 @@ canvas {
     system-ui,
     sans-serif;
   letter-spacing: 0.02em;
-  color: #9ff0e4;
+  color: var(--teal);
 }
 #missions .claim.big {
   margin-top: 22px;
@@ -3485,7 +3500,7 @@ canvas {
     monospace;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #9ff0e4;
+  color: var(--teal);
 }
 #missions .mdf {
   margin-top: 24px;
@@ -3679,7 +3694,7 @@ canvas {
 }
 #wallet .wp {
   fill: none;
-  stroke: #ffd36b;
+  stroke: var(--gold);
   stroke-width: 1.8;
   stroke-linecap: round;
   transform: rotate(-90deg);
@@ -3688,7 +3703,7 @@ canvas {
   transition: stroke-dasharray 0.6s ease;
 }
 #wallet .ws {
-  fill: #ffd36b;
+  fill: var(--gold);
   filter: drop-shadow(0 0 4px rgba(255, 211, 107, 0.6));
 }
 #wallet i {
@@ -3696,13 +3711,13 @@ canvas {
 }
 /* contador de estrellas: texto limpio */
 #wallet {
-  color: #ece6d8;
+  color: var(--fg);
 }
 #wallet .wst {
   width: 15px;
   height: 15px;
   display: block;
-  fill: #ffd36b;
+  fill: var(--gold);
   filter: drop-shadow(0 0 5px rgba(255, 211, 107, 0.7));
 }
 #wallet b {
@@ -3715,7 +3730,7 @@ canvas {
   color: rgba(236, 230, 216, 0.4);
 }
 #wallet.full b {
-  color: #ffd36b;
+  color: var(--gold);
 }
 #wallet.pop .wst {
   animation: wstar 0.5s ease-out;
@@ -3752,7 +3767,7 @@ canvas {
   font-size: 12px;
   font-weight: 500;
   text-transform: uppercase;
-  color: #ffd36b;
+  color: var(--gold);
   text-shadow: 0 0 14px rgba(255, 211, 107, 0.6);
 }
 /* pausa: salir a los niveles */
@@ -3831,7 +3846,7 @@ body.playing #quit {
   border-radius: 50%;
   background: #000;
   box-shadow:
-    0 0 0 1.5px #ff5a1f,
+    0 0 0 1.5px var(--sun),
     0 0 9px rgba(255, 90, 31, 0.7);
 }
 #pbar .ex {
@@ -3873,7 +3888,7 @@ body.playing #quit {
   height: 12px;
   margin-left: -1px;
   border-radius: 1px;
-  background: #ffd36b;
+  background: var(--gold);
   box-shadow: 0 0 6px rgba(255, 211, 107, 0.8);
 }
 #pbar.hasrec .ln u {
@@ -3887,12 +3902,17 @@ body.playing #quit {
   height: 9px;
   margin: -4.5px 0 0 -4.5px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #8fc4ff, #2f6fd8 60%, #123a7a);
+  background: radial-gradient(
+    circle at 35% 35%,
+    var(--blue-light),
+    var(--blue) 60%,
+    var(--blue-deep)
+  );
   box-shadow: 0 0 8px rgba(143, 208, 255, 0.9);
   transition: left 0.35s cubic-bezier(0.3, 0.8, 0.3, 1);
 }
 #pbar.beat .ln i {
-  background: linear-gradient(90deg, rgba(255, 211, 107, 0.15), #ffd36b);
+  background: linear-gradient(90deg, rgba(255, 211, 107, 0.15), var(--gold));
   box-shadow: 0 0 8px rgba(255, 211, 107, 0.5);
 }
 #pbar.beat .ln u {
@@ -4172,7 +4192,7 @@ body.playing #quit {
   stroke-linejoin: round;
 }
 #panel .wstars .on svg {
-  fill: #ffd36b;
+  fill: var(--gold);
   stroke: #ffe7a8;
   filter: drop-shadow(0 0 6px rgba(255, 211, 107, 0.7));
 }
@@ -4243,7 +4263,7 @@ body.playing #quit {
   border-radius: 50%;
   border: 0;
   background: var(--sun);
-  color: #fff;
+  color: var(--white);
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -4297,7 +4317,7 @@ body.playing #quit {
 }
 #panel .mlv::before {
   content: '▸ ';
-  color: #ffa155;
+  color: var(--amber);
   letter-spacing: 0;
 }
 #panel .mgo {
@@ -4427,7 +4447,7 @@ body.paused #wallet {
   border-radius: 50%;
   background: #000;
   box-shadow:
-    0 0 0 1.5px #ff5a1f,
+    0 0 0 1.5px var(--sun),
     0 0 10px rgba(255, 90, 31, 0.7);
 }
 .pz-trip .exit {
@@ -4464,7 +4484,12 @@ body.paused #wallet {
   height: 10px;
   margin: -5px 0 0 -5px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #8fc4ff, #2f6fd8 60%, #123a7a);
+  background: radial-gradient(
+    circle at 35% 35%,
+    var(--blue-light),
+    var(--blue) 60%,
+    var(--blue-deep)
+  );
   box-shadow: 0 0 8px rgba(143, 208, 255, 0.9);
 }
 .pz-trip .rec {
@@ -4475,7 +4500,7 @@ body.paused #wallet {
   height: 14px;
   margin-left: -1px;
   border-radius: 1px;
-  background: #ffd36b;
+  background: var(--gold);
   box-shadow: 0 0 7px rgba(255, 211, 107, 0.85);
 }
 .pz-trip .rec::after {
@@ -4489,7 +4514,7 @@ body.paused #wallet {
     ui-monospace,
     monospace;
   letter-spacing: 0.2em;
-  color: #ffd36b;
+  color: var(--gold);
 }
 .pz-sl {
   display: flex;
@@ -4551,7 +4576,7 @@ body.paused #wallet {
     monospace;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #ece6d8;
+  color: var(--fg);
 }
 .pz-vol .line {
   position: relative;
@@ -4587,7 +4612,12 @@ body.paused #wallet {
   height: 18px;
   margin: -9px 0 0 -9px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #8fc4ff, #2f6fd8 60%, #123a7a);
+  background: radial-gradient(
+    circle at 35% 35%,
+    var(--blue-light),
+    var(--blue) 60%,
+    var(--blue-deep)
+  );
   box-shadow:
     0 0 0 4px rgba(143, 208, 255, 0.22),
     0 0 16px rgba(143, 208, 255, 1);
@@ -4620,7 +4650,7 @@ body.paused #wallet {
     400 11px 'Space Mono',
     ui-monospace,
     monospace;
-  color: #fff;
+  color: var(--white);
 }
 /* al seguir: cuenta 3 · 2 · 1 sobre la partida, al ritmo */
 #pzcount {
@@ -4641,7 +4671,7 @@ body.paused #wallet {
     600 clamp(64px, 22vw, 110px)/1 'Unbounded',
     system-ui,
     sans-serif;
-  color: #ece6d8;
+  color: var(--fg);
   text-shadow:
     0 0 34px rgba(255, 161, 85, 0.55),
     0 0 2px rgba(255, 255, 255, 0.6);

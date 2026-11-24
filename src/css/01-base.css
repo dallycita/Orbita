@@ -4,6 +4,16 @@
   --fg: #ece6d8;
   --muted: #8b8f9e;
   --sun: #ff5a1f;
+  --gold: #ffd36b;
+  --orange: #ff8a3d;
+  --teal: #9ff0e4;
+  --sky: #8fd0ff;
+  --white: #fff;
+  --amber: #ffa155;
+  --night: #0a0c17;
+  --blue-light: #8fc4ff;
+  --blue: #2f6fd8;
+  --blue-deep: #123a7a;
   box-sizing: border-box;
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);

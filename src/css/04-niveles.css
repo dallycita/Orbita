@@ -248,7 +248,7 @@
   margin-left: -2.5px;
   border-radius: 50%;
   background: #cfe6ff;
-  box-shadow: 0 0 6px #8fd0ff;
+  box-shadow: 0 0 6px var(--sky);
   transform-origin: 2.5px 32px;
   animation: navmoon 6s linear infinite;
 }
@@ -385,7 +385,7 @@
   font-size: 16px;
 }
 #levels .page.done .play {
-  background: linear-gradient(180deg, #ffd36b, #f0a43a);
+  background: linear-gradient(180deg, var(--gold), #f0a43a);
 }
 #levels .tries {
   position: relative;
@@ -463,9 +463,9 @@
   background: conic-gradient(
     from 0deg,
     rgba(255, 90, 31, 0) 0deg,
-    #ff5a1f 70deg,
+    var(--sun) 70deg,
     #ffe2b0 110deg,
-    #ff5a1f 150deg,
+    var(--sun) 150deg,
     rgba(255, 90, 31, 0) 220deg,
     rgba(255, 90, 31, 0.25) 300deg,
     rgba(255, 90, 31, 0) 360deg
@@ -485,7 +485,7 @@
       rgba(255, 90, 31, 0.08) 55%,
       rgba(9, 11, 22, 0.96) 80%
     ),
-    #0a0c17;
+    var(--night);
 }
 #levels .play .pin {
   align-items: center;
@@ -496,9 +496,9 @@
   background: conic-gradient(
     from 0deg,
     rgba(255, 211, 107, 0) 0deg,
-    #ffd36b 70deg,
+    var(--gold) 70deg,
     #fff3cf 110deg,
-    #ffd36b 150deg,
+    var(--gold) 150deg,
     rgba(255, 211, 107, 0) 220deg,
     rgba(255, 211, 107, 0.25) 300deg,
     rgba(255, 211, 107, 0) 360deg
@@ -512,7 +512,7 @@
       rgba(255, 200, 90, 0.06) 55%,
       rgba(9, 11, 22, 0.96) 80%
     ),
-    #0a0c17;
+    var(--night);
 }
 #levels .play[disabled]::before {
   animation: none;
@@ -569,7 +569,7 @@
   border-radius: 50%;
   background: #000;
   box-shadow:
-    0 0 0 1.5px #ff5a1f,
+    0 0 0 1.5px var(--sun),
     0 0 10px rgba(255, 90, 31, 0.7);
 }
 #levels .trip .exit {
@@ -604,16 +604,21 @@
   height: 10px;
   margin: -5px 0 0 -5px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #8fc4ff, #2f6fd8 60%, #123a7a);
+  background: radial-gradient(
+    circle at 35% 35%,
+    var(--blue-light),
+    var(--blue) 60%,
+    var(--blue-deep)
+  );
   box-shadow: 0 0 8px rgba(143, 208, 255, 0.9);
 }
 #levels .page.done .trip .line i {
-  background: linear-gradient(90deg, rgba(255, 211, 107, 0.2), #ffd36b);
+  background: linear-gradient(90deg, rgba(255, 211, 107, 0.2), var(--gold));
   box-shadow: 0 0 8px rgba(255, 211, 107, 0.6);
 }
 #levels .page.done .trip .exit {
   border-style: solid;
-  border-color: #ffd36b;
+  border-color: var(--gold);
   background: rgba(255, 211, 107, 0.25);
   box-shadow: 0 0 10px rgba(255, 211, 107, 0.6);
 }
@@ -628,7 +633,7 @@
 }
 #levels .tripinfo em {
   font-style: normal;
-  color: #ffd36b;
+  color: var(--gold);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -722,9 +727,9 @@
   background: conic-gradient(
     from 0deg,
     rgba(255, 90, 31, 0) 0deg,
-    #ff5a1f 70deg,
+    var(--sun) 70deg,
     #ffe2b0 110deg,
-    #ff5a1f 150deg,
+    var(--sun) 150deg,
     rgba(255, 90, 31, 0) 220deg,
     rgba(255, 90, 31, 0.25) 300deg,
     rgba(255, 90, 31, 0) 360deg
@@ -743,7 +748,7 @@
       rgba(255, 90, 31, 0.08) 55%,
       rgba(9, 11, 22, 0.96) 80%
     ),
-    #0a0c17;
+    var(--night);
 }
 #levels .play .pin {
   position: relative;
@@ -760,9 +765,9 @@
   background: conic-gradient(
     from 0deg,
     rgba(255, 211, 107, 0) 0deg,
-    #ffd36b 70deg,
+    var(--gold) 70deg,
     #fff3cf 110deg,
-    #ffd36b 150deg,
+    var(--gold) 150deg,
     rgba(255, 211, 107, 0) 220deg,
     rgba(255, 211, 107, 0.25) 300deg,
     rgba(255, 211, 107, 0) 360deg
@@ -776,7 +781,7 @@
       rgba(255, 200, 90, 0.06) 55%,
       rgba(9, 11, 22, 0.96) 80%
     ),
-    #0a0c17;
+    var(--night);
 }
 #levels .play[disabled] {
   color: var(--muted);
@@ -958,10 +963,10 @@
 }
 #levels .stb.on {
   border-color: rgba(255, 211, 107, 0.55);
-  color: #ffd36b;
+  color: var(--gold);
 }
 #levels .stb.on path {
-  fill: #ffd36b;
+  fill: var(--gold);
   stroke: #ffe7a8;
 }
 #levels .dist {

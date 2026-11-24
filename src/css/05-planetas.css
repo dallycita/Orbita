@@ -56,7 +56,7 @@
 #planets .pname {
   font-size: clamp(28px, 8vw, 40px);
   font-weight: 500;
-  color: #fff;
+  color: var(--white);
   line-height: 1.1;
 }
 #planets .pdesc {
@@ -64,7 +64,7 @@
   max-width: 32ch;
   font-size: 14px;
   line-height: 1.6;
-  color: #fff;
+  color: var(--white);
   opacity: 0.9;
   font-weight: 400;
 }
@@ -82,7 +82,7 @@
   border-radius: 999px;
   border: 0;
   background: var(--sun);
-  color: #fff;
+  color: var(--white);
   font-size: 14px;
   font-weight: 500;
 }
@@ -97,7 +97,7 @@
   border-radius: 999px;
   border: 1px solid rgba(143, 208, 255, 0.55);
   background: rgba(13, 18, 32, 0.5);
-  color: #8fd0ff;
+  color: var(--sky);
   font-size: 12px;
   letter-spacing: 0.12em;
 }
@@ -153,12 +153,12 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 1.5px solid #8fd0ff;
+  border: 1.5px solid var(--sky);
   opacity: 0;
   transition: opacity 0.3s;
 }
 #planets .spips i.on {
-  background: #8fd0ff;
+  background: var(--sky);
 }
 #planets .spower {
   width: 100%;
@@ -184,7 +184,7 @@
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  color: #fff;
+  color: var(--white);
   opacity: 0.9;
   font-weight: 400;
 }
@@ -194,7 +194,7 @@
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   background: transparent;
-  color: #fff;
+  color: var(--white);
   font-size: 12px;
   letter-spacing: 0.08em;
 }
@@ -240,7 +240,7 @@
 }
 #planets .arrow::after {
   border-radius: 50%;
-  box-shadow: 0 0 6px #8fd0ff;
+  box-shadow: 0 0 6px var(--sky);
   transform-origin: 2.5px 32px;
   animation: navmoon 6s linear infinite;
 }
@@ -440,7 +440,7 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #fff4ea;
-  border: 1.5px solid #ff8a3d;
+  border: 1.5px solid var(--orange);
   background:
     radial-gradient(
       120% 160% at 50% 135%,
@@ -448,12 +448,12 @@
       rgba(255, 120, 40, 0.05) 55%,
       rgba(9, 11, 22, 0.95) 80%
     ),
-    #0a0c17;
+    var(--night);
   box-shadow: 0 0 24px rgba(255, 120, 40, 0.3);
 }
 #planets .po .pbtn.on {
   border-color: rgba(255, 211, 107, 0.5);
-  color: #ffd36b;
+  color: var(--gold);
   background: rgba(255, 211, 107, 0.06);
   box-shadow: none;
   cursor: default;
@@ -475,7 +475,7 @@
   padding: 0;
   border: 0;
   background: none;
-  color: #8fd0ff;
+  color: var(--sky);
   pointer-events: auto;
 }
 #planets .pscan svg {
@@ -503,7 +503,7 @@
   transform: rotate(45deg);
 }
 #planets .pscan.on {
-  color: #ffa155;
+  color: var(--amber);
 }
 #planets .pscan.on svg {
   box-shadow:
@@ -635,7 +635,7 @@
   animation: plIn 0.4s 0.65s ease-out forwards;
 }
 #planets .ppowd span {
-  color: #ffd36b;
+  color: var(--gold);
 }
 /* poder sin pastilla: icono propio + nombre entre dos líneas finas */
 #planets .ppow {
@@ -650,7 +650,7 @@
     monospace;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #ffd36b;
+  color: var(--gold);
 }
 #planets .ppow::before,
 #planets .ppow::after {
@@ -666,13 +666,13 @@
   width: 16px;
   height: 16px;
   fill: none;
-  stroke: #ffd36b;
+  stroke: var(--gold);
   stroke-width: 1.6;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 #planets .ppow svg .f {
-  fill: #ffd36b;
+  fill: var(--gold);
   stroke: none;
 }
 #planets .ppow.off {
@@ -705,8 +705,8 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #ffd36b;
-  box-shadow: 0 0 10px #ffd36b;
+  background: var(--gold);
+  box-shadow: 0 0 10px var(--gold);
   animation: puPulse 1.6s ease-in-out infinite;
 }
 @keyframes poIn {
