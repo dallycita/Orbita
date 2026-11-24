@@ -1,4 +1,8 @@
-// ---------- récord ----------
+/**
+ * Récords guardados (mejor anillo e intentos de cada nivel) y el estado principal de la partida:
+ * pantalla actual (`state`), anillos, nivel de anillo del planeta y de la cámara, salto y carga.
+ * Los récords viven en localStorage con claves `orbita_pN_anillo` y `orbita_pN_intentos`.
+ */
 let best = 0;
 try {
   best = parseInt(localStorage.getItem('orbita_best_v2') || '0', 10) || 0;
@@ -23,9 +27,12 @@ const saveBestRing = () => {
 };
 let runRecord = 0,
   newRec = false;
+/**
+ * Actualiza el marcador de anillos: la barra de viaje de arriba (como en Geometry Dash, el
+ * planeta avanza del agujero negro a la salida y la marca dorada es el récord), el número y el
+ * arco de progreso.
+ */
 function updateRingHUD() {
-  // barra de viaje arriba, como en Geometry Dash: tu planeta avanza del agujero negro a la salida;
-  // la marca dorada es tu récord
   if (elPbar && elPbar.style) {
     const g = curGoal(),
       v = Math.min(level, g),
@@ -53,7 +60,8 @@ function updateRingHUD() {
   }
 }
 
-// ---------- estado ----------
+// Pantalla actual: 'pretitle', 'splash', 'intro', 'home', 'planets', 'levels', 'menu',
+// 'play', 'dead' o 'win'.
 let state = 'pretitle';
 let rings, level, pLevel, camLevel, pAng, jumping, jumpT, combo, lastLand, score;
 let astFade = 0,
@@ -61,8 +69,9 @@ let astFade = 0,
 let charge = 0,
   jumpTarget = 1,
   crossed = false;
+// Anillo de la salida.
 const GOAL = 50;
-let lvl = 0; // 0: Sistema solar · 1: Andrómeda
+let lvl = 0; // Índice del nivel: 0 Sistema solar, 1 Andrómeda…
 let best2 = 0,
   attempts2 = 0,
   best3 = 0,
@@ -86,7 +95,19 @@ for (let i = 3; i < 8; i++) {
     attX[i] = 0;
   }
 }
+/**
+ * Mejor anillo alcanzado en un nivel.
+ *
+ * @param {number} i Índice del nivel.
+ * @returns {number} Nivel de anillo.
+ */
 const bestOf = i => (i >= 3 ? bestX[i] || 0 : i === 2 ? best3 : i === 1 ? best2 : bestRing);
+/**
+ * Guarda el mejor anillo de un nivel.
+ *
+ * @param {number} i Índice del nivel.
+ * @param {number} v Nivel de anillo.
+ */
 function setBestOf(i, v) {
   if (i >= 3) {
     bestX[i] = v;
@@ -108,5 +129,11 @@ function setBestOf(i, v) {
     saveBestRing();
   }
 }
+/**
+ * Intentos hechos en un nivel.
+ *
+ * @param {number} i Índice del nivel.
+ * @returns {number} Cantidad de intentos.
+ */
 const attemptsOf = i =>
   i >= 3 ? attX[i] || 0 : i === 2 ? attempts3 : i === 1 ? attempts2 : attempts;
