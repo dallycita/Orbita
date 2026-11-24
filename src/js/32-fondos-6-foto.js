@@ -1,4 +1,7 @@
-// fotos reales como fondo (si hay)
+/**
+ * Shader GLSL de fondo hecho con una foto real, cuando el nivel tiene una. La foto gira muy
+ * despacio y se acerca con la profundidad. Lo usa el motor de fondos (32-fondos-9-motor).
+ */
 const FS_PHOTO =
   BG_COMMON +
   `

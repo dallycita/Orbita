@@ -1,9 +1,14 @@
-// ---------- pantalla de inicio (como Geometry Dash): se queda hasta que eliges ----------
+/**
+ * Pantalla de inicio, como en Geometry Dash: se queda hasta que el jugador elige (jugar, planetas,
+ * misiones, historia o ajustes). También guarda el silencio general (`muted`).
+ */
 const elHome = document.getElementById('home');
+/** Sonido apagado por el jugador (se guarda en localStorage). */
 let muted = false;
 try {
   muted = localStorage.getItem('orbita_p1_sonido') === '0';
 } catch (e) {}
+/** Aplica `muted` al volumen general de salida. */
 function applyMute() {
   if (AC && outBus) {
     try {
@@ -12,6 +17,11 @@ function applyMute() {
   }
 }
 let storyReturn = null; // a dónde volver después de ver la historia desde un menú
+/**
+ * Si hay un planeta recién desbloqueado que el jugador aún no vio.
+ *
+ * @returns {boolean} Verdadero si hay que marcar el botón de planetas.
+ */
 function hasNewPlanet() {
   try {
     return localStorage.getItem('orbita_pl_nuevo') === '1';
@@ -19,6 +29,7 @@ function hasNewPlanet() {
     return false;
   }
 }
+/** Arma los botones de la pantalla de inicio y su hoja de ajustes. */
 function renderHome() {
   if (!elHome) {
     return;
@@ -55,6 +66,12 @@ function renderHome() {
     .querySelectorAll('[data-h]')
     .forEach(b => b.addEventListener('click', () => homeAction(b.dataset.h, b)));
 }
+/**
+ * Atiende un botón de la pantalla de inicio.
+ *
+ * @param {string} a Acción del botón (su `data-h`): play, story, cfg, planets, snd, reset...
+ * @param {HTMLElement} b El botón tocado (para cambiar su texto).
+ */
 function homeAction(a, b) {
   initAudio();
   if (AC && AC.state === 'suspended') {
@@ -125,6 +142,7 @@ function homeAction(a, b) {
     }
   } else if (a === 'reset') {
     const v = b.querySelector('b');
+    // pide un segundo toque antes de borrar el progreso
     if (!b.dataset.sure) {
       b.dataset.sure = '1';
       if (v) {
@@ -137,6 +155,11 @@ function homeAction(a, b) {
     resetProgress();
   }
 }
+/**
+ * Oculta la pantalla de inicio.
+ *
+ * @param {boolean} keepAmb Mantener el sonido ambiente del inicio (al ir al selector de niveles).
+ */
 function hideHome(keepAmb) {
   if (elHome) {
     elHome.classList.add('off');
@@ -146,6 +169,11 @@ function hideHome(keepAmb) {
   }
   showStop(0.3);
 }
+/**
+ * Abre la pantalla de inicio y deja la partida preparada detrás.
+ *
+ * @param {boolean} withIntro Hacer la animación de entrada (logo grande que se acomoda).
+ */
 function openHome(withIntro) {
   if (elLv) {
     elLv.classList.add('off');

@@ -6109,17 +6109,19 @@ function organ(t0, freqs, dur, gain, bright) {
   trem.start(t0);
   trem.stop(t0 + dur + 0.7);
 }
-// ---------- "Horizonte de sucesos": la banda sonora del Sistema solar ----------
-// La idea: no es una historia de amor, es una persecución. La música tiene dos personajes:
-// · el agujero negro: un zumbido enorme que "late" cada vez más rápido, y un motivo de dos notas
-// que CAE medio tono,
-// como la gravedad, y que se repite cada vez más seguido cuanto más cerca está (como el tiburón de
-// Tiburón);
-//  · la Tierra: una frase de cristal, frágil, que corre cada vez más rápido para escapar.
-// Debajo, un tono que sube sin fin (escala de Shepard): la sensación de que algo se acerca y nunca
-// termina.
-// Todo con una reverberación de varios segundos, como un espacio inmenso y vacío.
+/**
+ * "Horizonte de sucesos": la banda sonora del Sistema solar, sintetizada con Web Audio paso a paso
+ * (stepCosmos). Es una persecución con dos personajes: el agujero negro (zumbido que late y un
+ * motivo que cae medio tono, cada vez más seguido) y la Tierra (frase de cristal que corre).
+ * Debajo, una escala de Shepard que sube sin fin; todo con reverberación de varios segundos.
+ */
+/** Estado del sintetizador: nodos de reverberación, zumbido, bus y sección actual. */
 let hzS = null;
+/**
+ * Crea el estado del sintetizador la primera vez, o de nuevo si cambió el contexto de audio.
+ *
+ * @returns {object} El estado hzS.
+ */
 function hzEnsure() {
   if (hzS && hzS.ac === AC) {
     return hzS;
@@ -6146,6 +6148,13 @@ function hzEnsure() {
   out.connect(hzBus());
   return hzS;
 }
+/**
+ * Conecta un sonido a la salida: una parte directa y otra a la reverberación.
+ *
+ * @param {AudioNode} node Sonido que se conecta.
+ * @param {number} dry Volumen directo, de 0 a 1.
+ * @param {number} wet Volumen hacia la reverberación, de 0 a 1.
+ */
 function hzOut(node, dry, wet) {
   const a = AC.createGain(),
     b = AC.createGain();
@@ -6191,6 +6200,11 @@ function hzDroneStart() {
   [oA, oB, oS].forEach(o => o.start(n));
   S.drone = { g, lp, oA, oB, oS, f };
 }
+/**
+ * Apaga el zumbido del agujero negro.
+ *
+ * @param {boolean} quick Apagarlo casi al instante en vez de con un desvanecido.
+ */
 function hzDroneStop(quick) {
   if (!hzS || !hzS.drone) {
     return;
@@ -6270,8 +6284,8 @@ function hzGlass(t0, f, gain, dur) {
     o.stop(t0 + dur + 0.05);
   }
 }
-// el tono que sube sin fin (escala de Shepard–Risset): siete voces separadas por octavas que suben
-// juntas
+// El tono que sube sin fin (escala de Shepard–Risset): siete voces separadas por octavas suben
+// juntas; las de los extremos suenan bajito, así que el oído no nota dónde vuelve a empezar.
 function hzShepard(t0, dur, gain, rate) {
   const S = hzEnsure(),
     p0 = S.shep,
@@ -6298,8 +6312,11 @@ function hzShepard(t0, dur, gain, rate) {
   }
   S.shep = (p0 + rate) % 7;
 }
-// ---- producción: bus propio con compresión (para que suene lleno y fuerte) y más instrumentos
-// ----
+/**
+ * Bus propio de la banda sonora con compresión, para que suene llena y fuerte.
+ *
+ * @returns {AudioNode} Entrada del bus (se crea una vez por contexto de audio).
+ */
 function hzBus() {
   const S = hzEnsure();
   if (S.bus) {
@@ -6320,6 +6337,13 @@ function hzBus() {
   S.bus = g;
   return g;
 }
+/**
+ * Coloca un sonido a la izquierda o a la derecha, si el navegador lo permite.
+ *
+ * @param {AudioNode} node Sonido.
+ * @param {number} pan De -1 (izquierda) a 1 (derecha).
+ * @returns {AudioNode} El nodo que hay que conectar después.
+ */
 function hzPan(node, pan) {
   if (!AC.createStereoPanner) {
     return node;
@@ -6492,6 +6516,7 @@ function hzTaiko(t0, gain) {
   src.start(t0);
   src.stop(t0 + 0.15);
 }
+/** Platillo al revés: ruido que crece hasta el tiempo t0 + dur (segundos de AC). */
 function hzSwell(t0, dur, gain) {
   const src = AC.createBufferSource();
   src.buffer = NOISE;
@@ -6510,6 +6535,7 @@ function hzSwell(t0, dur, gain) {
   src.start(t0);
   src.stop(t0 + dur + 0.05);
 }
+/** Golpe de platillo: ruido agudo que se apaga en unos 2 segundos. */
 function hzCrash(t0, gain) {
   const src = AC.createBufferSource();
   src.buffer = NOISE;
@@ -6608,7 +6634,13 @@ const HZ_OSTS = {
   b: [0, 0, 7, 0, 0, 7, 0, 12, 0, 0, 7, 0, 10, 7, 3, 7],
   c: [0, 12, 0, 12, 7, 12, 0, 12, 0, 12, 0, 12, 10, 12, 7, 12],
 };
-// la sección según qué tan lejos vas
+/**
+ * Elige la sección de la música según qué tan lejos va el jugador.
+ *
+ * @param {number} L Nivel de anillo alcanzado.
+ * @param {boolean} fast Si está el tramo final rápido (clímax).
+ * @returns {string} 'vacio', 'caza', 'eco', 'respiro', 'carrera' o 'climax'.
+ */
 function hzSection(L, fast) {
   if (fast) {
     return 'climax';
@@ -6665,6 +6697,12 @@ function hzLead(t0, f, gain, dur, bright, pan) {
   vib.start(t0);
   vib.stop(t0 + dur + 0.05);
 }
+/**
+ * Programa un paso (semicorchea) de la banda sonora del Sistema solar.
+ *
+ * @param {number} s Número de paso desde que empezó la canción.
+ * @param {number} t0 Momento en que suena el paso, en segundos del reloj de audio (AC).
+ */
 function stepCosmos(s, t0) {
   hzEnsure();
   hzBus();
@@ -6817,7 +6855,7 @@ function stepCosmos(s, t0) {
       hzGlass(t0, hzf(n), 0.034 + 0.01 * prog, 1.1);
     }
   } else if (sec === 'eco') {
-    // ahora lo canta una voz cálida, y el cristal le responde una octava arriba
+    // lo canta una voz cálida, y el cristal le responde una octava arriba
     const n = note(hook, s32);
     if (n !== null) {
       hzLead(t0, hzf(n), 0.04, s32 % 8 === 6 || s32 % 8 === 0 ? 0.32 : 0.24, 0.35, -0.15);
@@ -7484,7 +7522,12 @@ const PLANET_SVG = {
     '<circle cx="50" cy="50" r="17" fill="#d9c7b4"/><path d="M52 62 C44 57 45 49 52 52 C59 49 60 57 52 62 Z" fill="#f4ebe0"/>',
 };
 // nivel 1: el sistema solar termina en el anillo 50
-// ---------- estado de la partida: contadores, tutorial, efectos en pantalla ----------
+/**
+ * Estado compartido de la partida: contadores, tutorial, gestos, rachas, reloj del juego (`t`) y
+ * listas de efectos en pantalla. Solo declara variables; las cambian muchos archivos.
+ */
+
+// winT: segundos desde que se ganó; perfCount: saltos perfectos; attempts: intentos guardados
 let winT = 0,
   perfCount = 0,
   attempts = 0;
@@ -7493,7 +7536,8 @@ try {
 } catch (e) {
   attempts = 0;
 }
-// ---- tutorial: los primeros 10 anillos de la huida, una cosa a la vez ----
+// Tutorial: los primeros 10 anillos de la huida, una cosa a la vez.
+// TUT_TYPES da el tipo de cada anillo y TUT_TIPS el consejo que se muestra en él.
 const TUT_GOAL = 10;
 const TUT_TYPES = [
   'vacio',
@@ -7520,8 +7564,14 @@ const TUT_TIPS = [
   'Una barrera sin huecos. Desliza hacia arriba para el salto doble.',
 ];
 let tutorial = false,
-  tutorialDone = true; // ya no hay tutorial: se aprende jugando
+  tutorialDone = true; // el tutorial no se impone al empezar: se aprende jugando
+/**
+ * Meta de la partida actual.
+ *
+ * @returns {number} Nivel de anillo que hay que alcanzar (TUT_GOAL en el tutorial).
+ */
 const curGoal = () => (tutorial ? TUT_GOAL : GOAL);
+// brillo de cada marca de carga del poder al llenarse, de 0 a 1
 const pipFlash = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 let readyT = 0,
   chargeFlash = 0,
@@ -7529,6 +7579,8 @@ let readyT = 0,
 try {
   readyHintDone = localStorage.getItem('orbita_p1_poderlisto') === '1';
 } catch (e) {}
+// gest: gesto en curso; pending: salto pedido que espera 0,09 s por si el gesto es un
+// deslizamiento (salto doble); pendingT: segundos que lleva esperando
 let gest = null,
   pending = false,
   pendingT = 0;
@@ -7547,7 +7599,9 @@ let streak = 0,
   culprit = null,
   culpritT = 0,
   landPop = 0;
+// holgura máxima con los asteroides para que un salto cuente como perfecto
 const PERFECT = 12;
+// t: reloj del juego, en segundos; timeScale y slowTimer: cámara lenta
 let t = 0,
   timeScale = 1,
   slowTimer = 0,
@@ -7560,12 +7614,15 @@ let particles = [],
   trail = [],
   texts = [],
   burns = [];
+// sunLevel: nivel de anillo hasta donde llega el agujero negro; lastEaten: último anillo tragado
 let sunLevel = -1.6,
   lastEaten = -2;
+// restos que caen en espiral hacia el agujero negro (ángulo en radianes y distancia)
 const debris = Array.from({ length: 60 }, () => ({
   a: Math.random() * Math.PI * 2,
   r: 60 + Math.random() * 180,
 }));
+// duración base de un salto entre anillos, en segundos (jumpDur la ajusta según el planeta)
 const JUMP_DUR = 0.12;
 // generador con semilla fija: el recorrido es siempre el mismo, como un nivel de Geometry Dash
 const SEED = 20261007;
@@ -7686,31 +7743,67 @@ try {
 } catch (e) {
   seenTypes = {};
 }
-// ---------- sincronía con la música ----------
-// fase dentro de cada golpe (0 = justo en el golpe); -1 si no hay música
+/**
+ * Ritmo y objetos del recorrido: sincronía con los golpes de la música, estrellas (la moneda del
+ * juego), nebulosas y púlsares, los recorridos de los niveles 4 a 8 y la nova de Andrómeda.
+ * Varias constantes (COIN_RINGS, NEB_AT, PUL_AT) se completan más abajo en este mismo archivo.
+ */
+
+/**
+ * Fase dentro del golpe actual de la música.
+ *
+ * @returns {number} De 0 (justo en el golpe) a 1; -1 si no suena música.
+ */
 function beatPhase() {
   return AC && musicOn && musicStart >= 0 ? frac(beatTime() / TB) : -1;
 }
-// intensidad del golpe: 1 justo en el bombo y se apaga rápido
+/**
+ * Intensidad del golpe: 1 justo en el bombo y se apaga rápido (más suave con movimiento reducido).
+ *
+ * @returns {number} De 0 a 1.
+ */
 function beatKick() {
   const x = beatPhase();
   return x < 0 ? 0 : Math.exp(-x * 7) * (reduceMotion ? 0.35 : 1);
 }
-// respiración lenta con el bajo (cada dos golpes)
+/**
+ * Respiración lenta con el bajo, un ciclo cada dos golpes.
+ *
+ * @returns {number} De 0 a 1; 0 si no suena música.
+ */
 function bassBreath() {
   return AC && musicOn && musicStart >= 0
     ? 0.5 - 0.5 * Math.cos(2 * Math.PI * frac(beatTime() / (2 * TB)))
     : 0;
 }
 let lastBeatIdx = -1;
+/**
+ * Tiempo de la canción descontando la latencia de salida del audio, para que lo visual coincida
+ * con lo que se oye. Sin música usa el reloj del juego `t`.
+ *
+ * @returns {number} Segundos desde que empezó la música.
+ */
 function beatTime() {
   return AC && musicStart >= 0
     ? AC.currentTime - musicStart - (AC.outputLatency || AC.baseLatency || 0)
     : t;
 }
-// ángulo y tamaño reales de cada asteroide según el tipo de anillo
-// poff: lo que el anillo no giró mientras estuvo congelado
+/**
+ * Ángulo real de un asteroide en su anillo. `poff` es lo que el anillo no giró mientras estuvo
+ * congelado.
+ *
+ * @param {object} ring Anillo.
+ * @param {object} o Asteroide del anillo.
+ * @returns {number} Ángulo, en radianes.
+ */
 const obsAng = (ring, o) => o.a + (o.dir || 1) * (ring.phase - (ring.poff || 0)) + (ring.off || 0);
+/**
+ * Tamaño real de un asteroide: en los anillos de respiración crece y se encoge con el ritmo.
+ *
+ * @param {object} ring Anillo.
+ * @param {object} o Asteroide del anillo.
+ * @returns {number} Radio, en las mismas unidades que `o.r`.
+ */
 function obsRad(ring, o) {
   if (ring.type !== 'respiracion') {
     return o.r;
@@ -7719,8 +7812,8 @@ function obsRad(ring, o) {
     sz = 0.5 - 0.5 * Math.cos(2 * Math.PI * x); // respira cada 4 golpes: pequeño justo en el golpe
   return o.r * (0.3 + 0.7 * sz);
 }
-// ---------- estrellas: la moneda del juego (para personalizar planetas más adelante) ----------
-// aparecen en todos los niveles; se ganan en cada partida y se guardan
+// Estrellas: la moneda del juego. Aparecen en todos los niveles, se ganan en cada partida y se
+// guardan. COIN_RINGS[nivel] = los niveles de anillo que tienen estrella.
 const COIN_RINGS = [
   new Set([4, 12, 22, 28, 37, 45]),
   new Set([4, 9, 15, 18, 32, 40]),
@@ -7732,12 +7825,17 @@ try {
   wallet = parseInt(localStorage.getItem('orbita_estrellas') || '0', 10) || 0;
 } catch (e) {}
 const elWallet = document.getElementById('wallet');
+/**
+ * Actualiza el contador de estrellas de la pantalla.
+ *
+ * @param {boolean} pop Hacer la animación de salto si el total subió.
+ */
 function updateWallet(pop) {
   if (!elWallet) {
     return;
   }
-  // total de estrellas únicas de todo el juego (igual que las tarjetas): ★ 2 / 48, con un anillo de
-  // progreso
+  // total de estrellas únicas de todo el juego, contado igual que en las tarjetas (por ejemplo
+  // 2 / 48), con un anillo de progreso
   let got = 0,
     all = 0;
   COIN_RINGS.forEach((set, i) => {
@@ -7768,6 +7866,7 @@ function updateWallet(pop) {
   updateWallet.last = got;
 }
 updateWallet(false);
+/** Sonido al recoger una estrella: cuatro notas que suben. */
 function coinChime() {
   if (!AC || muted) {
     return;
@@ -7779,6 +7878,14 @@ function coinChime() {
     );
   } catch (e) {}
 }
+/**
+ * Dibuja una estrella para recoger, con brillo que late.
+ *
+ * @param {number} x Posición horizontal, en píxeles de pantalla.
+ * @param {number} y Posición vertical, en píxeles de pantalla.
+ * @param {number} sz Tamaño, en píxeles de pantalla.
+ * @param {number} al Opacidad, de 0 a 1.
+ */
 function drawCoin(x, y, sz, al) {
   ctx.save();
   ctx.globalAlpha = al;
@@ -7808,18 +7915,24 @@ function drawCoin(x, y, sz, al) {
   ctx.stroke();
   ctx.restore();
 }
-// ---------- desde el nivel 3: nebulosas y púlsares (no son asteroides, y tocarlos cambia algo)
-// ----------
-// nebulosas rosadas: nubes de hidrógeno donde nacen estrellas; su energía te impulsa dos anillos
-// hacia arriba
-// púlsares azules: restos de estrellas que explotaron y giran lanzando dos rayos; su radiación te
-// empuja un anillo hacia abajo
+// Nebulosas y púlsares (desde el cuarto nivel): no son asteroides; tocarlos mueve al jugador.
+// Nebulosas rosadas: nubes de hidrógeno donde nacen estrellas; su energía te impulsa dos anillos
+// hacia arriba.
+// Púlsares azules: restos de estrellas que explotaron y giran lanzando dos rayos; su radiación te
+// empuja un anillo hacia abajo.
 const OBJ_NEBULA = new Set([3, 6, 10, 14, 18, 25, 33]);
 const OBJ_PULSAR = new Set([22, 23, 26, 30, 34, 41, 42, 45]);
 let pushing = false,
   pushT = 0,
   pushFrom = 0,
   starBoost = false;
+/**
+ * Coloca un objeto en el mayor hueco entre los asteroides del anillo, para que se pueda alcanzar.
+ *
+ * @param {object} ring Anillo con su lista de asteroides `obs`.
+ * @param {object} extra Datos que se agregan al objeto.
+ * @returns {object} El objeto con su ángulo `a`, en radianes, y `got: false`.
+ */
 function placeInGap(ring, extra) {
   if (!ring.obs.length) {
     return Object.assign({ a: 0, got: false }, extra);
@@ -7840,6 +7953,14 @@ function placeInGap(ring, extra) {
   }
   return Object.assign({ a: bestA, got: false }, extra);
 }
+/**
+ * Dibuja una nebulosa: nubes rosadas que se mueven despacio y unas estrellitas.
+ *
+ * @param {number} x Posición horizontal, en píxeles de pantalla.
+ * @param {number} y Posición vertical, en píxeles de pantalla.
+ * @param {number} sz Tamaño, en píxeles de pantalla.
+ * @param {number} al Opacidad, de 0 a 1.
+ */
 function drawNebula(x, y, sz, al) {
   ctx.save();
   for (let i = 0; i < 4; i++) {
@@ -7863,6 +7984,14 @@ function drawNebula(x, y, sz, al) {
   }
   ctx.restore();
 }
+/**
+ * Dibuja un púlsar: un núcleo azul con dos rayos opuestos que giran.
+ *
+ * @param {number} x Posición horizontal, en píxeles de pantalla.
+ * @param {number} y Posición vertical, en píxeles de pantalla.
+ * @param {number} sz Tamaño, en píxeles de pantalla.
+ * @param {number} al Opacidad, de 0 a 1.
+ */
 function drawPulsar(x, y, sz, al) {
   ctx.save();
   ctx.globalAlpha = al;
@@ -7899,6 +8028,11 @@ function drawPulsar(x, y, sz, al) {
   }
   ctx.restore();
 }
+/**
+ * Sonido al tocar una nebulosa o un púlsar.
+ *
+ * @param {boolean} up Notas que suben (nebulosa) o que bajan (púlsar).
+ */
 function objChime(up) {
   if (!AC || muted) {
     return;
@@ -7909,6 +8043,7 @@ function objChime(up) {
     seq.forEach((sm, i) => uiTone(ROOT * Math.pow(2, sm / 12), n + i * 0.06, 1.1, 0.04));
   } catch (e) {}
 }
+/** La nebulosa lanza al jugador hasta dos anillos hacia arriba, sin pasar la meta. */
 function starLaunch() {
   const up = Math.min(2, curGoal() - level);
   if (up <= 0) {
@@ -7921,6 +8056,7 @@ function starLaunch() {
   starBoost = true;
   pending = false;
 }
+/** El púlsar empuja al jugador un anillo hacia abajo. */
 function starPush() {
   if (level <= 0) {
     return;
@@ -7932,7 +8068,8 @@ function starPush() {
   appear = 0;
   astFade = 0;
 }
-// ---------- niveles 4 a 8: recorridos, objetos y dificultad ----------
+// Niveles 4 a 8 (índices 3 a 7): recorridos de tipos de anillo, objetos y dificultad.
+// Cada recorrido es [cantidad, tipo]; courseMaps lo expande a un tipo por nivel de anillo.
 const COURSES_X = {
   3: [
     [4, 'clasico'],
@@ -8041,6 +8178,7 @@ for (const i in COURSES_X) {
   }
   courseMaps[i] = m;
 }
+// multiplicadores por nivel: velocidad de los anillos y del agujero negro
 const RING_MUL = [1, 1, 1.08, 1.1, 1.12, 1.25, 1.4, 1.55];
 const HOLE_MUL = [1, 0.95, 1.05, 1.12, 1.14, 1.25, 1.35, 1.45];
 const NEB_AT = {
@@ -8063,20 +8201,33 @@ COIN_RINGS[5] = new Set([3, 7, 13, 17, 24, 37]);
 COIN_RINGS[6] = new Set([1, 3, 7, 11, 20, 42]);
 COIN_RINGS[7] = new Set([1, 3, 4, 13, 16, 28]);
 updateWallet(false);
-// fuerzas de marea: el anillo se estira como un óvalo que gira
+/**
+ * Cuánto se estira un anillo en un ángulo: por fuerzas de marea (óvalo que gira) o por la onda de
+ * la nova.
+ *
+ * @param {object} ring Anillo.
+ * @param {number} ang Ángulo, en radianes.
+ * @returns {number} Factor del radio (1 = sin estirar).
+ */
 const stretchAt = (ring, ang) =>
   ring && ring.type === 'marea'
     ? 1 + 0.05 * Math.cos(2 * (ang - (ring.tid || 0)))
     : ring && ring.type === 'nova'
       ? 1 + novaPush(ring, ang, beatTime()) / Math.max(20, rr(ring.k))
       : 1;
-// Andrómeda · nova: la estrella se carga 3 golpes y estalla al empezar cada compás; su onda empuja
-// la muralla hacia afuera y abre la órbita un instante
+// Andrómeda, nova: la estrella se carga 3 golpes y estalla al empezar cada compás; su onda empuja
+// la muralla hacia afuera y abre la órbita un instante.
 const NOVA_BAR = () => 4 * TB;
 const novaTau = tt => {
   const b = NOVA_BAR();
   return ((tt % b) + b) % b;
 }; // tiempo desde el último estallido
+/**
+ * Forma de la onda de la nova: sube rápido, se sostiene y se apaga suave.
+ *
+ * @param {number} tau Segundos desde el último estallido.
+ * @returns {number} De 0 a 1.
+ */
 function novaEnv(tau) {
   if (tau < 0.07) {
     return tau / 0.07;
@@ -8090,6 +8241,15 @@ function novaEnv(tau) {
   }
   return 0;
 }
+/**
+ * Cuánto empuja la nova la muralla hacia afuera en un ángulo. Entre estallidos la muralla se
+ * hincha un poco en cada golpe de carga; durante la onda, empuja más cerca de la estrella.
+ *
+ * @param {object} ring Anillo de nova (`na` es el ángulo de la estrella).
+ * @param {number} ang Ángulo, en radianes.
+ * @param {number} tt Tiempo de la canción, en segundos.
+ * @returns {number} Empuje, en píxeles de pantalla.
+ */
 function novaPush(ring, ang, tt) {
   const tau = novaTau(tt),
     e = novaEnv(tau);
@@ -8100,14 +8260,14 @@ function novaPush(ring, ang, tt) {
     const c = Math.floor(tau / TB),
       q = tau - c * TB;
     return (1.5 + 1.2 * c) * Math.exp(-q * 9);
-  } // en cada golpe de carga la muralla se hincha un poco: está por abrirse
+  }
   const na = ring.na + ring.phase,
     d = Math.abs(Math.atan2(Math.sin(ang - na), Math.cos(ang - na)));
   if (d < 0.01) {
     return 0;
   }
   return e * (32 + 24 * Math.exp(-d * 1.1));
-} // la estrella se queda en su lugar
+} // en el ángulo exacto de la estrella no hay empuje: ella se queda en su lugar
 // ---------- peligros que no son asteroides ----------
 // cometas (desde el Sombrero): cruzan entre tu anillo y el siguiente; su cola apunta lejos del
 // agujero negro
@@ -10390,14 +10550,15 @@ function drawInside(al) {
   ctx.restore();
 }
 // al salir: ondas que recorren los anillos
-// ---- espacio doblado (nivel 1, anillos 27–33): un agujero de gusano flota delante de ti y dobla
-// el espacio.
-// Es una lente gravitacional de verdad: todo lo que pasa cerca (anillos, asteroides y tu planeta)
-// se ve empujado
-// hacia afuera de la esfera, se estira en arcos y corre más rápido alrededor de su borde. Dentro se
-// ve el cielo del otro lado.
-// Dato real: la gravedad dobla la luz (Einstein, 1915); así se calculó la imagen del agujero de
-// gusano de Interstellar.
+/**
+ * Espacio doblado: un agujero de gusano flota delante del jugador y actúa como lente gravitacional.
+ * Lo que pasa cerca (anillos, asteroides, el planeta) se ve empujado hacia afuera de la esfera, se
+ * estira en arcos y corre más rápido por su borde; dentro se ve el cielo del otro lado.
+ * Dato real: la gravedad dobla la luz (Einstein, 1915); así se calculó el agujero de Interstellar.
+ */
+
+// BEND_AT[nivel] = [primer, último] nivel de anillo con lente; WH_K es el anillo de la boca del
+// gusano y WH_EXIT el de salida. BEND_R es el radio de Einstein de la lente.
 const BEND_AT = { 3: [26, 28] },
   BEND_R = 23,
   WORM_COL = '#d4c8ff',
@@ -10405,11 +10566,22 @@ const BEND_AT = { 3: [26, 28] },
   WH_EXIT = 41;
 let bend = { str: 0, a: -Math.PI / 2, L: 0, on: false, grow: 1, fixed: false },
   whRip = null;
+/**
+ * Radio actual de la lente: crece y se apaga con su fuerza.
+ *
+ * @returns {number} Radio, en unidades del mundo (se multiplica por S para pantalla).
+ */
 const bendRad = () => BEND_R * bend.str * (bend.grow || 1);
+/**
+ * Enciende, apaga y mueve la lente según el anillo en que va el jugador.
+ *
+ * @param {number} d Tiempo desde el cuadro anterior, en segundos.
+ */
 function bendUpdate(d) {
+  // durante la entrada y la salida la mueve el portal
   if (bend.fixed) {
     return;
-  } // durante la entrada y la salida la mueve el portal
+  }
   const z = BEND_AT[lvl],
     want = !tutorial && z && level >= z[0] && level <= z[1] && state === 'play' ? 1 : 0;
   if (want && !bend.on) {
@@ -10430,11 +10602,24 @@ function bendUpdate(d) {
   bend.a +=
     Math.atan2(Math.sin(aT - bend.a), Math.cos(aT - bend.a)) * Math.min(1, d * (lock ? 4 : 2));
 }
+/**
+ * Posición del centro de la lente respecto al agujero negro.
+ *
+ * @returns {number[]} [x, y], en unidades del mundo.
+ */
 function bendW() {
   const R = rr(bend.L);
   return [Math.cos(bend.a) * R, Math.sin(bend.a) * R];
 }
-// lente: un punto a distancia r del centro de la esfera se ve a (r + √(r² + 4θ²))/2
+/**
+ * Dónde se ve un punto a través de la lente (y de la onda gravitacional, si la hay). Con lente
+ * puntual, un punto a distancia r del centro se ve a (r + √(r² + 4θ²))/2, con θ el radio de
+ * Einstein.
+ *
+ * @param {number} x Posición horizontal, en unidades del mundo.
+ * @param {number} y Posición vertical, en unidades del mundo.
+ * @returns {number[]} [x, y] donde se ve, en unidades del mundo.
+ */
 function lensP(x, y) {
   if (whRip && !viewInside) {
     // onda gravitacional: estira y encoge el espacio al pasar
@@ -10460,8 +10645,15 @@ function lensP(x, y) {
     r2 = (r + Math.sqrt(r * r + 4 * te * te)) / 2;
   return [wx + (dx * r2) / r, wy + (dy * r2) / r];
 }
+/**
+ * Cuánto estira la lente un objeto en un punto, para deformar su dibujo.
+ *
+ * @param {number} x Posición horizontal, en unidades del mundo.
+ * @param {number} y Posición vertical, en unidades del mundo.
+ * @returns {number[]} [estiramiento tangencial (a lo largo del borde), radial (hacia el centro),
+ *   ángulo del punto visto desde la lente en radianes].
+ */
 function lensJ(x, y) {
-  // cuánto se estira: a lo largo del borde (tangencial) y hacia el centro (radial)
   if (bend.str < 0.01 || viewInside) {
     return [1, 1, 0];
   }
@@ -10473,6 +10665,7 @@ function lensJ(x, y) {
     q = Math.sqrt(r * r + 4 * te * te);
   return [(r + q) / (2 * r), 0.5 * (1 + r / q), Math.atan2(dy, dx)];
 }
+/** Dibuja la esfera del agujero de gusano con el cielo del otro lado dentro y un halo suave. */
 function drawBendSphere() {
   if (bend.str < 0.01 || viewInside) {
     return;
@@ -12799,7 +12992,17 @@ function showTry(recRing) {
   void el.offsetWidth;
   el.classList.add('go');
 }
-// ---------- el tutorial: reaparecer sin perder, terminarlo y empezarlo ----------
+/**
+ * El tutorial: empezarlo, reaparecer al chocar sin perder la partida y terminarlo.
+ */
+
+/**
+ * En el tutorial, un choque no termina la partida: el planeta estalla y reaparece en el mismo
+ * anillo tras 0,7 segundos, con el agujero negro un poco más atrás.
+ *
+ * @param {number} x Posición horizontal del choque, en unidades del mundo.
+ * @param {number} y Posición vertical del choque, en unidades del mundo.
+ */
 function tutRespawn(x, y) {
   state = 'dead';
   flash = 0.4;
@@ -12827,6 +13030,7 @@ function tutRespawn(x, y) {
     pLevel = level;
     pending = false;
     gest = null;
+    // aleja el agujero negro para que no vuelva a atrapar al jugador enseguida
     sunLevel = Math.min(sunLevel, level - 1.6);
     lastEaten = Math.floor(sunLevel);
     swallow = null;
@@ -12837,6 +13041,7 @@ function tutRespawn(x, y) {
     }
   }, 700);
 }
+/** Termina el tutorial: lo marca como hecho y ofrece jugar el Sistema solar o ver los niveles. */
 function tutorialWin() {
   state = 'win';
   winT = 0;
@@ -12866,6 +13071,7 @@ function tutorialWin() {
     }, 600);
   }, 2200);
 }
+/** Empieza el tutorial con la partida limpia y la música. */
 function startTutorial() {
   homeAmbience(false);
   if (elLv) {
@@ -14702,8 +14908,16 @@ function drawShock() {
   }
   ctx.restore();
 }
-// ---------- el viaje por el Sistema solar: los planetas pasan en el fondo, en su orden real
-// ----------
+/**
+ * Dibuja un cuadro de la partida: cielo, agujero negro, anillos, asteroides, jugador, partículas y
+ * textos, en ese orden (lo de abajo se pinta primero). En el Sistema solar los planetas pasan en el
+ * fondo en su orden real.
+ */
+
+/**
+ * Dibuja la escena completa de la partida en el lienzo principal, con temblor y zoom de cámara.
+ * Lo llama 21-dibujo en cada cuadro de juego.
+ */
 function renderScene() {
   const z = zoneOf(level);
   ctx.save();
@@ -14909,7 +15123,7 @@ function renderScene() {
       }
     };
     if (!tutorial && k >= level) {
-      // con los cielos nuevos: contorno oscuro detrás y el anillo en blanco más firme
+      // contorno oscuro detrás y el anillo en blanco firme, para que se lea sobre cielos claros
       const ga = ctx.globalAlpha,
         lw = ctx.lineWidth,
         ss = ctx.strokeStyle;
@@ -15122,8 +15336,7 @@ function renderScene() {
       ctx.globalAlpha = 1;
     }
   }
-  // tu récord marcado en el recorrido: lo ves acercarse
-  // tu récord (donde caíste la última vez): azul, como la Tierra
+  // tu récord (donde caíste la última vez) marcado en el recorrido, en azul como la Tierra
   if (state === 'play' && runRecord > level && runRecord < GOAL) {
     const R = rr(runRecord),
       vis = clamp((250 - R) / 40, 0, 1);
@@ -16594,7 +16807,13 @@ function renderSplash() {
     ctx.globalAlpha = 1;
   }
 }
-// ---------- selector de niveles (todos abiertos, como Geometry Dash) ----------
+/**
+ * Selector de niveles: la lista de galaxias (LEVELS), sus tarjetas con dificultad, estrellas y
+ * dato real, y las funciones para abrir el selector y empezar un nivel.
+ * Todos los niveles están abiertos desde el inicio, como en Geometry Dash.
+ */
+
+/** Los niveles en orden: nombre, dificultad, color, icono, distancia y dato real. */
 const LEVELS = [
   {
     name: 'Sistema solar',
@@ -16677,11 +16896,13 @@ const LEVELS = [
     nuevo: 'Llamaradas y cometas en pinza',
   },
 ];
+/** Si el jugador ya vio la historia de introducción (se guarda en localStorage). */
 let storySeen = false;
 try {
   storySeen = localStorage.getItem('orbita_p1_historia') === '1';
 } catch (e) {}
 const elLv = document.getElementById('levels');
+/** Índice del nivel elegido en el selector. */
 let lvIndex = 0;
 const LV_ICONS = {
   centaurus:
@@ -16786,6 +17007,12 @@ const LV_DATO = [
   'Su agujero negro tiene unos 6500 millones de veces la masa del Sol.',
   'Su primera fotografía se publicó en 2022, gracias al Event Horizon Telescope.',
 ];
+/**
+ * Lee las estrellas ganadas en un nivel.
+ *
+ * @param {number} i Índice del nivel en LEVELS.
+ * @returns {number[]} Las estrellas conseguidas (lista vacía si no hay o no hay localStorage).
+ */
 function lvStarsGot(i) {
   try {
     const all = JSON.parse(localStorage.getItem('orbita_lvstars') || '{}');
@@ -16797,6 +17024,12 @@ function lvStarsGot(i) {
 // dificultad como gravedad: un mini agujero negro con 4 anillos; los encendidos dicen qué tan
 // fuerte jala
 const GRAV_TIER = { Fácil: 1, Medio: 2, Difícil: 3, 'Muy difícil': 4 };
+/**
+ * Icono SVG de dificultad.
+ *
+ * @param {number} n Anillos encendidos, de 1 a 4.
+ * @returns {string} El SVG en texto.
+ */
 const GRAV_SVG = n =>
   '<svg viewBox="0 0 30 30" aria-hidden="true">' +
   [6, 8.6, 11.2, 13.8]
@@ -16812,6 +17045,7 @@ const GRAV_SVG = n =>
     )
     .join('') +
   '<circle cx="15" cy="15" r="3.4" fill="#000" stroke="#ffa155" stroke-width="1.3"/></svg>';
+/** Arma el HTML del selector de niveles y su navegación. */
 function renderLevels() {
   sigShown = -1;
   if (!elLv) {
@@ -16967,8 +17201,13 @@ function renderLevels() {
 // dato real como transmisión: se escribe letra por letra al llegar a cada galaxia
 let sigShown = -1,
   sigTimer = null;
-// que las cifras no se partan
+// espacio irrompible entre cifras (30 000, 99,8 %) para que no se partan en dos líneas
 const sigTxt = i => LV_DATO[i].replace(/(\d) (?=[\d%])/g, '$1\u00a0');
+/**
+ * Escribe letra por letra el dato real de un nivel en su tarjeta.
+ *
+ * @param {number} i Índice del nivel en LEVELS.
+ */
 function sigType(i) {
   if (!elLv || !elLv.querySelectorAll) {
     return;
@@ -17021,13 +17260,16 @@ function sigType(i) {
   sigTimer = setTimeout(step, 420);
 }
 
-const levelsUnlocked = () => true; // por ahora, todos los niveles abiertos desde el inicio
+const levelsUnlocked = () => true; // todos los niveles están abiertos desde el inicio
+// tutAfterStory: al terminar la historia sigue el tutorial ("Repetir tutorial").
+// pendingTut: al tocar en el menú empieza el tutorial en vez de la partida.
 let tutAfterStory = false,
-  pendingTut = false; // "Repetir tutorial": la historia desemboca otra vez en el tutorial
+  pendingTut = false;
+/** Al terminar la pantalla de presentación, abre el inicio. */
 function afterSplash() {
   openHome(true);
 }
-// empezar como jugador nuevo: olvida historia, tutorial, intentos y récords
+/** Empieza como jugador nuevo: olvida historia, tutorial, intentos y récords. */
 function resetProgress() {
   try {
     [
@@ -17086,6 +17328,7 @@ function resetProgress() {
   tutAfterStory = false;
   startIntro();
 }
+/** Abre el selector de niveles: para la música de partida y suena el ambiente del inicio. */
 function openLevels() {
   tutorial = false;
   stopMusic();
@@ -17101,6 +17344,11 @@ function openLevels() {
   elPanel.classList.add('hide');
   elHud.style.opacity = 0;
 }
+/**
+ * Empieza un nivel: cierra el selector, prepara la partida y muestra el menú de inicio del nivel.
+ *
+ * @param {number} i Índice del nivel en LEVELS.
+ */
 function startLevel(i) {
   sesTries = 1;
   if (!LEVELS[i] || !LEVELS[i].ready) {
@@ -17128,12 +17376,17 @@ function startLevel(i) {
   elPanel.classList.add('top');
   elPanel.classList.remove('hide');
 }
-// ---------- pantalla de inicio (como Geometry Dash): se queda hasta que eliges ----------
+/**
+ * Pantalla de inicio, como en Geometry Dash: se queda hasta que el jugador elige (jugar, planetas,
+ * misiones, historia o ajustes). También guarda el silencio general (`muted`).
+ */
 const elHome = document.getElementById('home');
+/** Sonido apagado por el jugador (se guarda en localStorage). */
 let muted = false;
 try {
   muted = localStorage.getItem('orbita_p1_sonido') === '0';
 } catch (e) {}
+/** Aplica `muted` al volumen general de salida. */
 function applyMute() {
   if (AC && outBus) {
     try {
@@ -17142,6 +17395,11 @@ function applyMute() {
   }
 }
 let storyReturn = null; // a dónde volver después de ver la historia desde un menú
+/**
+ * Si hay un planeta recién desbloqueado que el jugador aún no vio.
+ *
+ * @returns {boolean} Verdadero si hay que marcar el botón de planetas.
+ */
 function hasNewPlanet() {
   try {
     return localStorage.getItem('orbita_pl_nuevo') === '1';
@@ -17149,6 +17407,7 @@ function hasNewPlanet() {
     return false;
   }
 }
+/** Arma los botones de la pantalla de inicio y su hoja de ajustes. */
 function renderHome() {
   if (!elHome) {
     return;
@@ -17185,6 +17444,12 @@ function renderHome() {
     .querySelectorAll('[data-h]')
     .forEach(b => b.addEventListener('click', () => homeAction(b.dataset.h, b)));
 }
+/**
+ * Atiende un botón de la pantalla de inicio.
+ *
+ * @param {string} a Acción del botón (su `data-h`): play, story, cfg, planets, snd, reset...
+ * @param {HTMLElement} b El botón tocado (para cambiar su texto).
+ */
 function homeAction(a, b) {
   initAudio();
   if (AC && AC.state === 'suspended') {
@@ -17255,6 +17520,7 @@ function homeAction(a, b) {
     }
   } else if (a === 'reset') {
     const v = b.querySelector('b');
+    // pide un segundo toque antes de borrar el progreso
     if (!b.dataset.sure) {
       b.dataset.sure = '1';
       if (v) {
@@ -17267,6 +17533,11 @@ function homeAction(a, b) {
     resetProgress();
   }
 }
+/**
+ * Oculta la pantalla de inicio.
+ *
+ * @param {boolean} keepAmb Mantener el sonido ambiente del inicio (al ir al selector de niveles).
+ */
 function hideHome(keepAmb) {
   if (elHome) {
     elHome.classList.add('off');
@@ -17276,6 +17547,11 @@ function hideHome(keepAmb) {
   }
   showStop(0.3);
 }
+/**
+ * Abre la pantalla de inicio y deja la partida preparada detrás.
+ *
+ * @param {boolean} withIntro Hacer la animación de entrada (logo grande que se acomoda).
+ */
 function openHome(withIntro) {
   if (elLv) {
     elLv.classList.add('off');
@@ -18223,7 +18499,11 @@ function gwChirp() {
     }
   } catch (e) {}
 }
-// ---------- pantalla de planetas: el planeta girando en el espacio ----------
+/**
+ * Planetas en HD y pantalla de planetas: texturas procedurales en WebGL (PLGL), anillos, el
+ * planeta del jugador en la partida y el carrusel de planetas con su escáner.
+ * Sin WebGL todo cae a un dibujo 2D más simple (drawBigPlanet2D).
+ */
 const elPl = document.getElementById('planets');
 let pIndex = 0,
   pSwap = 0,
@@ -18322,8 +18602,11 @@ const PBANDS = {
   jupiter: ['rgba(130,80,45,.45)', [-0.7, -0.42, -0.12, 0.1, 0.38, 0.62]],
   venus: ['rgba(200,160,90,.25)', [-0.5, 0.05, 0.45]],
 };
-// ---------- planetas en HD: textura procedural 3D horneada una vez + esfera iluminada en WebGL
-// ----------
+/**
+ * Motor WebGL de planetas: hornea una vez la textura procedural de cada planeta (mapa de
+ * longitud y latitud) y luego dibuja una esfera iluminada que la usa.
+ * Devuelve `render`, `ok` (hay WebGL) y `warm` (prepara una textura por adelantado).
+ */
 const PLGL = (() => {
   let gl = null,
     cv = null,
@@ -18807,7 +19090,18 @@ void main(){
     }
     return e;
   }
-  // dibuja el planeta y devuelve el lienzo (cuadrado de lado 2·R·pad)
+  /**
+   * Dibuja el planeta en el lienzo WebGL propio y lo devuelve para copiarlo al lienzo 2D.
+   *
+   * @param {string} id Planeta (tierra, luna, ..., sol).
+   * @param {number} px Diámetro del planeta, en píxeles del dispositivo.
+   * @param {number} rot Giro sobre su eje, en radianes.
+   * @param {number[]} light Dirección de la luz [x, y, z].
+   * @param {number[]} lightCol Color de la luz [r, g, b], cerca de 1.
+   * @param {number} time Tiempo del juego, en segundos (anima nubes y el Sol).
+   * @returns {{cv: HTMLCanvasElement, pad: number}|null} Lienzo cuadrado de lado 2·R·pad, o null
+   *   si no hay WebGL o el planeta no existe.
+   */
   function render(id, px, rot, light, lightCol, time) {
     if (!init() || KIND[id] === undefined) {
       return null;
@@ -18866,7 +19160,18 @@ void main(){
     },
   };
 })();
-// anillos con sus divisiones reales (C, B, Cassini, A, Encke) dibujados nítidos en 2D
+/**
+ * Dibuja media capa de los anillos de Saturno o Urano, con sus divisiones reales (anillos C, B,
+ * división de Cassini, A y división de Encke). Se llama dos veces, detrás y delante del planeta.
+ * Con el poder de anillos activo (ringBoostNow) el disco se abre y gira.
+ *
+ * @param {string} id Planeta; solo hace algo con 'saturno' y 'urano'.
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} R Radio del planeta, en píxeles de pantalla.
+ * @param {string} half 'back' (mitad de atrás) o 'front' (mitad de adelante).
+ * @param {boolean} locked Planeta bloqueado: dibuja solo un anillo gris.
+ */
 function planetRing(id, cx, cy, R, half, locked) {
   if (id !== 'saturno' && id !== 'urano') {
     return;
@@ -18938,8 +19243,8 @@ function planetRing(id, cx, cy, R, half, locked) {
   ctx.arc(0, 0, R * r0, 0, Math.PI * 2, true);
   ctx.fill('evenodd');
   if (bst > 0) {
-    // Anillos protectores: el disco de hielo se abre y gira (los de adentro más rápido, como en el
-    // Saturno real)
+    // Anillos protectores: el disco de hielo se abre y gira; los de adentro van más rápido, como
+    // en el Saturno real (ley de Kepler: velocidad angular proporcional a r^-1.5).
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = 0.16 * bst;
     ctx.strokeStyle = '#fff0cc';
@@ -18985,8 +19290,19 @@ function planetRing(id, cx, cy, R, half, locked) {
   ctx.restore();
 }
 
-// light: 'left' (pantalla de planetas, luz del Sol) o 'below' (en el juego, luz del disco del
-// agujero negro)
+/**
+ * Dibuja un planeta grande en HD con WebGL, con sus anillos detrás y delante.
+ * Si está bloqueado o no hay WebGL, usa el dibujo 2D.
+ *
+ * @param {string} id Planeta (tierra, luna, ..., sol).
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} R Radio, en píxeles de pantalla.
+ * @param {number} rot Giro sobre su eje, en radianes.
+ * @param {boolean} locked Planeta bloqueado (silueta oscura).
+ * @param {string|{x: number, y: number}} light 'left' (pantalla de planetas, luz del Sol),
+ *   'below' (en el juego, luz del disco del agujero negro) o una dirección {x, y}.
+ */
 function drawBigPlanet(id, cx, cy, R, rot, locked, light) {
   if (locked || !(R > 0.5)) {
     return drawBigPlanet2D(id, cx, cy, R, rot, locked, light);
@@ -19028,6 +19344,10 @@ function drawBigPlanet(id, cx, cy, R, rot, locked, light) {
   ctx.drawImage(res.cv, cx - h, cy - h, 2 * h, 2 * h);
   planetRing(id, cx, cy, R, 'front', false);
 }
+/**
+ * Versión 2D de drawBigPlanet, sin WebGL: color base, bandas y manchas que giran con `rot`.
+ * Recibe los mismos parámetros que drawBigPlanet.
+ */
 function drawBigPlanet2D(id, cx, cy, R, rot, locked, light) {
   const ring = (from, to) => {
     if (id === 'saturno') {
@@ -19140,7 +19460,14 @@ function drawBigPlanet2D(id, cx, cy, R, rot, locked, light) {
   }
   ring(0, Math.PI);
 }
-// el planeta del jugador en el juego: su tamaño real (en escala) cambia cómo se ve
+/**
+ * Dibuja el planeta del jugador en la partida, con sus efectos (escudo, Caronte, aviso de onda,
+ * sobrecalentamiento). Su tamaño real, en escala, cambia cómo se ve.
+ *
+ * @param {number} px Posición horizontal, en píxeles de pantalla.
+ * @param {number} py Posición vertical, en píxeles de pantalla.
+ * @param {number} rad Radio base, en píxeles de pantalla (se multiplica por sizeK()).
+ */
 function drawPlayer(px, py, rad) {
   if (!tutorial) {
     // un halo oscuro detrás de tu planeta para que siempre se despegue del fondo
@@ -19203,8 +19530,14 @@ function drawPlayer(px, py, rad) {
     drawHot(px, py, r);
   }
 }
-// sobrecalentado: brilla al rojo vivo, la atmósfera chisporrotea y sale humo (se queda así el resto
-// del intento)
+/**
+ * Planeta sobrecalentado: brilla al rojo vivo, la atmósfera chisporrotea y sale humo.
+ * Se queda así el resto del intento.
+ *
+ * @param {number} px Posición horizontal, en píxeles de pantalla.
+ * @param {number} py Posición vertical, en píxeles de pantalla.
+ * @param {number} r Radio, en píxeles de pantalla.
+ */
 function drawHot(px, py, r) {
   const k = Math.min(1, hotT / 0.4),
     pl = 0.5 + 0.5 * Math.sin(t * 6);
@@ -19254,6 +19587,11 @@ function drawHot(px, py, r) {
     });
   }
 }
+/**
+ * Dibuja un cuadro de la pantalla de planetas: fondo, carrusel en órbita y escáner.
+ *
+ * @param {number} dt Tiempo desde el cuadro anterior, en segundos.
+ */
 function renderPlanetsScene(dt) {
   t += dt;
   pSwap = Math.max(0, pSwap - dt * 3.2);
@@ -19324,8 +19662,13 @@ function renderPlanetsScene(dt) {
   ctx.globalAlpha = 1;
   ctx.restore();
 }
-// pantalla de planetas en órbita: el elegido grande arriba y los demás sobre una órbita; al
-// cambiar, todo gira contigo
+/**
+ * Carrusel de la pantalla de planetas: el elegido grande arriba y los demás sobre una órbita;
+ * al cambiar de planeta, todo gira con él.
+ *
+ * @param {number} dt Tiempo desde el cuadro anterior, en segundos.
+ * @param {object} P Planeta elegido (de PLANETS_P).
+ */
 function drawPlanetOrbit(dt, P) {
   const N = PLANETS_P.length;
   pPos += (pTarget - pPos) * Math.min(1, dt * 7.5);
@@ -19565,6 +19908,7 @@ const POW_ICO = {
   pluton: '<circle cx="9" cy="12" r="5.5"/><circle cx="18.5" cy="8" r="2.8"/>',
   sol: '<path d="M12 21.5c-4 0-6.5-2.8-6.5-6.3 0-3.7 3-5.4 3.5-9.7 2.4 1.6 3.4 3.8 3.4 5.6 1-.7 1.7-2 1.8-3.4 2.3 1.9 4.3 4.3 4.3 7.5 0 3.5-2.5 6.3-6.5 6.3z"/>',
 };
+/** Actualiza el HTML de la pantalla de planetas para el planeta elegido. */
 function renderPlanets() {
   if (!elPl) {
     return;
@@ -19781,6 +20125,11 @@ function renderPlanets() {
     scanOn = false;
   }
 }
+/**
+ * Pasa al planeta siguiente o anterior del carrusel.
+ *
+ * @param {number} d Pasos: 1 siguiente, -1 anterior.
+ */
 function planetStep(d) {
   pScan = false;
   pTarget += d;
@@ -19790,7 +20139,11 @@ function planetStep(d) {
   renderPlanets();
   warmNext(d);
 }
-// prepara en segundo plano la textura HD del siguiente planeta para que el cambio no dé tirón
+/**
+ * Prepara en segundo plano la textura HD del planeta que viene, para que el cambio sea fluido.
+ *
+ * @param {number} d Dirección del último paso: 1 o -1.
+ */
 function warmNext(d) {
   const n = PLANETS_P[(pIndex + (d || 1) + PLANETS_P.length) % PLANETS_P.length];
   setTimeout(() => {
@@ -19801,6 +20154,7 @@ function warmNext(d) {
     } catch (e) {}
   }, 450);
 }
+/** Abre la pantalla de planetas con el planeta que usa el jugador al centro. */
 function openPlanets() {
   try {
     localStorage.removeItem('orbita_pl_nuevo');
@@ -19824,6 +20178,7 @@ function openPlanets() {
     elHome.classList.add('off');
   }
 }
+/** Cierra la pantalla de planetas y vuelve al inicio. */
 function closePlanets() {
   scanOn = false;
   if (elPl) {
@@ -19837,7 +20192,11 @@ function closePlanets() {
     elHome.classList.remove('off');
   }
 }
-// sonido de cristal para las flechas: dos notas que suben (siguiente) o bajan (anterior)
+/**
+ * Sonido de cristal para las flechas: dos notas que suben (siguiente) o bajan (anterior).
+ *
+ * @param {number} dir Dirección: negativo baja, positivo sube.
+ */
 function uiGlass(dir) {
   if (!AC || muted) {
     return;
@@ -19852,14 +20211,27 @@ function uiGlass(dir) {
     uiTone(ROOT * 2 * Math.pow(2, seq[1] / 12), n + 0.07, 0.7, 0.015);
   } catch (e) {}
 }
-// ---------- Escanear: el planeta gira, se encoge y aparecen sus datos reales ----------
+/**
+ * Escáner de la pantalla de planetas: el planeta gira, se encoge y aparecen sus datos reales y
+ * cómo se siente en el juego. El dibujo del escaneo está en 29-planetas-hd.
+ */
+
+// scanOn: escaneo activo; scanK: avance de la animación, de 0 a 1; pRot: giro del planeta en
+// radianes; scanLineT: avance de la línea de luz; scanApplyAt: cuándo crecen las barras
+// (milisegundos de performance.now()).
 let scanOn = false,
   scanK = 0,
   pRot = 0,
   scanLineT = 0,
   scanApplyAt = 0;
-// cómo se siente cada característica en el juego: una palabra y su efecto (los números reales van
-// debajo)
+/**
+ * Cómo se siente una característica en el juego: una palabra y su efecto (los números reales
+ * van debajo).
+ *
+ * @param {string} k Característica: 'size' (tamaño), 'vel' (velocidad) o 'res' (resistencia).
+ * @param {number} v Diferencia con la Tierra, en porcentaje.
+ * @returns {string[]} [palabra, efecto].
+ */
 function statWords(k, v) {
   if (k === 'size') {
     return v <= -10
@@ -19881,6 +20253,7 @@ function statWords(k, v) {
       ? ['Algo frágil', 'aguanta un poco menos']
       : ['Firme', 'aguanta cerca del agujero negro'];
 }
+// filas de datos: [clave, título, texto de efecto, dato real del planeta, si el valor es ventaja]
 const STAT_ROWS = [
   [
     'size',
@@ -19915,7 +20288,10 @@ const STAT_ROWS = [
     v => v > 0,
   ],
 ];
-// las barras crecen desde el centro (la Tierra) cuando el planeta termina de encogerse
+/**
+ * Hace crecer las barras de datos desde el centro (la Tierra) cuando el planeta termina de
+ * encogerse, y luego muestra el poder.
+ */
 function applyScanBars() {
   if (!elPl || !elPl.querySelectorAll || !elPl.querySelector) {
     return;
@@ -19933,6 +20309,7 @@ function applyScanBars() {
     setTimeout(() => pw.classList.add('on'), 650);
   }
 }
+/** Sonido del escáner: un barrido que sube y un arpegio corto. */
 function uiScan() {
   if (!AC || muted) {
     return;
@@ -19957,6 +20334,11 @@ function uiScan() {
     );
   } catch (e) {}
 }
+/**
+ * Empieza o termina el escaneo del planeta.
+ *
+ * @param {boolean} on Escanear o dejar de escanear.
+ */
 function setScan(on) {
   scanOn = on;
   scanLineT = 0;
@@ -20698,9 +21080,13 @@ vec3 stars(vec2 q, float sc, float dens){
   return c;
 }
 `;
-// Andrómeda (nivel 3): el shader de la galaxia vista desde dentro
-// Andrómeda: disco inclinado ~77°, núcleo de estrellas viejas, brazos azules, franjas de polvo,
-// regiones rosadas, M32 y M110
+/**
+ * Shaders GLSL del fondo de Andrómeda (nivel 3), la galaxia vista desde dentro. Los usa el motor
+ * de fondos (32-fondos-9-motor). El texto GLSL es parte del programa: sus comentarios no se tocan.
+ */
+
+// Andrómeda (M31): disco inclinado ~77°, núcleo de estrellas viejas, brazos azules, franjas de
+// polvo, regiones rosadas y sus galaxias satélite M32 y M110.
 const FS_AND =
   BG_COMMON +
   `
@@ -20798,7 +21184,8 @@ void main(){
   col += (h21(q + fract(uT*7.3)*91.) - .5)*.035;                               // grano de cámara
   gl_FragColor = vec4(pow(max(col, 0.), vec3(.95)), 1.);
 }`;
-// Andrómeda: el viaje pasa por sus lugares reales, de las afueras al núcleo
+// Variante de viaje: pasa por lugares reales de Andrómeda, de las afueras al núcleo (NGC 206, M32,
+// el anillo de polvo que brilla en infrarrojo y el núcleo).
 const FS_AND2 =
   BG_COMMON +
   `
@@ -22037,7 +22424,10 @@ void main(){
 // fotos de Hubble, ESO, Webb y el EHT
 const FS_GX =
   BG_COMMON + GX_BASE + GX_CENTAURUS + GX_REMOLINO + GX_SOMBRERO + GX_M87 + GX_SAGITARIO + GX_FINAL;
-// fotos reales como fondo (si hay)
+/**
+ * Shader GLSL de fondo hecho con una foto real, cuando el nivel tiene una. La foto gira muy
+ * despacio y se acerca con la profundidad. Lo usa el motor de fondos (32-fondos-9-motor).
+ */
 const FS_PHOTO =
   BG_COMMON +
   `

@@ -1,11 +1,24 @@
-// ---------- Escanear: el planeta gira, se encoge y aparecen sus datos reales ----------
+/**
+ * Escáner de la pantalla de planetas: el planeta gira, se encoge y aparecen sus datos reales y
+ * cómo se siente en el juego. El dibujo del escaneo está en 29-planetas-hd.
+ */
+
+// scanOn: escaneo activo; scanK: avance de la animación, de 0 a 1; pRot: giro del planeta en
+// radianes; scanLineT: avance de la línea de luz; scanApplyAt: cuándo crecen las barras
+// (milisegundos de performance.now()).
 let scanOn = false,
   scanK = 0,
   pRot = 0,
   scanLineT = 0,
   scanApplyAt = 0;
-// cómo se siente cada característica en el juego: una palabra y su efecto (los números reales van
-// debajo)
+/**
+ * Cómo se siente una característica en el juego: una palabra y su efecto (los números reales
+ * van debajo).
+ *
+ * @param {string} k Característica: 'size' (tamaño), 'vel' (velocidad) o 'res' (resistencia).
+ * @param {number} v Diferencia con la Tierra, en porcentaje.
+ * @returns {string[]} [palabra, efecto].
+ */
 function statWords(k, v) {
   if (k === 'size') {
     return v <= -10
@@ -27,6 +40,7 @@ function statWords(k, v) {
       ? ['Algo frágil', 'aguanta un poco menos']
       : ['Firme', 'aguanta cerca del agujero negro'];
 }
+// filas de datos: [clave, título, texto de efecto, dato real del planeta, si el valor es ventaja]
 const STAT_ROWS = [
   [
     'size',
@@ -61,7 +75,10 @@ const STAT_ROWS = [
     v => v > 0,
   ],
 ];
-// las barras crecen desde el centro (la Tierra) cuando el planeta termina de encogerse
+/**
+ * Hace crecer las barras de datos desde el centro (la Tierra) cuando el planeta termina de
+ * encogerse, y luego muestra el poder.
+ */
 function applyScanBars() {
   if (!elPl || !elPl.querySelectorAll || !elPl.querySelector) {
     return;
@@ -79,6 +96,7 @@ function applyScanBars() {
     setTimeout(() => pw.classList.add('on'), 650);
   }
 }
+/** Sonido del escáner: un barrido que sube y un arpegio corto. */
 function uiScan() {
   if (!AC || muted) {
     return;
@@ -103,6 +121,11 @@ function uiScan() {
     );
   } catch (e) {}
 }
+/**
+ * Empieza o termina el escaneo del planeta.
+ *
+ * @param {boolean} on Escanear o dejar de escanear.
+ */
 function setScan(on) {
   scanOn = on;
   scanLineT = 0;
