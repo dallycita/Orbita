@@ -11202,14 +11202,15 @@ function drawInside(al) {
   ctx.restore();
 }
 // al salir: ondas que recorren los anillos
-// ---- espacio doblado (nivel 1, anillos 27–33): un agujero de gusano flota delante de ti y dobla
-// el espacio.
-// Es una lente gravitacional de verdad: todo lo que pasa cerca (anillos, asteroides y tu planeta)
-// se ve empujado
-// hacia afuera de la esfera, se estira en arcos y corre más rápido alrededor de su borde. Dentro se
-// ve el cielo del otro lado.
-// Dato real: la gravedad dobla la luz (Einstein, 1915); así se calculó la imagen del agujero de
-// gusano de Interstellar.
+/**
+ * Espacio doblado: un agujero de gusano flota delante del jugador y actúa como lente gravitacional.
+ * Lo que pasa cerca (anillos, asteroides, el planeta) se ve empujado hacia afuera de la esfera, se
+ * estira en arcos y corre más rápido por su borde; dentro se ve el cielo del otro lado.
+ * Dato real: la gravedad dobla la luz (Einstein, 1915); así se calculó el agujero de Interstellar.
+ */
+
+// BEND_AT[nivel] = [primer, último] nivel de anillo con lente; WH_K es el anillo de la boca del
+// gusano y WH_EXIT el de salida. BEND_R es el radio de Einstein de la lente.
 const BEND_AT = { 3: [26, 28] },
   BEND_R = 23,
   WORM_COL = '#d4c8ff',
@@ -11217,11 +11218,22 @@ const BEND_AT = { 3: [26, 28] },
   WH_EXIT = 41;
 let bend = { str: 0, a: -Math.PI / 2, L: 0, on: false, grow: 1, fixed: false },
   whRip = null;
+/**
+ * Radio actual de la lente: crece y se apaga con su fuerza.
+ *
+ * @returns {number} Radio, en unidades del mundo (se multiplica por S para pantalla).
+ */
 const bendRad = () => BEND_R * bend.str * (bend.grow || 1);
+/**
+ * Enciende, apaga y mueve la lente según el anillo en que va el jugador.
+ *
+ * @param {number} d Tiempo desde el cuadro anterior, en segundos.
+ */
 function bendUpdate(d) {
+  // durante la entrada y la salida la mueve el portal
   if (bend.fixed) {
     return;
-  } // durante la entrada y la salida la mueve el portal
+  }
   const z = BEND_AT[lvl],
     want = !tutorial && z && level >= z[0] && level <= z[1] && state === 'play' ? 1 : 0;
   if (want && !bend.on) {
@@ -11242,11 +11254,24 @@ function bendUpdate(d) {
   bend.a +=
     Math.atan2(Math.sin(aT - bend.a), Math.cos(aT - bend.a)) * Math.min(1, d * (lock ? 4 : 2));
 }
+/**
+ * Posición del centro de la lente respecto al agujero negro.
+ *
+ * @returns {number[]} [x, y], en unidades del mundo.
+ */
 function bendW() {
   const R = rr(bend.L);
   return [Math.cos(bend.a) * R, Math.sin(bend.a) * R];
 }
-// lente: un punto a distancia r del centro de la esfera se ve a (r + √(r² + 4θ²))/2
+/**
+ * Dónde se ve un punto a través de la lente (y de la onda gravitacional, si la hay). Con lente
+ * puntual, un punto a distancia r del centro se ve a (r + √(r² + 4θ²))/2, con θ el radio de
+ * Einstein.
+ *
+ * @param {number} x Posición horizontal, en unidades del mundo.
+ * @param {number} y Posición vertical, en unidades del mundo.
+ * @returns {number[]} [x, y] donde se ve, en unidades del mundo.
+ */
 function lensP(x, y) {
   if (whRip && !viewInside) {
     // onda gravitacional: estira y encoge el espacio al pasar
@@ -11272,8 +11297,15 @@ function lensP(x, y) {
     r2 = (r + Math.sqrt(r * r + 4 * te * te)) / 2;
   return [wx + (dx * r2) / r, wy + (dy * r2) / r];
 }
+/**
+ * Cuánto estira la lente un objeto en un punto, para deformar su dibujo.
+ *
+ * @param {number} x Posición horizontal, en unidades del mundo.
+ * @param {number} y Posición vertical, en unidades del mundo.
+ * @returns {number[]} [estiramiento tangencial (a lo largo del borde), radial (hacia el centro),
+ *   ángulo del punto visto desde la lente en radianes].
+ */
 function lensJ(x, y) {
-  // cuánto se estira: a lo largo del borde (tangencial) y hacia el centro (radial)
   if (bend.str < 0.01 || viewInside) {
     return [1, 1, 0];
   }
@@ -11285,6 +11317,7 @@ function lensJ(x, y) {
     q = Math.sqrt(r * r + 4 * te * te);
   return [(r + q) / (2 * r), 0.5 * (1 + r / q), Math.atan2(dy, dx)];
 }
+/** Dibuja la esfera del agujero de gusano con el cielo del otro lado dentro y un halo suave. */
 function drawBendSphere() {
   if (bend.str < 0.01 || viewInside) {
     return;
