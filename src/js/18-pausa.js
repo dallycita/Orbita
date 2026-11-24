@@ -274,8 +274,8 @@ function pzSub(t0, f0, f1, dur, gain) {
 /**
  * Sonidos de la pausa.
  *
- * @param {string} kind 'open', 'go', 'count', 'launch', 'again', 'levels', 'mute', 'unmute', 'slide' u
- *   'hover'.
+ * @param {string} kind 'open', 'go', 'count', 'launch', 'again', 'levels', 'mute', 'unmute',
+ *   'slide' u 'hover'.
  * @param {number} [v] Número de la cuenta (3, 2, 1) para 'count', o volumen de 0 a 100 para
  *   'slide'.
  */
