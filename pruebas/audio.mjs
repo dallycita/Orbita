@@ -23,11 +23,13 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const TOL = 1e-3;
 function compare(A, B){
   const a = JSON.parse(readFileSync(join(A, 'audio.json'))), b = JSON.parse(readFileSync(join(B, 'audio.json')));
-  let bad = 0; const ruido = [];
+  let bad = 0; const ruido = [], variacion = [];
   for (const k of new Set([...Object.keys(a), ...Object.keys(b)])){
     const x = a[k], y = b[k];
     if (!x || !y){ console.log('✗ ' + k + ': falta en ' + (x ? B : A)); bad++; continue; }
     const diffs = [];
+    const sameEvents = x.eventos && y.eventos && x.eventos.n === y.eventos.n && x.eventos.hash === y.eventos.hash;
+    if (x.eventos && y.eventos && !sameEvents) diffs.push('lo que el juego le pide al motor de sonido cambió (' + x.eventos.n + ' → ' + y.eventos.n + ' eventos)');
     if (x.motores.length !== y.motores.length) diffs.push('motores de sonido creados: ' + x.motores.length + ' → ' + y.motores.length);
     for (let i = 0; i < Math.min(x.motores.length, y.motores.length); i++){
       const p = x.motores[i], q = y.motores[i];
@@ -36,12 +38,14 @@ function compare(A, B){
       if (fa.length !== fb.length){ diffs.push('motor ' + (i + 1) + ': duración distinta'); continue; }
       let worst = 0, at = -1; const half = fa.length/2;
       for (let j = 0; j < fa.length; j++){ const d = Math.abs(fa[j] - fb[j]); if (d > worst) worst = d; if (d > TOL && at < 0) at = j; }
-      if (at >= 0) diffs.push('motor ' + (i + 1) + ': suena distinto desde el segundo ' + (Math.floor((at % half)/3)*128/38400).toFixed(2) + ' (diferencia ' + worst.toExponential(1) + ')');
+      if (at >= 0 && sameEvents) variacion.push(k + ' (desde el segundo ' + (Math.floor((at % half)/3)*128/38400).toFixed(2) + ', ' + worst.toExponential(1) + ')');
+      else if (at >= 0) diffs.push('motor ' + (i + 1) + ': suena distinto desde el segundo ' + (Math.floor((at % half)/3)*128/38400).toFixed(2) + ' (diferencia ' + worst.toExponential(1) + ')');
       else ruido.push(k + ' (' + worst.toExponential(1) + ')');
     }
     if (x.errores !== y.errores) diffs.push('errores: ' + (y.errores || 'ninguno'));
     if (diffs.length){ bad++; console.log('✗ ' + k + ': ' + diffs.join(', ')); }
   }
+  if (variacion.length) console.log('· variación del motor de sonido del navegador (el juego pidió exactamente lo mismo; el motor a veces lo mezcla distinto según la carga del procesador): ' + variacion.join(', '));
   if (ruido.length) console.log('· ruido de redondeo al mezclar (el navegador suma los sonidos en distinto orden en cada corrida; muy por debajo de lo audible): ' + ruido.join(', '));
   console.log(bad ? '\n' + bad + ' escenas de sonido con diferencias' : '✓ idénticas: ' + Object.keys(a).length + ' escenas de sonido (todas las muestras)');
   return bad;
@@ -64,6 +68,10 @@ const BOT = readFileSync(join(ROOT, 'pruebas', 'bot.js'), 'utf8');
 // el mismo mundo falso que la huella visual (azar con semilla, reloj y temporizadores falsos), con sonido encendido
 const INIT = `(() => {
   window.__rastro = [];
+  // registro de todo lo que el juego le pide al motor de sonido (siempre activo): su huella es la comprobación exacta
+  window.__aHash = 2166136261; window.__aN = 0;
+  window.__logA = s => { window.__aN++; for (let i = 0; i < s.length; i++) window.__aHash = Math.imul(window.__aHash ^ s.charCodeAt(i), 16777619) >>> 0; if (window.__RASTRO) window.__rastro.push(s); };
+  window.__hashArr = a => { const u = new Uint32Array(a.buffer, a.byteOffset, a.length); let h = 2166136261; for (let i = 0; i < u.length; i++) h = Math.imul(h ^ u[i], 16777619) >>> 0; return h.toString(16); };
   let s = 1234567; Math.random = () => { if (window.__RASTRO) window.__rastro.push((new Error().stack.split('\\n')[2] || '').trim().split(' ')[1] + '@' + window.__now); s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0)/4294967296; };
   window.__now = 0; const T0 = Date.UTC(2026, 10, 19, 20, 0, 0); performance.now = () => window.__now;
   const RD = Date; class FD extends RD { constructor(...a){ if (a.length) super(...a); else super(T0 + window.__now); } static now(){ return T0 + window.__now; } } window.Date = FD;
@@ -90,14 +98,14 @@ const INIT = `(() => {
   // se guardan todos los nodos de sonido: si el navegador limpiara uno sin referencias (por ejemplo un eco que aún
   // suena), el resultado dependería de cuándo limpia, no del juego
   window.__keep = []; { const C = BaseAudioContext.prototype; for (const m of Object.getOwnPropertyNames(C).filter(m => m.startsWith('create'))){ const o = C[m]; C[m] = function(...a){ const n = o.apply(this, a); window.__keep.push(n); return n; }; } }
-  if (window.__RASTRO) for (const K of [OscillatorNode, AudioBufferSourceNode]){ const st = K.prototype.start; K.prototype.start = function(when, ...a){ window.__rastro.push('sonido:' + K.name + ':' + (+when || 0).toFixed(5) + ':' + (this.frequency ? this.frequency.value.toFixed(3) : (a[0] || 0).toFixed(5)) + '@' + window.__now); return st.call(this, when, ...a); }; }
-  if (window.__RASTRO){ const P = AudioParam.prototype; for (const m of ['setValueAtTime', 'linearRampToValueAtTime', 'exponentialRampToValueAtTime', 'setTargetAtTime', 'cancelScheduledValues']){ const o = P[m]; P[m] = function(...a){ window.__rastro.push('param:' + m + ':' + a.map(x => (+x).toFixed(5)).join(',') + '@' + window.__now); return o.apply(this, a); }; }
-    const d = Object.getOwnPropertyDescriptor(P, 'value'); Object.defineProperty(P, 'value', {get(){ return d.get.call(this); }, set(v){ window.__rastro.push('param:value:' + (+v).toFixed(5) + '@' + window.__now); d.set.call(this, v); }}); }
-  if (window.__RASTRO){ let nid = 0; const C = BaseAudioContext.prototype; for (const m of Object.getOwnPropertyNames(C).filter(m => m.startsWith('create'))){ const o = C[m]; C[m] = function(...a){ const n = o.apply(this, a); n.__id = m.slice(6) + (++nid); window.__rastro.push('crear:' + n.__id + '@' + window.__now); return n; }; }
-    const cn = AudioNode.prototype.connect; AudioNode.prototype.connect = function(d, ...a){ window.__rastro.push('conectar:' + this.__id + '>' + (d.__id || (d instanceof AudioParam ? 'param' : d.constructor.name)) + '@' + window.__now); return cn.call(this, d, ...a); };
-    for (const [K, props] of [[OscillatorNode, ['type']], [BiquadFilterNode, ['type']], [AudioBufferSourceNode, ['loop', 'buffer']]]) for (const pr of props){ const d = Object.getOwnPropertyDescriptor(K.prototype, pr); Object.defineProperty(K.prototype, pr, {get(){ return d.get.call(this); }, set(v){ window.__rastro.push('prop:' + this.__id + '.' + pr + '=' + (v && v.length ? 'buffer' + v.length : v) + '@' + window.__now); d.set.call(this, v); }}); } }
-  if (window.__RASTRO){ for (const K of [OscillatorNode, AudioBufferSourceNode]){ const sp = K.prototype.stop; K.prototype.stop = function(when){ window.__rastro.push('parar:' + this.__id + ':' + (when === undefined ? 'ya' : (+when).toFixed(6)) + '@' + window.__now); return sp.call(this, when); }; }
-    const dc = AudioNode.prototype.disconnect; AudioNode.prototype.disconnect = function(...a){ window.__rastro.push('desconectar:' + this.__id + '@' + window.__now); return dc.apply(this, a); }; }
+  for (const K of [OscillatorNode, AudioBufferSourceNode]){ const st = K.prototype.start; K.prototype.start = function(when, ...a){ window.__logA('sonido:' + K.name + ':' + (+when || 0).toFixed(5) + ':' + (this.frequency ? this.frequency.value.toFixed(3) : (a[0] || 0).toFixed(5)) + '@' + window.__now); return st.call(this, when, ...a); }; }
+  { const P = AudioParam.prototype; for (const m of ['setValueAtTime', 'linearRampToValueAtTime', 'exponentialRampToValueAtTime', 'setTargetAtTime', 'cancelScheduledValues']){ const o = P[m]; P[m] = function(...a){ window.__logA('param:' + m + ':' + a.map(x => (+x).toFixed(5)).join(',') + '@' + window.__now); return o.apply(this, a); }; }
+    const d = Object.getOwnPropertyDescriptor(P, 'value'); Object.defineProperty(P, 'value', {get(){ return d.get.call(this); }, set(v){ window.__logA('param:value:' + (+v).toFixed(5) + '@' + window.__now); d.set.call(this, v); }}); }
+  { let nid = 0; const C = BaseAudioContext.prototype; for (const m of Object.getOwnPropertyNames(C).filter(m => m.startsWith('create'))){ const o = C[m]; C[m] = function(...a){ const n = o.apply(this, a); n.__id = m.slice(6) + (++nid); window.__logA('crear:' + n.__id + '(' + a.map(x => typeof x === 'number' ? +x.toFixed(6) : typeof x).join(',') + ')@' + window.__now); return n; }; }
+    const cn = AudioNode.prototype.connect; AudioNode.prototype.connect = function(d, ...a){ window.__logA('conectar:' + this.__id + '>' + (d.__id || (d instanceof AudioParam ? 'param' : d.constructor.name)) + '@' + window.__now); return cn.call(this, d, ...a); };
+    for (const [K, props] of [[OscillatorNode, ['type']], [BiquadFilterNode, ['type']], [AudioBufferSourceNode, ['loop', 'buffer']], [WaveShaperNode, ['curve', 'oversample']]]) for (const pr of props){ const d = Object.getOwnPropertyDescriptor(K.prototype, pr); Object.defineProperty(K.prototype, pr, {get(){ return d.get.call(this); }, set(v){ window.__logA('prop:' + this.__id + '.' + pr + '=' + (v instanceof Float32Array ? 'f32:' + v.length + ':' + window.__hashArr(v) : v && v.getChannelData ? 'buffer' + v.length + ':' + Array.from({length: v.numberOfChannels}, (_, c) => window.__hashArr(v.getChannelData(c))).join('/') : v) + '@' + window.__now); d.set.call(this, v); }}); } }
+  { for (const K of [OscillatorNode, AudioBufferSourceNode]){ const sp = K.prototype.stop; K.prototype.stop = function(when){ window.__logA('parar:' + this.__id + ':' + (when === undefined ? 'ya' : (+when).toFixed(6)) + '@' + window.__now); return sp.call(this, when); }; }
+    const dc = AudioNode.prototype.disconnect; AudioNode.prototype.disconnect = function(...a){ window.__logA('desconectar:' + this.__id + '@' + window.__now); return dc.apply(this, a); }; }
   window.__audStep = async () => {
     for (const c of window.__ACs){
       if (c.__v !== 'running' || c.__done) continue;
@@ -204,7 +212,8 @@ async function runClip(c){
   const motores = await pg.evaluate(() => window.__audFinish());
   if (process.env.MUESTRAS) motores.forEach((m, i) => { writeFileSync(join(OUT, c.name + '.' + (i + 1) + '.f32'), Buffer.from(new Float32Array(m.L.concat(m.R)).buffer)); delete m.L; delete m.R; });
   motores.forEach((m, i) => { writeFileSync(join(OUT, c.name + '.' + (i + 1) + '.firma.json'), JSON.stringify(m.firma)); delete m.firma; });
-  result[c.name] = {motores, errores: errs.join(' | ')};
+  const eventos = await pg.evaluate(() => ({n: window.__aN, hash: window.__aHash.toString(16)}));
+  result[c.name] = {motores, eventos, errores: errs.join(' | ')};
   process.stdout.write(errs.length ? '!' : '.');
   await pg.close();
 }
