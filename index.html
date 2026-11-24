@@ -8446,9 +8446,18 @@ const debris = Array.from({ length: 60 }, () => ({
   r: 60 + Math.random() * 180,
 }));
 const JUMP_DUR = 0.12;
-// generador con semilla fija: el recorrido es siempre el mismo, como un nivel de Geometry Dash
+/**
+ * Recorridos fijos de los niveles 1 a 3: qué tipo de anillo hay en cada posición, y el generador
+ * aleatorio con semilla fija que hace que cada partida sea igual.
+ */
+// Generador con semilla fija: el recorrido es siempre el mismo, como un nivel de Geometry Dash.
 const SEED = 20261007;
 let rngState = SEED;
+/**
+ * Número aleatorio repetible (algoritmo mulberry32) a partir de `rngState`.
+ *
+ * @returns {number} Número entre 0 (incluido) y 1 (excluido).
+ */
 function rng() {
   rngState |= 0;
   rngState = (rngState + 0x6d2b79f5) | 0;
@@ -8456,7 +8465,8 @@ function rng() {
   x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
   return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
 }
-// tipos de anillo: se presentan uno por uno y luego se mezclan en bloques de 2 a 4 anillos
+// Tipos de anillo con su nombre y su consejo. Se presentan uno por uno y luego se mezclan en
+// bloques de 2 a 4 anillos.
 const TYPE_INFO = {
   muralla: ['Muralla', 'Espera el hueco'],
   respiracion: ['Respiración', 'Salta cuando se encojan'],
@@ -8468,6 +8478,7 @@ const TYPE_INFO = {
   nova: ['Nova', 'Salta cuando estalle'],
   arrastre: ['Arrastre del espacio', 'Te lleva consigo: salta cuando coincidas'],
 };
+// Recorridos como bloques [cantidad de anillos, tipo].
 const COURSE = [
   [6, 'clasico'],
   [2, 'muralla'],
@@ -8522,6 +8533,7 @@ const COURSE3 = [
   [5, 'clasico'],
   [3, 'escalera'],
 ]; // nivel 3: 49 anillos + la salida
+// Mapas anillo por anillo (el anillo 0 es el inicial), rellenados con clásicos hasta 60.
 const courseMap3 = ['clasico'];
 for (const [n, ty] of COURSE3) {
   for (let i = 0; i < n; i++) {
@@ -8551,6 +8563,12 @@ const courseMap = ['clasico'];
     courseMap.push('clasico');
   }
 })();
+/**
+ * Tipo del anillo `k` en el nivel actual (o en el tutorial); la salida (`GOAL`) es una muralla.
+ *
+ * @param {number} k Nivel de anillo.
+ * @returns {string} Tipo de anillo.
+ */
 const ringType = k =>
   tutorial
     ? TUT_TYPES[k] || 'vacio'
@@ -8559,6 +8577,7 @@ const ringType = k =>
       : (lvl >= 3 ? courseMaps[lvl] : lvl === 2 ? courseMap3 : lvl === 1 ? courseMap2 : courseMap)[
           Math.min(k, 59)
         ];
+// Tipos de anillo ya presentados al jugador, guardados en `orbita_p1_vistos`.
 let seenTypes = {};
 try {
   seenTypes = JSON.parse(localStorage.getItem('orbita_p1_vistos') || '{}') || {};
