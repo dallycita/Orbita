@@ -44,6 +44,6 @@ Cada una se decide aparte, cuando termine la limpieza.
 
 ## Pedido de la dueña para después de la limpieza
 
-- **Fluidez:** el juego se siente lento entre saltos. En el equipo de la dueña el medidor marca 30 FPS y baja hasta 12 (en una Mac rápida iba a 60): es rendimiento. Primero medir con el "Medidor de rendimiento" en el celular
+- **Fluidez:** el juego se siente lento entre saltos. En el equipo de la dueña el medidor marca 30 FPS y baja hasta 12 (en una Mac rápida iba a 60): es rendimiento. El medidor marca "código" de 40 a 60 ms por cuadro: el procesador no alcanza (el cuadro debe caber en 16 ms). Revisar: objetos creados en cada cuadro (degradados, listas, textos), shadowBlur, la copia del fondo WebGL al lienzo y la resolución de dibujo. Primero medir con el "Medidor de rendimiento" en el celular
   para saber si es rendimiento (cuadros perdidos) o el ritmo del juego (duración del salto, cámara, cámara lenta del
   "Perfecto"). Lo segundo cambia cómo se juega.
