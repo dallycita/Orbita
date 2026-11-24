@@ -129,13 +129,8 @@ import {
   texts,
   tutorial,
 } from './08-partida-estado.js';
-import { SEED, TYPE_INFO, ringType, rng, seenTypes, setRngState } from './09-recorridos.js';
+import { SEED, ringType, rng, seenTypes, setRngState } from './09-recorridos.js';
 import {
-  COIN_RINGS,
-  NEB_AT,
-  OBJ_NEBULA,
-  OBJ_PULSAR,
-  PUL_AT,
   RING_MUL,
   coinChime,
   objChime,
@@ -175,9 +170,12 @@ import { TUNE, hazardsOnLand, hazardsReset, setWaveBeepT, setWaveProx } from './
 import { tutRespawn, tutorialWin } from './17-tutorial.js';
 import { powerReadySound } from './21-dibujo.js';
 import { noteDouble } from './23-intro.js';
-import { LEVELS, lvStarsGot, setPendingTut } from './25-selector-niveles.js';
+import { lvStarsGot, setPendingTut } from './25-selector-niveles.js';
 import { GLBG } from './32-fondos-9-motor.js';
 import { misEvent, misWin } from './34-misiones.js';
+import { COIN_RINGS, LEVELS } from './data/levels.js';
+import { TYPE_INFO } from './data/courses.js';
+import { NEB_AT, OBJ_NEBULA, OBJ_PULSAR, PUL_AT } from './data/hazards.js';
 
 /**
  * Crea un anillo con sus obstáculos y su giro según el tipo que le toca en el nivel.

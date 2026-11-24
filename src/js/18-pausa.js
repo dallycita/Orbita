@@ -19,11 +19,12 @@ import {
 import { stopMusic } from './05-musica-reproductor.js';
 import { bestOf, level, lvl, rings, setState, state } from './06-record-y-estado.js';
 import { curGoal, setGest, setPending, tutorial } from './08-partida-estado.js';
-import { COIN_RINGS } from './10-ritmo-y-objetos.js';
+
 import { sesTries, setSesTries, showTry, start } from './16-partida.js';
-import { LEVELS, lvStarsGot, openLevels } from './25-selector-niveles.js';
+import { lvStarsGot, openLevels } from './25-selector-niveles.js';
 import { muted } from './26-pantalla-inicio.js';
 import { setLast } from './36-bucle-principal.js';
+import { COIN_RINGS, LEVELS } from './data/levels.js';
 
 let paused = false,
   pzCount = null,

@@ -6,6 +6,183 @@
 import { GOAL, bestOf, bestRing } from './06-record-y-estado.js';
 import { JUMP_DUR, perfCount } from './08-partida-estado.js';
 import { PLGL } from './29-planetas-hd.js';
+import { PLANET_SVG } from './data/planets.js';
+
+// Planeta elegido, récord de Perfectos en una partida, secreto de Plutón, truco de todos los
+// planetas, cargas de escudo y si se usó el salto doble en la partida.
+let curPlanet = 'tierra',
+  maxPerf = 0,
+  plutoOk = false,
+  allPlanets = false,
+  shieldLeft = 0,
+  usedDouble = false;
+/**
+ * @param {object} P Planeta de PLANETS_P.
+ * @returns {boolean} true si está desbloqueado.
+ */
+const planetOk = P => allPlanets || P.ok();
+/** @returns {object} Datos del planeta elegido (la Tierra si no se encuentra). */
+const curP = () => PLANETS_P.find(P => P.id === curPlanet) || PLANETS_P[3];
+/** @returns {object} Estadísticas del planeta elegido. */
+const pst = () => curP().st;
+/** @returns {number} Perfectos necesarios para cargar el poder (de la rotación real). */
+const chargeMax = () => pst().charge;
+/**
+ * Factor de tamaño del planeta según su diámetro real: de Plutón (×0.85) a Júpiter (×1.22), se
+ * nota sin ser abismal.
+ *
+ * @returns {number} Multiplicador del radio.
+ */
+const sizeK = () => 1 + (pst().size / 100) * 0.7;
+/**
+ * Duración del salto según la velocidad orbital real: los lentos flotan hasta ~40 % más tiempo.
+ *
+ * @returns {number} Duración, en segundos.
+ */
+const jumpDur = () => Math.max(0.09, JUMP_DUR * (1 - (pst().vel / 100) * 0.75));
+/**
+ * Margen con que el agujero negro alcanza al planeta según su densidad real: los menos densos se
+ * despedazan antes por la marea (hasta ~media vuelta de anillo antes).
+ *
+ * @returns {number} Margen, en niveles de anillo.
+ */
+const catchMargin = () => 0.18 - (pst().res / 100) * 0.6;
+/** @returns {string[]} Identificadores de los planetas desbloqueados. */
+const unlockedIds = () => PLANETS_P.filter(planetOk).map(P => P.id);
+/**
+ * Miniatura de un planeta para la interfaz: imagen 3D si hay WebGL, si no su ícono SVG.
+ *
+ * @param {string} id Identificador del planeta.
+ * @returns {string} HTML de la miniatura (vacío si no hay ícono).
+ */
+function planetThumb(id) {
+  try {
+    const r = PLGL.render(id, 120, 0.6, [-0.78, 0.42, 0.48], [1.12, 1.06, 0.98], 1);
+    if (r && r.cv.toDataURL) {
+      return '<img src="' + r.cv.toDataURL() + '" alt="">';
+    }
+  } catch (e) {}
+  return PLANET_SVG[id]
+    ? '<svg viewBox="0 0 100 100" aria-hidden="true">' + PLANET_SVG[id] + '</svg>'
+    : '';
+}
+/** Guarda que hay planetas recién rescatados, para avisar en el menú. */
+function markNewPlanets() {
+  try {
+    localStorage.setItem('orbita_pl_nuevo', '1');
+  } catch (e) {}
+}
+/**
+ * HTML con las miniaturas de los planetas rescatados desde una lista anterior.
+ *
+ * @param {string[]} before Planetas desbloqueados antes de la partida.
+ * @returns {string} HTML, o '' si no se rescató ninguno.
+ */
+function rescuedCards(before) {
+  const now = unlockedIds(),
+    nuevos = PLANETS_P.filter(P => now.includes(P.id) && !before.includes(P.id));
+  if (!nuevos.length) {
+    return '';
+  }
+  return (
+    '<div class="wres"><div class="wpl">' +
+    nuevos
+      .map(P => '<span class="wp" title="' + P.name + '">' + planetThumb(P.id) + '</span>')
+      .join('') +
+    '</div>' +
+    '<small>' +
+    (nuevos.length > 1 ? 'Rescatados' : 'Rescatado') +
+    '</small></div>'
+  );
+}
+/** Guarda el récord de Perfectos en una partida, que desbloquea a Mercurio y Urano. */
+function saveRunStats() {
+  if (perfCount > maxPerf) {
+    maxPerf = perfCount;
+    try {
+      localStorage.setItem('orbita_p1_maxperf', String(maxPerf));
+    } catch (e) {}
+  }
+}
+
+/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
+export function initPlanets() {
+  try {
+    curPlanet = localStorage.getItem('orbita_p1_planeta') || 'tierra';
+    maxPerf = parseInt(localStorage.getItem('orbita_p1_maxperf') || '0', 10) || 0;
+    plutoOk = localStorage.getItem('orbita_p1_pluton') === '1';
+    allPlanets = localStorage.getItem('orbita_p1_todos') === '1';
+  } catch (e) {}
+  if (!PLANETS_P.some(P => P.id === curPlanet)) {
+    curPlanet = 'tierra';
+  }
+}
+
+/**
+ * Cambia `allPlanets` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setAllPlanets(value) {
+  allPlanets = value;
+  return value;
+}
+
+/**
+ * Cambia `curPlanet` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setCurPlanet(value) {
+  curPlanet = value;
+  return value;
+}
+
+/**
+ * Cambia `maxPerf` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setMaxPerf(value) {
+  maxPerf = value;
+  return value;
+}
+
+/**
+ * Cambia `plutoOk` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setPlutoOk(value) {
+  plutoOk = value;
+  return value;
+}
+
+/**
+ * Cambia `shieldLeft` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setShieldLeft(value) {
+  shieldLeft = value;
+  return value;
+}
+
+/**
+ * Cambia `usedDouble` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+export function setUsedDouble(value) {
+  usedDouble = value;
+  return value;
+}
 
 // Estadísticas sacadas de datos reales: size del diámetro (escala logarítmica), vel de la
 // velocidad orbital, res de la densidad (resistencia a la fuerza de marea) y charge de la
@@ -211,198 +388,9 @@ const PLANETS_P = [
     ],
   },
 ];
-// Planeta elegido, récord de Perfectos en una partida, secreto de Plutón, truco de todos los
-// planetas, cargas de escudo y si se usó el salto doble en la partida.
-let curPlanet = 'tierra',
-  maxPerf = 0,
-  plutoOk = false,
-  allPlanets = false,
-  shieldLeft = 0,
-  usedDouble = false;
-/**
- * @param {object} P Planeta de PLANETS_P.
- * @returns {boolean} true si está desbloqueado.
- */
-const planetOk = P => allPlanets || P.ok();
-/** @returns {object} Datos del planeta elegido (la Tierra si no se encuentra). */
-const curP = () => PLANETS_P.find(P => P.id === curPlanet) || PLANETS_P[3];
-/** @returns {object} Estadísticas del planeta elegido. */
-const pst = () => curP().st;
-/** @returns {number} Perfectos necesarios para cargar el poder (de la rotación real). */
-const chargeMax = () => pst().charge;
-/**
- * Factor de tamaño del planeta según su diámetro real: de Plutón (×0.85) a Júpiter (×1.22), se
- * nota sin ser abismal.
- *
- * @returns {number} Multiplicador del radio.
- */
-const sizeK = () => 1 + (pst().size / 100) * 0.7;
-/**
- * Duración del salto según la velocidad orbital real: los lentos flotan hasta ~40 % más tiempo.
- *
- * @returns {number} Duración, en segundos.
- */
-const jumpDur = () => Math.max(0.09, JUMP_DUR * (1 - (pst().vel / 100) * 0.75));
-/**
- * Margen con que el agujero negro alcanza al planeta según su densidad real: los menos densos se
- * despedazan antes por la marea (hasta ~media vuelta de anillo antes).
- *
- * @returns {number} Margen, en niveles de anillo.
- */
-const catchMargin = () => 0.18 - (pst().res / 100) * 0.6;
-/** @returns {string[]} Identificadores de los planetas desbloqueados. */
-const unlockedIds = () => PLANETS_P.filter(planetOk).map(P => P.id);
-/**
- * Miniatura de un planeta para la interfaz: imagen 3D si hay WebGL, si no su ícono SVG.
- *
- * @param {string} id Identificador del planeta.
- * @returns {string} HTML de la miniatura (vacío si no hay ícono).
- */
-function planetThumb(id) {
-  try {
-    const r = PLGL.render(id, 120, 0.6, [-0.78, 0.42, 0.48], [1.12, 1.06, 0.98], 1);
-    if (r && r.cv.toDataURL) {
-      return '<img src="' + r.cv.toDataURL() + '" alt="">';
-    }
-  } catch (e) {}
-  return PLANET_SVG[id]
-    ? '<svg viewBox="0 0 100 100" aria-hidden="true">' + PLANET_SVG[id] + '</svg>'
-    : '';
-}
-/** Guarda que hay planetas recién rescatados, para avisar en el menú. */
-function markNewPlanets() {
-  try {
-    localStorage.setItem('orbita_pl_nuevo', '1');
-  } catch (e) {}
-}
-/**
- * HTML con las miniaturas de los planetas rescatados desde una lista anterior.
- *
- * @param {string[]} before Planetas desbloqueados antes de la partida.
- * @returns {string} HTML, o '' si no se rescató ninguno.
- */
-function rescuedCards(before) {
-  const now = unlockedIds(),
-    nuevos = PLANETS_P.filter(P => now.includes(P.id) && !before.includes(P.id));
-  if (!nuevos.length) {
-    return '';
-  }
-  return (
-    '<div class="wres"><div class="wpl">' +
-    nuevos
-      .map(P => '<span class="wp" title="' + P.name + '">' + planetThumb(P.id) + '</span>')
-      .join('') +
-    '</div>' +
-    '<small>' +
-    (nuevos.length > 1 ? 'Rescatados' : 'Rescatado') +
-    '</small></div>'
-  );
-}
-/** Guarda el récord de Perfectos en una partida, que desbloquea a Mercurio y Urano. */
-function saveRunStats() {
-  if (perfCount > maxPerf) {
-    maxPerf = perfCount;
-    try {
-      localStorage.setItem('orbita_p1_maxperf', String(maxPerf));
-    } catch (e) {}
-  }
-}
-// Íconos SVG de respaldo para la pantalla de planetas (sin WebGL).
-const PLANET_SVG = {
-  tierra:
-    '<circle cx="50" cy="50" r="26" fill="#3d8bff"/><path d="M34 40 Q42 30 52 38 Q48 48 38 47 Z M56 56 Q66 50 70 60 Q62 70 55 64 Z" fill="#5ccf6b"/><path d="M30 46 Q50 42 70 47" stroke="#fff" stroke-opacity=".7" stroke-width="2" fill="none"/>',
-  saturno:
-    '<ellipse cx="50" cy="50" rx="44" ry="12" transform="rotate(-18 50 50)" fill="none" stroke="#f3e2b0" stroke-width="5" stroke-opacity=".9"/><circle cx="50" cy="50" r="22" fill="#e6cf8f"/><rect x="28" y="44" width="44" height="4" fill="#c9a86a" opacity=".6"/><rect x="28" y="53" width="44" height="5" fill="#c9a86a" opacity=".5"/><path d="M8 58 A44 12 -18 0 0 92 42" transform="rotate(0)" fill="none" stroke="#f3e2b0" stroke-width="5" stroke-opacity=".9"/>',
-  urano:
-    '<ellipse cx="50" cy="50" rx="9" ry="40" transform="rotate(8 50 50)" fill="none" stroke="#c8f0fa" stroke-width="3" stroke-opacity=".6"/><circle cx="50" cy="50" r="23" fill="#8fd3e0"/>',
-  neptuno:
-    '<circle cx="50" cy="50" r="24" fill="#3f6fd6"/><rect x="26" y="42" width="48" height="5" fill="#2b4fa8" opacity=".6"/><ellipse cx="58" cy="57" rx="6" ry="3.5" fill="#1f3f8f" opacity=".8"/>',
-  pluton:
-    '<circle cx="50" cy="50" r="17" fill="#d9c7b4"/><path d="M52 62 C44 57 45 49 52 52 C59 49 60 57 52 62 Z" fill="#f4ebe0"/>',
-};
-
-/** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
-export function initPlanets() {
-  try {
-    curPlanet = localStorage.getItem('orbita_p1_planeta') || 'tierra';
-    maxPerf = parseInt(localStorage.getItem('orbita_p1_maxperf') || '0', 10) || 0;
-    plutoOk = localStorage.getItem('orbita_p1_pluton') === '1';
-    allPlanets = localStorage.getItem('orbita_p1_todos') === '1';
-  } catch (e) {}
-  if (!PLANETS_P.some(P => P.id === curPlanet)) {
-    curPlanet = 'tierra';
-  }
-}
-
-/**
- * Cambia `allPlanets` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setAllPlanets(value) {
-  allPlanets = value;
-  return value;
-}
-
-/**
- * Cambia `curPlanet` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setCurPlanet(value) {
-  curPlanet = value;
-  return value;
-}
-
-/**
- * Cambia `maxPerf` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setMaxPerf(value) {
-  maxPerf = value;
-  return value;
-}
-
-/**
- * Cambia `plutoOk` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setPlutoOk(value) {
-  plutoOk = value;
-  return value;
-}
-
-/**
- * Cambia `shieldLeft` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setShieldLeft(value) {
-  shieldLeft = value;
-  return value;
-}
-
-/**
- * Cambia `usedDouble` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setUsedDouble(value) {
-  usedDouble = value;
-  return value;
-}
 
 export {
   PLANETS_P,
-  PLANET_SVG,
   allPlanets,
   catchMargin,
   chargeMax,

@@ -7,8 +7,9 @@
 import { H, W, ctx } from './01-pantalla-y-utilidades.js';
 import { t } from './08-partida-estado.js';
 import { BR0, BR1, SK, bhCore, bhDiskK } from './24-presentacion.js';
-import { LEVELS, elLv } from './25-selector-niveles.js';
+import { elLv } from './25-selector-niveles.js';
 import { drawBigPlanet } from './29-planetas-hd.js';
+import { LEVELS } from './data/levels.js';
 
 // Una sola escena WebGL a pantalla completa: al deslizar, mezcla las dos galaxias vecinas y cada
 // una se mueve con su tarjeta.

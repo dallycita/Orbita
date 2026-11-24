@@ -42,7 +42,6 @@ import { pauseGame, pausePress, paused, pzCount, resumeGame } from './18-pausa.j
 import { endIntro } from './23-intro.js';
 import { skipSplash, splashT } from './24-presentacion.js';
 import {
-  LEVELS,
   elLv,
   openLevels,
   pendingTut,
@@ -54,6 +53,7 @@ import { elHome, openHome } from './26-pantalla-inicio.js';
 import { HOME_IN, homeT, setHomeT, setLogoT0 } from './27-inicio-animacion.js';
 import { showStop } from './28-sonidos-interfaz.js';
 import { planetStep, uiGlass } from './29-planetas-hd.js';
+import { LEVELS } from './data/levels.js';
 
 /**
  * Atiende un toque o la tecla de acción según la pantalla actual: pausa, botones de los paneles,

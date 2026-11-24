@@ -137,6 +137,26 @@ if (exportedNeeded.size){
   const all = [...new Set([...(m ? m[1].split(',').map(x => x.trim()).filter(Boolean) : []), ...exportedNeeded])].sort();
   dst = m ? dst.replace(m[0], 'export { ' + all.join(', ') + ' };') : dst.replace(/\s*$/, '\n\nexport { ' + all.join(', ') + ' };\n');
 }
+// limpiar imports: en el destino, lo movido ya no se importa; en los dos, se quita lo que quedó sin uso
+function pruneImports(code, drop){
+  for (let guard = 0; guard < 200; guard++){
+    const a = parse(code), s2 = eslintScope.analyze(a, { ecmaVersion: 2022, sourceType: 'module' });
+    const mod = s2.scopes.find(x => x.type === 'module');
+    let edit = null;
+    for (const imp of importsOf(a)){
+      const keep = imp.specifiers.filter(sp => !drop.has(sp.local.name) && (mod.set.get(sp.local.name) || { references: [1] }).references.length > 0);
+      if (keep.length === imp.specifiers.length) continue;
+      const text = keep.length ? 'import { ' + keep.map(sp => sp.imported.name === sp.local.name ? sp.local.name : sp.imported.name + ' as ' + sp.local.name).join(', ') + " } from '" + imp.source.value + "';" : '';
+      let end = imp.range[1]; if (!keep.length && code[end] === '\n') end++;
+      edit = [imp.range[0], end, text]; break;
+    }
+    if (!edit) return code;
+    code = code.slice(0, edit[0]) + edit[2] + code.slice(edit[1]);
+  }
+  return code;
+}
+dst = pruneImports(dst, moved);
+src = pruneImports(src, new Set());
 mkdirSync(dirname(TO), { recursive: true });
 writeFileSync(FROM, src); writeFileSync(TO, dst);
 console.log('✓ movidos ' + [...moved].join(', ') + ' de ' + fromRel + ' a ' + toRel + (users.size ? ' · imports arreglados en ' + users.size + ' archivos' : ''));

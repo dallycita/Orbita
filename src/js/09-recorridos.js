@@ -5,6 +5,7 @@
 import { GOAL, lvl } from './06-record-y-estado.js';
 import { TUT_TYPES, tutorial } from './08-partida-estado.js';
 import { courseMaps } from './10-ritmo-y-objetos.js';
+import { COURSE, COURSE2, COURSE3, courseMap, courseMap2, courseMap3 } from './data/courses.js';
 
 // Generador con semilla fija: el recorrido es siempre el mismo, como un nivel de Geometry Dash.
 const SEED = 20261007;
@@ -21,78 +22,6 @@ function rng() {
   x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
   return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
 }
-// Tipos de anillo con su nombre y su consejo. Se presentan uno por uno y luego se mezclan en
-// bloques de 2 a 4 anillos.
-const TYPE_INFO = {
-  muralla: ['Muralla', 'Espera el hueco'],
-  respiracion: ['Respiración', 'Salta cuando se encojan'],
-  contragiro: ['Contragiro', 'Salta cuando se separen'],
-  freno: ['Freno', 'Cambia de dirección'],
-  escalera: ['Escalera', 'Salta seguido'],
-  orbita: ['Órbita', 'Toca para cambiar de sentido'],
-  marea: ['Fuerzas de marea', 'Acelera y frena: espera el hueco'],
-  nova: ['Nova', 'Salta cuando estalle'],
-  arrastre: ['Arrastre del espacio', 'Te lleva consigo: salta cuando coincidas'],
-};
-// Recorridos como bloques [cantidad de anillos, tipo].
-const COURSE = [
-  [6, 'clasico'],
-  [2, 'muralla'],
-  [3, 'clasico'],
-  [3, 'respiracion'],
-  [3, 'clasico'],
-  [3, 'escalera'],
-  [3, 'clasico'],
-  [3, 'muralla'],
-  [2, 'clasico'],
-  [3, 'respiracion'],
-  [2, 'clasico'],
-  [3, 'escalera'],
-  [2, 'clasico'],
-  [3, 'muralla'],
-  [2, 'clasico'],
-  [3, 'respiracion'],
-  [3, 'escalera'],
-]; // nivel 1: 49 anillos + la salida
-const COURSE2 = [
-  [5, 'clasico'],
-  [2, 'muralla'],
-  [3, 'clasico'],
-  [3, 'contragiro'],
-  [3, 'clasico'],
-  [3, 'respiracion'],
-  [3, 'contragiro'],
-  [2, 'clasico'],
-  [3, 'escalera'],
-  [3, 'contragiro'],
-  [2, 'clasico'],
-  [3, 'muralla'],
-  [3, 'contragiro'],
-  [2, 'clasico'],
-  [3, 'respiracion'],
-  [3, 'contragiro'],
-  [3, 'escalera'],
-]; // nivel 2: 49 anillos + la salida
-const COURSE3 = [
-  [5, 'clasico'],
-  [2, 'muralla'],
-  [4, 'clasico'],
-  [3, 'contragiro'],
-  [3, 'respiracion'],
-  [5, 'clasico'],
-  [3, 'escalera'],
-  [2, 'clasico'],
-  [3, 'contragiro'],
-  [5, 'clasico'],
-  [3, 'muralla'],
-  [3, 'respiracion'],
-  [5, 'clasico'],
-  [3, 'escalera'],
-]; // nivel 3: 49 anillos + la salida
-// Mapas anillo por anillo (el anillo 0 es el inicial), rellenados con clásicos hasta 60.
-const courseMap3 = ['clasico'];
-const courseMap2 = ['clasico'];
-const courseMap = ['clasico'];
 /**
  * Tipo del anillo `k` en el nivel actual (o en el tutorial); la salida (`GOAL`) es una muralla.
  *
@@ -167,4 +96,4 @@ export function setSeenTypes(value) {
   return value;
 }
 
-export { SEED, TYPE_INFO, ringType, rng, rngState, seenTypes };
+export { SEED, ringType, rng, rngState, seenTypes };

@@ -6,7 +6,7 @@ import { elHud, elPanel } from './01-pantalla-y-utilidades.js';
 import { AC, initAudio, outBus } from './02-audio.js';
 import { stopMusic } from './05-musica-reproductor.js';
 import { setState } from './06-record-y-estado.js';
-import { PLANET_SVG, allPlanets, setAllPlanets } from './07-planetas.js';
+import { allPlanets, setAllPlanets } from './07-planetas.js';
 import { setTutorial } from './08-partida-estado.js';
 import { setup } from './16-partida.js';
 import { introDrone, startIntro } from './23-intro.js';
@@ -36,6 +36,7 @@ import { showStart, showStop } from './28-sonidos-interfaz.js';
 import { openPlanets } from './29-planetas-hd.js';
 import { misMoons, misReady, openMissions } from './34-misiones.js';
 import { MEDIR, medEl, setMEDIR, setMedEl, setMedPrev } from './35-medidor.js';
+import { PLANET_SVG } from './data/planets.js';
 
 let elHome;
 /** Sonido apagado por el jugador (se guarda en localStorage). */

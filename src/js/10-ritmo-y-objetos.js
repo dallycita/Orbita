@@ -21,6 +21,7 @@ import { rr } from './16-partida.js';
 import { lvStarsGot } from './25-selector-niveles.js';
 import { muted } from './26-pantalla-inicio.js';
 import { uiTone } from './28-sonidos-interfaz.js';
+import { COIN_RINGS } from './data/levels.js';
 
 /**
  * Fase dentro del golpe actual de la música.
@@ -85,13 +86,6 @@ function obsRad(ring, o) {
     sz = 0.5 - 0.5 * Math.cos(2 * Math.PI * x); // respira cada 4 golpes: pequeño justo en el golpe
   return o.r * (0.3 + 0.7 * sz);
 }
-// Estrellas: la moneda del juego. Aparecen en todos los niveles, se ganan en cada partida y se
-// guardan. COIN_RINGS[nivel] = los niveles de anillo que tienen estrella.
-const COIN_RINGS = [
-  new Set([4, 12, 22, 28, 37, 45]),
-  new Set([4, 9, 15, 18, 32, 40]),
-  new Set([4, 9, 15, 17, 31, 43]),
-];
 let wallet = 0,
   runCoins = 0;
 let elWallet;
@@ -184,13 +178,6 @@ function drawCoin(x, y, sz, al) {
   ctx.stroke();
   ctx.restore();
 }
-// Nebulosas y púlsares (desde el cuarto nivel): no son asteroides; tocarlos mueve al jugador.
-// Nebulosas rosadas: nubes de hidrógeno donde nacen estrellas; su energía te impulsa dos anillos
-// hacia arriba.
-// Púlsares azules: restos de estrellas que explotaron y giran lanzando dos rayos; su radiación te
-// empuja un anillo hacia abajo.
-const OBJ_NEBULA = new Set([3, 6, 10, 14, 18, 25, 33]);
-const OBJ_PULSAR = new Set([22, 23, 26, 30, 34, 41, 42, 45]);
 let pushing = false,
   pushT = 0,
   pushFrom = 0,
@@ -438,20 +425,6 @@ const courseMaps = {};
 // multiplicadores por nivel: velocidad de los anillos y del agujero negro
 const RING_MUL = [1, 1, 1.08, 1.1, 1.12, 1.25, 1.4, 1.55];
 const HOLE_MUL = [1, 0.95, 1.05, 1.12, 1.14, 1.25, 1.35, 1.45];
-const NEB_AT = {
-  3: new Set([2, 9, 16, 23, 42]),
-  4: new Set([2, 8, 16, 30, 45]),
-  5: new Set([2, 8, 16, 25, 36]),
-  6: new Set([2, 9, 18, 28]),
-  7: new Set([2, 14, 17, 29]),
-};
-const PUL_AT = {
-  3: new Set([11, 22, 43]),
-  4: new Set([9, 17, 22, 31, 46]),
-  5: new Set([6, 14, 19, 34, 39]),
-  6: new Set([10, 19, 29, 43]),
-  7: new Set([5, 15, 38, 47]),
-};
 /**
  * Cuánto se estira un anillo en un ángulo: por fuerzas de marea (óvalo que gira) o por la onda de
  * la nova.
@@ -614,13 +587,8 @@ export function setWallet(value) {
 }
 
 export {
-  COIN_RINGS,
   HOLE_MUL,
-  NEB_AT,
   NOVA_BAR,
-  OBJ_NEBULA,
-  OBJ_PULSAR,
-  PUL_AT,
   RING_MUL,
   bassBreath,
   beatKick,

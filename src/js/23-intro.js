@@ -44,7 +44,6 @@ import { rr } from './16-partida.js';
 import { drawEarth } from './21-dibujo.js';
 import { bhDiskK } from './24-presentacion.js';
 import {
-  LEVELS,
   openLevels,
   setStorySeen,
   setTutAfterStory,
@@ -54,6 +53,7 @@ import { openHome, setStoryReturn, storyReturn } from './26-pantalla-inicio.js';
 import { homeAmbience } from './27-inicio-animacion.js';
 import { PLGL, drawBigPlanet } from './29-planetas-hd.js';
 import { misEvent } from './34-misiones.js';
+import { LEVELS } from './data/levels.js';
 
 // Planetas de la intro. r: radio de la órbita y s: tamaño, en unidades de la intro.
 const PLANETS = [
