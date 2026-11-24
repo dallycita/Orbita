@@ -1,9 +1,9 @@
 /**
  * (encabezado pendiente)
  */
-import { AC, ROOT, master, noiseHit } from '../02-audio.js';
+import { AC, ROOT, master, noiseHit } from './engine.js';
 import { muted } from '../core/settings.js';
-import { echoBus } from '../03-musica-ritmos.js';
+import { echoBus } from './music-tracks.js';
 
 /**
  * Sonido de cristal para las flechas: dos notas que suben (siguiente) o bajan (anterior).

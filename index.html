@@ -4797,7 +4797,7 @@ document.addEventListener(
 const CHEV_R =
   '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9.5 5.5 16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 (() => {
-  // src/js/01-pantalla-y-utilidades.js
+  // src/js/core/display.js
   var cvs;
   var ctx;
   var elScore;
@@ -4931,7 +4931,7 @@ const CHEV_R =
     return value;
   }
 
-  // src/js/02-audio.js
+  // src/js/audio/engine.js
   var AC = null;
   var master = null;
   var musicBus = null;
@@ -5210,7 +5210,7 @@ const CHEV_R =
   ];
   var GOAL = 50;
 
-  // src/js/08-partida-estado.js
+  // src/js/core/run-state.js
   var winT = 0;
   var perfCount = 0;
   var attempts = 0;
@@ -5437,7 +5437,7 @@ const CHEV_R =
     return value;
   }
 
-  // src/js/06-record-y-estado.js
+  // src/js/core/state.js
   var best = 0;
   var saveBest = () => {
     try {
@@ -5652,7 +5652,7 @@ const CHEV_R =
     return value;
   }
 
-  // src/js/03-musica-ritmos.js
+  // src/js/audio/music-tracks.js
   var BPM = 140;
   var STEP = 60 / BPM / 4;
   var TB = 60 / BPM;
@@ -6618,7 +6618,7 @@ const CHEV_R =
     return value;
   }
 
-  // src/js/04-musica-horizonte.js
+  // src/js/audio/horizon-track.js
   var hzS = null;
   function hzEnsure() {
     if (hzS && hzS.ac === AC) {
@@ -7319,7 +7319,7 @@ const CHEV_R =
     }
   }
 
-  // src/js/05-musica-reproductor.js
+  // src/js/audio/music-player.js
   function scheduleStep(s, t0) {
     if (musicStyle === "espacial" && state === "play" && level >= SW_AT) {
       if (!riserOn && s % 32 === 16) {
@@ -7485,7 +7485,7 @@ const CHEV_R =
     }
   }
 
-  // src/js/07-planetas.js
+  // src/js/game/planets.js
   var curPlanet = "tierra";
   var maxPerf = 0;
   var plutoOk = false;
@@ -8225,7 +8225,7 @@ const CHEV_R =
   // src/js/core/geometry.js
   var rr = (k) => R0 + (k - camLevel) * GAP;
 
-  // src/js/10-ritmo-y-objetos.js
+  // src/js/game/beat.js
   function beatPhase() {
     return AC && musicOn && musicStart >= 0 ? frac(beatTime() / TB) : -1;
   }
@@ -8675,7 +8675,7 @@ const CHEV_R =
   var courseMap2 = ["clasico"];
   var courseMap = ["clasico"];
 
-  // src/js/09-recorridos.js
+  // src/js/game/courses.js
   var SEED = 20261007;
   var rngState = SEED;
   function rng() {
@@ -8729,7 +8729,7 @@ const CHEV_R =
     return value;
   }
 
-  // src/js/11-peligros-datos.js
+  // src/js/game/hazard-state.js
   var comets = [];
   var beams = [];
   var flareT = 0;
@@ -9080,7 +9080,7 @@ const CHEV_R =
     }
   }
 
-  // src/js/12-poderes.js
+  // src/js/game/powers.js
   var ghostT = 0;
   var shieldT = 0;
   var eclipseT = 0;
@@ -9560,7 +9560,7 @@ const CHEV_R =
     7: /* @__PURE__ */ new Set([5, 15, 38, 47])
   };
 
-  // src/js/15-peligros.js
+  // src/js/game/hazards.js
   var NOVA_AT = {
     2: {
       6: { sp: 52, per: 8, gaps: 3, gw: 0.62, n: 3 },
@@ -10776,7 +10776,7 @@ const CHEV_R =
     return value;
   }
 
-  // src/js/14-lente-gravitacional.js
+  // src/js/game/gravitational-lens.js
   var BEND_AT = { 3: [26, 28] };
   var BEND_R = 23;
   var WORM_COL = "#d4c8ff";
@@ -11043,7 +11043,7 @@ const CHEV_R =
     return value;
   }
 
-  // src/js/13-agujero-de-gusano.js
+  // src/js/game/wormhole.js
   var whGap = () => level + 1 < 34 ? 4 : 3;
   var ORB_W = 1.75;
   var WH_IN = 0.78;
@@ -11492,7 +11492,7 @@ const CHEV_R =
   };
   var zoneOf = (k) => lvl >= 3 && !tutorial ? ZONE_LV[lvl] : lvl === 1 && !tutorial ? ZONE_MAG : lvl === 2 && !tutorial ? ZONE_AND : ZONES[Math.floor(k / 25) % ZONES.length];
 
-  // src/js/16-partida.js
+  // src/js/game/run.js
   function setup() {
     setRngState(SEED);
     setSwallow(null);
@@ -12171,7 +12171,7 @@ const CHEV_R =
     return value;
   }
 
-  // src/js/17-tutorial.js
+  // src/js/game/tutorial.js
   function tutRespawn(x, y) {
     setState("dead");
     setFlash(0.4);
@@ -14119,7 +14119,7 @@ const CHEV_R =
     return value;
   }
 
-  // src/js/33-tarjetas-niveles.js
+  // src/js/screens/level-cards.js
   var LVGL = /* @__PURE__ */ (() => {
     let gl = null, cv = null, prog = null, U = {}, failed = false, buf = null;
     const FS = `
@@ -14650,7 +14650,7 @@ const CHEV_R =
     return '<div class="mlv">Nivel ' + (LEVELS.indexOf(L) + 1) + " · " + L.name + '</div><div class="cta mgo">Toca para escapar</div>' + chipsHTML();
   };
 
-  // src/js/25-selector-niveles.js
+  // src/js/screens/levels.js
   var lvIndex = 0;
   var LV_ICONS;
   var LV_DATO = [
@@ -15082,7 +15082,7 @@ const CHEV_R =
     pzSnd("count", i);
   }
 
-  // src/js/18-pausa.js
+  // src/js/screens/pause.js
   var pzCount = null;
   var pzPanelCls = "";
   var pzDrag = null;
@@ -15302,7 +15302,7 @@ const CHEV_R =
   // src/js/core/math.js
   var easeIO = (x) => x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
 
-  // src/js/23-intro.js
+  // src/js/screens/intro.js
   var PLANETS = [
     { n: "Mercurio", r: 38, s: 3.5, c: "#a9a6a0" },
     { n: "Venus", r: 60, s: 5.5, c: "#e3c27a" },
@@ -15806,7 +15806,7 @@ const CHEV_R =
     EARTH_W = 0.9 * Math.pow(60 / 84, 1.5);
   }
 
-  // src/js/24-presentacion.js
+  // src/js/screens/splash.js
   var SPLASH_END = 10;
   var splashT = 0;
   var splashBus = null;
@@ -16014,7 +16014,7 @@ const CHEV_R =
     }
   }
 
-  // src/js/27-inicio-animacion.js
+  // src/js/screens/home-animation.js
   var HOME_BIG = 6.4;
   var hsRipple = 0;
   var hsFlare = 0;
@@ -16429,7 +16429,7 @@ const CHEV_R =
     return value;
   }
 
-  // src/js/30-escanear.js
+  // src/js/screens/planet-scan.js
   var scanOn = false;
   var scanK = 0;
   var pRot = 0;
@@ -16539,7 +16539,7 @@ const CHEV_R =
     return value;
   }
 
-  // src/js/29-planetas-hd.js
+  // src/js/screens/planets.js
   var pIndex = 0;
   var pSwap = 0;
   var pDir = 1;
@@ -17052,7 +17052,7 @@ const CHEV_R =
     return h;
   }
 
-  // src/js/34-misiones.js
+  // src/js/screens/missions.js
   function misCrystal() {
     return '<defs><linearGradient id="mcg' + (misCrystal.n = (misCrystal.n || 0) + 1) + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8fffb"/><stop offset="1" stop-color="#3fc7b8"/></linearGradient></defs><path d="M9 3.0 L13.030000000000001 9.5 L9 16.0 L4.97 9.5Z" fill="url(#mcg' + misCrystal.n + ')"/><path d="M17.5 10.3 L20.104 14.5 L17.5 18.7 L14.896 14.5Z" fill="url(#mcg' + misCrystal.n + ')"/><path d="M10.5 16.2 L12.236 19 L10.5 21.8 L8.764 19Z" fill="#bff3ec"/>';
   }
@@ -18009,7 +18009,7 @@ const CHEV_R =
     on("missionReady", misPing);
   }
 
-  // src/js/35-medidor.js
+  // src/js/screens/perf-meter.js
   var MEDIR = false;
   var medEl = null;
   var medPrev = 0;
@@ -18081,7 +18081,7 @@ const CHEV_R =
     return value;
   }
 
-  // src/js/26-pantalla-inicio.js
+  // src/js/screens/home.js
   function hasNewPlanet() {
     try {
       return localStorage.getItem("orbita_pl_nuevo") === "1";
@@ -18230,7 +18230,7 @@ const CHEV_R =
     loadMute();
   }
 
-  // src/js/19-controles.js
+  // src/js/screens/controls.js
   function press(e) {
     if (paused) {
       pausePress(e);
@@ -18455,7 +18455,7 @@ const CHEV_R =
     });
   }
 
-  // src/js/20-logica.js
+  // src/js/game/update.js
   function update(dt) {
     if (slowTimer > 0) {
       setSlowTimer(slowTimer - dt);
@@ -18837,7 +18837,7 @@ const CHEV_R =
     setBurns(burns.filter((b) => b.life > 0));
   }
 
-  // src/js/31-fondos-2d.js
+  // src/js/render/backgrounds/fallback-2d.js
   var andCanvas = null;
   var andKey = "";
   function buildAndromeda() {
@@ -19430,7 +19430,7 @@ const CHEV_R =
     }));
   }
 
-  // src/js/32-fondos-1-comun.js
+  // src/js/render/backgrounds/common.js
   var BG_VS = "attribute vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }";
   var BG_COMMON = `
 precision highp float;
@@ -19456,7 +19456,7 @@ vec3 stars(vec2 q, float sc, float dens){
 }
 `;
 
-  // src/js/32-fondos-2-andromeda.js
+  // src/js/render/backgrounds/andromeda.js
   var FS_AND = BG_COMMON + `
 uniform float uScale; uniform float uSpd; uniform float uBand;   // 0 visible · 1 ultravioleta · 2 infrarrojo · 3 todas las luces
 vec2 galC(){ return vec2((mix(.62, .5, uJour) + .03*sin(uT*.045))*uRes.x, (mix(-.32, .34, uJour) + .015*cos(uT*.037))*uRes.y); }
@@ -19736,7 +19736,7 @@ void main(){
   gl_FragColor = vec4(col, 1.);
 }`;
 
-  // src/js/32-fondos-3-via-lactea.js
+  // src/js/render/backgrounds/milky-way.js
   var FS_MW = BG_COMMON + `
 uniform float uScale;
 float fbm7(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 7; i++){ s += a*vn(p); p = m*p; a *= .5; } return s; }
@@ -19967,7 +19967,7 @@ void main(){
   gl_FragColor = vec4(col, 1.);
 }`;
 
-  // src/js/32-fondos-4-magallanes.js
+  // src/js/render/backgrounds/magellanic-clouds.js
   var FS_LMC = BG_COMMON + `
 uniform float uScale;
 float fbm7(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 7; i++){ s += a*vn(p); p = m*p; a *= .5; } return s; }
@@ -20196,7 +20196,7 @@ void main(){
   gl_FragColor = vec4(col, 1.);
 }`;
 
-  // src/js/32-fondos-50-lejanas.js
+  // src/js/render/backgrounds/far-galaxies.js
   var GX_BASE = `
 uniform float uScale; uniform float uKind;
 float fbm7(vec2 p){ float s = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < 7; i++){ s += a*vn(p); p = m*p; a *= .5; } return s; }
@@ -20285,7 +20285,7 @@ vec3 flares(vec2 q){
 }
 `;
 
-  // src/js/32-fondos-51-centaurus.js
+  // src/js/render/backgrounds/centaurus.js
   var GX_CENTAURUS = `// ===================== CENTAURUS A =====================
 // tonos de las fotos de ESO: cuerpo crema-gris #d6c5c1, franja de polvo café con borde naranja, cúmulos azules,
 // regiones rosadas; chorros en rayos X azules (#6a8ad8) y lóbulos naranjas en submilimétrico
@@ -20348,7 +20348,7 @@ vec3 cenLobes(vec2 q){
 }
 `;
 
-  // src/js/32-fondos-52-remolino.js
+  // src/js/render/backgrounds/whirlpool.js
   var GX_REMOLINO = `// ===================== REMOLINO M51 =====================
 // Hubble: brazos azul-grisáceos #8aa0b8, núcleo amarillo #e8d0a8, regiones HII rojo-rosa muy marcadas, polvo café #5f4f49,
 // la compañera NGC 5195 amarillo-café con polvo cruzándola
@@ -20513,7 +20513,7 @@ vec3 m51Pair(vec2 q){
 }
 `;
 
-  // src/js/32-fondos-53-sombrero.js
+  // src/js/render/backgrounds/sombrero.js
   var GX_SOMBRERO = `// ===================== SOMBRERO M104 =====================
 // Hubble: bulbo plateado con un toque lavanda #d1ccdc, halo gris #8c8687, anillo de polvo café oscuro #2a1e18 con borde
 // cálido #6f5848, y cientos de cúmulos globulares alrededor
@@ -20562,7 +20562,7 @@ vec3 sombCore(vec2 q){
 }
 `;
 
-  // src/js/32-fondos-54-m87.js
+  // src/js/render/backgrounds/m87.js
   var GX_M87 = `// ===================== M87 =====================
 // Hubble: halo crema-amarillo #ca9f72 → #d5c7b8 muy suave, el chorro azul-violeta con nudos, miles de cúmulos globulares;
 // el Event Horizon Telescope: anillo naranja #f38f14 / amarillo #fcd05b / rojo #911c01, más brillante abajo
@@ -20624,7 +20624,7 @@ vec3 m87Shadow(vec2 q){
 }
 `;
 
-  // src/js/32-fondos-55-sagitario.js
+  // src/js/render/backgrounds/sagittarius.js
   var GX_SAGITARIO = `// ===================== SAGITARIO A* =====================
 // centro galáctico: en luz visible nubes doradas y polvo; el compuesto de NASA (Hubble+Spitzer+Chandra) en violeta #3e3775,
 // azul #454b9f, magenta #7e4774 y filamentos dorados; los filamentos de radio de MeerKAT; las estrellas S girando;
@@ -20695,7 +20695,7 @@ vec3 sgrShadow(vec2 q){
 }
 `;
 
-  // src/js/32-fondos-56-final.js
+  // src/js/render/backgrounds/final.js
   var GX_FINAL = `// la Vía Láctea vista desde fuera: el regreso a casa
 vec3 homeGalaxy(vec2 q){
   vec2 d = (q - vec2(.5*uRes.x, .74*uRes.y))/(uScale*.36); d = rot(.4 + uT*.01)*d; d.y /= .6;
@@ -20785,7 +20785,7 @@ void main(){
 }`;
   var FS_GX = BG_COMMON + GX_BASE + GX_CENTAURUS + GX_REMOLINO + GX_SOMBRERO + GX_M87 + GX_SAGITARIO + GX_FINAL;
 
-  // src/js/32-fondos-6-foto.js
+  // src/js/render/backgrounds/photo.js
   var FS_PHOTO = BG_COMMON + `
 uniform sampler2D uImg; uniform vec2 uImgSize; uniform vec4 uFit; // xy: centro de la foto en pantalla (0-1), z: zoom
 vec3 photo(vec2 q, float depth){
@@ -20814,7 +20814,7 @@ void main(){
   gl_FragColor = vec4(col, 1.);
 }`;
 
-  // src/js/32-fondos-9-motor.js
+  // src/js/render/backgrounds/engine.js
   var GLBG = /* @__PURE__ */ (() => {
     let cv = null, gl = null, progs = {}, buf = null, failed = false, photoTex = {};
     function init() {
@@ -22171,7 +22171,7 @@ void main(){
     ctx.restore();
   }
 
-  // src/js/22-viaje-sistema-solar.js
+  // src/js/render/scene.js
   function renderScene() {
     const z = zoneOf(level);
     ctx.save();
@@ -22757,7 +22757,7 @@ void main(){
     drawFlare();
   }
 
-  // src/js/21-dibujo.js
+  // src/js/render/frame.js
   var camView = 0;
   var camVel = 0;
   var camT = 0;
@@ -22857,7 +22857,7 @@ void main(){
     ctx.restore();
   }
 
-  // src/js/28-sonidos-interfaz.js
+  // src/js/screens/ui-sound-events.js
   var lastHover = null;
   function initUiSounds() {
     window.addEventListener("pointerover", (e) => {
@@ -22900,7 +22900,7 @@ void main(){
     );
   }
 
-  // src/js/36-bucle-principal.js
+  // src/js/loop.js
   function frame(now) {
     const m0 = MEDIR ? performance.now() : 0;
     const dt = Math.min((now - last) / 1e3, 0.05);

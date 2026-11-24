@@ -1,10 +1,10 @@
 /**
  * (encabezado pendiente)
  */
-import { tutorial } from '../08-partida-estado.js';
+import { tutorial } from '../core/run-state.js';
 import { MIS_ACH, MIS_DAILY } from '../data/missions.js';
 import { emit } from '../core/events.js';
-import { PLANETS_P } from '../07-planetas.js';
+import { PLANETS_P } from './planets.js';
 import { COIN_RINGS, LEVELS } from '../data/levels.js';
 import { doblesHechos, lvStarsGot, setDoblesHechos } from './progress.js';
 

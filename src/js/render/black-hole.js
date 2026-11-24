@@ -1,8 +1,8 @@
 /**
  * (encabezado pendiente)
  */
-import { BONE, clamp, ctx } from '../01-pantalla-y-utilidades.js';
-import { t } from '../08-partida-estado.js';
+import { BONE, clamp, ctx } from '../core/display.js';
+import { t } from '../core/run-state.js';
 
 // true cuando la letra Unbounded ya cargó; antes, el logo se dibuja con la letra del sistema
 let splashFont = false;

@@ -1,11 +1,11 @@
 /**
  * (encabezado pendiente)
  */
-import { CX, CY, H, PR, S, W, ctx, frac, rgba } from '../01-pantalla-y-utilidades.js';
-import { pAng, state } from '../06-record-y-estado.js';
-import { PLANETS_P, curPlanet, sizeK } from '../07-planetas.js';
-import { particles, t, tutorial } from '../08-partida-estado.js';
-import { hot, hotT } from '../11-peligros-datos.js';
+import { CX, CY, H, PR, S, W, ctx, frac, rgba } from '../core/display.js';
+import { pAng, state } from '../core/state.js';
+import { PLANETS_P, curPlanet, sizeK } from '../game/planets.js';
+import { particles, t, tutorial } from '../core/run-state.js';
+import { hot, hotT } from '../game/hazard-state.js';
 import {
   caronteOn,
   caronteXY,
@@ -13,8 +13,8 @@ import {
   ringBoostNow,
   setRingBoostNow,
   shieldT,
-} from '../12-poderes.js';
-import { waveProx } from '../15-peligros.js';
+} from '../game/powers.js';
+import { waveProx } from '../game/hazards.js';
 
 import { PBANDS, PBASE, PFEAT, PLANET_SVG } from '../data/planets.js';
 import { CLOUD, CONT } from './sprites.js';

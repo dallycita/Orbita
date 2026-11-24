@@ -1,9 +1,9 @@
 /**
  * (encabezado pendiente)
  */
-import { lvl } from '../06-record-y-estado.js';
-import { tutorial } from '../08-partida-estado.js';
-import { BONE } from '../01-pantalla-y-utilidades.js';
+import { lvl } from '../core/state.js';
+import { tutorial } from '../core/run-state.js';
+import { BONE } from '../core/display.js';
 
 const ZONES = [
   { ring: BONE, ast: BONE, s1: '#ffe2b0', s2: '#ff5a1f', bg: '#0d1220' },

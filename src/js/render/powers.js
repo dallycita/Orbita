@@ -1,11 +1,11 @@
 /**
  * (encabezado pendiente)
  */
-import { CX, CY, H, PR, S, SUN, W, clamp, ctx, frac, rgba } from '../01-pantalla-y-utilidades.js';
-import { level, pAng, pLevel, rings, state } from '../06-record-y-estado.js';
-import { curP, curPlanet, jumpDur, pst, sizeK } from '../07-planetas.js';
-import { particles, sunLevel, t, tutorial } from '../08-partida-estado.js';
-import { beatTime, obsAng, obsRad } from '../10-ritmo-y-objetos.js';
+import { CX, CY, H, PR, S, SUN, W, clamp, ctx, frac, rgba } from '../core/display.js';
+import { level, pAng, pLevel, rings, state } from '../core/state.js';
+import { curP, curPlanet, jumpDur, pst, sizeK } from '../game/planets.js';
+import { particles, sunLevel, t, tutorial } from '../core/run-state.js';
+import { beatTime, obsAng, obsRad } from '../game/beat.js';
 import { PLGL, drawCaronte, drawPlayer } from './planets.js';
 import { rr } from '../core/geometry.js';
 import {
@@ -25,8 +25,8 @@ import {
   shieldT,
   smst,
   strainNow,
-} from '../12-poderes.js';
-import { noise } from '../02-audio.js';
+} from '../game/powers.js';
+import { noise } from '../audio/engine.js';
 
 /**
  * Dibuja los efectos de los poderes en el escenario: magnetosfera de Júpiter, salto de Mercurio,

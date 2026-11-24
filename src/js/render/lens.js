@@ -1,10 +1,10 @@
 /**
  * (encabezado pendiente)
  */
-import { CX, CY, H, S, W, ctx } from '../01-pantalla-y-utilidades.js';
-import { GLBG } from '../32-fondos-9-motor.js';
+import { CX, CY, H, S, W, ctx } from '../core/display.js';
+import { GLBG } from './backgrounds/engine.js';
 import { viewInside } from '../core/screen.js';
-import { bend, bendRad, bendW } from '../14-lente-gravitacional.js';
+import { bend, bendRad, bendW } from '../game/gravitational-lens.js';
 
 /** Dibuja la esfera del agujero de gusano con el cielo del otro lado dentro y un halo suave. */
 function drawBendSphere() {

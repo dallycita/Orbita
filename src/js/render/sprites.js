@@ -1,9 +1,9 @@
 /**
  * (encabezado pendiente)
  */
-import { BONE, CX, CY, DPR, PR, S, ctx, frac } from '../01-pantalla-y-utilidades.js';
-import { charge } from '../06-record-y-estado.js';
-import { chargeMax, sizeK } from '../07-planetas.js';
+import { BONE, CX, CY, DPR, PR, S, ctx, frac } from '../core/display.js';
+import { charge } from '../core/state.js';
+import { chargeMax, sizeK } from '../game/planets.js';
 import {
   chargeFlash,
   hintT,
@@ -12,9 +12,9 @@ import {
   readyT,
   t,
   tutorial,
-} from '../08-partida-estado.js';
-import { wh, whShock } from '../13-agujero-de-gusano.js';
-import { bend } from '../14-lente-gravitacional.js';
+} from '../core/run-state.js';
+import { wh, whShock } from '../game/wormhole.js';
+import { bend } from '../game/gravitational-lens.js';
 import { doblesHechos } from '../game/progress.js';
 
 /**

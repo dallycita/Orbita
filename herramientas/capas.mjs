@@ -3,31 +3,21 @@
 // Cada módulo solo puede importar de su capa o de las de su izquierda, y no puede haber ciclos.
 //   node herramientas/capas.mjs           informe
 //   node herramientas/capas.mjs --estricto  falla (código 1) si hay imports hacia arriba o ciclos
-// La capa de un módulo sale de su carpeta (src/js/data/, src/js/core/…). Los archivos numerados que todavía no se
-// mudaron a su carpeta tienen su capa en la tabla PENDIENTES.
+// La capa de un módulo sale de su carpeta (src/js/data/, src/js/core/…); main.js y loop.js son el arranque.
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, relative, normalize } from 'node:path';
 
 const JS = join(dirname(new URL(import.meta.url).pathname), '..', 'src', 'js');
 const LAYERS = ['data', 'core', 'audio', 'game', 'render', 'screens', 'main'];
-const PENDIENTES = {
-  '01': 'core', '06': 'core', '08': 'core', '07': 'game', '09': 'game',
-  '02': 'audio', '03': 'audio', '04': 'audio', '05': 'audio', '28': 'screens',
-  '10': 'game', '11': 'game', '12': 'game', '13': 'game', '14': 'game', '15': 'game', '16': 'game', '17': 'game', '20': 'game',
-  '21': 'render', '22': 'render', '31': 'render', '32': 'render',
-  '18': 'screens', '19': 'screens', '23': 'screens', '24': 'screens', '25': 'screens', '26': 'screens', '27': 'screens',
-  '29': 'screens', '30': 'screens', '33': 'screens', '34': 'screens', '35': 'screens', '36': 'main',
-};
 const files = [];
 (function walk(d){ for (const f of readdirSync(d)){ const p = join(d, f); if (statSync(p).isDirectory()){ if (f !== 'fuera') walk(p); } else if (f.endsWith('.js')) files.push(p); } })(JS);
 const rel = f => relative(JS, f);
 function layerOf(f){
   const r = rel(f);
-  if (r === 'main.js') return 'main';
+  if (r === 'main.js' || r === 'loop.js') return 'main';
   const top = r.split('/')[0];
   if (LAYERS.includes(top)) return top;
-  const n = r.slice(0, 2); if (PENDIENTES[n]) return PENDIENTES[n];
-  throw new Error('no sé en qué capa va ' + r);
+  throw new Error('no sé en qué capa va ' + r + ' (debe estar en una carpeta de capa)');
 }
 const graph = new Map(), up = [];
 for (const f of files){

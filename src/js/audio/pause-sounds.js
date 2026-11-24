@@ -1,7 +1,7 @@
 /**
  * (encabezado pendiente)
  */
-import { ROOT, volGain } from '../02-audio.js';
+import { ROOT, volGain } from './engine.js';
 import { muted, volSfx } from '../core/settings.js';
 
 let pzAC = null;

@@ -1,7 +1,7 @@
 /**
  * (encabezado pendiente)
  */
-import { AC, NOISE, ROOT, master } from '../02-audio.js';
+import { AC, NOISE, ROOT, master } from './engine.js';
 
 import { muted } from '../core/settings.js';
 import { uiOut, uiTone } from './ui-sounds.js';

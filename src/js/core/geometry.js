@@ -1,8 +1,8 @@
 /**
  * (encabezado pendiente)
  */
-import { GAP, R0 } from '../01-pantalla-y-utilidades.js';
-import { camLevel } from '../06-record-y-estado.js';
+import { GAP, R0 } from './display.js';
+import { camLevel } from './state.js';
 
 /**
  * Radio de un anillo visto desde la cámara.

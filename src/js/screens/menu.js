@@ -1,8 +1,8 @@
 /**
  * (encabezado pendiente)
  */
-import { chipsHTML } from '../01-pantalla-y-utilidades.js';
-import { lvl } from '../06-record-y-estado.js';
+import { chipsHTML } from '../core/display.js';
+import { lvl } from '../core/state.js';
 import { LEVELS } from '../data/levels.js';
 
 // Panel previo a jugar: nivel elegido, invitación a tocar y los avisos de ayuda.

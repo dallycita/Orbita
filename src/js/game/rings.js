@@ -1,12 +1,12 @@
 /**
  * (encabezado pendiente)
  */
-import { TB } from '../03-musica-ritmos.js';
-import { level, lvl, rings } from '../06-record-y-estado.js';
-import { JUMP_DUR, curGoal, t, tutorial } from '../08-partida-estado.js';
-import { ringType, rng } from '../09-recorridos.js';
-import { RING_MUL, placeInGap } from '../10-ritmo-y-objetos.js';
-import { TUNE } from '../15-peligros.js';
+import { TB } from '../audio/music-tracks.js';
+import { level, lvl, rings } from '../core/state.js';
+import { JUMP_DUR, curGoal, t, tutorial } from '../core/run-state.js';
+import { ringType, rng } from './courses.js';
+import { RING_MUL, placeInGap } from './beat.js';
+import { TUNE } from './hazards.js';
 import { COIN_RINGS } from '../data/levels.js';
 import { NEB_AT, OBJ_NEBULA, OBJ_PULSAR, PUL_AT } from '../data/hazards.js';
 
