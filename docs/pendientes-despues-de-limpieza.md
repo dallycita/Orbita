@@ -35,3 +35,9 @@ Cada una se decide aparte, cuando termine la limpieza.
 - **Parámetro sin uso** (`12-poderes.js`): `powerUpdate(dt, d)` nunca usa `d`.
 - **Agujero de gusano** (`13-agujero-de-gusano.js`): se describía como "anillos 30 a 41", pero el código usa
   `WH_K = 29`. Probablemente es contar desde 0 o desde 1; confirmar.
+
+## Pendiente de la limpieza misma (para la Fase 7)
+
+- **CSS:** quedan 96 selectores repetidos que no se pudieron juntar sin riesgo de cambiar la cascada, 39
+  `!important` y el orden por componente. Se resuelven al partir el CSS por componente, regla por regla.
+- **Ternarios anidados (55):** se parten al rehacer cada función (fases 9 y 12), para no tocarlas dos veces.
