@@ -8395,31 +8395,67 @@ try {
 } catch (e) {
   seenTypes = {};
 }
-// ---------- sincronía con la música ----------
-// fase dentro de cada golpe (0 = justo en el golpe); -1 si no hay música
+/**
+ * Ritmo y objetos del recorrido: sincronía con los golpes de la música, estrellas (la moneda del
+ * juego), nebulosas y púlsares, los recorridos de los niveles 4 a 8 y la nova de Andrómeda.
+ * Varias constantes (COIN_RINGS, NEB_AT, PUL_AT) se completan más abajo en este mismo archivo.
+ */
+
+/**
+ * Fase dentro del golpe actual de la música.
+ *
+ * @returns {number} De 0 (justo en el golpe) a 1; -1 si no suena música.
+ */
 function beatPhase() {
   return AC && musicOn && musicStart >= 0 ? frac(beatTime() / TB) : -1;
 }
-// intensidad del golpe: 1 justo en el bombo y se apaga rápido
+/**
+ * Intensidad del golpe: 1 justo en el bombo y se apaga rápido (más suave con movimiento reducido).
+ *
+ * @returns {number} De 0 a 1.
+ */
 function beatKick() {
   const x = beatPhase();
   return x < 0 ? 0 : Math.exp(-x * 7) * (reduceMotion ? 0.35 : 1);
 }
-// respiración lenta con el bajo (cada dos golpes)
+/**
+ * Respiración lenta con el bajo, un ciclo cada dos golpes.
+ *
+ * @returns {number} De 0 a 1; 0 si no suena música.
+ */
 function bassBreath() {
   return AC && musicOn && musicStart >= 0
     ? 0.5 - 0.5 * Math.cos(2 * Math.PI * frac(beatTime() / (2 * TB)))
     : 0;
 }
 let lastBeatIdx = -1;
+/**
+ * Tiempo de la canción descontando la latencia de salida del audio, para que lo visual coincida
+ * con lo que se oye. Sin música usa el reloj del juego `t`.
+ *
+ * @returns {number} Segundos desde que empezó la música.
+ */
 function beatTime() {
   return AC && musicStart >= 0
     ? AC.currentTime - musicStart - (AC.outputLatency || AC.baseLatency || 0)
     : t;
 }
-// ángulo y tamaño reales de cada asteroide según el tipo de anillo
-// poff: lo que el anillo no giró mientras estuvo congelado
+/**
+ * Ángulo real de un asteroide en su anillo. `poff` es lo que el anillo no giró mientras estuvo
+ * congelado.
+ *
+ * @param {object} ring Anillo.
+ * @param {object} o Asteroide del anillo.
+ * @returns {number} Ángulo, en radianes.
+ */
 const obsAng = (ring, o) => o.a + (o.dir || 1) * (ring.phase - (ring.poff || 0)) + (ring.off || 0);
+/**
+ * Tamaño real de un asteroide: en los anillos de respiración crece y se encoge con el ritmo.
+ *
+ * @param {object} ring Anillo.
+ * @param {object} o Asteroide del anillo.
+ * @returns {number} Radio, en las mismas unidades que `o.r`.
+ */
 function obsRad(ring, o) {
   if (ring.type !== 'respiracion') {
     return o.r;
@@ -8428,8 +8464,8 @@ function obsRad(ring, o) {
     sz = 0.5 - 0.5 * Math.cos(2 * Math.PI * x); // respira cada 4 golpes: pequeño justo en el golpe
   return o.r * (0.3 + 0.7 * sz);
 }
-// ---------- estrellas: la moneda del juego (para personalizar planetas más adelante) ----------
-// aparecen en todos los niveles; se ganan en cada partida y se guardan
+// Estrellas: la moneda del juego. Aparecen en todos los niveles, se ganan en cada partida y se
+// guardan. COIN_RINGS[nivel] = los niveles de anillo que tienen estrella.
 const COIN_RINGS = [
   new Set([4, 12, 22, 28, 37, 45]),
   new Set([4, 9, 15, 18, 32, 40]),
@@ -8441,12 +8477,17 @@ try {
   wallet = parseInt(localStorage.getItem('orbita_estrellas') || '0', 10) || 0;
 } catch (e) {}
 const elWallet = document.getElementById('wallet');
+/**
+ * Actualiza el contador de estrellas de la pantalla.
+ *
+ * @param {boolean} pop Hacer la animación de salto si el total subió.
+ */
 function updateWallet(pop) {
   if (!elWallet) {
     return;
   }
-  // total de estrellas únicas de todo el juego (igual que las tarjetas): ★ 2 / 48, con un anillo de
-  // progreso
+  // total de estrellas únicas de todo el juego, contado igual que en las tarjetas (por ejemplo
+  // 2 / 48), con un anillo de progreso
   let got = 0,
     all = 0;
   COIN_RINGS.forEach((set, i) => {
@@ -8477,6 +8518,7 @@ function updateWallet(pop) {
   updateWallet.last = got;
 }
 updateWallet(false);
+/** Sonido al recoger una estrella: cuatro notas que suben. */
 function coinChime() {
   if (!AC || muted) {
     return;
@@ -8488,6 +8530,14 @@ function coinChime() {
     );
   } catch (e) {}
 }
+/**
+ * Dibuja una estrella para recoger, con brillo que late.
+ *
+ * @param {number} x Posición horizontal, en píxeles de pantalla.
+ * @param {number} y Posición vertical, en píxeles de pantalla.
+ * @param {number} sz Tamaño, en píxeles de pantalla.
+ * @param {number} al Opacidad, de 0 a 1.
+ */
 function drawCoin(x, y, sz, al) {
   ctx.save();
   ctx.globalAlpha = al;
@@ -8517,18 +8567,24 @@ function drawCoin(x, y, sz, al) {
   ctx.stroke();
   ctx.restore();
 }
-// ---------- desde el nivel 3: nebulosas y púlsares (no son asteroides, y tocarlos cambia algo)
-// ----------
-// nebulosas rosadas: nubes de hidrógeno donde nacen estrellas; su energía te impulsa dos anillos
-// hacia arriba
-// púlsares azules: restos de estrellas que explotaron y giran lanzando dos rayos; su radiación te
-// empuja un anillo hacia abajo
+// Nebulosas y púlsares (desde el cuarto nivel): no son asteroides; tocarlos mueve al jugador.
+// Nebulosas rosadas: nubes de hidrógeno donde nacen estrellas; su energía te impulsa dos anillos
+// hacia arriba.
+// Púlsares azules: restos de estrellas que explotaron y giran lanzando dos rayos; su radiación te
+// empuja un anillo hacia abajo.
 const OBJ_NEBULA = new Set([3, 6, 10, 14, 18, 25, 33]);
 const OBJ_PULSAR = new Set([22, 23, 26, 30, 34, 41, 42, 45]);
 let pushing = false,
   pushT = 0,
   pushFrom = 0,
   starBoost = false;
+/**
+ * Coloca un objeto en el mayor hueco entre los asteroides del anillo, para que se pueda alcanzar.
+ *
+ * @param {object} ring Anillo con su lista de asteroides `obs`.
+ * @param {object} extra Datos que se agregan al objeto.
+ * @returns {object} El objeto con su ángulo `a`, en radianes, y `got: false`.
+ */
 function placeInGap(ring, extra) {
   if (!ring.obs.length) {
     return Object.assign({ a: 0, got: false }, extra);
@@ -8549,6 +8605,14 @@ function placeInGap(ring, extra) {
   }
   return Object.assign({ a: bestA, got: false }, extra);
 }
+/**
+ * Dibuja una nebulosa: nubes rosadas que se mueven despacio y unas estrellitas.
+ *
+ * @param {number} x Posición horizontal, en píxeles de pantalla.
+ * @param {number} y Posición vertical, en píxeles de pantalla.
+ * @param {number} sz Tamaño, en píxeles de pantalla.
+ * @param {number} al Opacidad, de 0 a 1.
+ */
 function drawNebula(x, y, sz, al) {
   ctx.save();
   for (let i = 0; i < 4; i++) {
@@ -8572,6 +8636,14 @@ function drawNebula(x, y, sz, al) {
   }
   ctx.restore();
 }
+/**
+ * Dibuja un púlsar: un núcleo azul con dos rayos opuestos que giran.
+ *
+ * @param {number} x Posición horizontal, en píxeles de pantalla.
+ * @param {number} y Posición vertical, en píxeles de pantalla.
+ * @param {number} sz Tamaño, en píxeles de pantalla.
+ * @param {number} al Opacidad, de 0 a 1.
+ */
 function drawPulsar(x, y, sz, al) {
   ctx.save();
   ctx.globalAlpha = al;
@@ -8608,6 +8680,11 @@ function drawPulsar(x, y, sz, al) {
   }
   ctx.restore();
 }
+/**
+ * Sonido al tocar una nebulosa o un púlsar.
+ *
+ * @param {boolean} up Notas que suben (nebulosa) o que bajan (púlsar).
+ */
 function objChime(up) {
   if (!AC || muted) {
     return;
@@ -8618,6 +8695,7 @@ function objChime(up) {
     seq.forEach((sm, i) => uiTone(ROOT * Math.pow(2, sm / 12), n + i * 0.06, 1.1, 0.04));
   } catch (e) {}
 }
+/** La nebulosa lanza al jugador hasta dos anillos hacia arriba, sin pasar la meta. */
 function starLaunch() {
   const up = Math.min(2, curGoal() - level);
   if (up <= 0) {
@@ -8630,6 +8708,7 @@ function starLaunch() {
   starBoost = true;
   pending = false;
 }
+/** El púlsar empuja al jugador un anillo hacia abajo. */
 function starPush() {
   if (level <= 0) {
     return;
@@ -8641,7 +8720,8 @@ function starPush() {
   appear = 0;
   astFade = 0;
 }
-// ---------- niveles 4 a 8: recorridos, objetos y dificultad ----------
+// Niveles 4 a 8 (índices 3 a 7): recorridos de tipos de anillo, objetos y dificultad.
+// Cada recorrido es [cantidad, tipo]; courseMaps lo expande a un tipo por nivel de anillo.
 const COURSES_X = {
   3: [
     [4, 'clasico'],
@@ -8750,6 +8830,7 @@ for (const i in COURSES_X) {
   }
   courseMaps[i] = m;
 }
+// multiplicadores por nivel: velocidad de los anillos y del agujero negro
 const RING_MUL = [1, 1, 1.08, 1.1, 1.12, 1.25, 1.4, 1.55];
 const HOLE_MUL = [1, 0.95, 1.05, 1.12, 1.14, 1.25, 1.35, 1.45];
 const NEB_AT = {
@@ -8772,20 +8853,33 @@ COIN_RINGS[5] = new Set([3, 7, 13, 17, 24, 37]);
 COIN_RINGS[6] = new Set([1, 3, 7, 11, 20, 42]);
 COIN_RINGS[7] = new Set([1, 3, 4, 13, 16, 28]);
 updateWallet(false);
-// fuerzas de marea: el anillo se estira como un óvalo que gira
+/**
+ * Cuánto se estira un anillo en un ángulo: por fuerzas de marea (óvalo que gira) o por la onda de
+ * la nova.
+ *
+ * @param {object} ring Anillo.
+ * @param {number} ang Ángulo, en radianes.
+ * @returns {number} Factor del radio (1 = sin estirar).
+ */
 const stretchAt = (ring, ang) =>
   ring && ring.type === 'marea'
     ? 1 + 0.05 * Math.cos(2 * (ang - (ring.tid || 0)))
     : ring && ring.type === 'nova'
       ? 1 + novaPush(ring, ang, beatTime()) / Math.max(20, rr(ring.k))
       : 1;
-// Andrómeda · nova: la estrella se carga 3 golpes y estalla al empezar cada compás; su onda empuja
-// la muralla hacia afuera y abre la órbita un instante
+// Andrómeda, nova: la estrella se carga 3 golpes y estalla al empezar cada compás; su onda empuja
+// la muralla hacia afuera y abre la órbita un instante.
 const NOVA_BAR = () => 4 * TB;
 const novaTau = tt => {
   const b = NOVA_BAR();
   return ((tt % b) + b) % b;
 }; // tiempo desde el último estallido
+/**
+ * Forma de la onda de la nova: sube rápido, se sostiene y se apaga suave.
+ *
+ * @param {number} tau Segundos desde el último estallido.
+ * @returns {number} De 0 a 1.
+ */
 function novaEnv(tau) {
   if (tau < 0.07) {
     return tau / 0.07;
@@ -8799,6 +8893,15 @@ function novaEnv(tau) {
   }
   return 0;
 }
+/**
+ * Cuánto empuja la nova la muralla hacia afuera en un ángulo. Entre estallidos la muralla se
+ * hincha un poco en cada golpe de carga; durante la onda, empuja más cerca de la estrella.
+ *
+ * @param {object} ring Anillo de nova (`na` es el ángulo de la estrella).
+ * @param {number} ang Ángulo, en radianes.
+ * @param {number} tt Tiempo de la canción, en segundos.
+ * @returns {number} Empuje, en píxeles de pantalla.
+ */
 function novaPush(ring, ang, tt) {
   const tau = novaTau(tt),
     e = novaEnv(tau);
@@ -8809,14 +8912,14 @@ function novaPush(ring, ang, tt) {
     const c = Math.floor(tau / TB),
       q = tau - c * TB;
     return (1.5 + 1.2 * c) * Math.exp(-q * 9);
-  } // en cada golpe de carga la muralla se hincha un poco: está por abrirse
+  }
   const na = ring.na + ring.phase,
     d = Math.abs(Math.atan2(Math.sin(ang - na), Math.cos(ang - na)));
   if (d < 0.01) {
     return 0;
   }
   return e * (32 + 24 * Math.exp(-d * 1.1));
-} // la estrella se queda en su lugar
+} // en el ángulo exacto de la estrella no hay empuje: ella se queda en su lugar
 // ---------- peligros que no son asteroides ----------
 // cometas (desde el Sombrero): cruzan entre tu anillo y el siguiente; su cola apunta lejos del
 // agujero negro
