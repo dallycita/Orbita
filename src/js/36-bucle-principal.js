@@ -8,7 +8,7 @@ import { deadT, setT, t } from './08-partida-estado.js';
 import { elWallet } from './10-ritmo-y-objetos.js';
 
 import { update } from './20-logica.js';
-import { astPrebake, render } from './21-dibujo.js';
+import { render } from './21-dibujo.js';
 import { renderIntro, updateIntro } from './23-intro.js';
 import { renderSplash, updateSplash } from './24-presentacion.js';
 
@@ -20,6 +20,7 @@ import { MEDIR, medFrame, setMedMid } from './35-medidor.js';
 import { HOME_IN, homeT, paused, setHomeT } from './core/screen.js';
 import { last, setLast } from './core/clock.js';
 import { elHome } from './core/dom.js';
+import { astPrebake } from './render/sprites.js';
 
 /**
  * Un cuadro del juego. El paso de tiempo se limita a 0,05 segundos para que una pausa del

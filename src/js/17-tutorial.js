@@ -37,10 +37,11 @@ import {
   sunLevel,
   texts,
 } from './08-partida-estado.js';
-import { setup, winSound } from './16-partida.js';
+import { setup } from './16-partida.js';
 
 import { homeAmbience } from './audio/ui-sounds.js';
 import { elLv } from './core/dom.js';
+import { winSound } from './audio/sfx.js';
 
 /**
  * En el tutorial, un choque no termina la partida: el planeta estalla y reaparece en el mismo

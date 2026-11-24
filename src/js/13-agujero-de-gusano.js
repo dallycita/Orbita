@@ -61,13 +61,13 @@ import { seenTypes } from './09-recorridos.js';
 import { beatKick, beatTime } from './10-ritmo-y-objetos.js';
 import { WH_K, WORM_COL, bend, bendW, lensP, setBend, setWhRip } from './14-lente-gravitacional.js';
 import { hazardTip } from './15-peligros.js';
-import { ensureRings } from './16-partida.js';
 
 import { muted } from './core/settings.js';
 import { misEvent } from './game/missions.js';
 import { advanceJourney } from './core/journey.js';
 import { GOAL } from './data/levels.js';
 import { rr } from './core/geometry.js';
+import { ensureRings } from './game/rings.js';
 
 /**
  * Golpes de música entre lanzamientos: cuatro en los primeros anillos (para aprender), luego tres.
@@ -82,9 +82,6 @@ const WH_IN = 0.78;
 const WH_OUT = 0.7;
 let wh = null;
 let whShock = null;
-let gapC = {};
-let viewInside = false;
-let hideEarth = false;
 /**
  * Sonido de entrada: un tirón grave que sube, con el aire que se arrastra hacia la boca.
  *
@@ -480,39 +477,6 @@ function drawInside(al) {
 }
 
 /**
- * Cambia `gapC` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setGapC(value) {
-  gapC = value;
-  return value;
-}
-
-/**
- * Cambia `hideEarth` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setHideEarth(value) {
-  hideEarth = value;
-  return value;
-}
-
-/**
- * Cambia `viewInside` desde otro módulo (este módulo es su dueño).
- *
- * @param {*} value Valor nuevo.
- * @returns {*} El mismo valor, como el de una asignación.
- */
-export function setViewInside(value) {
-  viewInside = value;
-  return value;
-}
-
-/**
  * Cambia `wh` desde otro módulo (este módulo es su dueño).
  *
  * @param {*} value Valor nuevo.
@@ -539,9 +503,6 @@ export {
   WH_IN,
   WH_OUT,
   drawInside,
-  gapC,
-  hideEarth,
-  viewInside,
   wh,
   whEnter,
   whGap,

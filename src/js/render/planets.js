@@ -1,15 +1,23 @@
 /**
  * (encabezado pendiente)
  */
-import { CX, CY, H, S, W, ctx, rgba } from '../01-pantalla-y-utilidades.js';
-import { state } from '../06-record-y-estado.js';
+import { CX, CY, H, PR, S, W, ctx, frac, rgba } from '../01-pantalla-y-utilidades.js';
+import { pAng, state } from '../06-record-y-estado.js';
 import { PLANETS_P, curPlanet, sizeK, unlockedIds } from '../07-planetas.js';
 import { particles, t, tutorial } from '../08-partida-estado.js';
 import { hot, hotT } from '../11-peligros-datos.js';
-import { drawCaronteBack, hsh, ringBoostNow, setRingBoostNow, shieldT } from '../12-poderes.js';
+import {
+  caronteOn,
+  caronteXY,
+  hsh,
+  ringBoostNow,
+  setRingBoostNow,
+  shieldT,
+} from '../12-poderes.js';
 import { waveProx } from '../15-peligros.js';
-import { drawEarth } from '../21-dibujo.js';
+
 import { PBANDS, PBASE, PFEAT, PLANET_SVG } from '../data/planets.js';
+import { CLOUD, CONT } from './sprites.js';
 
 /**
  * Motor WebGL de planetas: hornea una vez la textura procedural de cada planeta (mapa de
@@ -1044,4 +1052,135 @@ function rescuedCards(before) {
   );
 }
 
-export { PLGL, drawBigPlanet, drawPlayer, planetThumb, rescuedCards };
+/**
+ * Dibuja la órbita de Caronte y, si está en la mitad que pasa detrás de Plutón, la luna. Se
+ * llama antes de dibujar el planeta; la mitad de delante la dibuja `drawPowerFx`.
+ *
+ * @param {number} px Centro horizontal de Plutón, en píxeles de pantalla.
+ * @param {number} py Centro vertical de Plutón, en píxeles de pantalla.
+ */
+function drawCaronteBack(px, py) {
+  if (!caronteOn()) {
+    return;
+  }
+  const r = PR * S * 1.15 * sizeK(),
+    [cx, cy, z] = caronteXY(px, py, r);
+  ctx.save();
+  ctx.globalAlpha = 0.3;
+  ctx.strokeStyle = '#d9c7b4';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.ellipse(px, py, r * 2.4, r * 0.7, 0.25, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+  if (z < 0) {
+    drawCaronte(cx, cy, r * 0.62, 1);
+  }
+}
+
+/**
+ * Dibuja la Tierra: en 3D con WebGL o, si no, un círculo con continentes y nubes que se mueven.
+ *
+ * @param {number} px Posición horizontal, en píxeles de pantalla.
+ * @param {number} py Posición vertical, en píxeles de pantalla.
+ * @param {number} rad Radio, en píxeles de pantalla.
+ */
+function drawEarth(px, py, rad) {
+  if (PLGL.ok() && rad > 0.5) {
+    drawBigPlanet('tierra', px, py, rad, t * 0.35, false, 'below');
+    ctx.strokeStyle = 'rgba(143,208,255,.35)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(px, py, rad + 1.2, 0, Math.PI * 2);
+    ctx.stroke();
+    return;
+  }
+  ctx.save();
+  ctx.shadowColor = 'rgba(120,190,255,.7)';
+  ctx.shadowBlur = 10;
+  ctx.fillStyle = '#2b63c9';
+  ctx.beginPath();
+  ctx.arc(px, py, rad, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.beginPath();
+  ctx.arc(px, py, rad, 0, Math.PI * 2);
+  ctx.clip();
+  ctx.fillStyle = '#4fa35a';
+  for (const c of CONT) {
+    const x = px + (frac(c.x + t * 0.06) * 2.8 - 1.4) * rad;
+    ctx.beginPath();
+    ctx.ellipse(x, py + c.y * rad, c.w * rad, c.h * rad, 0.3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.fillStyle = 'rgba(255,255,255,.8)';
+  for (const c of CLOUD) {
+    const x = px + (frac(c.x + t * 0.11) * 2.8 - 1.4) * rad;
+    ctx.beginPath();
+    ctx.ellipse(x, py + c.y * rad, c.w * rad, 0.09 * rad, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  const sh = ctx.createLinearGradient(px, py + rad, px, py - rad);
+  sh.addColorStop(0, 'rgba(10,14,30,0)');
+  sh.addColorStop(0.5, 'rgba(10,14,30,.15)');
+  sh.addColorStop(1, 'rgba(10,14,30,.75)');
+  ctx.fillStyle = sh;
+  ctx.fillRect(px - rad, py - rad, rad * 2, rad * 2);
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(143,208,255,.7)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.arc(px, py, rad + 0.6, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+/**
+ * Dibuja Caronte con el planeta en WebGL (textura de la Luna) o un círculo si no hay WebGL, y le
+ * pinta encima su polo rojizo.
+ *
+ * @param {number} cx Centro horizontal, en píxeles de pantalla.
+ * @param {number} cy Centro vertical, en píxeles de pantalla.
+ * @param {number} cr Radio, en píxeles de pantalla.
+ * @param {number} al Opacidad, de 0 a 1.
+ */
+function drawCaronte(cx, cy, cr, al) {
+  ctx.save();
+  ctx.globalAlpha = al;
+  let res = null;
+  try {
+    if (PLGL.ok()) {
+      res = PLGL.render(
+        'luna',
+        2 * cr * 2,
+        t * 0.3,
+        [-Math.cos(pAng) * 0.8, Math.sin(pAng) * 0.8, 0.6],
+        [1.3, 1.18, 1.08],
+        t,
+      );
+    }
+  } catch (e) {
+    res = null;
+  }
+  if (res) {
+    const h = cr * res.pad;
+    ctx.drawImage(res.cv, cx - h, cy - h, 2 * h, 2 * h);
+  } else {
+    ctx.fillStyle = '#a99a8c';
+    ctx.beginPath();
+    ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.beginPath();
+  ctx.arc(cx, cy, cr * 0.98, 0, Math.PI * 2);
+  ctx.clip();
+  const g = ctx.createRadialGradient(cx, cy - cr * 0.85, 0, cx, cy - cr * 0.85, cr * 0.75);
+  g.addColorStop(0, 'rgba(120,52,36,.65)');
+  g.addColorStop(1, 'rgba(120,52,36,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(cx - cr, cy - cr, cr * 2, cr * 2);
+  ctx.fillStyle = 'rgba(150,150,160,.12)';
+  ctx.fillRect(cx - cr, cy - cr, cr * 2, cr * 2);
+  ctx.restore();
+}
+
+export { PLGL, drawBigPlanet, drawCaronte, drawEarth, drawPlayer, planetThumb, rescuedCards };

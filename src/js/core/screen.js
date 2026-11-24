@@ -150,9 +150,36 @@ function openScreen(name, ...args) {
   return screens.get(name)(...args);
 }
 
+let viewInside = false;
+
+let hideEarth = false;
+
+/**
+ * Cambia `hideEarth` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+function setHideEarth(value) {
+  hideEarth = value;
+  return value;
+}
+
+/**
+ * Cambia `viewInside` desde otro módulo (este módulo es su dueño).
+ *
+ * @param {*} value Valor nuevo.
+ * @returns {*} El mismo valor, como el de una asignación.
+ */
+function setViewInside(value) {
+  viewInside = value;
+  return value;
+}
+
 export {
   HOME_IN,
   camZoom,
+  hideEarth,
   homeT,
   introFade,
   logoT0,
@@ -161,6 +188,7 @@ export {
   pendingTut,
   registerScreen,
   setCamZoom,
+  setHideEarth,
   setHomeT,
   setIntroFade,
   setLogoT0,
@@ -169,7 +197,9 @@ export {
   setStoryReturn,
   setStorySeen,
   setTutAfterStory,
+  setViewInside,
   storyReturn,
   storySeen,
   tutAfterStory,
+  viewInside,
 };

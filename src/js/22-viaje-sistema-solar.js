@@ -67,29 +67,29 @@ import {
   stretchAt,
 } from './10-ritmo-y-objetos.js';
 import { skyFlash } from './11-peligros-datos.js';
-import {
-  bhWob,
-  drawPowerFx,
-  drawPowerScene,
-  drawRingPower,
-  setStrainK,
-  strainK,
-  strainNow,
-} from './12-poderes.js';
-import { hideEarth, viewInside, wh } from './13-agujero-de-gusano.js';
+import { bhWob, setStrainK, strainK, strainNow } from './12-poderes.js';
+import { wh } from './13-agujero-de-gusano.js';
 import { bend, bendRad, bendW, drawBendSphere, lensJ, lensP } from './14-lente-gravitacional.js';
 import { drawFlare, drawHazards, drawNova } from './15-peligros.js';
-
-import { drawAst, drawCharge, drawPowerAura } from './21-dibujo.js';
 
 import { drawAndromeda, drawGalBG, drawMagallanes } from './31-fondos-2d.js';
 import { GLBG, REMOLINO_PHOTO, remolinoSource } from './32-fondos-9-motor.js';
 import { drawPlayer } from './render/planets.js';
 import { brandHole, drawLogo } from './render/black-hole.js';
-import { camZoom, homeT, introFade, logoT0, setCamZoom } from './core/screen.js';
+import {
+  camZoom,
+  hideEarth,
+  homeT,
+  introFade,
+  logoT0,
+  setCamZoom,
+  viewInside,
+} from './core/screen.js';
 import { GOAL } from './data/levels.js';
 import { zoneOf } from './game/zones.js';
 import { rr } from './core/geometry.js';
+import { drawPowerFx, drawPowerScene, drawRingPower } from './render/powers.js';
+import { drawAst, drawCharge, drawPowerAura } from './render/sprites.js';
 
 /**
  * Dibuja la escena completa de la partida en el lienzo principal, con temblor y zoom de cámara.

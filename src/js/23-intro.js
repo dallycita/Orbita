@@ -38,9 +38,7 @@ import {
   t,
 } from './08-partida-estado.js';
 
-import { drawEarth } from './21-dibujo.js';
-
-import { PLGL, drawBigPlanet } from './render/planets.js';
+import { PLGL, drawBigPlanet, drawEarth } from './render/planets.js';
 import { homeAmbience, introDrone } from './audio/ui-sounds.js';
 import { bhDiskK } from './render/black-hole.js';
 import {
