@@ -2,7 +2,7 @@
  * Arranque del juego: ejecuta lo que cada módulo hace al cargar, en el orden de siempre, y empieza el bucle.
  */
 import { initScreen } from './01-pantalla-y-utilidades.js';
-import { initAudioSettings } from './02-audio.js';
+
 import './03-musica-ritmos.js';
 import './04-musica-horizonte.js';
 import './05-musica-reproductor.js';
@@ -50,6 +50,7 @@ import { initMissions } from './34-misiones.js';
 import { initPerfMeter } from './35-medidor.js';
 import { initMainLoop } from './36-bucle-principal.js';
 import { frame } from './36-bucle-principal.js';
+import { initAudioSettings } from './core/settings.js';
 
 initScreen();
 initAudioSettings();

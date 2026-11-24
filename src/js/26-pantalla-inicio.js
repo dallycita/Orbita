@@ -1,6 +1,6 @@
 /**
  * Pantalla de inicio, como en Geometry Dash: se queda hasta que el jugador elige (jugar, planetas,
- * misiones, historia o ajustes). También guarda el silencio general (`muted`).
+ * misiones, historia o ajustes).
  */
 import { elHud, elPanel } from './01-pantalla-y-utilidades.js';
 import { AC, initAudio, outBus } from './02-audio.js';
@@ -37,10 +37,10 @@ import { openPlanets } from './29-planetas-hd.js';
 import { misMoons, misReady, openMissions } from './34-misiones.js';
 import { MEDIR, medEl, setMEDIR, setMedEl, setMedPrev } from './35-medidor.js';
 import { PLANET_SVG } from './data/planets.js';
+import { loadMute, muted, setMuted } from './core/settings.js';
 
 let elHome;
 /** Sonido apagado por el jugador (se guarda en localStorage). */
-let muted = false;
 /** Aplica `muted` al volumen general de salida. */
 function applyMute() {
   if (AC && outBus) {
@@ -164,7 +164,7 @@ function homeAction(a, b) {
       sheet.classList.remove('on');
     }
   } else if (a === 'snd') {
-    muted = !muted;
+    setMuted(!muted);
     try {
       localStorage.setItem('orbita_p1_sonido', muted ? '0' : '1');
     } catch (e) {}
@@ -241,9 +241,7 @@ function openHome(withIntro) {
 /** Lo que este módulo hace al cargar el juego; main.js lo llama en orden. */
 export function initHome() {
   elHome = document.getElementById('home');
-  try {
-    muted = localStorage.getItem('orbita_p1_sonido') === '0';
-  } catch (e) {}
+  loadMute();
 }
 
 /**
@@ -257,4 +255,4 @@ export function setStoryReturn(value) {
   return value;
 }
 
-export { applyMute, elHome, muted, openHome, renderHome, storyReturn };
+export { applyMute, elHome, openHome, renderHome, storyReturn };

@@ -30,7 +30,7 @@ for (const n of wanted) if (ast.body.some(s => (s.type === 'FunctionDeclaration'
 // no mover lo que la función de arranque asigna
 for (const st of ast.body){
   const fn = st.type === 'ExportNamedDeclaration' && st.declaration && st.declaration.type === 'FunctionDeclaration' ? st.declaration : null;
-  if (fn && /^init[A-Z]/.test(fn.id.name)){
+  if (fn && /^init[A-Z]/.test(fn.id.name) && !wanted.includes(fn.id.name)){
     const body = src.slice(fn.body.range[0], fn.body.range[1]);
     for (const n of wanted) if (new RegExp('(^|[^\\w.$])' + n + '\\s*=[^=]').test(body)) { console.error('✗ ' + n + ' se asigna en ' + fn.id.name + ': moverlo cambiaría el orden al cargar'); process.exit(1); }
   }
@@ -39,6 +39,7 @@ for (const st of ast.body){
 // --- sacar las declaraciones del origen (con su comentario de encima)
 const pieces = [];
 const cuts = [];
+const movedNames = new Set();
 const declName = s => { const d = s.type === 'ExportNamedDeclaration' && s.declaration ? s.declaration : s;
   if (d.type === 'FunctionDeclaration') return [d.id.name];
   if (d.type === 'VariableDeclaration') return d.declarations.map(x => x.id.name);
@@ -56,11 +57,12 @@ for (const st of ast.body){
     const a = comment ? st.range[0] - (lead.length - lead.lastIndexOf(comment)) : st.range[0];
     let text = src.slice(a, st.range[1]);
     pieces.push(text.replace(/^export\s+/m, ''));
+    ns.forEach(n => movedNames.add(n));
     cuts.push([a, st.range[1]]);
   }
   prevEnd = st.range[1];
 }
-const moved = new Set([...names].filter(n => cuts.length && pieces.some(p => new RegExp('(function|let|const|var)\\s+' + n + '\\b').test(p))));
+const moved = movedNames;
 for (const n of wanted) if (!moved.has(n)){ console.error('✗ no encontré la declaración de ' + n + ' en ' + fromRel); process.exit(1); }
 cuts.sort((x, y) => y[0] - x[0]);
 for (const [a, b] of cuts){ let e = b; if (src[e] === '\n') e++; src = src.slice(0, a) + src.slice(e); }

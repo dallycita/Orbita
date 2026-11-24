@@ -12,8 +12,9 @@ import { hot, hotT } from './11-peligros-datos.js';
 import { drawCaronteBack, hsh, ringBoostNow, setRingBoostNow, shieldT } from './12-poderes.js';
 import { waveProx } from './15-peligros.js';
 import { drawEarth } from './21-dibujo.js';
-import { elHome, muted } from './26-pantalla-inicio.js';
+import { elHome } from './26-pantalla-inicio.js';
 import { uiOut, uiTone } from './28-sonidos-interfaz.js';
+import { muted } from './core/settings.js';
 import {
   STAT_ROWS,
   applyScanBars,

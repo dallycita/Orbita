@@ -6,8 +6,8 @@
  */
 import { AC, ROOT, master, noiseHit } from './02-audio.js';
 import { paused, pzSnd } from './18-pausa.js';
-import { muted } from './26-pantalla-inicio.js';
 import { uiGlass } from './29-planetas-hd.js';
+import { muted } from './core/settings.js';
 
 let uiBus = null,
   lastHover = null,

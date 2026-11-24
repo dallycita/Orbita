@@ -75,9 +75,9 @@ import {
 import { beatTime, obsAng, obsRad } from './10-ritmo-y-objetos.js';
 import { rr } from './16-partida.js';
 import { noteDouble } from './23-intro.js';
-import { muted } from './26-pantalla-inicio.js';
 import { uiTone } from './28-sonidos-interfaz.js';
 import { PLGL, drawPlayer } from './29-planetas-hd.js';
+import { muted } from './core/settings.js';
 
 let ghostT = 0,
   shieldT = 0,

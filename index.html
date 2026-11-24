@@ -5301,6 +5301,215 @@ const CHEV_R =
     return value;
   }
 
+  // src/js/core/settings.js
+  var muted = false;
+  var volMus = 100, volSfx = 100;
+  function initAudioSettings() {
+    try {
+      const a = localStorage.getItem("orbita_vol_mus"), b = localStorage.getItem("orbita_vol_sfx");
+      if (a !== null) {
+        volMus = Math.max(0, Math.min(100, +a || 0));
+      }
+      if (b !== null) {
+        volSfx = Math.max(0, Math.min(100, +b || 0));
+      }
+    } catch (e) {
+    }
+  }
+  function setVolMus(value) {
+    volMus = value;
+    return value;
+  }
+  function setVolSfx(value) {
+    volSfx = value;
+    return value;
+  }
+  function loadMute() {
+    try {
+      muted = localStorage.getItem("orbita_p1_sonido") === "0";
+    } catch (e) {
+    }
+  }
+  function setMuted(value) {
+    muted = value;
+    return value;
+  }
+
+  // src/js/02-audio.js
+  var AC = null, master = null, musicBus = null, NOISE = null, shaper = null, outBus = null, musVol = null;
+  var volGain = (v) => Math.pow(v / 100, 2);
+  function applyVolumes() {
+    if (!AC || !master || !musVol) {
+      return;
+    }
+    try {
+      const n = AC.currentTime;
+      master.gain.setTargetAtTime(volGain(volSfx), n, 0.03);
+      musVol.gain.setTargetAtTime(volGain(volMus), n, 0.03);
+    } catch (e) {
+    }
+  }
+  function saveVolumes() {
+    try {
+      localStorage.setItem("orbita_vol_mus", String(Math.round(volMus)));
+      localStorage.setItem("orbita_vol_sfx", String(Math.round(volSfx)));
+    } catch (e) {
+    }
+  }
+  function initAudio() {
+    if (AC) {
+      return;
+    }
+    try {
+      AC = new (window.AudioContext || window.webkitAudioContext)();
+      outBus = AC.createGain();
+      outBus.gain.value = typeof muted !== "undefined" && muted ? 0 : 0.6;
+      const comp = AC.createDynamicsCompressor();
+      outBus.connect(comp);
+      comp.connect(AC.destination);
+      master = AC.createGain();
+      master.gain.value = volGain(volSfx);
+      master.connect(outBus);
+      musVol = AC.createGain();
+      musVol.gain.value = volGain(volMus);
+      musVol.connect(outBus);
+      musicBus = AC.createGain();
+      musicBus.gain.value = 1e-4;
+      musicBus.connect(musVol);
+      const len = AC.sampleRate * 2;
+      NOISE = AC.createBuffer(1, len, AC.sampleRate);
+      const d = NOISE.getChannelData(0);
+      for (let i = 0; i < len; i++) {
+        d[i] = Math.random() * 2 - 1;
+      }
+    } catch (e) {
+      AC = null;
+    }
+  }
+  var ROOT = 415.3;
+  var SCALE = [0, 3, 5, 7, 10, 12, 15, 17];
+  function cowbell(semi) {
+    if (!AC) {
+      return;
+    }
+    try {
+      const t0 = AC.currentTime, f = ROOT * Math.pow(2, semi / 12);
+      const o1 = AC.createOscillator(), o2 = AC.createOscillator();
+      o1.type = o2.type = "square";
+      o1.frequency.value = f;
+      o2.frequency.value = f * 1.48;
+      const bp = AC.createBiquadFilter();
+      bp.type = "bandpass";
+      bp.frequency.value = f * 1.7;
+      bp.Q.value = 1.4;
+      const g = AC.createGain();
+      g.gain.setValueAtTime(1e-4, t0);
+      g.gain.exponentialRampToValueAtTime(0.3, t0 + 4e-3);
+      g.gain.exponentialRampToValueAtTime(1e-4, t0 + 0.26);
+      o1.connect(bp);
+      o2.connect(bp);
+      bp.connect(g);
+      g.connect(master);
+      o1.start(t0);
+      o2.start(t0);
+      o1.stop(t0 + 0.3);
+      o2.stop(t0 + 0.3);
+    } catch (e) {
+    }
+  }
+  function noiseHit(t0, dur, type, freq, gain, dest, f1) {
+    const src = AC.createBufferSource();
+    src.buffer = NOISE;
+    const f = AC.createBiquadFilter();
+    f.type = type;
+    f.Q.value = 0.9;
+    f.frequency.setValueAtTime(freq, t0);
+    if (f1) {
+      f.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+    }
+    const g = AC.createGain();
+    g.gain.setValueAtTime(gain, t0);
+    g.gain.exponentialRampToValueAtTime(1e-4, t0 + dur);
+    src.connect(f);
+    f.connect(g);
+    g.connect(dest);
+    src.start(t0, Math.random() * 0.8);
+    src.stop(t0 + dur + 0.02);
+  }
+  function noise(dur, f0, f1, gain, type) {
+    if (!AC) {
+      return;
+    }
+    try {
+      noiseHit(AC.currentTime, dur, type, f0, gain, master, f1);
+    } catch (e) {
+    }
+  }
+  function thump() {
+    if (!AC) {
+      return;
+    }
+    try {
+      const t0 = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(110, t0);
+      o.frequency.exponentialRampToValueAtTime(55, t0 + 0.1);
+      g.gain.setValueAtTime(0.3, t0);
+      g.gain.exponentialRampToValueAtTime(1e-4, t0 + 0.15);
+      o.connect(g);
+      g.connect(master);
+      o.start(t0);
+      o.stop(t0 + 0.17);
+    } catch (e) {
+    }
+  }
+  function suck() {
+    if (!AC) {
+      return;
+    }
+    try {
+      const t0 = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(260, t0);
+      o.frequency.exponentialRampToValueAtTime(30, t0 + 1.8);
+      g.gain.setValueAtTime(1e-4, t0);
+      g.gain.exponentialRampToValueAtTime(0.45, t0 + 0.6);
+      g.gain.exponentialRampToValueAtTime(1e-4, t0 + 1.9);
+      o.connect(g);
+      g.connect(master);
+      o.start(t0);
+      o.stop(t0 + 2);
+      noiseHit(t0, 1.8, "lowpass", 2200, 0.45, master, 70);
+    } catch (e) {
+    }
+  }
+  function sub() {
+    if (!AC) {
+      return;
+    }
+    try {
+      const t0 = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(110, t0);
+      o.frequency.exponentialRampToValueAtTime(28, t0 + 0.9);
+      const lp = AC.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.value = 400;
+      g.gain.setValueAtTime(0.5, t0);
+      g.gain.exponentialRampToValueAtTime(1e-4, t0 + 1);
+      o.connect(lp);
+      lp.connect(g);
+      g.connect(master);
+      o.start(t0);
+      o.stop(t0 + 1.05);
+    } catch (e) {
+    }
+  }
+  function setShaper(value) {
+    shaper = value;
+    return value;
+  }
+
   // src/js/03-musica-ritmos.js
   var BPM = 140, STEP = 60 / BPM / 4, TB = 60 / BPM;
   var musicOn = false, nextT = 0, step = 0, schedTimer = null, kickQueue = [], musicStart = -1;
@@ -13046,6 +13255,242 @@ void main(){
     elMis = document.getElementById("missions");
   }
 
+  // src/js/35-medidor.js
+  var MEDIR = false;
+  var medEl = null, medPrev = 0, medMid = 0, medShow = 0;
+  var medInt = [], medJs = [], medUpd = [], medJank = [];
+  function medFrame(now, t0) {
+    const t1 = performance.now();
+    if (medPrev) {
+      medInt.push(now - medPrev);
+      if (now - medPrev > 25) {
+        medJank.push(now);
+      }
+    }
+    medPrev = now;
+    medJs.push(t1 - t0);
+    medUpd.push(medMid ? medMid - t0 : -1);
+    medMid = 0;
+    while (medInt.length > 120) {
+      medInt.shift();
+    }
+    while (medJs.length > 120) {
+      medJs.shift();
+      medUpd.shift();
+    }
+    while (medJank.length && now - medJank[0] > 1e4) {
+      medJank.shift();
+    }
+    if (now - medShow < 500) {
+      return;
+    }
+    medShow = now;
+    if (!medEl) {
+      medEl = document.createElement("div");
+      medEl.id = "medidor";
+      medEl.setAttribute("aria-hidden", "true");
+      medEl.style.cssText = 'position:fixed;left:10px;bottom:10px;z-index:50;pointer-events:none;padding:8px 10px;border-radius:10px;background:rgba(5,7,13,.78);border:1px solid rgba(236,230,216,.18);font:400 10px/1.55 "Space Mono",ui-monospace,monospace;color:#ece6d8;white-space:pre;letter-spacing:.02em';
+      document.body.appendChild(medEl);
+    }
+    const srt = (a) => [...a].sort((x, y) => x - y), q = (s, p) => s.length ? s[Math.min(s.length - 1, Math.floor(p * s.length))] : 0;
+    const iv = srt(medInt), js = srt(medJs), up = medUpd.filter((x) => x >= 0), med = q(iv, 0.5), fps = med ? 1e3 / med : 0;
+    const upm = up.length ? q(srt(up), 0.5) : -1, jsm = q(js, 0.5);
+    const col = fps >= 55 ? "#8ff0c0" : fps >= 40 ? "#ffd36b" : "#ff7a6b";
+    medEl.innerHTML = '<b style="color:' + col + ';font-weight:400">FPS ' + fps.toFixed(0).padStart(3) + "</b>   cuadro " + med.toFixed(1) + " ms (peor " + q(iv, 0.95).toFixed(1) + ")\ncódigo " + jsm.toFixed(1) + " ms" + (upm >= 0 ? " (lógica " + upm.toFixed(1) + " · dibujo " + (jsm - upm).toFixed(1) + ")" : "") + "\ntirones " + medJank.length + " en 10 s   partículas " + particles.length;
+  }
+  function initPerfMeter() {
+    try {
+      MEDIR = localStorage.getItem("orbita_medidor") === "1" || /[?&#]medir\b/.test(location.search + location.hash);
+    } catch (e) {
+    }
+  }
+  function setMEDIR(value) {
+    MEDIR = value;
+    return value;
+  }
+  function setMedEl(value) {
+    medEl = value;
+    return value;
+  }
+  function setMedMid(value) {
+    medMid = value;
+    return value;
+  }
+  function setMedPrev(value) {
+    medPrev = value;
+    return value;
+  }
+
+  // src/js/data/planets.js
+  var PLANET_SVG = {
+    tierra: '<circle cx="50" cy="50" r="26" fill="#3d8bff"/><path d="M34 40 Q42 30 52 38 Q48 48 38 47 Z M56 56 Q66 50 70 60 Q62 70 55 64 Z" fill="#5ccf6b"/><path d="M30 46 Q50 42 70 47" stroke="#fff" stroke-opacity=".7" stroke-width="2" fill="none"/>',
+    saturno: '<ellipse cx="50" cy="50" rx="44" ry="12" transform="rotate(-18 50 50)" fill="none" stroke="#f3e2b0" stroke-width="5" stroke-opacity=".9"/><circle cx="50" cy="50" r="22" fill="#e6cf8f"/><rect x="28" y="44" width="44" height="4" fill="#c9a86a" opacity=".6"/><rect x="28" y="53" width="44" height="5" fill="#c9a86a" opacity=".5"/><path d="M8 58 A44 12 -18 0 0 92 42" transform="rotate(0)" fill="none" stroke="#f3e2b0" stroke-width="5" stroke-opacity=".9"/>',
+    urano: '<ellipse cx="50" cy="50" rx="9" ry="40" transform="rotate(8 50 50)" fill="none" stroke="#c8f0fa" stroke-width="3" stroke-opacity=".6"/><circle cx="50" cy="50" r="23" fill="#8fd3e0"/>',
+    neptuno: '<circle cx="50" cy="50" r="24" fill="#3f6fd6"/><rect x="26" y="42" width="48" height="5" fill="#2b4fa8" opacity=".6"/><ellipse cx="58" cy="57" rx="6" ry="3.5" fill="#1f3f8f" opacity=".8"/>',
+    pluton: '<circle cx="50" cy="50" r="17" fill="#d9c7b4"/><path d="M52 62 C44 57 45 49 52 52 C59 49 60 57 52 62 Z" fill="#f4ebe0"/>'
+  };
+
+  // src/js/26-pantalla-inicio.js
+  var elHome;
+  function applyMute() {
+    if (AC && outBus) {
+      try {
+        outBus.gain.setValueAtTime(muted ? 0 : 0.6, AC.currentTime);
+      } catch (e) {
+      }
+    }
+  }
+  var storyReturn = null;
+  function hasNewPlanet() {
+    try {
+      return localStorage.getItem("orbita_pl_nuevo") === "1";
+    } catch (e) {
+      return false;
+    }
+  }
+  function renderHome() {
+    if (!elHome) {
+      return;
+    }
+    elHome.innerHTML = '<div class="playrow"><button type="button" class="plan' + (hasNewPlanet() ? " new" : "") + '" data-h="planets" aria-label="Elegir planeta"><span class="orb"></span><svg viewBox="0 0 100 100" aria-hidden="true">' + PLANET_SVG.saturno + '</svg><span class="plabel">PLANETAS</span></button><button type="button" class="bigplay" data-h="play" aria-label="Jugar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="#fff"/></svg></button><button type="button" class="plan mis' + (misReady() ? " new" : "") + '" data-h="missions" aria-label="Misiones"><svg viewBox="0 0 100 100" aria-hidden="true">' + misMoons() + '</svg><span class="plabel">MISIONES</span></button></div><div class="playlbl">JUGAR</div><div class="row"><button type="button" class="sm" data-h="story">Historia</button><button type="button" class="sm" data-h="cfg">Ajustes</button></div><div class="sheet" role="dialog" aria-label="Ajustes"><h3>Ajustes</h3><button type="button" class="opt" data-h="snd"><span>Sonido</span><b>' + (muted ? "Apagado" : "Encendido") + '</b></button><button type="button" class="opt" data-h="allp"><span>Todos los planetas (pruebas)</span><b>' + (allPlanets ? "Sí" : "No") + '</b></button><button type="button" class="opt" data-h="medir"><span>Medidor de rendimiento (pruebas)</span><b>' + (MEDIR ? "Sí" : "No") + '</b></button><button type="button" class="opt danger" data-h="reset"><span>Borrar progreso</span><b>Empezar de cero</b></button><button type="button" class="opt" data-h="close" style="justify-content:center"><span>Cerrar</span></button></div>';
+    if (!elHome.querySelectorAll) {
+      return;
+    }
+    elHome.querySelectorAll("[data-h]").forEach((b) => b.addEventListener("click", () => homeAction(b.dataset.h, b)));
+  }
+  function homeAction(a, b) {
+    initAudio();
+    if (AC && AC.state === "suspended") {
+      AC.resume();
+    }
+    applyMute();
+    const sheet = elHome.querySelector ? elHome.querySelector(".sheet") : null;
+    if (a === "play") {
+      if (!storySeen) {
+        hideHome();
+        startIntro();
+      } else {
+        hideHome(true);
+        openLevels();
+      }
+    } else if (a === "story") {
+      hideHome();
+      storyReturn = "home";
+      startIntro();
+    } else if (a === "tut") {
+      hideHome();
+      setTutAfterStory(true);
+      startIntro();
+    } else if (a === "cfg") {
+      if (sheet) {
+        sheet.classList.add("on");
+      }
+    } else if (a === "planets") {
+      openPlanets();
+    } else if (a === "missions") {
+      openMissions();
+    } else if (a === "medir") {
+      setMEDIR(!MEDIR);
+      try {
+        localStorage.setItem("orbita_medidor", MEDIR ? "1" : "0");
+      } catch (e) {
+      }
+      if (!MEDIR && medEl) {
+        medEl.remove();
+        setMedEl(null);
+      }
+      setMedPrev(0);
+      const v = b.querySelector("b");
+      if (v) {
+        v.textContent = MEDIR ? "Sí" : "No";
+      }
+    } else if (a === "allp") {
+      setAllPlanets(!allPlanets);
+      try {
+        localStorage.setItem("orbita_p1_todos", allPlanets ? "1" : "0");
+      } catch (e) {
+      }
+      const v = b.querySelector("b");
+      if (v) {
+        v.textContent = allPlanets ? "Sí" : "No";
+      }
+    } else if (a === "close") {
+      if (sheet) {
+        sheet.classList.remove("on");
+      }
+    } else if (a === "snd") {
+      setMuted(!muted);
+      try {
+        localStorage.setItem("orbita_p1_sonido", muted ? "0" : "1");
+      } catch (e) {
+      }
+      applyMute();
+      const v = b.querySelector("b");
+      if (v) {
+        v.textContent = muted ? "Apagado" : "Encendido";
+      }
+    } else if (a === "reset") {
+      const v = b.querySelector("b");
+      if (!b.dataset.sure) {
+        b.dataset.sure = "1";
+        if (v) {
+          v.textContent = "¿Seguro? Toca otra vez";
+          v.style.color = "var(--sun)";
+        }
+        return;
+      }
+      hideHome();
+      resetProgress();
+    }
+  }
+  function hideHome(keepAmb) {
+    if (elHome) {
+      elHome.classList.add("off");
+    }
+    if (!keepAmb) {
+      homeAmbience(false);
+    }
+    showStop(0.3);
+  }
+  function openHome(withIntro) {
+    if (elLv) {
+      elLv.classList.add("off");
+    }
+    setTutorial(false);
+    setPendingTut(false);
+    introDrone(false);
+    setup();
+    setState("home");
+    renderHome();
+    setHomeT(withIntro ? 0 : HOME_IN);
+    setLogoT0(withIntro ? HOME_BIG + 0.45 : -99);
+    setHsEvents({});
+    setHsFlare(setHsBoost(setHsShake(setHsJet(setHsRipple(0)))));
+    if (withIntro) {
+      showStart();
+    }
+    if (elHome) {
+      if (homeT >= HOME_IN) {
+        elHome.classList.remove("off");
+      } else {
+        elHome.classList.add("off");
+      }
+    }
+    elPanel.classList.add("hide");
+    elHud.style.opacity = 0;
+    stopMusic();
+    applyMute();
+    homeAmbience(true);
+  }
+  function initHome() {
+    elHome = document.getElementById("home");
+    loadMute();
+  }
+  function setStoryReturn(value) {
+    storyReturn = value;
+    return value;
+  }
+
   // src/js/23-intro.js
   var PLANETS = [
     { n: "Mercurio", r: 38, s: 3.5, c: "#a9a6a0" },
@@ -14802,72 +15247,6 @@ void main(){
       }
     }
     setBurns(burns.filter((b) => b.life > 0));
-  }
-
-  // src/js/35-medidor.js
-  var MEDIR = false;
-  var medEl = null, medPrev = 0, medMid = 0, medShow = 0;
-  var medInt = [], medJs = [], medUpd = [], medJank = [];
-  function medFrame(now, t0) {
-    const t1 = performance.now();
-    if (medPrev) {
-      medInt.push(now - medPrev);
-      if (now - medPrev > 25) {
-        medJank.push(now);
-      }
-    }
-    medPrev = now;
-    medJs.push(t1 - t0);
-    medUpd.push(medMid ? medMid - t0 : -1);
-    medMid = 0;
-    while (medInt.length > 120) {
-      medInt.shift();
-    }
-    while (medJs.length > 120) {
-      medJs.shift();
-      medUpd.shift();
-    }
-    while (medJank.length && now - medJank[0] > 1e4) {
-      medJank.shift();
-    }
-    if (now - medShow < 500) {
-      return;
-    }
-    medShow = now;
-    if (!medEl) {
-      medEl = document.createElement("div");
-      medEl.id = "medidor";
-      medEl.setAttribute("aria-hidden", "true");
-      medEl.style.cssText = 'position:fixed;left:10px;bottom:10px;z-index:50;pointer-events:none;padding:8px 10px;border-radius:10px;background:rgba(5,7,13,.78);border:1px solid rgba(236,230,216,.18);font:400 10px/1.55 "Space Mono",ui-monospace,monospace;color:#ece6d8;white-space:pre;letter-spacing:.02em';
-      document.body.appendChild(medEl);
-    }
-    const srt = (a) => [...a].sort((x, y) => x - y), q = (s, p) => s.length ? s[Math.min(s.length - 1, Math.floor(p * s.length))] : 0;
-    const iv = srt(medInt), js = srt(medJs), up = medUpd.filter((x) => x >= 0), med = q(iv, 0.5), fps = med ? 1e3 / med : 0;
-    const upm = up.length ? q(srt(up), 0.5) : -1, jsm = q(js, 0.5);
-    const col = fps >= 55 ? "#8ff0c0" : fps >= 40 ? "#ffd36b" : "#ff7a6b";
-    medEl.innerHTML = '<b style="color:' + col + ';font-weight:400">FPS ' + fps.toFixed(0).padStart(3) + "</b>   cuadro " + med.toFixed(1) + " ms (peor " + q(iv, 0.95).toFixed(1) + ")\ncódigo " + jsm.toFixed(1) + " ms" + (upm >= 0 ? " (lógica " + upm.toFixed(1) + " · dibujo " + (jsm - upm).toFixed(1) + ")" : "") + "\ntirones " + medJank.length + " en 10 s   partículas " + particles.length;
-  }
-  function initPerfMeter() {
-    try {
-      MEDIR = localStorage.getItem("orbita_medidor") === "1" || /[?&#]medir\b/.test(location.search + location.hash);
-    } catch (e) {
-    }
-  }
-  function setMEDIR(value) {
-    MEDIR = value;
-    return value;
-  }
-  function setMedEl(value) {
-    medEl = value;
-    return value;
-  }
-  function setMedMid(value) {
-    medMid = value;
-    return value;
-  }
-  function setMedPrev(value) {
-    medPrev = value;
-    return value;
   }
 
   // src/js/36-bucle-principal.js
@@ -21820,15 +22199,6 @@ void main(){
     })();
   }
 
-  // src/js/data/planets.js
-  var PLANET_SVG = {
-    tierra: '<circle cx="50" cy="50" r="26" fill="#3d8bff"/><path d="M34 40 Q42 30 52 38 Q48 48 38 47 Z M56 56 Q66 50 70 60 Q62 70 55 64 Z" fill="#5ccf6b"/><path d="M30 46 Q50 42 70 47" stroke="#fff" stroke-opacity=".7" stroke-width="2" fill="none"/>',
-    saturno: '<ellipse cx="50" cy="50" rx="44" ry="12" transform="rotate(-18 50 50)" fill="none" stroke="#f3e2b0" stroke-width="5" stroke-opacity=".9"/><circle cx="50" cy="50" r="22" fill="#e6cf8f"/><rect x="28" y="44" width="44" height="4" fill="#c9a86a" opacity=".6"/><rect x="28" y="53" width="44" height="5" fill="#c9a86a" opacity=".5"/><path d="M8 58 A44 12 -18 0 0 92 42" transform="rotate(0)" fill="none" stroke="#f3e2b0" stroke-width="5" stroke-opacity=".9"/>',
-    urano: '<ellipse cx="50" cy="50" rx="9" ry="40" transform="rotate(8 50 50)" fill="none" stroke="#c8f0fa" stroke-width="3" stroke-opacity=".6"/><circle cx="50" cy="50" r="23" fill="#8fd3e0"/>',
-    neptuno: '<circle cx="50" cy="50" r="24" fill="#3f6fd6"/><rect x="26" y="42" width="48" height="5" fill="#2b4fa8" opacity=".6"/><ellipse cx="58" cy="57" rx="6" ry="3.5" fill="#1f3f8f" opacity=".8"/>',
-    pluton: '<circle cx="50" cy="50" r="17" fill="#d9c7b4"/><path d="M52 62 C44 57 45 49 52 52 C59 49 60 57 52 62 Z" fill="#f4ebe0"/>'
-  };
-
   // src/js/07-planetas.js
   var curPlanet = "tierra", maxPerf = 0, plutoOk = false, allPlanets = false, shieldLeft = 0, usedDouble = false;
   var planetOk = (P) => allPlanets || P.ok();
@@ -22108,367 +22478,6 @@ void main(){
       ]
     }
   ];
-
-  // src/js/26-pantalla-inicio.js
-  var elHome;
-  var muted = false;
-  function applyMute() {
-    if (AC && outBus) {
-      try {
-        outBus.gain.setValueAtTime(muted ? 0 : 0.6, AC.currentTime);
-      } catch (e) {
-      }
-    }
-  }
-  var storyReturn = null;
-  function hasNewPlanet() {
-    try {
-      return localStorage.getItem("orbita_pl_nuevo") === "1";
-    } catch (e) {
-      return false;
-    }
-  }
-  function renderHome() {
-    if (!elHome) {
-      return;
-    }
-    elHome.innerHTML = '<div class="playrow"><button type="button" class="plan' + (hasNewPlanet() ? " new" : "") + '" data-h="planets" aria-label="Elegir planeta"><span class="orb"></span><svg viewBox="0 0 100 100" aria-hidden="true">' + PLANET_SVG.saturno + '</svg><span class="plabel">PLANETAS</span></button><button type="button" class="bigplay" data-h="play" aria-label="Jugar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="#fff"/></svg></button><button type="button" class="plan mis' + (misReady() ? " new" : "") + '" data-h="missions" aria-label="Misiones"><svg viewBox="0 0 100 100" aria-hidden="true">' + misMoons() + '</svg><span class="plabel">MISIONES</span></button></div><div class="playlbl">JUGAR</div><div class="row"><button type="button" class="sm" data-h="story">Historia</button><button type="button" class="sm" data-h="cfg">Ajustes</button></div><div class="sheet" role="dialog" aria-label="Ajustes"><h3>Ajustes</h3><button type="button" class="opt" data-h="snd"><span>Sonido</span><b>' + (muted ? "Apagado" : "Encendido") + '</b></button><button type="button" class="opt" data-h="allp"><span>Todos los planetas (pruebas)</span><b>' + (allPlanets ? "Sí" : "No") + '</b></button><button type="button" class="opt" data-h="medir"><span>Medidor de rendimiento (pruebas)</span><b>' + (MEDIR ? "Sí" : "No") + '</b></button><button type="button" class="opt danger" data-h="reset"><span>Borrar progreso</span><b>Empezar de cero</b></button><button type="button" class="opt" data-h="close" style="justify-content:center"><span>Cerrar</span></button></div>';
-    if (!elHome.querySelectorAll) {
-      return;
-    }
-    elHome.querySelectorAll("[data-h]").forEach((b) => b.addEventListener("click", () => homeAction(b.dataset.h, b)));
-  }
-  function homeAction(a, b) {
-    initAudio();
-    if (AC && AC.state === "suspended") {
-      AC.resume();
-    }
-    applyMute();
-    const sheet = elHome.querySelector ? elHome.querySelector(".sheet") : null;
-    if (a === "play") {
-      if (!storySeen) {
-        hideHome();
-        startIntro();
-      } else {
-        hideHome(true);
-        openLevels();
-      }
-    } else if (a === "story") {
-      hideHome();
-      storyReturn = "home";
-      startIntro();
-    } else if (a === "tut") {
-      hideHome();
-      setTutAfterStory(true);
-      startIntro();
-    } else if (a === "cfg") {
-      if (sheet) {
-        sheet.classList.add("on");
-      }
-    } else if (a === "planets") {
-      openPlanets();
-    } else if (a === "missions") {
-      openMissions();
-    } else if (a === "medir") {
-      setMEDIR(!MEDIR);
-      try {
-        localStorage.setItem("orbita_medidor", MEDIR ? "1" : "0");
-      } catch (e) {
-      }
-      if (!MEDIR && medEl) {
-        medEl.remove();
-        setMedEl(null);
-      }
-      setMedPrev(0);
-      const v = b.querySelector("b");
-      if (v) {
-        v.textContent = MEDIR ? "Sí" : "No";
-      }
-    } else if (a === "allp") {
-      setAllPlanets(!allPlanets);
-      try {
-        localStorage.setItem("orbita_p1_todos", allPlanets ? "1" : "0");
-      } catch (e) {
-      }
-      const v = b.querySelector("b");
-      if (v) {
-        v.textContent = allPlanets ? "Sí" : "No";
-      }
-    } else if (a === "close") {
-      if (sheet) {
-        sheet.classList.remove("on");
-      }
-    } else if (a === "snd") {
-      muted = !muted;
-      try {
-        localStorage.setItem("orbita_p1_sonido", muted ? "0" : "1");
-      } catch (e) {
-      }
-      applyMute();
-      const v = b.querySelector("b");
-      if (v) {
-        v.textContent = muted ? "Apagado" : "Encendido";
-      }
-    } else if (a === "reset") {
-      const v = b.querySelector("b");
-      if (!b.dataset.sure) {
-        b.dataset.sure = "1";
-        if (v) {
-          v.textContent = "¿Seguro? Toca otra vez";
-          v.style.color = "var(--sun)";
-        }
-        return;
-      }
-      hideHome();
-      resetProgress();
-    }
-  }
-  function hideHome(keepAmb) {
-    if (elHome) {
-      elHome.classList.add("off");
-    }
-    if (!keepAmb) {
-      homeAmbience(false);
-    }
-    showStop(0.3);
-  }
-  function openHome(withIntro) {
-    if (elLv) {
-      elLv.classList.add("off");
-    }
-    setTutorial(false);
-    setPendingTut(false);
-    introDrone(false);
-    setup();
-    setState("home");
-    renderHome();
-    setHomeT(withIntro ? 0 : HOME_IN);
-    setLogoT0(withIntro ? HOME_BIG + 0.45 : -99);
-    setHsEvents({});
-    setHsFlare(setHsBoost(setHsShake(setHsJet(setHsRipple(0)))));
-    if (withIntro) {
-      showStart();
-    }
-    if (elHome) {
-      if (homeT >= HOME_IN) {
-        elHome.classList.remove("off");
-      } else {
-        elHome.classList.add("off");
-      }
-    }
-    elPanel.classList.add("hide");
-    elHud.style.opacity = 0;
-    stopMusic();
-    applyMute();
-    homeAmbience(true);
-  }
-  function initHome() {
-    elHome = document.getElementById("home");
-    try {
-      muted = localStorage.getItem("orbita_p1_sonido") === "0";
-    } catch (e) {
-    }
-  }
-  function setStoryReturn(value) {
-    storyReturn = value;
-    return value;
-  }
-
-  // src/js/02-audio.js
-  var AC = null, master = null, musicBus = null, NOISE = null, shaper = null, outBus = null, musVol = null;
-  var volMus = 100, volSfx = 100;
-  var volGain = (v) => Math.pow(v / 100, 2);
-  function applyVolumes() {
-    if (!AC || !master || !musVol) {
-      return;
-    }
-    try {
-      const n = AC.currentTime;
-      master.gain.setTargetAtTime(volGain(volSfx), n, 0.03);
-      musVol.gain.setTargetAtTime(volGain(volMus), n, 0.03);
-    } catch (e) {
-    }
-  }
-  function saveVolumes() {
-    try {
-      localStorage.setItem("orbita_vol_mus", String(Math.round(volMus)));
-      localStorage.setItem("orbita_vol_sfx", String(Math.round(volSfx)));
-    } catch (e) {
-    }
-  }
-  function initAudio() {
-    if (AC) {
-      return;
-    }
-    try {
-      AC = new (window.AudioContext || window.webkitAudioContext)();
-      outBus = AC.createGain();
-      outBus.gain.value = typeof muted !== "undefined" && muted ? 0 : 0.6;
-      const comp = AC.createDynamicsCompressor();
-      outBus.connect(comp);
-      comp.connect(AC.destination);
-      master = AC.createGain();
-      master.gain.value = volGain(volSfx);
-      master.connect(outBus);
-      musVol = AC.createGain();
-      musVol.gain.value = volGain(volMus);
-      musVol.connect(outBus);
-      musicBus = AC.createGain();
-      musicBus.gain.value = 1e-4;
-      musicBus.connect(musVol);
-      const len = AC.sampleRate * 2;
-      NOISE = AC.createBuffer(1, len, AC.sampleRate);
-      const d = NOISE.getChannelData(0);
-      for (let i = 0; i < len; i++) {
-        d[i] = Math.random() * 2 - 1;
-      }
-    } catch (e) {
-      AC = null;
-    }
-  }
-  var ROOT = 415.3;
-  var SCALE = [0, 3, 5, 7, 10, 12, 15, 17];
-  function cowbell(semi) {
-    if (!AC) {
-      return;
-    }
-    try {
-      const t0 = AC.currentTime, f = ROOT * Math.pow(2, semi / 12);
-      const o1 = AC.createOscillator(), o2 = AC.createOscillator();
-      o1.type = o2.type = "square";
-      o1.frequency.value = f;
-      o2.frequency.value = f * 1.48;
-      const bp = AC.createBiquadFilter();
-      bp.type = "bandpass";
-      bp.frequency.value = f * 1.7;
-      bp.Q.value = 1.4;
-      const g = AC.createGain();
-      g.gain.setValueAtTime(1e-4, t0);
-      g.gain.exponentialRampToValueAtTime(0.3, t0 + 4e-3);
-      g.gain.exponentialRampToValueAtTime(1e-4, t0 + 0.26);
-      o1.connect(bp);
-      o2.connect(bp);
-      bp.connect(g);
-      g.connect(master);
-      o1.start(t0);
-      o2.start(t0);
-      o1.stop(t0 + 0.3);
-      o2.stop(t0 + 0.3);
-    } catch (e) {
-    }
-  }
-  function noiseHit(t0, dur, type, freq, gain, dest, f1) {
-    const src = AC.createBufferSource();
-    src.buffer = NOISE;
-    const f = AC.createBiquadFilter();
-    f.type = type;
-    f.Q.value = 0.9;
-    f.frequency.setValueAtTime(freq, t0);
-    if (f1) {
-      f.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
-    }
-    const g = AC.createGain();
-    g.gain.setValueAtTime(gain, t0);
-    g.gain.exponentialRampToValueAtTime(1e-4, t0 + dur);
-    src.connect(f);
-    f.connect(g);
-    g.connect(dest);
-    src.start(t0, Math.random() * 0.8);
-    src.stop(t0 + dur + 0.02);
-  }
-  function noise(dur, f0, f1, gain, type) {
-    if (!AC) {
-      return;
-    }
-    try {
-      noiseHit(AC.currentTime, dur, type, f0, gain, master, f1);
-    } catch (e) {
-    }
-  }
-  function thump() {
-    if (!AC) {
-      return;
-    }
-    try {
-      const t0 = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
-      o.type = "sine";
-      o.frequency.setValueAtTime(110, t0);
-      o.frequency.exponentialRampToValueAtTime(55, t0 + 0.1);
-      g.gain.setValueAtTime(0.3, t0);
-      g.gain.exponentialRampToValueAtTime(1e-4, t0 + 0.15);
-      o.connect(g);
-      g.connect(master);
-      o.start(t0);
-      o.stop(t0 + 0.17);
-    } catch (e) {
-    }
-  }
-  function suck() {
-    if (!AC) {
-      return;
-    }
-    try {
-      const t0 = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
-      o.type = "sine";
-      o.frequency.setValueAtTime(260, t0);
-      o.frequency.exponentialRampToValueAtTime(30, t0 + 1.8);
-      g.gain.setValueAtTime(1e-4, t0);
-      g.gain.exponentialRampToValueAtTime(0.45, t0 + 0.6);
-      g.gain.exponentialRampToValueAtTime(1e-4, t0 + 1.9);
-      o.connect(g);
-      g.connect(master);
-      o.start(t0);
-      o.stop(t0 + 2);
-      noiseHit(t0, 1.8, "lowpass", 2200, 0.45, master, 70);
-    } catch (e) {
-    }
-  }
-  function sub() {
-    if (!AC) {
-      return;
-    }
-    try {
-      const t0 = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
-      o.type = "sawtooth";
-      o.frequency.setValueAtTime(110, t0);
-      o.frequency.exponentialRampToValueAtTime(28, t0 + 0.9);
-      const lp = AC.createBiquadFilter();
-      lp.type = "lowpass";
-      lp.frequency.value = 400;
-      g.gain.setValueAtTime(0.5, t0);
-      g.gain.exponentialRampToValueAtTime(1e-4, t0 + 1);
-      o.connect(lp);
-      lp.connect(g);
-      g.connect(master);
-      o.start(t0);
-      o.stop(t0 + 1.05);
-    } catch (e) {
-    }
-  }
-  function initAudioSettings() {
-    try {
-      const a = localStorage.getItem("orbita_vol_mus"), b = localStorage.getItem("orbita_vol_sfx");
-      if (a !== null) {
-        volMus = Math.max(0, Math.min(100, +a || 0));
-      }
-      if (b !== null) {
-        volSfx = Math.max(0, Math.min(100, +b || 0));
-      }
-    } catch (e) {
-    }
-  }
-  function setShaper(value) {
-    shaper = value;
-    return value;
-  }
-  function setVolMus(value) {
-    volMus = value;
-    return value;
-  }
-  function setVolSfx(value) {
-    volSfx = value;
-    return value;
-  }
 
   // src/js/19-controles.js
   function press(e) {

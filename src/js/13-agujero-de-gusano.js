@@ -63,9 +63,9 @@ import { beatKick, beatTime } from './10-ritmo-y-objetos.js';
 import { WH_K, WORM_COL, bend, bendW, lensP, setBend, setWhRip } from './14-lente-gravitacional.js';
 import { hazardTip } from './15-peligros.js';
 import { ensureRings, rr } from './16-partida.js';
-import { muted } from './26-pantalla-inicio.js';
 import { GLBG } from './32-fondos-9-motor.js';
 import { misEvent } from './34-misiones.js';
+import { muted } from './core/settings.js';
 
 /**
  * Golpes de música entre lanzamientos: cuatro en los primeros anillos (para aprender), luego tres.

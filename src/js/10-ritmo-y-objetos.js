@@ -19,9 +19,9 @@ import {
 import { curGoal, setPending, t } from './08-partida-estado.js';
 import { rr } from './16-partida.js';
 import { lvStarsGot } from './25-selector-niveles.js';
-import { muted } from './26-pantalla-inicio.js';
 import { uiTone } from './28-sonidos-interfaz.js';
 import { COIN_RINGS } from './data/levels.js';
+import { muted } from './core/settings.js';
 
 /**
  * Fase dentro del golpe actual de la música.

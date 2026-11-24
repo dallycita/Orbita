@@ -37,9 +37,9 @@ import {
 import { bend } from './14-lente-gravitacional.js';
 import { renderScene } from './22-viaje-sistema-solar.js';
 import { doblesHechos } from './23-intro.js';
-import { muted } from './26-pantalla-inicio.js';
 import { uiOut, uiTone } from './28-sonidos-interfaz.js';
 import { PLGL, drawBigPlanet } from './29-planetas-hd.js';
+import { muted } from './core/settings.js';
 
 // Asteroides en 3D con WebGL, con la misma luz cálida del disco del agujero negro que los
 // planetas. Cada roca es un elipsoide deformado con ruido, con cráteres hundidos de borde

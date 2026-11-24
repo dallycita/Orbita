@@ -8,7 +8,7 @@ import { buzz, clamp, reduceMotion } from './01-pantalla-y-utilidades.js';
 import { AC, NOISE, ROOT, musicBus, noiseHit, setShaper, shaper } from './02-audio.js';
 import { level, pLevel, state } from './06-record-y-estado.js';
 import { setShake, shake, sunLevel, tutorial } from './08-partida-estado.js';
-import { muted } from './26-pantalla-inicio.js';
+import { muted } from './core/settings.js';
 
 // Tempo: STEP es una semicorchea y TB un pulso, en segundos.
 const BPM = 140,

@@ -24,7 +24,6 @@ import { sunLevel, t } from './08-partida-estado.js';
 import { rr } from './16-partida.js';
 import { easeIO } from './23-intro.js';
 import { BR0, BR1, SK, bhCore, bhDiskK, drawLogo, setSfl, sfl } from './24-presentacion.js';
-import { muted } from './26-pantalla-inicio.js';
 import {
   bigSuck,
   gwChirp,
@@ -35,6 +34,7 @@ import {
   uiTone,
 } from './28-sonidos-interfaz.js';
 import { drawPlayer } from './29-planetas-hd.js';
+import { muted } from './core/settings.js';
 
 /**
  * Enciende o apaga la música de misterio de los menús: un zumbido profundo que respira, notas de
