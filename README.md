@@ -16,7 +16,6 @@ Necesitas [Node.js](https://nodejs.org) 18 o más nuevo. La primera vez corre `n
 npm run dev      # abre http://localhost:5173 y recarga solo cada vez que guardas
 npm run build    # arma index.html a partir de src/
 npm run check    # comprueba que index.html está al día y que cada archivo declara lo que usa
-npm run deps     # escribe docs/dependencias.md: qué usa y qué cambia cada archivo de los demás
 ```
 
 **La regla más importante: se edita `src/`, nunca `index.html`.** `index.html` se genera solo; si lo editas a mano, el próximo `build` borra el cambio. Antes de subir un cambio, corre `npm run build` (con `npm run dev` abierto se hace solo). GitHub también lo revisa en cada subida.
@@ -31,7 +30,7 @@ src/
   js/                    el juego, en orden
 index.html               el juego armado (no se edita)
 build.mjs  dev.mjs       las herramientas para armar y trabajar
-material/                prototipos, imágenes de diseño y muestras de música (no son parte del juego)
+material/                imágenes de diseño y muestras de música (no son parte del juego)
 docs/ideas.md            ideas pendientes
 ```
 
@@ -82,9 +81,9 @@ Un archivo por pantalla: `01-base` (colores y página), `02-navegacion` (flechas
 
 ### Cada archivo declara qué usa de los demás
 
-`docs/dependencias.md` (lo escribe `npm run deps`) muestra, por archivo, **qué usa** de cada otro archivo y **qué variables de otros archivos cambia** (lo más delicado: es estado compartido). `npm run lint` avisa si un archivo usa o cambia algo de otro que no estaba declarado.
+Cada archivo de `src/js` es un módulo: **importa** lo que usa de otros y **exporta** lo que ofrece. Cada variable tiene un solo módulo dueño; los demás la leen importándola y la cambian con una función del dueño (por ejemplo `setLevel`). `npm run lint` marca como error usar un nombre sin importarlo.
 
-Todos los archivos de `js/` comparten el mismo espacio de nombres: una función de un archivo puede usar las variables de otro. El número al principio fija el orden en que se unen, y ese orden importa: un archivo puede usar al cargar lo que se definió en un archivo anterior, no en uno posterior. Si agregas un archivo nuevo, ponle el número del lugar donde va.
+El arranque está en `src/js/main.js`: llama, en orden, la función de arranque de cada módulo (`initScreen`, `initPause`…) y al final empieza el bucle del juego. esbuild une los módulos en `index.html`, que sigue siendo un solo archivo que funciona con doble clic.
 
 ## Comprobar que nada cambió
 
