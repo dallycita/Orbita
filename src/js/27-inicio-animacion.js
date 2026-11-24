@@ -1,6 +1,15 @@
-// ---------- entrada a la pantalla de inicio: un agujero negro enorme que se aleja ----------
-// música de misterio: un zumbido profundo que respira, notas de cristal flotando y un viento
-// cósmico
+/**
+ * Entrada a la pantalla de inicio: un agujero negro enorme dobla la luz, se come rocas y destroza
+ * una estrella; luego se aleja hasta su tamaño de juego mientras se forma el logotipo.
+ * Incluye la música de misterio de los menús. El reloj de la animación es `homeT`, en segundos.
+ */
+
+/**
+ * Enciende o apaga la música de misterio de los menús: un zumbido profundo que respira, notas de
+ * cristal flotando y un viento cósmico. Encenderla dos veces no la duplica.
+ *
+ * @param {boolean} on Verdadero para encenderla (sube en 2,5 s); falso para apagarla (en 0,8 s).
+ */
 function homeAmbience(on) {
   if (!AC) {
     return;
@@ -83,8 +92,9 @@ function homeAmbience(on) {
     }
   } catch (e) {}
 }
-// ---------- la demostración: el agujero negro dobla la luz, se come rocas y destroza una estrella
-// ----------
+// ---- La demostración: el agujero negro dobla la luz, se come rocas y destroza una estrella ----
+// HOME_BIG: segundo en que el agujero empieza a alejarse; HOME_IN: segundo en que llega a su
+// tamaño de juego (fin de la entrada).
 const HOME_BIG = 6.4,
   HOME_IN = 8.0;
 let logoT0 = -99;
@@ -104,8 +114,18 @@ const ROCKS = [
   [2.0, 5.3, 1.8, 1],
   [3.7, 1.2, 2.0, -1],
   [4.1, 3.4, 1.9, 1],
-]; // [nace, ángulo, duración, sentido]
-const TDE = { t0: 2.3, dur: 2.7, a0: -0.25 }; // la estrella que es destrozada
+]; // [nace (s), ángulo (rad), duración de la caída (s), sentido del giro]
+// La estrella destrozada por la marea (evento de disrupción de marea, TDE): empieza (s), dura (s)
+// y ángulo inicial (rad).
+const TDE = { t0: 2.3, dur: 2.7, a0: -0.25 };
+/**
+ * Toca un golpe grave que baja de tono, por la salida de sonido de la demostración.
+ *
+ * @param {number} f0 Frecuencia inicial, en Hz.
+ * @param {number} f1 Frecuencia final, en Hz.
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Volumen máximo, de 0 a 1.
+ */
 function hsLow(f0, f1, dur, gain) {
   const n = AC.currentTime,
     o = AC.createOscillator(),
@@ -121,6 +141,12 @@ function hsLow(f0, f1, dur, gain) {
   o.start(n);
   o.stop(n + dur + 0.05);
 }
+/**
+ * Sonido de un momento de la demostración.
+ *
+ * @param {string} kind 'rock' (una roca cae), 'tear' (la estrella se estira) o 'feed' (se la
+ *   traga).
+ */
 function hsSound(kind) {
   if (!AC || muted) {
     return;
@@ -188,7 +214,14 @@ function hsSound(kind) {
     }
   } catch (e) {}
 }
-// sonidos del logotipo al formarse: una nota por letra, y la Tierra cayendo en el acento
+/**
+ * Toca una nota de cristal (con un armónico breve) con eco.
+ *
+ * @param {number} f Frecuencia, en Hz.
+ * @param {number} t0 Momento de inicio, en segundos del reloj de audio.
+ * @param {number} dur Duración, en segundos.
+ * @param {number} gain Volumen máximo, de 0 a 1.
+ */
 function glassNote(f, t0, dur, gain) {
   const o = AC.createOscillator(),
     o2 = AC.createOscillator(),
@@ -214,7 +247,11 @@ function glassNote(f, t0, dur, gain) {
   o.stop(t0 + dur + 0.05);
   o2.stop(t0 + dur + 0.05);
 }
-// sonidos del logotipo al formarse, en la misma tonalidad de la música de misterio
+/**
+ * Sonidos del logotipo al formarse, en la misma tonalidad de la música de misterio: un respiro
+ * grave cuando aparece la Ó, una nota por letra y la Tierra cayendo en el acento. Se llama cada
+ * cuadro; `hsEvents` evita repetir cada sonido.
+ */
 function logoSounds() {
   if (!(logoT0 > 0) || !AC || muted) {
     return;
@@ -250,6 +287,12 @@ function logoSounds() {
     }
   } catch (e) {}
 }
+/**
+ * Avanza un cuadro la demostración: lanza a su hora cada sonido y golpe (rocas, estrella, onda
+ * gravitacional) una sola vez, y apaga los destellos y temblores.
+ *
+ * @param {number} dt Tiempo del cuadro, en segundos.
+ */
 function updateHomeShow(dt) {
   hsFlare = Math.max(0, hsFlare - dt * 1.6);
   hsBoost = Math.max(0, hsBoost - dt * 0.5);
@@ -302,12 +345,27 @@ function updateHomeShow(dt) {
     hsSound('feed');
   }
 }
-// trayectoria en espiral hacia el horizonte (u: 0 a 1)
+/**
+ * Punto de una trayectoria en espiral hacia el horizonte, cada vez más rápida al acercarse.
+ *
+ * @param {number} cx Centro horizontal del agujero, en píxeles de pantalla.
+ * @param {number} cy Centro vertical del agujero, en píxeles de pantalla.
+ * @param {number} R Radio del horizonte, en píxeles de pantalla.
+ * @param {number} r0 Radio inicial, en píxeles de pantalla.
+ * @param {number} a0 Ángulo inicial, en radianes.
+ * @param {number} u Avance de la caída, de 0 a 1.
+ * @param {number} dir Sentido del giro (1 o -1).
+ * @returns {number[]} [x, y, r]: posición y distancia al centro, en píxeles de pantalla.
+ */
 function spiralPos(cx, cy, R, r0, a0, u, dir) {
   const r = r0 + (R * 0.92 - r0) * Math.pow(u, 1.7),
     a = a0 + dir * (u * 1.6 + u * u * u * 4.2);
   return [cx + Math.cos(a) * r, cy + Math.sin(a) * r * 0.82, r];
 }
+/**
+ * Dibuja un cuadro de la entrada: el agujero negro grande (lente de estrellas, chorros, rocas en
+ * espiral y la estrella destrozada) que se aleja hasta su lugar de juego.
+ */
 function renderHomeIntro() {
   const T = homeT,
     p = easeIO(clamp((T - HOME_BIG) / (HOME_IN - HOME_BIG), 0, 1));
@@ -322,7 +380,8 @@ function renderHomeIntro() {
   const R = Rbig + (Rg - Rbig) * p,
     cx = W / 2 + (CX - W / 2) * p,
     cy = H * 0.47 + (CY - H * 0.47) * p;
-  // la luz de las estrellas se dobla alrededor del agujero negro
+  // La luz de las estrellas se dobla alrededor del agujero negro: cada estrella se aparta del
+  // centro como RE²/d (RE hace de radio de Einstein) y cerca del anillo se estira en un arco.
   const sr = Math.max(W, H) * 0.62,
     RE = R * 1.7;
   for (const s of stars) {
